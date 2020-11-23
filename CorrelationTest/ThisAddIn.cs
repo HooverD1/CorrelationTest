@@ -11,8 +11,10 @@ namespace CorrelationTest
 {
     public partial class ThisAddIn
     {
+        public static Excel.Application MyApp { get; set; }
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
+            MyApp = Globals.ThisAddIn.Application;
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
@@ -34,3 +36,7 @@ namespace CorrelationTest
         #endregion
     }
 }
+
+
+
+    
