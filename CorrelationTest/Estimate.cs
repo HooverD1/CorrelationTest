@@ -113,6 +113,7 @@ namespace CorrelationTest
             foreach(Estimate est in this.SubEstimates)
             {
                 subFields[index] = est.Name;
+                index++;
             }
             return subFields;
         }

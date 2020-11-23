@@ -37,6 +37,11 @@ namespace CorrelationTest
                 }
                 this.Value = CreateValue(correlArray, fields);
             }
+
+            public CorrelationString(Data.CorrelationMatrix matrix)
+            {
+                this.Value = CreateValue(matrix.GetMatrix(), matrix.GetFields());
+            }
             
             private static object[] GetFieldsFromRange(Excel.Range correlRange)
             {
@@ -154,25 +159,31 @@ namespace CorrelationTest
                 xlOrigin.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
             }
 
-            public static Data.CorrelationString ConstructString(object[] fields, Estimate parent = null)
+            public static Data.CorrelationString ConstructString(object[] fields, Dictionary<Tuple<string, string>, double> correls = null)
             {
-                Data.CorrelationString correlationString = new CorrelationString(fields);       //zero string
-                if (parent == null)
-                    return correlationString;
+                Data.CorrelationString correlationString = new CorrelationString(fields);       //build zero string
+                if (correls == null)
+                    return correlationString;       //return zero string
                 else
                 {
-                    //if you send in a parent estimate, pull its children's NonZero items
-                    //do I need to construct the children here?
-                    Data.CorrelationMatrix matrix = new Data.CorrelationMatrix(correlationString);      //zero matrix
-                    foreach (Estimate sub in parent.SubEstimates)
+                    Data.CorrelationMatrix matrix = new Data.CorrelationMatrix(correlationString);      //convert to zero matrix for modification
+                    foreach (string field1 in matrix.Fields)
                     {
-                        foreach(KeyValuePair<string, double> pair in sub.CorrelPairs)
+                        foreach (string field2 in matrix.Fields)
                         {
-                            matrix.SetCorrelation(sub.ID, pair.Key, pair.Value);            //override zeroes
+                            if (correls.ContainsKey(new Tuple<string, string>(field1, field2)))
+                            {
+                                matrix.SetCorrelation(field1, field2, correls[new Tuple<string, string>(field1, field2)]);
+                            }
+                            else if(correls.ContainsKey(new Tuple<string, string>(field2, field1)))
+                            {
+                                matrix.SetCorrelation(field2, field1, correls[new Tuple<string, string>(field2, field1)]);
+                            }
                         }
                     }
+                    //convert to a string
+                    return new Data.CorrelationString(matrix);      //return modified zero matrix as correl string
                 }
-                return correlationString;
             }
 
             public static void ExpandCorrel(Excel.Range selection)

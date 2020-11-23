@@ -50,6 +50,7 @@ namespace CorrelationTest
                 this.FieldCount = this.Fields.Count();
                 this.IsEven = Even(this.FieldCount);
                 this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
+                this.FieldDict = GetFieldDict(correlStringObj.GetFields());
                 //MainArray = GetMainRange(this.Fields, this.Matrix);
             }
 
@@ -153,6 +154,16 @@ namespace CorrelationTest
                 for (int i = 1; i <= this.FieldCount; i++)
                 {
                     FieldDict.Add(fieldStrings[1, i].ToString(), i);
+                }
+                return FieldDict;
+            }
+
+            private Dictionary<string, int> GetFieldDict(object[] fields)
+            {
+                FieldDict = new Dictionary<string, int>();
+                for (int i = 0; i < fields.Count(); i++)
+                {
+                    FieldDict.Add(fields[i].ToString(), i);
                 }
                 return FieldDict;
             }
