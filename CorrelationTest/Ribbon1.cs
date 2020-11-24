@@ -18,9 +18,21 @@ namespace CorrelationTest
         {
             //build all default correlations if they don't exist
             Excel.Worksheet xlSheet = ThisAddIn.MyApp.ActiveSheet;
-            Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "xlSheet", xlSheet } };
-            ICostSheet wbs_sheet = CostSheetFactory.Construct(Sheets.Sheet.GetSheetType(xlSheet), sheetData);
-            wbs_sheet.BuildCorrelations();
+            SheetType sheetType = Sheets.Sheet.GetSheetType(xlSheet);
+            if(sheetType == SheetType.WBS)
+            {
+                Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "SheetType", sheetType }, { "xlSheet", xlSheet } };
+                ICostSheet wbs_sheet = CostSheetFactory.Construct(sheetData);
+                wbs_sheet.BuildCorrelations();
+            }
+            else if(sheetType == SheetType.Estimate)
+            {
+
+            }
+            else
+            {
+
+            }
         }
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -92,6 +104,9 @@ namespace CorrelationTest
         private void btnVisualize_Click(object sender, RibbonControlEventArgs e)
         {
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.BuildFromExisting();
+            if (correlSheet == null)
+                return;
+
             correlSheet.VisualizeCorrel();
         }
     }

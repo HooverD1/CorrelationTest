@@ -20,9 +20,10 @@ namespace CorrelationTest
 
     public static class CostSheetFactory       
     {                                   
-        public static ICostSheet Construct(SheetType sheetType, Dictionary<string, object> data)
+        public static ICostSheet Construct(Dictionary<string, object> data)
         {
             ICostSheet sheetObj;
+            SheetType sheetType = (SheetType)data["SheetType"];
             switch (sheetType)
             {
                 case SheetType.WBS:
