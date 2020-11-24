@@ -21,7 +21,6 @@ namespace CorrelationTest
         public class CorrelationMatrix
         {
             public Dictionary<string, int> FieldDict { get; set; }
-            private object[,] MainArray { get; set; }
             private object[,] PartialArray { get; set; }
             private object[,] SecondaryArray { get; set; }
             private object[,] Matrix { get; set; }
@@ -37,7 +36,7 @@ namespace CorrelationTest
                 this.FieldCount = correlMatrix.Columns.Count;
                 this.IsEven = Even(this.FieldCount);
                 this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
-                MainArray = GetMainRange(correlMatrix);
+                Matrix = GetMainRange(correlMatrix);
                 SecondaryArray = GetSecondaryRange(correlMatrix);
                 FieldDict = GetFieldDict(correlMatrix);
             }
@@ -50,8 +49,7 @@ namespace CorrelationTest
                 this.FieldCount = this.Fields.Count();
                 this.IsEven = Even(this.FieldCount);
                 this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
-                this.FieldDict = GetFieldDict(correlStringObj.GetFields());
-                //MainArray = GetMainRange(this.Fields, this.Matrix);
+                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
             private bool Even(int fieldCount)
@@ -158,42 +156,59 @@ namespace CorrelationTest
                 return FieldDict;
             }
 
-            private Dictionary<string, int> GetFieldDict(object[] fields)
+            private Dictionary<string, int> GetFieldDict(object[] ids)
             {
                 FieldDict = new Dictionary<string, int>();
-                for (int i = 0; i < fields.Count(); i++)
+                for (int i = 0; i < ids.Count(); i++)
                 {
-                    FieldDict.Add(fields[i].ToString(), i);
+                    FieldDict.Add(ids[i].ToString(), i);
                 }
                 return FieldDict;
             }
 
             public object[,] GetMatrix()
             {
-                return MainArray;
+                return Matrix;
             }
 
             public object[] GetFields()
             {
+                return FieldDict.Keys.Select(x => ParseID(x)).ToArray<object>();
+            }
+
+            public object[] GetIDs()
+            {
                 return FieldDict.Keys.ToArray<object>();
+            }
+
+            private string ParseID(string id)
+            {
+                string[] id_pieces = id.Split('|');         //split lines
+                if (id_pieces.Length == 2)
+                    return id_pieces[1];                    //return the name portion of the ID
+                else
+                    return null;                            //if malformed, return null
             }
 
             public double AccessArray(string id1, string id2)
             {
                 //Access values by unique id pairs
-                return Convert.ToDouble(MainArray[FieldDict[id1], FieldDict[id2]]);
+                if (id1 == id2)
+                    return 1;
+                else
+                    return Convert.ToDouble(Matrix[FieldDict[id1], FieldDict[id2]]);
             }
 
             public void SetCorrelation(string id1, string id2, double correlation)
             {
-                MainArray[FieldDict[id1], FieldDict[id2]] = correlation;
+                Matrix[FieldDict[id1], FieldDict[id2]] = correlation;
             }
 
             public double AccessArray2(string row, string col)
             {
                 Tuple<ArrayType, int, int> coords = TransformField(FieldDict[row], FieldDict[col]);
                 if (coords.Item1 == ArrayType.Main)
-                    return (double)MainArray[coords.Item2, coords.Item3];
+                    return (double)Matrix[coords.Item2, coords.Item3];
                 else if (coords.Item1 == ArrayType.Secondary)
                     return (double)SecondaryArray[coords.Item2, coords.Item3];
                 else

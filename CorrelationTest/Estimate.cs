@@ -16,6 +16,7 @@ namespace CorrelationTest
         public char Type { get; set; }
         public Estimate ParentEstimate { get; set; }
         public List<Estimate> SubEstimates { get; set; }
+        public List<Estimate> Siblings { get; set; }
         public Excel.Range xlRow { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
         public Data.CorrelationString InputCorrelStringObj { get; set; }
@@ -24,7 +25,7 @@ namespace CorrelationTest
         public string Name { get; set; }
         public Excel.Range xlCorrelCell { get; set; }
         public string WBS_String { get; set; }
-        public Dictionary<string, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
+        public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
         public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject = null)
         {
@@ -45,7 +46,7 @@ namespace CorrelationTest
             this.WBS_String = Convert.ToString(itemRow.Cells[1, 3].Value);
             this.xlCorrelCell = itemRow.Cells[1, 4];
             this.ID = GetID();
-            this.CorrelPairs = new Dictionary<string, double>();
+            this.CorrelPairs = new Dictionary<Estimate, double>();
         }
 
         public bool Equals(Estimate estimate)       //check the ID to determine equality
@@ -83,17 +84,18 @@ namespace CorrelationTest
             }
             LoadCorrelatedValues(this.ParentEstimate);
         }
-        private void LoadCorrelatedValues(Estimate estimate)      //this only ran on expand before -- now runs on build
+        private void LoadCorrelatedValues(Estimate parentEstimate)      //this only ran on expand before -- now runs on build
         {
-            if (estimate == null) { return; }
-            if (estimate.ParentEstimate == null) { return; }
-            Data.CorrelationMatrix parentMatrix = new Data.CorrelationMatrix(estimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
+            if (parentEstimate == null) { return; }
+            if (parentEstimate.ParentEstimate == null) { return; }
+            Data.CorrelationMatrix parentMatrix = new Data.CorrelationMatrix(parentEstimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
             foreach (Estimate sibling in ParentEstimate.SubEstimates)
             {
                 if (sibling == this)
                     continue;
+                this.Siblings.Add(sibling);
                 //create the string >> create the matrix >> retrieve values & store
-                this.CorrelPairs.Add(sibling.ID, parentMatrix.AccessArray(this.ID, sibling.ID));
+                this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.ID, sibling.ID));
             }
         }
 
@@ -118,9 +120,9 @@ namespace CorrelationTest
             return subFields;
         }
 
-        public string GetID()
+        private string GetID()
         {
-            return $"{this.WBS_String}|{this.xlRow.Worksheet.Name}";
+            return $"{this.xlRow.Worksheet.Name}|{this.Name}";
         }
 
 

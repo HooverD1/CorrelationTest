@@ -12,7 +12,7 @@ namespace CorrelationTest
         //used for Sheet types that have Correlation strings
         Excel.Range xlCorrelCell { get; set; }
         Dictionary<string, object> DistributionParameters { get; set; }
-        string GetID();
+        string ID { get; set; }
         Excel.Range xlRow { get; set; }
         void LoadSubEstimates(Excel.Range parentRow);
     }

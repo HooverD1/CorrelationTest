@@ -14,7 +14,7 @@ namespace CorrelationTest
         void LoadParentEstimates();         //loads Estimates
         bool Validate();                            //validate the fields being returned from the xlCorrelSheet against the fields in the sheetObj they're being returned to
         object[] Get_xlFields();                    //Gets the array of field names off the sheet
-        void BuildDefaultCorrelations();
+        void BuildCorrelations();
         
     }
 

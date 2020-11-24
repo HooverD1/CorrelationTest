@@ -82,45 +82,53 @@ namespace CorrelationTest
             {
                 throw new NotImplementedException();
             }
-            public void BuildDefaultCorrelations()
+            public void BuildCorrelations()
             {
                 int maxDepth = (from Estimate est in this.Estimates select est.Level).Max();
+                var correlTemp = BuildCorrelTemp(this.Estimates);
+                if(Estimates.Any())
+                    Estimates[0].xlCorrelCell.EntireColumn.Clear();
+                foreach (Estimate est in this.Estimates)
+                    PrintCorrel(est, correlTemp);  //recursively build out children
+            }
+
+            private Dictionary<Tuple<string, string>, double> BuildCorrelTemp(List<IEstimate> Estimates)
+            {
                 var correlTemp = new Dictionary<Tuple<string, string>, double>();   //<ID, ID>, correl_value
                 if (this.Estimates.Any())
                 {
                     //Save off existing correlations
                     //Create a correl string from the column
-                    foreach(Estimate estimate in this.Estimates)
+                    foreach (Estimate estimate in this.Estimates)
                     {
+                        if (estimate.SubEstimates.Count == 0)
+                            continue;
                         Data.CorrelationString correlString;
                         if (estimate.xlCorrelCell.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString.ConstructString(estimate.GetSubEstimateFields());     //construct zero string
+                            correlString = Data.CorrelationString.ConstructString(estimate.GetSubEstimateFields(), this.xlSheet.Name);     //construct zero string
                         else
                             correlString = new Data.CorrelationString(estimate.xlCorrelCell.Value);       //construct from string
                         var correlMatrix = new Data.CorrelationMatrix(correlString);
-                        foreach(string field in correlMatrix.Fields)
+                        var matrixIDs = correlMatrix.GetIDs();
+                        foreach (string id1 in matrixIDs)
                         {
-                            if (correlMatrix.AccessArray(estimate.ID, field) != 0)
+                            foreach (string id2 in matrixIDs)
                             {
-                                correlTemp.Add(new Tuple<string, string>(estimate.ID, field), correlMatrix.AccessArray(estimate.ID, field));
+                                correlTemp.Add(new Tuple<string, string>(id1, id2), correlMatrix.AccessArray(id1, id2));
                             }
-                        }                        
+                        }
                     }
-                    Estimates[0].xlCorrelCell.EntireColumn.Clear();        //Clear the Correlation String column   -- how to save current values here?
                 }
-                    
-                foreach (Estimate est in this.Estimates)
-                    PrintCorrel(est, correlTemp);  //recursively build out children
+                return correlTemp;
             }
            
             private void PrintCorrel(Estimate estimate, Dictionary<Tuple<string, string>, double> correlTemp = null)
             {
                 if (estimate.SubEstimates.Count >= 2)
                 {
-                    object[] subNames = (from Estimate est in estimate.SubEstimates select est.Name).ToArray<object>();
+                    object[] subIDs = (from Estimate est in estimate.SubEstimates select est.ID).ToArray<object>();
                     //check if any of the subestimates have NonZeroCorrel entries
-                    Data.CorrelationString correlationString;
-                    correlationString = Data.CorrelationString.ConstructString(subNames, correlTemp);
+                    Data.CorrelationString correlationString = Data.CorrelationString.ConstructString(subIDs, this.xlSheet.Name, correlTemp);
                     correlationString.PrintToSheet(estimate.xlCorrelCell);
                 }
             }

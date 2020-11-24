@@ -219,7 +219,7 @@ namespace CorrelationTest
                 if (correlSheet == null)
                     return;
                 //validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
-                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow).GetID() == correlSheet.xlIDCell.Value)
+                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow).ID == correlSheet.xlIDCell.Value)
                 {
                     correlSheet.CorrelString.PrintToSheet(correlSheet.LinkToOrigin.LinkSource);
                     if (!correlSheet.CorrelMatrix.CheckForPSD())

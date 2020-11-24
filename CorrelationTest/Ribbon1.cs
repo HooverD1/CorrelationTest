@@ -20,7 +20,7 @@ namespace CorrelationTest
             Excel.Worksheet xlSheet = ThisAddIn.MyApp.ActiveSheet;
             Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "xlSheet", xlSheet } };
             ICostSheet wbs_sheet = CostSheetFactory.Construct(Sheets.Sheet.GetSheetType(xlSheet), sheetData);
-            wbs_sheet.BuildDefaultCorrelations();
+            wbs_sheet.BuildCorrelations();
         }
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
