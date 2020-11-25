@@ -104,6 +104,13 @@ namespace CorrelationTest
             }
             public void BuildCorrelations()
             {
+                //Check for Duplicates
+                foreach(Estimate est in this.Estimates)
+                {
+                    if ((from Estimate est2 in this.Estimates where est2.ID.Equals(est.ID) select est2).Count() > 1)
+                        UniqueID.AutoFixUniqueIDs(this.Estimates);                    
+                }
+                
                 int maxDepth = (from Estimate est in this.Estimates select est.Level).Max();
                 var correlTemp = BuildCorrelTemp(this.Estimates);
                 if(Estimates.Any())

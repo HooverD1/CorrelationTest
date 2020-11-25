@@ -167,7 +167,11 @@ namespace CorrelationTest
                        correlString = correlString.Replace("\n", "&");  //simplify delimiter
                 string[] correlLines = correlString.Split('&');         //split lines
                 string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
-                return id_strings.Select(x => new UniqueID(x)).ToArray();
+                UniqueID[] returnIDs = id_strings.Select(x => new UniqueID(x)).ToArray();
+                if (returnIDs.Distinct().Count() == returnIDs.Count())
+                    return returnIDs;
+                else
+                    return UniqueID.AutoFixUniqueIDs(returnIDs);
                 //return Array.ConvertAll<string, object>(ids, new Converter<string, object>(x => (object)x));
             }
             public object[] GetFields()
@@ -250,6 +254,8 @@ namespace CorrelationTest
 
             public static void ExpandCorrel(Excel.Range selection)
             {
+                //Check if in edit mode
+
                 //Verify that it's a correl string
                 bool valid = CorrelationString.Validate(selection);
                 if (valid)

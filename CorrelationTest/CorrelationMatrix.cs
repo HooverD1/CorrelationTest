@@ -161,7 +161,10 @@ namespace CorrelationTest
                 FieldDict = new Dictionary<UniqueID, int>();
                 for (int i = 0; i < ids.Count(); i++)
                 {
-                    FieldDict.Add(ids[i], i);
+                    if (!FieldDict.ContainsKey(ids[i]))
+                        FieldDict.Add(ids[i], i);
+                    else
+                        throw new Exception("IDs are not unique");
                 }
                 return FieldDict;
             }

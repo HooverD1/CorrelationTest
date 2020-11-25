@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Office.Tools.Ribbon;
+using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
@@ -37,6 +38,7 @@ namespace CorrelationTest
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
+            SendKeys.Send("{ESC}");
             Data.CorrelationString.ExpandCorrel(ThisAddIn.MyApp.Selection);
         }
 

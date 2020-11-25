@@ -13,22 +13,25 @@ namespace CorrelationTest
         public string SheetName { get; }
         private const int FieldName_Placement = 1;
         public string FieldName { get; }
+        private string Postfix { get; }
         //private string WBSLevel { get; set; }
         public string Value { get; }
 
         public UniqueID(string FullID)
         {
+            this.Postfix = null;
             this.Value = FullID;
             Dictionary<string, string> ID_Components = ParseID(this.Value);
             this.SheetName = ID_Components["SheetName"];
             this.FieldName = ID_Components["FieldName"];
         }
 
-        public UniqueID(string SheetName, string FieldName)
+        public UniqueID(string SheetName, string FieldName, string Postfix = null)
         {
             StringBuilder sb = new StringBuilder();
             this.SheetName = SheetName;
             this.FieldName = FieldName;
+            this.Postfix = Postfix;
             for (int i = 0; i < UniqueID_Fields; i++)
             {
                 switch (i)
@@ -37,7 +40,10 @@ namespace CorrelationTest
                         sb.Append(SheetName);
                         break;
                     case FieldName_Placement:
-                        sb.Append(FieldName);
+                        if (Postfix == null)
+                            sb.Append($"{FieldName}");
+                        else
+                            sb.Append($"{FieldName} ({this.Postfix})");
                         break;
                     default:
                         break;
@@ -70,21 +76,34 @@ namespace CorrelationTest
             for (int i = 0; i < Estimates.Count; i++)
             {
                 //search the other estimates for the same name
-                var duplicatedNames = (from IEstimate est in Estimates where Estimates[i].Name == est.Name select est).ToArray();
+                var duplicatedNames = (from IEstimate est in Estimates where Estimates[i].ID.Equals(est.ID) select est).ToArray();
                 if (duplicatedNames.Count() > 1)
                 {
                     for(int j = 0; j < duplicatedNames.Count(); j++)
                     {
                         duplicatedNames[j].Name = $"{duplicatedNames[j].Name} ({j+1})";
+                        duplicatedNames[j].ID = new UniqueID(duplicatedNames[j].xlRow.Worksheet.Name, duplicatedNames[j].Name);
                     }
                 }
-                Estimates[i].ID = new UniqueID(Estimates[i].xlRow.Worksheet.Name, Estimates[i].Name);
+                //Estimates[i].ID = new UniqueID(Estimates[i].xlRow.Worksheet.Name, Estimates[i].Name);
             }
             //Print out the new IDs
             foreach(IEstimate est in Estimates)
             {
                 est.PrintName();
             }
+        }
+
+        public static UniqueID[] AutoFixUniqueIDs(UniqueID[] uniqueIDs)
+        {
+            if(uniqueIDs.Count() > 1)
+            {
+                for (int i = 0; i < uniqueIDs.Count(); i++)
+                {
+                    uniqueIDs[i] = new UniqueID(uniqueIDs[i].SheetName, uniqueIDs[i].FieldName, $"{i + 1}");
+                }
+            }                
+            return uniqueIDs;
         }
     }
 }
