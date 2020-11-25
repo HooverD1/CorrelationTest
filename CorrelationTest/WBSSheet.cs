@@ -18,7 +18,28 @@ namespace CorrelationTest
                 this.xlSheet = xlSheet;
                 LoadParentEstimates();      //loads this.estimates
             }
+
             private List<IEstimate> LoadEstimates()
+            {
+                List<IEstimate> returnList = new List<IEstimate>();
+                int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
+                Excel.Range[] estRows = PullEstimates($"B2:B{iLastCell}");
+                int maxDepth = Convert.ToInt32((from Excel.Range row in estRows select row.Cells[1, 1].value).Max());
+                var test = estRows[0].Cells[1, 1].value;
+                for (int i = 1; i < maxDepth; i++)
+                {
+                    Excel.Range[] topLevels = (from Excel.Range row in estRows where row.Cells[1, 1].value == i select row).ToArray<Excel.Range>();
+                    for (int index = 0; index < topLevels.Count(); index++)
+                    {
+                        Estimate parentEstimate = new Estimate(topLevels[index].EntireRow);
+                        parentEstimate.LoadSubEstimates();
+                        returnList.Add(parentEstimate);
+                    }
+                }
+                return returnList;
+            }
+            
+            private List<IEstimate> LoadEstimates2()
             {
                 List<IEstimate> returnList = new List<IEstimate>();
                 int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
@@ -54,7 +75,7 @@ namespace CorrelationTest
                 Excel.Range typeColumn = xlSheet.Range[typeRange];
                 IEnumerable<Excel.Range> returnVal =    from Excel.Range cell in typeColumn.Cells
                                                         where Convert.ToString(cell.Value) == "E"
-                                                        select cell;
+                                                        select cell.EntireRow;
                 return returnVal.ToArray<Excel.Range>();
             }
             public object[] Get_xlFields()
@@ -89,7 +110,10 @@ namespace CorrelationTest
                 if(Estimates.Any())
                     Estimates[0].xlCorrelCell.EntireColumn.Clear();
                 foreach (Estimate est in this.Estimates)
+                {
                     PrintCorrel(est, correlTemp);  //recursively build out children
+                }
+                    
             }
 
             private Dictionary<Tuple<string, string>, double> BuildCorrelTemp(List<IEstimate> Estimates)

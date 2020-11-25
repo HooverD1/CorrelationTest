@@ -132,7 +132,7 @@ namespace CorrelationTest
             public override void PrintToSheet()  //expanding from string
             {
                 Estimate tempEst = new Estimate(this.LinkToOrigin.LinkSource.EntireRow);        //Load only this parent estimate
-                tempEst.LoadSubEstimates(this.LinkToOrigin.LinkSource.EntireRow);                //Load the sub-estimates for this estimate
+                tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 this.xlIDCell.Value = tempEst.ID;                                               //Print the ID

@@ -14,6 +14,6 @@ namespace CorrelationTest
         Dictionary<string, object> DistributionParameters { get; set; }
         string ID { get; set; }
         Excel.Range xlRow { get; set; }
-        void LoadSubEstimates(Excel.Range parentRow);
+        void LoadSubEstimates();
     }
 }

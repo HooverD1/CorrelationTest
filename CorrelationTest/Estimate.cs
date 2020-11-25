@@ -54,12 +54,12 @@ namespace CorrelationTest
             return this.ID == estimate.ID ? true : false;
         }
 
-        public void LoadSubEstimates(Excel.Range parentRow)      //Returns a list of sub-estimates for this estimate
+        public void LoadSubEstimates()      //Returns a list of sub-estimates for this estimate
         {
-            Excel.Worksheet xlSheet = parentRow.Worksheet;
+            Excel.Worksheet xlSheet = this.xlRow.Worksheet;
             List<Estimate> returnList = new List<Estimate>();
             int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
-            Excel.Range[] estRows = PullEstimates(xlSheet, $"B{parentRow.Row}:B{iLastCell}");
+            Excel.Range[] estRows = PullEstimates(xlSheet, $"B{this.xlRow.Row}:B{iLastCell}");
             for (int next = 1; next < estRows.Count(); next++)
             {
                 Estimate nextEstimate;
@@ -76,7 +76,7 @@ namespace CorrelationTest
                     this.SubEstimates.Add(nextEstimate);
                     nextEstimate.ParentEstimate = this;
                 }
-                else if (nextEstimate.Level >= this.Level)
+                else if (nextEstimate.Level <= this.Level)
                 {
                     LoadCorrelatedValues(this.ParentEstimate);
                     return;
