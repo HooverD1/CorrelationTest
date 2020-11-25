@@ -20,10 +20,12 @@ namespace CorrelationTest
         public Excel.Range xlRow { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
         public Data.CorrelationString InputCorrelStringObj { get; set; }
-        public string ID { get; set; }
+        public UniqueID ID { get; set; }
         public int Level { get; set; }
         public string Name { get; set; }
         public Excel.Range xlCorrelCell { get; set; }
+        public Excel.Range xlIDCell { get; set; }
+        public Excel.Range xlNameCell { get; set; }
         public string WBS_String { get; set; }
         public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
@@ -45,13 +47,14 @@ namespace CorrelationTest
             this.Name = Convert.ToString(itemRow.Cells[1, 3].Value);
             this.WBS_String = Convert.ToString(itemRow.Cells[1, 3].Value);
             this.xlCorrelCell = itemRow.Cells[1, 4];
+            this.xlNameCell = itemRow.Cells[1, 3];
             this.ID = GetID();
             this.CorrelPairs = new Dictionary<Estimate, double>();
         }
 
         public bool Equals(Estimate estimate)       //check the ID to determine equality
         {
-            return this.ID == estimate.ID ? true : false;
+            return this.ID.Equals(estimate.ID) ? true : false;
         }
 
         public void LoadSubEstimates()      //Returns a list of sub-estimates for this estimate
@@ -108,23 +111,27 @@ namespace CorrelationTest
             return returnVal.ToArray<Excel.Range>();
         }
 
-        public object[] GetSubEstimateFields()
+        public UniqueID[] GetSubEstimateIDs()
         {
-            object[] subFields = new object[this.SubEstimates.Count];
+            UniqueID[] subIDs = new UniqueID[this.SubEstimates.Count];
             int index = 0;
             foreach(Estimate est in this.SubEstimates)
             {
-                subFields[index] = est.Name;
+                subIDs[index] = est.ID;
                 index++;
             }
-            return subFields;
+            return subIDs;
         }
 
-        private string GetID()
+        private UniqueID GetID()
         {
-            return $"{this.xlRow.Worksheet.Name}|{this.Name}";
+            return new UniqueID(this.xlRow.Worksheet.Name, this.Name);
         }
 
+        public void PrintName()
+        {
+            this.xlNameCell.Value = this.Name;
+        }
 
 
     }

@@ -204,6 +204,7 @@
     <Compile Include="Sheet.cs" />
     <Compile Include="CostSheetFactory.cs" />
     <Compile Include="SheetItem.cs" />
+    <Compile Include="UniqueID.cs" />
     <Compile Include="WBSSheet.cs" />
     <Compile Include="WBS_Item.cs" />
     <EmbeddedResource Include="CorrelationForm.resx">

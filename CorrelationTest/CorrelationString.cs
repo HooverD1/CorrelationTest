@@ -19,12 +19,12 @@ namespace CorrelationTest
             {
                 this.Value = correlString;
             }
-            public CorrelationString(object[,] correlArray, object[] ids, string sheet)
+            public CorrelationString(object[,] correlArray, UniqueID[] ids, string sheet)
             {
                 this.Value = CreateValue(correlArray, ids);               
             }
 
-            private CorrelationString(object[] ids, string sheet)     //create 0 string (independence)
+            private CorrelationString(UniqueID[] ids, string sheet)     //create 0 string (independence)
             {
                 int fieldCount = ids.Count();
 
@@ -52,17 +52,17 @@ namespace CorrelationTest
                 return ids;
             }
             
-            private static object[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
+            private static UniqueID[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
             {
                 var specs = new CorrelSheetSpecs();
                 string parentID = Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
                 string sheetID = parentID.Split('|').First();
                 
                 object[,] tempArray = correlRange.Resize[1, correlRange.Columns.Count].Value;
-                object[] returnArray = new object[tempArray.GetLength(1)];
+                UniqueID[] returnArray = new UniqueID[tempArray.GetLength(1)];
                 for(int i = 0; i < tempArray.GetLength(1); i++)
                 {
-                    returnArray[i] = $"{sheetID}|{tempArray[1, i+1]}";
+                    returnArray[i] = new UniqueID(sheetID, tempArray[1, i+1].ToString());
                 }
                 return returnArray;
             }
@@ -98,16 +98,15 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            private string CreateValue(object[,] correlArray, object[] ids)
+            private string CreateValue(object[,] correlArray, UniqueID[] ids)
             {
                 correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
-                ids = ExtensionMethods.ReIndexArray<object>(ids);
                 StringBuilder sb = new StringBuilder();
                 
                 for (int field = 0; field < correlArray.GetLength(1); field++)
                 {
                     //Add fields
-                    sb.Append(ids[field].ToString());
+                    sb.Append(ids[field].Value);
                     if(field < correlArray.GetLength(1)-1)
                         sb.Append(",");
                 }
@@ -162,32 +161,32 @@ namespace CorrelationTest
                 else
                     return false;
             }
-            public string[] GetIDs()
+            public UniqueID[] GetIDs()
             {
                 string correlString = this.Value.Replace("\r\n", "&");  //simplify delimiter
                        correlString = correlString.Replace("\n", "&");  //simplify delimiter
                 string[] correlLines = correlString.Split('&');         //split lines
-                string[] ids = correlLines[0].Split(',');            //get fields (first line) and delimit
-                return ids;
+                string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
+                return id_strings.Select(x => new UniqueID(x)).ToArray();
                 //return Array.ConvertAll<string, object>(ids, new Converter<string, object>(x => (object)x));
             }
             public object[] GetFields()
             {
                 List<string> returnList = new List<string>();
-                foreach(string id in GetIDs())
+                foreach(UniqueID id in GetIDs())
                 {
-                    returnList.Add(ParseID(id));
+                    returnList.Add(id.FieldName);
                 }
                 return returnList.ToArray<object>();
             }
-            private string ParseID(string id)
-            {
-                string[] id_pieces = id.Split('|');         //split lines
-                if (id_pieces.Length == 2)
-                    return id_pieces[1];                    //return the name portion of the ID
-                else
-                    return null;                            //if malformed, return null
-            }
+            //private string ParseID(string id)
+            //{
+            //    string[] id_pieces = id.Split('|');         //split lines
+            //    if (id_pieces.Length == 2)
+            //        return id_pieces[1];                    //return the name portion of the ID
+            //    else
+            //        return null;                            //if malformed, return null
+            //}
             public object[,] GetMatrix()
             {
                 string myValue = this.Value.Replace("\r\n", "&");
@@ -221,7 +220,7 @@ namespace CorrelationTest
                 xlOrigin.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
             }
 
-            public static Data.CorrelationString ConstructString(object[] ids, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
+            public static Data.CorrelationString ConstructString(UniqueID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
                 Data.CorrelationString correlationString = new CorrelationString(ids, sheet);       //build zero string
                 if (correls == null)
@@ -230,17 +229,17 @@ namespace CorrelationTest
                 {
                     Data.CorrelationMatrix matrix = new Data.CorrelationMatrix(correlationString);      //convert to zero matrix for modification
                     var matrixIDs = matrix.GetIDs();
-                    foreach (string id1 in matrixIDs)
+                    foreach (UniqueID id1 in matrixIDs)
                     {
-                        foreach (string id2 in matrixIDs)
+                        foreach (UniqueID id2 in matrixIDs)
                         {
-                            if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
+                            if (correls.ContainsKey(new Tuple<UniqueID, UniqueID>(id1, id2)))
                             {
-                                matrix.SetCorrelation(id1, id2, correls[new Tuple<string, string>(id1, id2)]);
+                                matrix.SetCorrelation(id1, id2, correls[new Tuple<UniqueID, UniqueID>(id1, id2)]);
                             }
-                            if(correls.ContainsKey(new Tuple<string, string>(id2, id1)))
+                            if(correls.ContainsKey(new Tuple<UniqueID, UniqueID>(id2, id1)))
                             {
-                                matrix.SetCorrelation(id2, id1, correls[new Tuple<string, string>(id2, id1)]);
+                                matrix.SetCorrelation(id2, id1, correls[new Tuple<UniqueID, UniqueID>(id2, id1)]);
                             }
                         }
                     }

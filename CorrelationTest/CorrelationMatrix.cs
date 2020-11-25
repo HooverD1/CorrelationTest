@@ -20,7 +20,7 @@ namespace CorrelationTest
 
         public class CorrelationMatrix
         {
-            public Dictionary<string, int> FieldDict { get; set; }
+            public Dictionary<UniqueID, int> FieldDict { get; set; }
             private object[,] PartialArray { get; set; }
             private object[,] SecondaryArray { get; set; }
             private object[,] Matrix { get; set; }
@@ -141,9 +141,9 @@ namespace CorrelationTest
                 return topLeft;
             }
 
-            private Dictionary<string, int> GetFieldDict(Excel.Range myRange)       //get the field index by unique id
+            private Dictionary<UniqueID, int> GetFieldDict(Excel.Range myRange)       //get the field index by unique id
             {
-                FieldDict = new Dictionary<string, int>();
+                FieldDict = new Dictionary<UniqueID, int>();
                 Excel.Range fieldStart = myRange.Offset[-1, 0];
                 Excel.Range fieldEnd = myRange.Offset[myRange.Columns.Count, 0];
                 Excel.Range fieldRange = myRange.Worksheet.Range[fieldStart, fieldEnd];
@@ -151,17 +151,17 @@ namespace CorrelationTest
                 fieldStrings = fieldRange.Value2;
                 for (int i = 1; i <= this.FieldCount; i++)
                 {
-                    FieldDict.Add(fieldStrings[1, i].ToString(), i);
+                    FieldDict.Add(new UniqueID(myRange.Worksheet.Name, fieldStrings[1, i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
                 }
                 return FieldDict;
             }
 
-            private Dictionary<string, int> GetFieldDict(object[] ids)
+            private Dictionary<UniqueID, int> GetFieldDict(UniqueID[] ids)
             {
-                FieldDict = new Dictionary<string, int>();
+                FieldDict = new Dictionary<UniqueID, int>();
                 for (int i = 0; i < ids.Count(); i++)
                 {
-                    FieldDict.Add(ids[i].ToString(), i);
+                    FieldDict.Add(ids[i], i);
                 }
                 return FieldDict;
             }
@@ -173,12 +173,12 @@ namespace CorrelationTest
 
             public object[] GetFields()
             {
-                return FieldDict.Keys.Select(x => ParseID(x)).ToArray<object>();
+                return FieldDict.Keys.Select(x => x.FieldName).ToArray<object>();
             }
 
-            public object[] GetIDs()
+            public UniqueID[] GetIDs()
             {
-                return FieldDict.Keys.ToArray<object>();
+                return FieldDict.Keys.ToArray();
             }
 
             private string ParseID(string id)
@@ -190,30 +190,20 @@ namespace CorrelationTest
                     return null;                            //if malformed, return null
             }
 
-            public double AccessArray(string id1, string id2)
+            public double AccessArray(UniqueID id1, UniqueID id2)
             {
                 //Access values by unique id pairs
-                if (id1 == id2)
+                if (id1.Equals(id2))
                     return 1;
                 else
                     return Convert.ToDouble(Matrix[FieldDict[id1], FieldDict[id2]]);
             }
 
-            public void SetCorrelation(string id1, string id2, double correlation)
+            public void SetCorrelation(UniqueID id1, UniqueID id2, double correlation)
             {
                 Matrix[FieldDict[id1], FieldDict[id2]] = correlation;
             }
 
-            public double AccessArray2(string row, string col)
-            {
-                Tuple<ArrayType, int, int> coords = TransformField(FieldDict[row], FieldDict[col]);
-                if (coords.Item1 == ArrayType.Main)
-                    return (double)Matrix[coords.Item2, coords.Item3];
-                else if (coords.Item1 == ArrayType.Secondary)
-                    return (double)SecondaryArray[coords.Item2, coords.Item3];
-                else
-                    throw new Exception();
-            }
             private enum ArrayType
             {
                 Main,

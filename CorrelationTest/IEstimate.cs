@@ -10,10 +10,14 @@ namespace CorrelationTest
     public interface IEstimate
     {
         //used for Sheet types that have Correlation strings
+        string Name { get; set; }
+        Excel.Range xlRow { get; set; }
+        Excel.Range xlNameCell { get; set; }
         Excel.Range xlCorrelCell { get; set; }
         Dictionary<string, object> DistributionParameters { get; set; }
-        string ID { get; set; }
-        Excel.Range xlRow { get; set; }
+        UniqueID ID { get; set; }
+        
         void LoadSubEstimates();
+        void PrintName();
     }
 }
