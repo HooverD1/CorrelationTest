@@ -176,7 +176,7 @@ namespace CorrelationTest
 
             public object[] GetFields()
             {
-                return FieldDict.Keys.Select(x => x.FieldName).ToArray<object>();
+                return FieldDict.Keys.Select(x => x.Name).ToArray<object>();
             }
 
             public UniqueID[] GetIDs()

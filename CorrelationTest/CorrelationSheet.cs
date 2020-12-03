@@ -135,7 +135,7 @@ namespace CorrelationTest
                 tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                this.xlIDCell.Value = tempEst.ID.Value;                                               //Print the ID
+                this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
                 for(int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
                     this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
@@ -219,7 +219,7 @@ namespace CorrelationTest
                 if (correlSheet == null)
                     return;
                 //validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
-                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow).ID.Value == correlSheet.xlIDCell.Value)
+                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow).uID.ID == correlSheet.xlIDCell.Value)
                 {
                     correlSheet.CorrelString.PrintToSheet(correlSheet.LinkToOrigin.LinkSource);
                     if (!correlSheet.CorrelMatrix.CheckForPSD())

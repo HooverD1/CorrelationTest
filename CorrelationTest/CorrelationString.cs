@@ -13,13 +13,13 @@ namespace CorrelationTest
         {
             public string Value { get; set; }
 
-            public CorrelationString(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange), xlRange.Worksheet.Name) { }
+            public CorrelationString(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange)) { }
             
             public CorrelationString(string correlString)
             {
                 this.Value = correlString;
             }
-            public CorrelationString(object[,] correlArray, UniqueID[] ids, string sheet)
+            public CorrelationString(object[,] correlArray, UniqueID[] ids)
             {
                 this.Value = CreateValue(correlArray, ids);               
             }
@@ -78,7 +78,7 @@ namespace CorrelationTest
                 int fields = parentEstimate.SubEstimates.Count;
                 for(int sub = 0; sub < fields; sub++)
                 {
-                    sb.Append(parentEstimate.SubEstimates[sub].ID);
+                    sb.Append(parentEstimate.SubEstimates[sub].uID);
                     if (sub < fields - 1)
                         sb.Append(",");
                 }
@@ -106,7 +106,7 @@ namespace CorrelationTest
                 for (int field = 0; field < correlArray.GetLength(1); field++)
                 {
                     //Add fields
-                    sb.Append(ids[field].Value);
+                    sb.Append(ids[field].ID);
                     if(field < correlArray.GetLength(1)-1)
                         sb.Append(",");
                 }
@@ -133,10 +133,6 @@ namespace CorrelationTest
             }
 
             public string[] GetFields(double[,] correlArray)
-            {
-                throw new NotImplementedException();
-            }
-            public double[,] UpdateFields(double[,] getFields)
             {
                 throw new NotImplementedException();
             }
@@ -171,15 +167,14 @@ namespace CorrelationTest
                 if (returnIDs.Distinct().Count() == returnIDs.Count())
                     return returnIDs;
                 else
-                    return UniqueID.AutoFixUniqueIDs(returnIDs);
-                //return Array.ConvertAll<string, object>(ids, new Converter<string, object>(x => (object)x));
+                    throw new Exception("Duplicated IDs");
             }
             public object[] GetFields()
             {
                 List<string> returnList = new List<string>();
                 foreach(UniqueID id in GetIDs())
                 {
-                    returnList.Add(id.FieldName);
+                    returnList.Add(id.Name);
                 }
                 return returnList.ToArray<object>();
             }
@@ -269,6 +264,28 @@ namespace CorrelationTest
                     //print the correlSheet
                     correlSheet.PrintToSheet();
                 }
+            }
+
+            public void OverwriteIDs(UniqueID[] newIDs)
+            {
+                string correlString = this.Value.Replace("\r\n", "&");  //simplify delimiter
+                correlString = correlString.Replace("\n", "&");  //simplify delimiter
+                string[] correlLines = correlString.Split('&');         //split lines
+                string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
+                //recombine with the newIDs
+                StringBuilder sb = new StringBuilder();
+                for(int i=0; i < newIDs.Length; i++)
+                {
+                    sb.Append(newIDs[i].Name);
+                    if (i < newIDs.Length - 1)
+                        sb.Append(",");
+                }
+                sb.AppendLine();
+                for(int j=1;j<correlLines.Length;j++)
+                {
+                    sb.Append(correlLines[j]);
+                }
+                this.Value = sb.ToString();
             }
         }
     }

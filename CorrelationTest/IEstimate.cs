@@ -15,7 +15,8 @@ namespace CorrelationTest
         Excel.Range xlNameCell { get; set; }
         Excel.Range xlCorrelCell { get; set; }
         Dictionary<string, object> DistributionParameters { get; set; }
-        UniqueID ID { get; set; }
+        UniqueID uID { get; set; }
+        List<Estimate> SubEstimates { get; set; }
         
         void LoadSubEstimates();
         void PrintName();

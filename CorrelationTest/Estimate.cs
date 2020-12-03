@@ -10,6 +10,7 @@ namespace CorrelationTest
 {
     public class Estimate : IEstimate
     {
+        public UniqueID uID { get; set; }
         public ICostSheet ContainingSheetObject { get; set; }
         public Distribution EstimateDistribution { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
@@ -17,44 +18,55 @@ namespace CorrelationTest
         public Estimate ParentEstimate { get; set; }
         public List<Estimate> SubEstimates { get; set; }
         public List<Estimate> Siblings { get; set; }
-        public Excel.Range xlRow { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
         public Data.CorrelationString InputCorrelStringObj { get; set; }
-        public UniqueID ID { get; set; }
         public int Level { get; set; }
         public string Name { get; set; }
-        public Excel.Range xlCorrelCell { get; set; }
+        public Excel.Range xlRow { get; set; }
         public Excel.Range xlIDCell { get; set; }
+        public Excel.Range xlTypeCell { get; set; }
         public Excel.Range xlNameCell { get; set; }
+        public Excel.Range xlDistributionCell { get; set; }
+        public Excel.Range xlCorrelCell { get; set; }
+        public Excel.Range xlLevelCell { get; set; }
         public string WBS_String { get; set; }
         public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
         public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject = null)
         {
+            DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(Sheets.Sheet.GetSheetType(itemRow.Worksheet));
+            this.xlRow = itemRow;
+            this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
+            this.xlCorrelCell = itemRow.Cells[1, dispCoords.InputCorrel_Offset];
+            this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
+            this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
+            this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
+            this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
             this.DistributionParameters = new Dictionary<string, object>()
-              { { "Type", itemRow.Cells[1, 5].Value },
-                { "Param1", itemRow.Cells[1, 6].Value },
-                { "Param2", itemRow.Cells[1, 7].Value },
-                { "Param3", itemRow.Cells[1, 8].Value },
-                { "Param4", itemRow.Cells[1, 9].Value },
-                { "Param5", itemRow.Cells[1, 10].Value } };
+              { { "Type", xlDistributionCell.Offset[0,0].Value },
+                { "Param1", xlDistributionCell.Offset[0,1].Value },
+                { "Param2", xlDistributionCell.Offset[0,2].Value },
+                { "Param3", xlDistributionCell.Offset[0,3].Value },
+                { "Param4", xlDistributionCell.Offset[0,4].Value },
+                { "Param5", xlDistributionCell.Offset[0,5].Value } };
             this.EstimateDistribution = new Distribution(this.DistributionParameters);
             this.SubEstimates = new List<Estimate>();
-            this.xlRow = itemRow;
-            this.Level = Convert.ToInt32(itemRow.Cells[1, 1].Value);
-            this.Type = Convert.ToChar(itemRow.Cells[1, 2].Value);
-            this.Name = Convert.ToString(itemRow.Cells[1, 3].Value);
-            this.WBS_String = Convert.ToString(itemRow.Cells[1, 3].Value);
-            this.xlCorrelCell = itemRow.Cells[1, 4];
-            this.xlNameCell = itemRow.Cells[1, 3];
-            this.ID = GetID();
+            
+            this.Level = Convert.ToInt32(xlLevelCell.Value);
+            this.Type = Convert.ToChar(xlTypeCell.Value);
+            this.Name = Convert.ToString(xlNameCell.Value);
+            
+            if (xlIDCell.Value == null)
+                this.uID = CreateID();
+            else
+                this.uID = new UniqueID(xlIDCell.Value);
             this.CorrelPairs = new Dictionary<Estimate, double>();
         }
 
         public bool Equals(Estimate estimate)       //check the ID to determine equality
         {
-            return this.ID.Equals(estimate.ID) ? true : false;
+            return this.uID.Equals(estimate.uID) ? true : false;
         }
 
         public void LoadSubEstimates()      //Returns a list of sub-estimates for this estimate
@@ -62,7 +74,7 @@ namespace CorrelationTest
             Excel.Worksheet xlSheet = this.xlRow.Worksheet;
             List<Estimate> returnList = new List<Estimate>();
             int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
-            Excel.Range[] estRows = PullEstimates(xlSheet, $"B{this.xlRow.Row}:B{iLastCell}");
+            Excel.Range[] estRows = PullEstimates(xlSheet, $"C{this.xlRow.Row}:C{iLastCell}");
             for (int next = 1; next < estRows.Count(); next++)
             {
                 Estimate nextEstimate;
@@ -98,7 +110,7 @@ namespace CorrelationTest
                     continue;
                 this.Siblings.Add(sibling);
                 //create the string >> create the matrix >> retrieve values & store
-                this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.ID, sibling.ID));
+                this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.uID, sibling.uID));
             }
         }
 
@@ -117,13 +129,13 @@ namespace CorrelationTest
             int index = 0;
             foreach(Estimate est in this.SubEstimates)
             {
-                subIDs[index] = est.ID;
+                subIDs[index] = est.uID;
                 index++;
             }
             return subIDs;
         }
 
-        private UniqueID GetID()
+        private UniqueID CreateID()
         {
             return new UniqueID(this.xlRow.Worksheet.Name, this.Name);
         }

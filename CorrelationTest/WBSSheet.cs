@@ -12,6 +12,8 @@ namespace CorrelationTest
     {
         public class WBSSheet: Sheet, ICostSheet, IHas_xlFields
         {
+            private const char PullColumn = 'C';
+            private const int LevelColumn = 2;
             public List<IEstimate> Estimates { get; set; }
             private DialogResult OverwriteRepeatedIDs { get; set; }     
 
@@ -24,13 +26,13 @@ namespace CorrelationTest
             public List<IEstimate> LoadEstimates()
             {
                 List<IEstimate> returnList = new List<IEstimate>();
-                int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
-                Excel.Range[] estRows = PullEstimates($"B2:B{iLastCell}");
-                int maxDepth = Convert.ToInt32((from Excel.Range row in estRows select row.Cells[1, 1].value).Max());
-                var test = estRows[0].Cells[1, 1].value;
+                int iLastCell = xlSheet.Range[$"{PullColumn}1000000"].End[Excel.XlDirection.xlUp].Row;
+                Excel.Range[] estRows = PullEstimates($"{PullColumn}2:{PullColumn}{iLastCell}");
+                int maxDepth = Convert.ToInt32((from Excel.Range row in estRows select row.Cells[1, LevelColumn].value).Max());
+
                 for (int i = 1; i <= maxDepth; i++)
                 {
-                    Excel.Range[] topLevels = (from Excel.Range row in estRows where row.Cells[1, 1].value == i select row).ToArray<Excel.Range>();
+                    Excel.Range[] topLevels = (from Excel.Range row in estRows where row.Cells[1, LevelColumn].value == i select row).ToArray<Excel.Range>();
                     for (int index = 0; index < topLevels.Count(); index++)
                     {
                         Estimate parentEstimate = new Estimate(topLevels[index].EntireRow);
@@ -69,7 +71,7 @@ namespace CorrelationTest
             }
       
 
-            private Excel.Range[] PullEstimates(string typeRange)
+            private Excel.Range[] PullEstimates(string typeRange)       //return an array of rows
             {
                 Excel.Range typeColumn = xlSheet.Range[typeRange];
                 IEnumerable<Excel.Range> returnVal =    from Excel.Range cell in typeColumn.Cells
@@ -104,22 +106,15 @@ namespace CorrelationTest
             }
             public void BuildCorrelations()
             {
-                //Check for Duplicates
-                foreach(Estimate est in this.Estimates)
-                {
-                    if ((from Estimate est2 in this.Estimates where est2.ID.Equals(est.ID) select est2).Count() > 1)
-                        UniqueID.AutoFixUniqueIDs(this.Estimates);                    
-                }
-                
                 int maxDepth = (from Estimate est in this.Estimates select est.Level).Max();
                 var correlTemp = BuildCorrelTemp(this.Estimates);
                 if(Estimates.Any())
                     Estimates[0].xlCorrelCell.EntireColumn.Clear();
                 foreach (Estimate est in this.Estimates)
                 {
+                    est.LoadSubEstimates();
                     PrintCorrel(est, correlTemp);  //recursively build out children
                 }
-                    
             }
 
             private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<IEstimate> Estimates)
@@ -147,38 +142,26 @@ namespace CorrelationTest
                                 var newKey = new Tuple<UniqueID, UniqueID>(id1, id2);
                                 if (!correlTemp.ContainsKey(newKey))
                                     correlTemp.Add(newKey, correlMatrix.AccessArray(id1, id2));
-                                else
-                                {
-                                    //key exists -- duplicated ID!
-                                    if(OverwriteRepeatedIDs == DialogResult.None)
-                                        OverwriteRepeatedIDs = MessageBox.Show("Estimate IDs are not unique. Overwrite IDs?", "Overwrite IDs?", MessageBoxButtons.YesNo);
-                                    if(OverwriteRepeatedIDs == DialogResult.Yes)
-                                    {
-                                        UniqueID.AutoFixUniqueIDs(Estimates);
-                                    }
-                                    else if(OverwriteRepeatedIDs == DialogResult.No)
-                                    {
-
-                                    }
-                                }
                             }
                         }
                     }
+                    if (OverwriteRepeatedIDs == DialogResult.Yes)       //rebuild correlations
+                        this.BuildCorrelations();
                 }
                 return correlTemp;
             }
 
-
-
-
-           
             private void PrintCorrel(Estimate estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> correlTemp = null)
             {
                 if (estimate.SubEstimates.Count >= 2)
                 {
-                    UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.ID).ToArray<UniqueID>();
+                    
+                    UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
                     //check if any of the subestimates have NonZeroCorrel entries
                     Data.CorrelationString correlationString = Data.CorrelationString.ConstructString(subIDs, this.xlSheet.Name, correlTemp);
+                    //var new_ids = UniqueID.AutoFixUniqueIDs(correlationString.GetIDs());
+                    //if(new_ids!= null)
+                    //    correlationString = correlationString.OverwriteIDs(new_ids);
                     correlationString.PrintToSheet(estimate.xlCorrelCell);
                 }
             }

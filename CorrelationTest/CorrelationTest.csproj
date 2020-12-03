@@ -185,6 +185,7 @@
     <Compile Include="CorrelationSheet.cs" />
     <Compile Include="CorrelationString.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
+    <Compile Include="DisplayCoords.cs" />
     <Compile Include="Distribution.cs" />
     <Compile Include="EstimateFactory.cs" />
     <Compile Include="Estimate.cs" />
