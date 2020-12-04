@@ -12,7 +12,7 @@ namespace CorrelationTest
     {
         public class WBSSheet: Sheet, ICostSheet, IHas_xlFields
         {
-            private const char PullColumn = 'C';
+            private DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(SheetType.WBS);
             private const int LevelColumn = 2;
             public List<IEstimate> Estimates { get; set; }
             private DialogResult OverwriteRepeatedIDs { get; set; }     
@@ -26,8 +26,10 @@ namespace CorrelationTest
             public List<IEstimate> LoadEstimates()
             {
                 List<IEstimate> returnList = new List<IEstimate>();
-                int iLastCell = xlSheet.Range[$"{PullColumn}1000000"].End[Excel.XlDirection.xlUp].Row;
-                Excel.Range[] estRows = PullEstimates($"{PullColumn}2:{PullColumn}{iLastCell}");
+                Excel.Range lastCell = xlSheet.Cells[1000000, dc.Type_Offset].End[Excel.XlDirection.xlUp];
+                Excel.Range firstCell = xlSheet.Cells[2, dc.Type_Offset];
+                Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
+                Excel.Range[] estRows = PullEstimates(pullRange.Address);
                 int maxDepth = Convert.ToInt32((from Excel.Range row in estRows select row.Cells[1, LevelColumn].value).Max());
 
                 for (int i = 1; i <= maxDepth; i++)
@@ -41,36 +43,8 @@ namespace CorrelationTest
                     }
                 }
                 return returnList;
-            }
+            }            
             
-            private List<IEstimate> LoadEstimates2()
-            {
-                List<IEstimate> returnList = new List<IEstimate>();
-                int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
-                Excel.Range[] estRows = PullEstimates($"B2:B{iLastCell}");
-                for(int index = 0; index < estRows.Count(); index++)
-                {
-                    Estimate parentEstimate = new Estimate(estRows[index].EntireRow);                    
-                    for (int next = index+1; next < estRows.Count(); next++)
-                    {
-                        Estimate nextEstimate = new Estimate(estRows[next].EntireRow);
-                        if(nextEstimate.Level - 1 == parentEstimate.Level)
-                        {
-                            //sub-estimate
-                            parentEstimate.SubEstimates.Add(nextEstimate);
-                            nextEstimate.ParentEstimate = parentEstimate;
-                        }
-                        else if(nextEstimate.Level >= parentEstimate.Level)
-                        {
-                            break;
-                        }
-                    }
-                    returnList.Add(parentEstimate);
-                }
-                return returnList;
-            }
-      
-
             private Excel.Range[] PullEstimates(string typeRange)       //return an array of rows
             {
                 Excel.Range typeColumn = xlSheet.Range[typeRange];
@@ -112,7 +86,6 @@ namespace CorrelationTest
                     Estimates[0].xlCorrelCell.EntireColumn.Clear();
                 foreach (Estimate est in this.Estimates)
                 {
-                    est.LoadSubEstimates();
                     PrintCorrel(est, correlTemp);  //recursively build out children
                 }
             }
@@ -128,11 +101,11 @@ namespace CorrelationTest
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
-                        Data.CorrelationString correlString;
+                        Data.CorrelationString_Inputs correlString;
                         if (estimate.xlCorrelCell.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
+                            correlString = Data.CorrelationString_Inputs.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
                         else
-                            correlString = new Data.CorrelationString(estimate.xlCorrelCell.Value);       //construct from string
+                            correlString = new Data.CorrelationString_Inputs(estimate.xlCorrelCell.Value);       //construct from string
                         var correlMatrix = new Data.CorrelationMatrix(correlString);
                         var matrixIDs = correlMatrix.GetIDs();
                         foreach (UniqueID id1 in matrixIDs)
@@ -158,7 +131,7 @@ namespace CorrelationTest
                     
                     UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
                     //check if any of the subestimates have NonZeroCorrel entries
-                    Data.CorrelationString correlationString = Data.CorrelationString.ConstructString(subIDs, this.xlSheet.Name, correlTemp);
+                    Data.CorrelationString_Inputs correlationString = Data.CorrelationString_Inputs.ConstructString(subIDs, this.xlSheet.Name, correlTemp);
                     //var new_ids = UniqueID.AutoFixUniqueIDs(correlationString.GetIDs());
                     //if(new_ids!= null)
                     //    correlationString = correlationString.OverwriteIDs(new_ids);

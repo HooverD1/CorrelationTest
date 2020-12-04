@@ -183,6 +183,7 @@
     </Compile>
     <Compile Include="CorrelationMatrix.cs" />
     <Compile Include="CorrelationSheet.cs" />
+    <Compile Include="CorrelationString_Inputs.cs" />
     <Compile Include="CorrelationString.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
     <Compile Include="DisplayCoords.cs" />

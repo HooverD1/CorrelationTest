@@ -15,6 +15,7 @@ namespace CorrelationTest
         public int Name_Offset { get; set; }
         public int InputCorrel_Offset { get; set; }
         public int Distribution_Offset { get; set; }
+        public int Dollar_Offset { get; set; }
 
         public static DisplayCoords ConstructDisplayCoords(SheetType displaySheet)
         {
@@ -38,6 +39,7 @@ namespace CorrelationTest
         private const int WBS_Name_Offset = 4;
         private const int WBS_InputCorrel_Offset = 5;
         private const int WBS_Distribution_Offset = 6;
+        private const int WBS_Dollar_Offset = 12;
 
         public DisplayCoords_WBS()
         {
@@ -47,6 +49,7 @@ namespace CorrelationTest
             this.Name_Offset = WBS_Name_Offset;
             this.InputCorrel_Offset = WBS_InputCorrel_Offset;
             this.Distribution_Offset = WBS_Distribution_Offset;
+            this.Dollar_Offset = WBS_Dollar_Offset;
         }
     }
 

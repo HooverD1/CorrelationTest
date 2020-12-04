@@ -10,6 +10,8 @@ namespace CorrelationTest
 {
     public class Estimate : IEstimate
     {
+        private DisplayCoords dispCoords { get; set; }
+        public double[] Dollars { get; set; }
         public UniqueID uID { get; set; }
         public ICostSheet ContainingSheetObject { get; set; }
         public Distribution EstimateDistribution { get; set; }
@@ -19,10 +21,11 @@ namespace CorrelationTest
         public List<Estimate> SubEstimates { get; set; }
         public List<Estimate> Siblings { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
-        public Data.CorrelationString InputCorrelStringObj { get; set; }
+        public Data.CorrelationString_Inputs InputCorrelStringObj { get; set; }
         public int Level { get; set; }
         public string Name { get; set; }
         public Excel.Range xlRow { get; set; }
+        public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
         public Excel.Range xlTypeCell { get; set; }
         public Excel.Range xlNameCell { get; set; }
@@ -34,8 +37,11 @@ namespace CorrelationTest
 
         public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject = null)
         {
-            DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(Sheets.Sheet.GetSheetType(itemRow.Worksheet));
+            this.dispCoords = DisplayCoords.ConstructDisplayCoords(Sheets.Sheet.GetSheetType(itemRow.Worksheet));
+            
+            //this.TemporalCorrelStringObj = new Data.CorrelationString_Inputs
             this.xlRow = itemRow;
+            this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
             this.xlCorrelCell = itemRow.Cells[1, dispCoords.InputCorrel_Offset];
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
@@ -43,6 +49,7 @@ namespace CorrelationTest
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
+            this.Dollars = LoadDollars();
             this.DistributionParameters = new Dictionary<string, object>()
               { { "Type", xlDistributionCell.Offset[0,0].Value },
                 { "Param1", xlDistributionCell.Offset[0,1].Value },
@@ -56,12 +63,25 @@ namespace CorrelationTest
             this.Level = Convert.ToInt32(xlLevelCell.Value);
             this.Type = Convert.ToChar(xlTypeCell.Value);
             this.Name = Convert.ToString(xlNameCell.Value);
-            
+
             if (xlIDCell.Value == null)
+            {
                 this.uID = CreateID();
+                this.uID.PrintToCell(xlIDCell);
+            }
             else
                 this.uID = new UniqueID(xlIDCell.Value);
             this.CorrelPairs = new Dictionary<Estimate, double>();
+        }
+
+        private double[] LoadDollars()
+        {
+            double[] dollars = new double[10];
+            for(int d = 0; d < dollars.Length; d++)
+            {
+                dollars[d] = xlDollarCell.Offset[0, d].Value;
+            }
+            return dollars;
         }
 
         public bool Equals(Estimate estimate)       //check the ID to determine equality
@@ -73,8 +93,11 @@ namespace CorrelationTest
         {
             Excel.Worksheet xlSheet = this.xlRow.Worksheet;
             List<Estimate> returnList = new List<Estimate>();
-            int iLastCell = xlSheet.Range["A1000000"].End[Excel.XlDirection.xlUp].Row;
-            Excel.Range[] estRows = PullEstimates(xlSheet, $"C{this.xlRow.Row}:C{iLastCell}");
+
+            Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row, dispCoords.Type_Offset];
+            Excel.Range lastCell = xlSheet.Cells[1000000, dispCoords.Type_Offset].End[Excel.XlDirection.xlUp];
+            Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
+            Excel.Range[] estRows = PullEstimates(pullRange);
             for (int next = 1; next < estRows.Count(); next++)
             {
                 Estimate nextEstimate;
@@ -114,10 +137,10 @@ namespace CorrelationTest
             }
         }
 
-        private Excel.Range[] PullEstimates(Excel.Worksheet xlSheet, string typeRange)
+        private Excel.Range[] PullEstimates(Excel.Range pullRange)
         {
-            Excel.Range typeColumn = xlSheet.Range[typeRange];
-            IEnumerable<Excel.Range> returnVal = from Excel.Range cell in typeColumn.Cells
+            Excel.Worksheet xlSheet = pullRange.Worksheet;
+            IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells
                                                  where Convert.ToString(cell.Value) == "E"
                                                  select cell;
             return returnVal.ToArray<Excel.Range>();

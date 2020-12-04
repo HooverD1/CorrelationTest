@@ -24,7 +24,7 @@ namespace CorrelationTest
             public readonly static Tuple<int, int> param_ColDist = new Tuple<int, int>(1, 11);    //where to find the last col param for the Distribution
 
             //public Excel.Worksheet xlSheet { get; set; }
-            private Data.CorrelationString CorrelString { get; set; }
+            private Data.CorrelationString_Inputs CorrelString { get; set; }
             private Data.CorrelationMatrix CorrelMatrix { get; set; }
             private Excel.Range xlMatrixCell { get; set; }
             private Data.Link LinkToOrigin { get; set; }
@@ -33,8 +33,8 @@ namespace CorrelationTest
             private Excel.Range xlDistCell { get; set; }
             private Data.CorrelSheetSpecs Specs { get; set; }
 
-            public CorrelationSheet(Data.CorrelationString correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
-            public CorrelationSheet(Data.CorrelationString correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
+            public CorrelationSheet(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {
                 this.CorrelString = correlString;
                 this.Specs = specs;
@@ -45,7 +45,7 @@ namespace CorrelationTest
                     xlSheet = xlCorrelSheets.First();
                 else
                     xlSheet = CreateXLCorrelSheet();
-                CorrelMatrix = new Data.CorrelationMatrix(correlString);
+                CorrelMatrix = new Data.CorrelationMatrix(CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
@@ -79,7 +79,7 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[matrixRow, matrixCol];
                 Excel.Range matrix_end = xlSheet.Cells[matrixRow_end, matrixCol_end];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell, matrix_end];
-                this.CorrelString = new Data.CorrelationString(matrixRange);
+                this.CorrelString = new Data.CorrelationString_Inputs(matrixRange);
                 this.CorrelMatrix = new Data.CorrelationMatrix(this.CorrelString);
             }
 

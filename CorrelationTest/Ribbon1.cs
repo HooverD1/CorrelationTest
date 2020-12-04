@@ -39,7 +39,7 @@ namespace CorrelationTest
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
             SendKeys.Send("{ESC}");
-            Data.CorrelationString.ExpandCorrel(ThisAddIn.MyApp.Selection);
+            Data.CorrelationString_Inputs.ExpandCorrel(ThisAddIn.MyApp.Selection);
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -58,6 +58,8 @@ namespace CorrelationTest
             xlSheet.Cells[5, 6] = "Normal";
             xlSheet.Cells[5, 7] = 0;
             xlSheet.Cells[5, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[5, i].value = 7;
             xlSheet.Cells[7, 2] = 2;
             xlSheet.Cells[7, 3] = "E";
             xlSheet.Cells[7, 4] = "Est2";
@@ -65,42 +67,56 @@ namespace CorrelationTest
             xlSheet.Cells[7, 7] = 10;
             xlSheet.Cells[7, 8] = 30;
             xlSheet.Cells[7, 9] = 20;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[7, i].value = 7;
             xlSheet.Cells[9, 2] = 2;
             xlSheet.Cells[9, 3] = "E";
             xlSheet.Cells[9, 4] = "Est3";
             xlSheet.Cells[9, 6] = "Normal";
             xlSheet.Cells[9, 7] = 0;
             xlSheet.Cells[9, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[9, i].value = 7;
             xlSheet.Cells[11, 2] = 1;
             xlSheet.Cells[11, 3] = "E";
             xlSheet.Cells[11, 4] = "Est4";
             xlSheet.Cells[11, 6] = "Normal";
             xlSheet.Cells[11, 7] = 0;
             xlSheet.Cells[11, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[11, i].value = 7;
             xlSheet.Cells[13, 2] = 2;
             xlSheet.Cells[13, 3] = "E";
             xlSheet.Cells[13, 4] = "Est5";
             xlSheet.Cells[13, 6] = "Normal";
             xlSheet.Cells[13, 7] = 0;
             xlSheet.Cells[13, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[13, i].value = 7;
             xlSheet.Cells[14, 2] = 2;
             xlSheet.Cells[14, 3] = "E";
             xlSheet.Cells[14, 4] = "Est6";
             xlSheet.Cells[14, 6] = "Lognormal";
             xlSheet.Cells[14, 7] = 0;
             xlSheet.Cells[14, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[14, i].value = 7;
             xlSheet.Cells[15, 2] = 3;
             xlSheet.Cells[15, 3] = "E";
             xlSheet.Cells[15, 4] = "Est7";
             xlSheet.Cells[15, 6] = "Normal";
             xlSheet.Cells[15, 7] = 0;
             xlSheet.Cells[15, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[15, i].value = 7;
             xlSheet.Cells[16, 2] = 3;
             xlSheet.Cells[16, 3] = "E";
             xlSheet.Cells[16, 4] = "Est8";
             xlSheet.Cells[16, 6] = "Normal";
             xlSheet.Cells[16, 7] = 0;
             xlSheet.Cells[16, 8] = 1;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[16, i].value = 7;
         }
 
         private void btnVisualize_Click(object sender, RibbonControlEventArgs e)

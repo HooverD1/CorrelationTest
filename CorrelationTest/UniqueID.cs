@@ -111,7 +111,7 @@ namespace CorrelationTest
 
         private static string Timestamp()
         {
-            var returnval = $"{DateTime.Now.ToUniversalTime().ToShortDateString()}{DateTime.Now.ToUniversalTime().ToShortTimeString()}";
+            var returnval = $"{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm")}";
             return returnval;
         }
 

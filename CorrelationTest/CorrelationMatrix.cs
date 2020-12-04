@@ -41,11 +41,11 @@ namespace CorrelationTest
                 FieldDict = GetFieldDict(correlMatrix);
             }
 
-            public CorrelationMatrix(Data.CorrelationString correlStringObj)
+            public CorrelationMatrix(Data.CorrelationString_Inputs correlStringObj)
             {
                 //expand from string
                 this.Fields = correlStringObj.GetFields();
-                this.Matrix = correlStringObj.GetMatrix();
+                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                 this.FieldCount = this.Fields.Count();
                 this.IsEven = Even(this.FieldCount);
                 this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
