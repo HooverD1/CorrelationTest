@@ -11,8 +11,6 @@ namespace CorrelationTest
     {
         public class CorrelationString_Inputs : CorrelationString
         {
-            public string Value { get; set; }
-
             public CorrelationString_Inputs(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange)) { }
             
             public CorrelationString_Inputs(string correlString)
@@ -21,7 +19,7 @@ namespace CorrelationTest
             }
             public CorrelationString_Inputs(object[,] correlArray, UniqueID[] ids)
             {
-                this.Value = CreateValue(correlArray, ids);               
+                this.Value = CreateValue(ids, correlArray);               
             }
 
             private CorrelationString_Inputs(UniqueID[] ids, string sheet)     //create 0 string (independence)
@@ -36,21 +34,21 @@ namespace CorrelationTest
                         correlArray[row, col] = 0;
                     }
                 }
-                this.Value = CreateValue(correlArray, ids);
+                this.Value = CreateValue(ids, correlArray);
             }
 
             public CorrelationString_Inputs(Data.CorrelationMatrix matrix)
             {
-                this.Value = CreateValue(matrix.GetMatrix(), matrix.GetIDs());
+                this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix());
             }
 
-            private object[] BuildIDsFromFields(object[] fields, string sheet)
-            {
-                object[] ids = new object[fields.Length];
-                for (int i = 0; i < fields.Length; i++)
-                    ids[i] = $"{sheet}|{fields[i]}";
-                return ids;
-            }
+            //private object[] BuildIDsFromFields(object[] fields, string sheet)
+            //{
+            //    object[] ids = new object[fields.Length];
+            //    for (int i = 0; i < fields.Length; i++)
+            //        ids[i] = $"{sheet}|{fields[i]}";
+            //    return ids;
+            //}
             
             private static UniqueID[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
             {
@@ -98,63 +96,15 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            private string CreateValue(object[,] correlArray, UniqueID[] ids)
-            {
-                correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
-                StringBuilder sb = new StringBuilder();
-                
-                for (int field = 0; field < correlArray.GetLength(1); field++)
-                {
-                    //Add fields
-                    sb.Append(ids[field].ID);
-                    if(field < correlArray.GetLength(1)-1)
-                        sb.Append(",");
-                }
-                sb.AppendLine();
-                for (int row = 0; row < correlArray.GetLength(0); row++)
-                {
-                    for (int col = row+1; col < correlArray.GetLength(1); col++)
-                    {
-                        sb.Append(correlArray[row, col]);
-                        if(col < correlArray.GetLength(1)-1)
-                            sb.Append(",");
-                    }
-                    if (row < correlArray.GetLength(0) - 2)
-                        sb.AppendLine();
-                }
-                return sb.ToString();
-            }
-
-
-
             public string CreateArray(string correlString)
             {
                 throw new NotImplementedException();
             }
 
-            public object[] GetFields()
+            public override object[] GetFields()
             {
                 var ids = this.GetIDs();
                 return (from UniqueID uid in ids select uid.Name).ToArray<object>();
-            }
-
-            public object[,] GetMatrix()
-            {
-                string[] correlLines = DelimitString();
-                string[] matrixLines = (correlLines.Where(x => x != correlLines[0])).ToArray<string>();
-                object[,] matrix = new object[correlLines.Length, correlLines.Length];
-                for (int i = 0; i < correlLines.Length; i++)
-                {
-                    string[] lineValues = matrixLines[i].Split(',');
-                    for (int j = correlLines.Length; j >= 0; j--)
-                    {
-                        if (i == j)
-                            matrix[j, i] = 1;
-                        else
-                            matrix[j, i] = lineValues[j];
-                    }
-                }
-                return matrix;
             }
 
             public bool ValidateAgainstMatrix(object[] outsideFields)
@@ -178,14 +128,8 @@ namespace CorrelationTest
                 else
                     return false;
             }
-            private string[] DelimitString()
-            {
-                string correlString = this.Value.Replace("\r\n", "&");  //simplify delimiter
-                correlString = correlString.Replace("\n", "&");  //simplify delimiter
-                string[] correlLines = correlString.Split('&');         //split lines
-                return correlLines;
-            }
-            public UniqueID[] GetIDs()
+
+            public override UniqueID[] GetIDs()
             {
                 string[] correlLines = DelimitString();
                 string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
@@ -208,7 +152,7 @@ namespace CorrelationTest
 
             public static Data.CorrelationString_Inputs ConstructString(UniqueID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
-                Data.CorrelationString_Inputs correlationString = new CorrelationString_Inputs(ids, sheet);       //build zero string
+                Data.CorrelationString_Inputs correlationString = (CorrelationString_Inputs)CreateZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
                     return correlationString;       //return zero string
                 else
@@ -273,10 +217,7 @@ namespace CorrelationTest
                 this.Value = sb.ToString();
             }
 
-            public void PrintToSheet(Excel.Range xlCorrelCell)
-            {
-                xlCorrelCell.Value = this.Value;
-            }
+
         }
     }
 }

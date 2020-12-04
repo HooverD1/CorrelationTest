@@ -185,6 +185,7 @@
     <Compile Include="CorrelationSheet.cs" />
     <Compile Include="CorrelationString_Inputs.cs" />
     <Compile Include="CorrelationString.cs" />
+    <Compile Include="CorrelationString_Periods.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
     <Compile Include="DisplayCoords.cs" />
     <Compile Include="Distribution.cs" />
@@ -194,6 +195,8 @@
     <Compile Include="IEstimate.cs" />
     <Compile Include="IHasFields.cs" />
     <Compile Include="Link.cs" />
+    <Compile Include="Period.cs" />
+    <Compile Include="PeriodID.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

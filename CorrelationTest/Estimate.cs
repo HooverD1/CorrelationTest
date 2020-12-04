@@ -11,7 +11,7 @@ namespace CorrelationTest
     public class Estimate : IEstimate
     {
         private DisplayCoords dispCoords { get; set; }
-        public double[] Dollars { get; set; }
+        public Period[] Periods { get; set; }
         public UniqueID uID { get; set; }
         public ICostSheet ContainingSheetObject { get; set; }
         public Distribution EstimateDistribution { get; set; }
@@ -49,7 +49,7 @@ namespace CorrelationTest
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
-            this.Dollars = LoadDollars();
+            this.Periods = LoadPeriods();
             this.DistributionParameters = new Dictionary<string, object>()
               { { "Type", xlDistributionCell.Offset[0,0].Value },
                 { "Param1", xlDistributionCell.Offset[0,1].Value },
@@ -73,7 +73,16 @@ namespace CorrelationTest
                 this.uID = new UniqueID(xlIDCell.Value);
             this.CorrelPairs = new Dictionary<Estimate, double>();
         }
-
+        private Period[] LoadPeriods()
+        {
+            double[] dollars = LoadDollars();
+            Period[] periods = new Period[10];
+            for(int i = 0; i < periods.Length; i++)
+            {
+                periods[i] = new Period(this.uID, i + 1, dollars[i]);
+            }
+            return periods;
+        }
         private double[] LoadDollars()
         {
             double[] dollars = new double[10];

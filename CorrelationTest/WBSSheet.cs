@@ -80,6 +80,7 @@ namespace CorrelationTest
             }
             public void BuildCorrelations()
             {
+                //Input correlation
                 int maxDepth = (from Estimate est in this.Estimates select est.Level).Max();
                 var correlTemp = BuildCorrelTemp(this.Estimates);
                 if(Estimates.Any())
@@ -88,6 +89,13 @@ namespace CorrelationTest
                 {
                     PrintCorrel(est, correlTemp);  //recursively build out children
                 }
+
+                //Period correlation
+                foreach(Estimate est in this.Estimates)
+                {
+
+                }
+
             }
 
             private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<IEstimate> Estimates)
@@ -124,18 +132,20 @@ namespace CorrelationTest
                 return correlTemp;
             }
 
-            private void PrintCorrel(Estimate estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> correlTemp = null)
+            private void PrintCorrel(Estimate estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
             {
                 if (estimate.SubEstimates.Count >= 2)
                 {
                     
                     UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
                     //check if any of the subestimates have NonZeroCorrel entries
-                    Data.CorrelationString_Inputs correlationString = Data.CorrelationString_Inputs.ConstructString(subIDs, this.xlSheet.Name, correlTemp);
-                    //var new_ids = UniqueID.AutoFixUniqueIDs(correlationString.GetIDs());
-                    //if(new_ids!= null)
-                    //    correlationString = correlationString.OverwriteIDs(new_ids);
-                    correlationString.PrintToSheet(estimate.xlCorrelCell);
+                    Data.CorrelationString_Inputs correlationString_inputs = Data.CorrelationString_Inputs.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
+                    correlationString_inputs.PrintToSheet(estimate.xlCorrelCell);
+
+                    PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
+                    Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Periods.ConstructString(periodIDs, this.xlSheet.Name, inputTemp);
+                    //Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Inputs.
+                    //Need to be able to construct a string for _Periods
                 }
             }
             

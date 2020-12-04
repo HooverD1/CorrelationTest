@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public struct UniqueID
+    public class UniqueID
     {
         private const int SheetType_Placement = 0;
         public string SheetType { get; }
@@ -15,9 +15,9 @@ namespace CorrelationTest
         public string Name { get; }
         private const int Created_Placement = 2; 
         public string Created { get; }
-        private const char Delimiter = '|';
-        private const char Delimiter2 = '.';
-        public string ID { get; }
+        protected const char Delimiter = '|';
+        protected const char Delimiter2 = '.';
+        public string ID { get; set; }
 
         public UniqueID(string FullID)
         {
@@ -66,7 +66,7 @@ namespace CorrelationTest
             xlUniqueID.Value = this.ID;
         }
 
-        private static string CreateID(Dictionary<string, string> ParamDict)
+        private string CreateID(Dictionary<string, string> ParamDict)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < ParamDict.Count; i++)

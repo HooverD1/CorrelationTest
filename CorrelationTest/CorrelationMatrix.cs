@@ -52,6 +52,17 @@ namespace CorrelationTest
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
+            public CorrelationMatrix(Data.CorrelationString_Periods correlStringObj)
+            {
+                //expand from string
+                this.Fields = correlStringObj.GetFields();
+                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                this.FieldCount = this.Fields.Count();
+                this.IsEven = Even(this.FieldCount);
+                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
+                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            }
+
             private bool Even(int fieldCount)
             {
                 if (fieldCount % 2 == 0)
