@@ -13,6 +13,8 @@ namespace CorrelationTest
         {
             public CorrelationString_Inputs(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange)) { }
             
+            
+
             public CorrelationString_Inputs(string correlString)
             {
                 this.Value = correlString;
@@ -148,11 +150,17 @@ namespace CorrelationTest
             //    else
             //        return null;                            //if malformed, return null
             //}
-            
+
+            public static CorrelationString_Inputs CreateZeroString(string[] fields)
+            {
+                //Need to downcast csi 
+                var csi = new CorrelationString(fields);
+                return new CorrelationString_Inputs(csi.Value);
+            }
 
             public static Data.CorrelationString_Inputs ConstructString(UniqueID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
-                Data.CorrelationString_Inputs correlationString = (CorrelationString_Inputs)CreateZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
+                Data.CorrelationString_Inputs correlationString = CreateZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
                     return correlationString;       //return zero string
                 else

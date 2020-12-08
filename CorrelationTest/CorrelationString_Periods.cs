@@ -22,6 +22,18 @@ namespace CorrelationTest
                 this.Value = CreateValue_Zero(fields, defaultCorrel);
             }
 
+            public CorrelationString_Periods(string correlString)
+            {
+                this.Value = correlString;
+            }
+
+            public static CorrelationString_Periods CreateZeroString(string[] fields)
+            {
+                //Need to downcast csi 
+                var csi = new CorrelationString(fields);
+                return new CorrelationString_Periods(csi.Value);
+            }
+
             public CorrelationString_Periods(Data.CorrelationMatrix matrix)
             {
                 this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix());

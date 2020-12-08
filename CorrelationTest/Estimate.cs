@@ -49,7 +49,6 @@ namespace CorrelationTest
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
-            this.Periods = LoadPeriods();
             this.DistributionParameters = new Dictionary<string, object>()
               { { "Type", xlDistributionCell.Offset[0,0].Value },
                 { "Param1", xlDistributionCell.Offset[0,1].Value },
@@ -71,6 +70,7 @@ namespace CorrelationTest
             }
             else
                 this.uID = new UniqueID(xlIDCell.Value);
+            this.Periods = LoadPeriods();
             this.CorrelPairs = new Dictionary<Estimate, double>();
         }
         private Period[] LoadPeriods()

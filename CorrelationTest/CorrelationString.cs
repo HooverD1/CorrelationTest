@@ -25,16 +25,12 @@ namespace CorrelationTest
 
             protected CorrelationString() { }
 
-            protected CorrelationString(string[] fields)     //creates zero string
+            public CorrelationString(string[] fields)     //creates zero string
             {
                 this.Value = CreateValue_Zero(fields);
             }
 
-            
-            public static CorrelationString CreateZeroString(string[] fields)
-            {
-                return new CorrelationString(fields);
-            }
+
 
             public string CreateValue_Zero(string[] fields, double defaultValue = 0) //create a zero correlstring from very generic params
             {
@@ -45,19 +41,20 @@ namespace CorrelationTest
                     if (i < fields.Length - 1)
                         sb.Append(",");
                 }
-                for (int row = 0; row < fields.Length - 1; row++)
+                sb.AppendLine();
+                for (int row = 0; row < fields.Length-1; row++)
                 {
-                    for (int col = 0; col < fields.Length - 1; col++)
+                    for (int col = row+1; col < fields.Length; col++)
                     {
-                        if (row == col)
-                        {
-                            sb.Append("1");
-                        }
-                        else
+                        if(col > row)
                         {
                             sb.Append(defaultValue.ToString());
                         }
-                        if (row < fields.Length - 1)
+                        else
+                        {
+                            continue;
+                        }
+                        if (col < fields.Length-1)
                             sb.Append(",");
                     }
                     if (row < fields.Length - 2)
@@ -75,24 +72,30 @@ namespace CorrelationTest
             }
 
             public object[,] GetMatrix()
-            {
+            {       //returning 2,2 instead of 3,3
                 string myValue = this.Value.Replace("\r\n", "&");
                 myValue = myValue.Replace("\n", "&");
-                myValue = myValue + "&";    //add a blank final row in for the sake of the array
-                string[] fieldString = myValue.Split('&');          //broken by line
-                object[,] matrix = new object[fieldString.Length - 1, fieldString.Length - 1];
+                //myValue = myValue + "&";    //add a blank final row in for the sake of the array
+                string[] fieldString1 = myValue.Split('&');          //broken by line
+                string[] fieldString = new string[fieldString1.Length - 1];
+                for(int i = 1; i < fieldString1.Length; i++) { fieldString[i - 1] = fieldString1[i]; }
+                object[,] matrix = new object[fieldString.Length+1, fieldString.Length+1];
 
-                for (int row = 0; row < fieldString.Length - 1; row++)
+                for (int row = 0; row < fieldString.Length+1; row++)
                 {
                     string[] values;
-                    values = fieldString[row + 1].Split(',');       //broken by entry
+                    if (row < fieldString.Length)
+                        values = fieldString[row].Split(',');       //broken by entry
+                    else
+                        values = null;
 
-                    for (int col = 0; col < fieldString.Length - 1; col++)
+                    for (int col = fieldString.Length; col >= 0; col--)
                     {
-                        if (col > row)
-                            matrix[row, col] = Convert.ToDouble(values[(col - row) - 1]);
-                        else if (col == row)
+                        if (col == row)
                             matrix[row, col] = 1;
+                        else if (col > row)
+                            matrix[row, col] = Convert.ToDouble(values[(col - row) - 1]);
+
                         else  //col < row
                             matrix[row, col] = null;
                     }

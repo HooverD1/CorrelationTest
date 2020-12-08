@@ -69,6 +69,15 @@ namespace CorrelationTest
             xlSheet.Cells[7, 9] = 20;
             for (int i = 12; i < 22; i++)
                 xlSheet.Cells[7, i].value = 7;
+            xlSheet.Cells[8, 2] = 2;
+            xlSheet.Cells[8, 3] = "E";
+            xlSheet.Cells[8, 4] = "Est22";
+            xlSheet.Cells[8, 6] = "Triangular";
+            xlSheet.Cells[8, 7] = 10;
+            xlSheet.Cells[8, 8] = 30;
+            xlSheet.Cells[8, 9] = 20;
+            for (int i = 12; i < 22; i++)
+                xlSheet.Cells[8, i].value = 7;
             xlSheet.Cells[9, 2] = 2;
             xlSheet.Cells[9, 3] = "E";
             xlSheet.Cells[9, 4] = "Est3";
