@@ -187,16 +187,19 @@
     <Compile Include="CorrelationString.cs" />
     <Compile Include="CorrelationString_Periods.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
+    <Compile Include="CostSheet.cs" />
     <Compile Include="DisplayCoords.cs" />
     <Compile Include="Distribution.cs" />
     <Compile Include="EstimateFactory.cs" />
     <Compile Include="Estimate.cs" />
+    <Compile Include="EstimateSheet.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="IEstimate.cs" />
     <Compile Include="IHasFields.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PeriodID.cs" />
+    <Compile Include="PhasingTriple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

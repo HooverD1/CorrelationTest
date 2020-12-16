@@ -195,7 +195,7 @@ namespace CorrelationTest
                     //Construct the estimate
                     IEstimate tempEstimate = EstimateFactory.Construct(selection);
                     //construct the correlString
-                    Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(Convert.ToString(tempEstimate.xlCorrelCell.Value));
+                    Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(Convert.ToString(tempEstimate.xlCorrelCell_Inputs.Value));
                     //construct the correlSheet
                     Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, selection, new Data.CorrelSheetSpecs());
                     //print the correlSheet

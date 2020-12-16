@@ -14,5 +14,15 @@ namespace CorrelationTest
             this.PeriodTag = period;
             ID = $"{uID.ID}{Delimiter}{period}";
         }
+
+        public static PeriodID[] GeneratePeriodIDs(UniqueID uid, int numOfPeriods)
+        {
+            PeriodID[] pids = new PeriodID[numOfPeriods];
+            for(int i = 0; i < numOfPeriods; i++)
+            {
+                pids[i] = new PeriodID(uid, i + 1);
+            }
+            return pids;
+        }
     }
 }

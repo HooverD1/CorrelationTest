@@ -11,7 +11,7 @@ namespace CorrelationTest
     {
         public static IEstimate Construct(Excel.Range selection)
         {
-            SheetType sheetType = Sheets.Sheet.GetSheetType(selection.Worksheet);
+            SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
             IEstimate returnEstimate;
             switch (sheetType)
             {

@@ -13,7 +13,8 @@ namespace CorrelationTest
         string Name { get; set; }
         Excel.Range xlRow { get; set; }
         Excel.Range xlNameCell { get; set; }
-        Excel.Range xlCorrelCell { get; set; }
+        Excel.Range xlCorrelCell_Inputs { get; set; }
+        Excel.Range xlCorrelCell_Periods { get; set; }
         Dictionary<string, object> DistributionParameters { get; set; }
         UniqueID uID { get; set; }
         List<Estimate> SubEstimates { get; set; }

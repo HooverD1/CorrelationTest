@@ -30,20 +30,21 @@ namespace CorrelationTest
         public Excel.Range xlTypeCell { get; set; }
         public Excel.Range xlNameCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
-        public Excel.Range xlCorrelCell { get; set; }
+        public Excel.Range xlCorrelCell_Inputs { get; set; }
+        public Excel.Range xlCorrelCell_Periods { get; set; }
         public Excel.Range xlLevelCell { get; set; }
         public string WBS_String { get; set; }
         public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
         public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject = null)
         {
-            this.dispCoords = DisplayCoords.ConstructDisplayCoords(Sheets.Sheet.GetSheetType(itemRow.Worksheet));
+            this.dispCoords = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(itemRow.Worksheet));
             
             //this.TemporalCorrelStringObj = new Data.CorrelationString_Inputs
             this.xlRow = itemRow;
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
-            this.xlCorrelCell = itemRow.Cells[1, dispCoords.InputCorrel_Offset];
+            this.xlCorrelCell_Inputs = itemRow.Cells[1, dispCoords.InputCorrel_Offset];
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
             this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
@@ -125,14 +126,15 @@ namespace CorrelationTest
                 }
                 else if (nextEstimate.Level <= this.Level)
                 {
-                    LoadCorrelatedValues(this.ParentEstimate);
+                    LoadCorrelatedValues();
                     return;
                 }
             }
-            LoadCorrelatedValues(this.ParentEstimate);
+            LoadCorrelatedValues();
         }
-        private void LoadCorrelatedValues(Estimate parentEstimate)      //this only ran on expand before -- now runs on build
+        private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
+            Estimate parentEstimate = this.ParentEstimate;
             if (parentEstimate == null) { return; }
             if (parentEstimate.ParentEstimate == null) { return; }
             Data.CorrelationMatrix parentMatrix = new Data.CorrelationMatrix(parentEstimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
@@ -143,6 +145,21 @@ namespace CorrelationTest
                 this.Siblings.Add(sibling);
                 //create the string >> create the matrix >> retrieve values & store
                 this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.uID, sibling.uID));
+            }
+        }
+
+        public void LoadExistingCorrelations()      //useful?
+        {
+            if (this.xlCorrelCell_Inputs != null)
+            {
+                Data.CorrelationString_Inputs csi = new Data.CorrelationString_Inputs(xlCorrelCell_Inputs.Value);
+                this.InputCorrelStringObj = csi;
+                
+            }
+            if (this.xlCorrelCell_Periods != null)
+            {
+                Data.CorrelationString_Periods csp = new Data.CorrelationString_Periods(xlCorrelCell_Periods.Value);
+                this.TemporalCorrelStringObj = csp;
             }
         }
 

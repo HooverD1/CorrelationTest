@@ -30,7 +30,8 @@ namespace CorrelationTest
                     sheetObj = new Sheets.WBSSheet((Excel.Worksheet)data["xlSheet"]);
                     break;
                 case SheetType.Estimate:
-                    throw new NotImplementedException();
+                    sheetObj = new Sheets.EstimateSheet((Excel.Worksheet)data["xlSheet"]);
+                    break;
                 default:
                     sheetObj = null;
                     break;

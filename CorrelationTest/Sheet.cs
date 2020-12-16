@@ -20,30 +20,22 @@ namespace CorrelationTest
         Unknown
     }
 
-    namespace Sheets
+    public abstract class Sheet
     {
-        public abstract class Sheet
+        public Excel.Worksheet xlSheet { get; set; }
+
+        public abstract void PrintToSheet();
+        public abstract bool Validate();
+
+        protected Excel.Range[] PullEstimates(string typeRange)       //return an array of rows
         {
-            public Excel.Worksheet xlSheet { get; set; }
-
-            public abstract void PrintToSheet();
-            public abstract bool Validate();
-
-            public static SheetType GetSheetType(Excel.Worksheet xlSheet)
-            {
-                string sheetIdent = xlSheet.Cells[1, 1].Value;
-                switch (sheetIdent)
-                {
-                    case "$Correlation":
-                        return SheetType.Correlation;
-                    case "$WBS":
-                        return SheetType.WBS;
-                    case "$Estimate":
-                        return SheetType.Estimate;
-                    default:
-                        return SheetType.Unknown;
-                }
-            }
+            Excel.Range typeColumn = xlSheet.Range[typeRange];
+            IEnumerable<Excel.Range> returnVal = from Excel.Range cell in typeColumn.Cells
+                                                 where Convert.ToString(cell.Value) == "E"
+                                                 select cell.EntireRow;
+            return returnVal.ToArray<Excel.Range>();
         }
+
+
     }
 }

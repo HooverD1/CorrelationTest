@@ -16,8 +16,7 @@ namespace CorrelationTest
             MisplacedValue,
             None
         }
-
-
+        
         public class CorrelationMatrix
         {
             public Dictionary<UniqueID, int> FieldDict { get; set; }
@@ -30,6 +29,12 @@ namespace CorrelationTest
             public int FieldCount { get; set; }
             public object[] Fields { get; set; }
             public Tuple<int, int> MatrixCoords { get; }
+
+            private CorrelationMatrix(double[,] phasingTriple)
+            {
+                //build a phasing correlation matrix from a provided triple
+
+            }
 
             public CorrelationMatrix(Excel.Range correlMatrix)       //from matrix
             {
@@ -61,6 +66,17 @@ namespace CorrelationTest
                 this.IsEven = Even(this.FieldCount);
                 this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            }
+
+            public CorrelationMatrix(UniqueID parent_uid, object[,] matrix)     //used for creating phasing correlation matrices
+            {
+                this.Matrix = matrix;
+                PeriodID[] pids = PeriodID.GeneratePeriodIDs(parent_uid, FieldCount);
+                this.Fields = (from PeriodID pid in pids select pid.Name).ToArray<object>();
+                this.FieldCount = this.Fields.Count();
+                this.IsEven = Even(this.FieldCount);
+                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
+                this.FieldDict = GetFieldDict(pids);
             }
 
             private bool Even(int fieldCount)

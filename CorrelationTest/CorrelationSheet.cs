@@ -234,6 +234,8 @@ namespace CorrelationTest
                 }                    
                 else
                     MessageBox.Show("ID not found");
+
+                correlSheet.LinkToOrigin.LinkSource.Activate();
             }
 
             private object[,] GetDistributionParamStrings()

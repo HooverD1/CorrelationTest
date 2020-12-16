@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
@@ -52,6 +53,65 @@ namespace CorrelationTest
             }
             else
                 return inputArray;
+        }
+
+        private static string TypeToLabel(SheetType sheetType)
+        {
+            switch (sheetType)
+            {
+                case SheetType.Estimate:
+                    return "$EST";
+                case SheetType.WBS:
+                    return "$WBS";
+                case SheetType.Data:
+                    return "$DATA";
+                case SheetType.Model:
+                    return "$MODEL";
+                case SheetType.Input:
+                    return "$INPUT";
+                case SheetType.FilterData:
+                    return "$FILTER";
+                case SheetType.Correlation:
+                    return "$CORRELATION";
+                default:
+                    return null;
+            }
+        }
+
+        public static SheetType GetSheetType(Excel.Worksheet xlSheet)
+        {
+            string sheetIdent = xlSheet.Cells[1, 1].Value;
+            switch (sheetIdent)
+            {
+                case "$CORRELATION":
+                    return SheetType.Correlation;
+                case "$WBS":
+                    return SheetType.WBS;
+                case "$EST":
+                    return SheetType.Estimate;
+                default:
+                    return SheetType.Unknown;
+            }
+        }
+
+        public static Excel.Worksheet GetWorksheet(string sheetName, SheetType sheetType = SheetType.Unknown)
+        {
+            Excel.Worksheet xlSheet;
+
+            IEnumerable<Excel.Worksheet> xlSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
+                                                    where sheet.Name == sheetName && sheet.Cells[1, 1].value == TypeToLabel(sheetType)
+                                                    select sheet;
+            if (xlSheets.Any())
+            {
+                xlSheet = xlSheets.First();
+            }
+            else
+            {
+                xlSheet = ThisAddIn.MyApp.Worksheets.Add();
+                xlSheet.Name = sheetName;
+                xlSheet.Cells[1, 1].value = TypeToLabel(sheetType);
+            }
+            return xlSheet;
         }
     }
 }
