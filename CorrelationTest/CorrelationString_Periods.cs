@@ -36,7 +36,7 @@ namespace CorrelationTest
 
             public CorrelationString_Periods(Data.CorrelationMatrix matrix)
             {
-                this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix());
+                this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix()); 
             }
 
             public static Data.CorrelationString_Periods ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
@@ -73,6 +73,13 @@ namespace CorrelationTest
                 return fields.ToArray<object>();
             }
 
+            public override UniqueID GetParentID()
+            {
+                string[] lines = this.Value.Split('&');
+                string[] header = lines[0].Split(',');
+                return new UniqueID(header[3]);
+            }
+
             public override UniqueID[] GetIDs()
             {
                 string[] correlLines = DelimitString();
@@ -82,6 +89,16 @@ namespace CorrelationTest
                     return returnIDs;
                 else
                     throw new Exception("Duplicated IDs");
+            }
+
+            public override void Expand(Excel.Range xlSource)
+            {
+                Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(this.Value);
+                var id = this.GetIDs()[0];
+                //construct the correlSheet
+                Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, xlSource, new Data.CorrelSheetSpecs());
+                //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
+                correlSheet.PrintToSheet();
             }
 
         }

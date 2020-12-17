@@ -38,7 +38,10 @@ namespace CorrelationTest
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
             SendKeys.Send("{ESC}");
-            Data.CorrelationString_Inputs.ExpandCorrel(ThisAddIn.MyApp.Selection);
+            //Need correlation string to expand depending on the value in Selection
+            Excel.Range selection = ThisAddIn.MyApp.Selection;
+            Data.CorrelationString cs = Data.CorrelationString.Construct(selection.Value);
+            cs.Expand(selection);
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -61,15 +64,11 @@ namespace CorrelationTest
             est_1.Cells[4, 7] = "Param1";
             est_1.Cells[4, 8] = "Param2";
             est_1.Cells[4, 9] = "Param3";
-            for(int k = 14; k < 20; k++)
-            {
-                est_1.Cells[4, k] = 7;
-            }
 
             est_1.Cells[5, 2] = 1;
             est_1.Cells[5, 3] = "E";
             est_1.Cells[5, 4] = "Est1";
-            est_1.Cells[5, 5] = "1,.8,.6";
+            est_1.Cells[5, 5] = "8,PT,abc&1,.8,.6";
             est_1.Cells[5, 6] = "Normal";
             est_1.Cells[5, 7] = 0;
             est_1.Cells[5, 8] = 1;
@@ -81,6 +80,7 @@ namespace CorrelationTest
             est_1.Cells[6, 2] = 2;
             est_1.Cells[6, 3] = "I";
             est_1.Cells[6, 4] = "Est2";
+            est_1.Cells[6, 5] = "1,.8,.6";
             est_1.Cells[6, 6] = "Triangular";
             est_1.Cells[6, 7] = 10;
             est_1.Cells[6, 8] = 30;
@@ -93,6 +93,7 @@ namespace CorrelationTest
             est_1.Cells[7, 2] = 2;
             est_1.Cells[7, 3] = "I";
             est_1.Cells[7, 4] = "Est3";
+            est_1.Cells[7, 5] = "1,.8,.6";
             est_1.Cells[7, 6] = "Triangular";
             est_1.Cells[7, 7] = 10;
             est_1.Cells[7, 8] = 30;

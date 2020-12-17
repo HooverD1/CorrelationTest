@@ -9,6 +9,14 @@ namespace CorrelationTest
 {
     namespace Data
     {
+        public enum CorrelStringType
+        {
+            InputsMatrix,
+            PhasingMatrix,
+            PhasingTriple,
+            DurationMatrix
+        }
+
         public class CorrelationString
         {
             public string Value { get; set; }
@@ -129,6 +137,121 @@ namespace CorrelationTest
                 }
                 return sb.ToString();
             }
+
+            public virtual UniqueID GetParentID() { return null; }
+
+            public virtual void Expand(Excel.Range xlSource) { }
+
+            #region CorrelString Factory
+            private static CorrelStringType ParseCorrelType(string correlStringValue)
+            {
+                string[] splitValues = correlStringValue.Split(',');
+                // # Periods | Type Char
+                string correlTypeStr = splitValues[1];
+                switch (correlTypeStr)
+                {
+                    case "IM":
+                        return CorrelStringType.InputsMatrix;
+                    case "PM":
+                        return CorrelStringType.PhasingMatrix;
+                    case "PT":
+                        return CorrelStringType.PhasingTriple;
+                    case "DM":
+                        return CorrelStringType.DurationMatrix;
+                    default:
+                        throw new Exception("Malformed Correlation String Header");
+                }
+            }
+
+            private static Dictionary<string, object> ParseStringValue(string[][] stringValues, CorrelStringType csType)
+            {
+                Dictionary<string, object> stringDictionary = new Dictionary<string, object>();
+                switch (csType)
+                {
+                    case CorrelStringType.PhasingTriple:
+                        return ParsePhasingTriple(stringValues);
+                    case CorrelStringType.PhasingMatrix:
+                        return ParsePhasingMatrix(stringValues);
+                    case CorrelStringType.InputsMatrix:
+                        return ParseInputsMatrix(stringValues);
+                    case CorrelStringType.DurationMatrix:
+                        return ParseDurationMatrix(stringValues);
+                    default:
+                        throw new Exception("Malformed CorrelStringType");
+                }
+            }
+
+            private static Dictionary<string, object> ParsePhasingTriple(string[][] values)
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                dict.Add("Periods", values[0][0]);
+                dict.Add("Parent_ID", values[0][2]);
+                object[,] tripleArray = ExtensionMethods.GetSubArray(values, 2);
+                dict.Add("Triple", $"{values[1][0]},{values[1][1]},{values[1][2]}");
+                return dict;
+            }
+            private static Dictionary<string, object> ParsePhasingMatrix(string[][] values)
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                dict.Add("Periods", values[0][0]);
+                dict.Add("IDs", values[1]);
+                dict.Add("Matrix", ExtensionMethods.GetSubArray(values, 2));
+                return dict;
+            }
+            private static Dictionary<string, object> ParseInputsMatrix(string[][] values)
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                dict.Add("Children", values[0][0]);
+                dict.Add("IDs", values[1]);
+                dict.Add("Matrix", ExtensionMethods.GetSubArray(values, 2));
+                return dict;
+            }
+            private static Dictionary<string, object> ParseDurationMatrix(string[][] values)
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                dict.Add("Children", values[0][0]);
+                dict.Add("IDs", values[1]);
+                dict.Add("Matrix", ExtensionMethods.GetSubArray(values, 2));
+                return dict;
+            }
+
+            private static string[][] SplitString(string correlStringValue)
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                string[] lines = correlStringValue.Split('&');
+                string[][] values = new string[lines.Length][];
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    values[i] = lines[i].Split(',');
+                }
+                return values;
+            }
+
+            public static CorrelationString Construct(string correlStringValue)     //construct a variety of CorrelationStrings from the string
+            {
+                CorrelStringType csType = ParseCorrelType(correlStringValue);
+                string[][] values = SplitString(correlStringValue);
+                Dictionary<string, object> parameters = ParseStringValue(values, csType);
+                //parse string values
+                //return a dictionary
+                //use that to build the object
+                switch (csType)
+                {
+                    case CorrelStringType.PhasingTriple:
+                        PhasingTriple pt = new PhasingTriple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
+                        return new CorrelationString_Periods(pt.GetPhasingCorrelationMatrix(Convert.ToInt32(parameters["Periods"])));
+                    case CorrelStringType.PhasingMatrix:
+                        return new CorrelationString_Periods(correlStringValue);
+                    case CorrelStringType.InputsMatrix:
+                        throw new NotImplementedException();
+                    case CorrelStringType.DurationMatrix:
+                        throw new NotImplementedException();
+                    default:
+                        throw new Exception("Cannot construct CorrelationString");
+                }
+            }
+            #endregion
+
         }
     }
     

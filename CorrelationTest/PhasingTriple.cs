@@ -24,9 +24,9 @@ namespace CorrelationTest
                 throw new Exception("Invalid phasing correlation triple.");
             else
             {
-                this.TopLeft = (double)tripleValues[0,0];
-                this.DiagonalMultiplier = (double)tripleValues[0,1];
-                this.VerticalMultiplier = (double)tripleValues[0,2];
+                this.TopLeft = Convert.ToDouble(tripleValues[0,0]);
+                this.DiagonalMultiplier = Convert.ToDouble(tripleValues[0,1]);
+                this.VerticalMultiplier = Convert.ToDouble(tripleValues[0,2]);
             }
         }
 

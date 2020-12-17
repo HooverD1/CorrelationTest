@@ -113,5 +113,19 @@ namespace CorrelationTest
             }
             return xlSheet;
         }
+
+        public static object[,] GetSubArray(object[][] mainArray, int startIndex)
+        {
+            int maxWidth = (from object[] subArray in mainArray select subArray.Length).Max();
+            object[,] returnArray = new object[mainArray.GetLength(0) - startIndex + 1, maxWidth];
+            for(int row = startIndex; row < mainArray.GetLength(0); row++)
+            {
+                for(int col = 0; col < mainArray.GetLength(1); col++)
+                {
+                    returnArray[row - startIndex, col] = mainArray[row][col];
+                }
+            }
+            return returnArray;
+        }
     }
 }
