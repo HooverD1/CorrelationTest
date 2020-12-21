@@ -117,15 +117,22 @@ namespace CorrelationTest
         public static object[,] GetSubArray(object[][] mainArray, int startIndex)
         {
             int maxWidth = (from object[] subArray in mainArray select subArray.Length).Max();
-            object[,] returnArray = new object[mainArray.GetLength(0) - startIndex + 1, maxWidth];
+            object[,] returnArray = new object[mainArray.GetLength(0) - startIndex, maxWidth];
             for(int row = startIndex; row < mainArray.GetLength(0); row++)
             {
-                for(int col = 0; col < mainArray.GetLength(1); col++)
+                for(int col = 0; col < returnArray.GetLength(1); col++)
                 {
                     returnArray[row - startIndex, col] = mainArray[row][col];
                 }
             }
             return returnArray;
+        }
+
+        public static string CleanStringLinebreaks(string my_string)
+        {
+            my_string = my_string.Replace("\r\n", "&");  //simplify delimiter
+            my_string = my_string.Replace("\n", "&");  //simplify delimiter
+            return my_string;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace CorrelationTest
             switch (sheetType)
             {
                 case SheetType.WBS:
-                    returnEstimate = new Estimate(selection.EntireRow);
+                    returnEstimate = new Estimate(selection.EntireRow, null);
                     break;
                 case SheetType.Unknown:
                     throw new NotImplementedException();

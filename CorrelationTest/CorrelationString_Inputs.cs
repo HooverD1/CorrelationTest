@@ -74,8 +74,10 @@ namespace CorrelationTest
             private string CreateValue(Estimate parentEstimate)
             {
                 //Convert all the sub-estimates to a correlation string
-                StringBuilder sb = new StringBuilder();
                 int fields = parentEstimate.SubEstimates.Count;
+                StringBuilder sb = new StringBuilder();
+                sb.Append($"{fields},IM");
+                sb.AppendLine();
                 for(int sub = 0; sub < fields; sub++)
                 {
                     sb.Append(parentEstimate.SubEstimates[sub].uID);
@@ -134,7 +136,7 @@ namespace CorrelationTest
             public override UniqueID[] GetIDs()
             {
                 string[] correlLines = DelimitString();
-                string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
+                string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
                 UniqueID[] returnIDs = id_strings.Select(x => new UniqueID(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
                     return returnIDs;
@@ -225,7 +227,11 @@ namespace CorrelationTest
                 this.Value = sb.ToString();
             }
 
-
+            public override void PrintToSheet(Excel.Range xlCell)
+            {
+                xlCell.Value = this.Value;
+                xlCell.NumberFormat = "\"In Correl\";;;\"IN_CORREL\"";
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ namespace CorrelationTest
         public int Type_Offset { get; set; }
         public int Name_Offset { get; set; }
         public int InputCorrel_Offset { get; set; }
+        public int PhasingCorrel_Offset { get; set; }
         public int Distribution_Offset { get; set; }
         public int Dollar_Offset { get; set; }
 
@@ -38,8 +39,9 @@ namespace CorrelationTest
         private const int WBS_Type_Offset = 3;
         private const int WBS_Name_Offset = 4;
         private const int WBS_InputCorrel_Offset = 5;
-        private const int WBS_Distribution_Offset = 6;
-        private const int WBS_Dollar_Offset = 12;
+        private const int WBS_PhasingCorrel_Offset = 6;
+        private const int WBS_Distribution_Offset = 7;
+        private const int WBS_Dollar_Offset = 14;
 
         public DisplayCoords_WBS()
         {
@@ -60,7 +62,9 @@ namespace CorrelationTest
         private const int Est_Type_Offset = 3;
         private const int Est_Name_Offset = 4;
         private const int Est_InputCorrel_Offset = 5;
-        private const int Est_Distribution_Offset = 6;
+        private const int Est_PhasingCorrel_Offset = 6;
+        private const int Est_Distribution_Offset = 7;
+        private const int Est_Dollar_Offset = 14;
 
         public DisplayCoords_Estimate()
         {
@@ -69,7 +73,9 @@ namespace CorrelationTest
             this.Type_Offset = Est_Type_Offset;
             this.Name_Offset = Est_Name_Offset;
             this.InputCorrel_Offset = Est_InputCorrel_Offset;
+            this.PhasingCorrel_Offset = Est_PhasingCorrel_Offset;
             this.Distribution_Offset = Est_Distribution_Offset;
+            this.Dollar_Offset = Est_Dollar_Offset;
         }
     }
 }

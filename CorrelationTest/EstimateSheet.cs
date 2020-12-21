@@ -31,12 +31,12 @@ namespace CorrelationTest
             private void BuildCorrelations_Input()
             {
                 //Input correlation
-                int maxDepth = (from Estimate est in this.Estimates select est.Level).Max();
                 var correlTemp = BuildCorrelTemp(this.Estimates);
                 if (Estimates.Any())
                     Estimates[0].xlCorrelCell_Inputs.EntireColumn.Clear();
                 foreach (Estimate est in this.Estimates)
                 {
+                    est.LoadSubEstimates();
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
                 }
             }
@@ -47,10 +47,10 @@ namespace CorrelationTest
                 foreach (Estimate est in this.Estimates)
                 {
                     //Save the existing values
-                    if (est.xlCorrelCell_Periods != null)
-                    {
-                        est.xlCorrelCell_Periods.Clear();
-                    }
+                    //if (est.xlCorrelCell_Periods != null)
+                    //{
+                    //    est.xlCorrelCell_Periods.Clear();
+                    //}
 
                     PrintCorrel_Periods(est);
                 }
@@ -98,21 +98,15 @@ namespace CorrelationTest
             public override List<IEstimate> LoadEstimates()
             {
                 List<IEstimate> returnList = new List<IEstimate>();
-                Excel.Range lastCell = xlSheet.Cells[1000000, dc.Name_Offset].End[Excel.XlDirection.xlUp];
-                Excel.Range firstCell = xlSheet.Cells[2, dc.Name_Offset];
+                Excel.Range lastCell = xlSheet.Cells[1000000, dc.Type_Offset].End[Excel.XlDirection.xlUp];
+                Excel.Range firstCell = xlSheet.Cells[2, dc.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange.Address);
-                int maxDepth = Convert.ToInt32((from Excel.Range row in estRows select row.Cells[1, LevelColumn].value).Max());
-
-                for (int i = 1; i <= maxDepth; i++)
+                Excel.Range[] estRows = PullEstimates(pullRange, CostItem.E);
+                for (int index = 0; index < estRows.Count(); index++)
                 {
-                    Excel.Range[] topLevels = (from Excel.Range row in estRows where row.Cells[1, LevelColumn].value == i select row).ToArray<Excel.Range>();
-                    for (int index = 0; index < topLevels.Count(); index++)
-                    {
-                        Estimate parentEstimate = new Estimate(topLevels[index].EntireRow);
-                        parentEstimate.LoadSubEstimates();
-                        returnList.Add(parentEstimate);
-                    }
+                    Estimate parentEstimate = new Estimate(estRows[index].EntireRow, this);
+                    //parentEstimate.LoadSubEstimates();
+                    returnList.Add(parentEstimate);
                 }
                 return returnList;
             }
@@ -125,6 +119,15 @@ namespace CorrelationTest
             public override bool Validate()
             {
                 throw new NotImplementedException();
+            }
+
+            public override Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType)
+            {
+                Excel.Worksheet xlSheet = pullRange.Worksheet;
+                IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells
+                                                     where Convert.ToString(cell.Value) == costType.ToString()
+                                                     select cell;
+                return returnVal.ToArray<Excel.Range>();
             }
         }
     }

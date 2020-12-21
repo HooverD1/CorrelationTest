@@ -36,7 +36,7 @@ namespace CorrelationTest
         public string WBS_String { get; set; }
         public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
-        public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject = null)
+        public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject)
         {
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(itemRow.Worksheet));
             
@@ -45,6 +45,7 @@ namespace CorrelationTest
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
             this.xlCorrelCell_Inputs = itemRow.Cells[1, dispCoords.InputCorrel_Offset];
+            this.xlCorrelCell_Periods = itemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
             this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
@@ -89,7 +90,7 @@ namespace CorrelationTest
             double[] dollars = new double[10];
             for(int d = 0; d < dollars.Length; d++)
             {
-                dollars[d] = xlDollarCell.Offset[0, d].Value;
+                dollars[d] = xlDollarCell.Offset[0, d].Value ?? 0;
             }
             return dollars;
         }
@@ -107,13 +108,13 @@ namespace CorrelationTest
             Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row, dispCoords.Type_Offset];
             Excel.Range lastCell = xlSheet.Cells[1000000, dispCoords.Type_Offset].End[Excel.XlDirection.xlUp];
             Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-            Excel.Range[] estRows = PullEstimates(pullRange);
+            Excel.Range[] estRows = this.ContainingSheetObject.PullEstimates(pullRange, CostItem.I);
             for (int next = 1; next < estRows.Count(); next++)
             {
                 Estimate nextEstimate;
                 Estimate existingEstimate = null;
                 //search for sub-estimate
-                nextEstimate = new Estimate(estRows[next].EntireRow);      //build temp sub-estimate
+                nextEstimate = new Estimate(estRows[next].EntireRow, this.ContainingSheetObject);      //build temp sub-estimate
                 //if(ContainingSheetObject != null)
                 //    existingEstimate = (from Estimate est in Estimates where est.ID == nextEstimate.ID select est).First();
                 if (existingEstimate != null)
@@ -163,15 +164,6 @@ namespace CorrelationTest
             }
         }
 
-        private Excel.Range[] PullEstimates(Excel.Range pullRange)
-        {
-            Excel.Worksheet xlSheet = pullRange.Worksheet;
-            IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells
-                                                 where Convert.ToString(cell.Value) == "E"
-                                                 select cell;
-            return returnVal.ToArray<Excel.Range>();
-        }
-
         public UniqueID[] GetSubEstimateIDs()
         {
             UniqueID[] subIDs = new UniqueID[this.SubEstimates.Count];
@@ -184,7 +176,7 @@ namespace CorrelationTest
             return subIDs;
         }
 
-        private UniqueID CreateID()
+        public UniqueID CreateID()
         {
             return new UniqueID(this.xlRow.Worksheet.Name, this.Name);
         }

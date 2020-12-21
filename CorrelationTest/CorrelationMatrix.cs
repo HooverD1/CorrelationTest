@@ -69,11 +69,12 @@ namespace CorrelationTest
             }
 
             public CorrelationMatrix(UniqueID parent_uid, object[,] matrix)     //used for creating phasing correlation matrices
-            {
+            {       //THIS NEEDS TO SET UP FIELD DICT
                 this.Matrix = matrix;
+                this.FieldCount = Matrix.GetLength(0);
+                //validate parent_uid and matrix
                 PeriodID[] pids = PeriodID.GeneratePeriodIDs(parent_uid, FieldCount);
                 this.Fields = (from PeriodID pid in pids select pid.Name).ToArray<object>();
-                this.FieldCount = this.Fields.Count();
                 this.IsEven = Even(this.FieldCount);
                 this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
                 this.FieldDict = GetFieldDict(pids);

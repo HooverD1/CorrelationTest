@@ -20,17 +20,10 @@ namespace CorrelationTest
         public class CorrelationString
         {
             public string Value { get; set; }
-
-            public void PrintToSheet(Excel.Range xlCell)
-            {
-                xlCell.Value = this.Value;
-                xlCell.NumberFormat = "\"Correl\";;;\"CORREL\"";
-            }
-
             public virtual object[] GetFields() { return null; }
             public virtual UniqueID[] GetIDs() { return null; }
-            
 
+            public virtual void PrintToSheet(Excel.Range xlCell) { }
             protected CorrelationString() { }
 
             public CorrelationString(string[] fields)     //creates zero string
@@ -43,6 +36,8 @@ namespace CorrelationTest
             public string CreateValue_Zero(string[] fields, double defaultValue = 0) //create a zero correlstring from very generic params
             {
                 StringBuilder sb = new StringBuilder();
+                sb.Append($"{fields.Length},IM");
+                sb.AppendLine();
                 for (int i = 0; i < fields.Length; i++)
                 {
                     sb.Append(fields[i]);
@@ -73,17 +68,14 @@ namespace CorrelationTest
 
             protected string[] DelimitString()
             {
-                string correlString = this.Value.Replace("\r\n", "&");  //simplify delimiter
-                correlString = correlString.Replace("\n", "&");  //simplify delimiter
+                string correlString = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] correlLines = correlString.Split('&');         //split lines
                 return correlLines;
             }
 
             public object[,] GetMatrix()
             {       //returning 2,2 instead of 3,3
-                string myValue = this.Value.Replace("\r\n", "&");
-                myValue = myValue.Replace("\n", "&");
-                //myValue = myValue + "&";    //add a blank final row in for the sake of the array
+                string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] fieldString1 = myValue.Split('&');          //broken by line
                 string[] fieldString = new string[fieldString1.Length - 1];
                 for(int i = 1; i < fieldString1.Length; i++) { fieldString[i - 1] = fieldString1[i]; }
@@ -102,7 +94,13 @@ namespace CorrelationTest
                         if (col == row)
                             matrix[row, col] = 1;
                         else if (col > row)
-                            matrix[row, col] = Convert.ToDouble(values[(col - row) - 1]);
+                        {
+                            if(Double.TryParse(values[(col - row) - 1], out double conversion))
+                            {
+                                matrix[row, col] = conversion;
+                            }
+                        }
+                            
 
                         else  //col < row
                             matrix[row, col] = null;
@@ -145,7 +143,8 @@ namespace CorrelationTest
             #region CorrelString Factory
             private static CorrelStringType ParseCorrelType(string correlStringValue)
             {
-                string[] splitValues = correlStringValue.Split(',');
+                correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
+                string[] splitValues = correlStringValue.Split('&')[0].Split(',');
                 // # Periods | Type Char
                 string correlTypeStr = splitValues[1];
                 switch (correlTypeStr)
@@ -185,9 +184,9 @@ namespace CorrelationTest
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>();
                 dict.Add("Periods", values[0][0]);
-                dict.Add("Parent_ID", values[0][2]);
-                object[,] tripleArray = ExtensionMethods.GetSubArray(values, 2);
-                dict.Add("Triple", $"{values[1][0]},{values[1][1]},{values[1][2]}");
+                dict.Add("Parent_ID", values[1][0]);
+                //object[,] tripleArray = ExtensionMethods.GetSubArray(values, 2);
+                dict.Add("Triple", $"{values[2][0]},{values[2][1]},{values[2][2]}");
                 return dict;
             }
             private static Dictionary<string, object> ParsePhasingMatrix(string[][] values)
@@ -230,6 +229,7 @@ namespace CorrelationTest
             public static CorrelationString Construct(string correlStringValue)     //construct a variety of CorrelationStrings from the string
             {
                 CorrelStringType csType = ParseCorrelType(correlStringValue);
+                correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
                 string[][] values = SplitString(correlStringValue);
                 Dictionary<string, object> parameters = ParseStringValue(values, csType);
                 //parse string values
@@ -239,7 +239,7 @@ namespace CorrelationTest
                 {
                     case CorrelStringType.PhasingTriple:
                         PhasingTriple pt = new PhasingTriple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
-                        return new CorrelationString_Periods(pt.GetPhasingCorrelationMatrix(Convert.ToInt32(parameters["Periods"])));
+                        return pt.GetCorrelationString(Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
                     case CorrelStringType.PhasingMatrix:
                         return new CorrelationString_Periods(correlStringValue);
                     case CorrelStringType.InputsMatrix:
@@ -250,6 +250,7 @@ namespace CorrelationTest
                         throw new Exception("Cannot construct CorrelationString");
                 }
             }
+
             #endregion
 
         }

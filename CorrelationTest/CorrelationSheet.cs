@@ -131,7 +131,11 @@ namespace CorrelationTest
             }
             public override void PrintToSheet()  //expanding from string
             {
-                Estimate tempEst = new Estimate(this.LinkToOrigin.LinkSource.EntireRow);        //Load only this parent estimate
+                //build a sheet object off the linksource
+                var costSheet = CostSheetFactory.Construct(new Dictionary<string, object>() {
+                    { "SheetType", ExtensionMethods.GetSheetType(this.LinkToOrigin.LinkSource.Worksheet) },
+                    { "xlSheet", this.LinkToOrigin.LinkSource.Worksheet } });
+                Estimate tempEst = new Estimate(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
@@ -219,7 +223,7 @@ namespace CorrelationTest
                 if (correlSheet == null)
                     return;
                 //validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
-                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow).uID.ID == correlSheet.xlIDCell.Value)
+                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow, null).uID.ID == correlSheet.xlIDCell.Value)
                 {
                     correlSheet.CorrelString.PrintToSheet(correlSheet.LinkToOrigin.LinkSource);
                     if (!correlSheet.CorrelMatrix.CheckForPSD())
@@ -235,7 +239,7 @@ namespace CorrelationTest
                 else
                     MessageBox.Show("ID not found");
 
-                correlSheet.LinkToOrigin.LinkSource.Activate();
+                correlSheet.LinkToOrigin.LinkSource.Worksheet.Activate();
             }
 
             private object[,] GetDistributionParamStrings()

@@ -39,6 +39,17 @@ namespace CorrelationTest
                 this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix()); 
             }
 
+            public CorrelationString_Periods(PhasingTriple pt, int periods, string parent_id)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append($"{periods},PT");
+                sb.AppendLine();
+                sb.Append(parent_id);
+                sb.AppendLine();
+                sb.Append(pt.ToString());
+                this.Value = sb.ToString();
+            }
+
             public static Data.CorrelationString_Periods ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
                 Data.CorrelationString_Periods correlationString = (CorrelationString_Periods)CreateZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
@@ -76,14 +87,14 @@ namespace CorrelationTest
             public override UniqueID GetParentID()
             {
                 string[] lines = this.Value.Split('&');
-                string[] header = lines[0].Split(',');
+                string[] header = lines[1].Split(',');
                 return new UniqueID(header[3]);
             }
 
             public override UniqueID[] GetIDs()
             {
                 string[] correlLines = DelimitString();
-                string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
+                string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
                 UniqueID[] returnIDs = id_strings.Select(x => new UniqueID(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
                     return returnIDs;
@@ -99,6 +110,12 @@ namespace CorrelationTest
                 Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, xlSource, new Data.CorrelSheetSpecs());
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
+            }
+
+            public override void PrintToSheet(Excel.Range xlCell)
+            {
+                xlCell.Value = this.Value;
+                xlCell.NumberFormat = "\"Ph Correl\";;;\"PH_CORREL\"";
             }
 
         }

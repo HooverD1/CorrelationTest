@@ -19,6 +19,7 @@ namespace CorrelationTest
         
         public PhasingTriple(string uidString, string triple)
         {
+            this.uID = new UniqueID(uidString);
             object[,] tripleValues = SplitTriple(triple);
             if (!ValidateTriple(tripleValues))
                 throw new Exception("Invalid phasing correlation triple.");
@@ -69,6 +70,16 @@ namespace CorrelationTest
             return true;
         }
 
+        public override string ToString()
+        {
+            return $"{TopLeft},{DiagonalMultiplier},{VerticalMultiplier}";
+        }
+
+        public Data.CorrelationString_Periods GetCorrelationString(int periods, string parent_uid)
+        {
+            return new Data.CorrelationString_Periods(this, periods, parent_uid);
+        }
+
         public Data.CorrelationMatrix GetPhasingCorrelationMatrix(int periods)
         {
             if (CorrelMatrix == null)
@@ -80,7 +91,7 @@ namespace CorrelationTest
                     {
                         if (row == col)
                             matrix[row, col] = 1;
-                        else if (col == row + 1)
+                        else
                             matrix[row, col] = TopLeft * Math.Pow(DiagonalMultiplier, col - 1) * Math.Pow(VerticalMultiplier, col - row - 1);
                     }
                 }

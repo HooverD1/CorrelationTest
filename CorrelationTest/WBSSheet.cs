@@ -35,7 +35,7 @@ namespace CorrelationTest
                     Excel.Range[] topLevels = (from Excel.Range row in estRows where row.Cells[1, LevelColumn].value == i select row).ToArray<Excel.Range>();
                     for (int index = 0; index < topLevels.Count(); index++)
                     {
-                        Estimate parentEstimate = new Estimate(topLevels[index].EntireRow);
+                        Estimate parentEstimate = new Estimate(topLevels[index].EntireRow, this);
                         parentEstimate.LoadSubEstimates();
                         returnList.Add(parentEstimate);
                     }
@@ -164,7 +164,16 @@ namespace CorrelationTest
                  */
                 PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
                 //Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Periods.ConstructString(periodIDs, this.xlSheet.Name, inputTemp);
-            }            
+            }
+
+            public override Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType)
+            {
+                Excel.Worksheet xlSheet = pullRange.Worksheet;
+                IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells
+                                                     where Convert.ToString(cell.Value) == costType.ToString()
+                                                     select cell;
+                return returnVal.ToArray<Excel.Range>();
+            }
         }
     }
 }

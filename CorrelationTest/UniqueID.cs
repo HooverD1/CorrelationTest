@@ -7,14 +7,14 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class UniqueID
+    public class UniqueID       //UniqueID form: SheetType | Name | CreatedDateTime
     {
         private const int SheetType_Placement = 0;
-        public string SheetType { get; }
+        public string SheetType { get; set; }
         private const int Name_Placement = 1;
-        public string Name { get; }
+        public string Name { get; set; }
         private const int Created_Placement = 2; 
-        public string Created { get; }
+        public string Created { get; set; }
         protected const char Delimiter = '|';
         protected const char Delimiter2 = '.';
         public string ID { get; set; }
@@ -66,6 +66,13 @@ namespace CorrelationTest
             xlUniqueID.Value = this.ID;
         }
 
+        public void RefreshID()
+        {
+            this.ID = CreateID(new Dictionary<string, string>() { { "SheetType", this.SheetType },
+                                                                  { "Name", this.Name },
+                                                                  { "Created", this.Created } });
+        }
+
         private string CreateID(Dictionary<string, string> ParamDict)
         {
             StringBuilder sb = new StringBuilder();
@@ -113,6 +120,21 @@ namespace CorrelationTest
         {
             var returnval = $"{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm")}";
             return returnval;
+        }
+
+        public static bool Validate(string uidString)
+        {
+            try
+            {
+                string[] uidValues = uidString.Split('|');
+                if (uidValues.Length != 3)
+                    return false;
+                return true;
+            }
+            catch(Exception)
+            {
+                return false;
+            }
         }
 
         //public static void AutoFixUniqueIDs(List<IEstimate> Estimates)

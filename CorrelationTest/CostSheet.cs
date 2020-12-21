@@ -4,9 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
+    public enum CostItem
+    {
+        I,
+        E,
+        W,
+        T
+    }
+
     public abstract class CostSheet : Sheet, ICostSheet
     {
         protected DialogResult OverwriteRepeatedIDs { get; set; }
@@ -55,8 +64,13 @@ namespace CorrelationTest
              * This should take a list of all estimates, recently built, cycle them, and call their print method to print correl strings (List<Estimate>)
              * The saved values should already be loaded into the estimates
              */
-            PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
-            //Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Periods.ConstructString(periodIDs, this.xlSheet.Name, inputTemp);
+            //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
+            //Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Periods.ConstructString(periodIDs, this.xlSheet.Name);
+            Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString.Construct(estimate.xlCorrelCell_Periods.Value);
+            correlationString_periods.PrintToSheet(estimate.xlCorrelCell_Periods);
         }
+
+        public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType) { return null; }
+
     }
 }
