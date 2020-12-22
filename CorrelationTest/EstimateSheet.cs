@@ -36,7 +36,7 @@ namespace CorrelationTest
                     Estimates[0].xlCorrelCell_Inputs.EntireColumn.Clear();
                 foreach (Estimate est in this.Estimates)
                 {
-                    est.LoadSubEstimates();
+                    est.LoadSubEstimates();     //this is returning too many subestimates       DAVID
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
                 }
             }

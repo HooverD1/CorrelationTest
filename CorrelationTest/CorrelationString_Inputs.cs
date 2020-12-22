@@ -100,6 +100,34 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
+            protected override string CreateValue(UniqueID[] ids, object[,] correlArray)
+            {
+                correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
+                StringBuilder sb = new StringBuilder();
+                sb.Append($"{ids.Length},IM");
+                sb.AppendLine();
+                for (int field = 0; field < correlArray.GetLength(1); field++)
+                {
+                    //Add fields
+                    sb.Append(ids[field].ID);
+                    if (field < correlArray.GetLength(1) - 1)
+                        sb.Append(",");
+                }
+                sb.AppendLine();
+                for (int row = 0; row < correlArray.GetLength(0); row++)
+                {
+                    for (int col = row + 1; col < correlArray.GetLength(1); col++)
+                    {
+                        sb.Append(correlArray[row, col]);
+                        if (col < correlArray.GetLength(1) - 1)
+                            sb.Append(",");
+                    }
+                    if (row < correlArray.GetLength(0) - 2)
+                        sb.AppendLine();
+                }
+                return sb.ToString();
+            }
+
             public string CreateArray(string correlString)
             {
                 throw new NotImplementedException();
@@ -111,20 +139,6 @@ namespace CorrelationTest
                 return (from UniqueID uid in ids select uid.Name).ToArray<object>();
             }
 
-            public bool ValidateAgainstMatrix(object[] outsideFields)
-            {
-                var localFields = this.GetFields();
-                if(localFields.Count() != outsideFields.Count())
-                {
-                    return false;
-                }
-                foreach(object field in localFields)
-                {
-                    if (!outsideFields.Contains<object>(field))
-                        return false;
-                }
-                return true;
-            }
             public static bool Validate(Excel.Range correlCell)      //validate that it is in fact a correlString
             {
                 if (correlCell.NumberFormat == "\"Correl\";;;\"CORREL\"")
@@ -188,6 +202,16 @@ namespace CorrelationTest
                 }
             }
 
+            public override void Expand(Excel.Range xlSource)
+            {
+                Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(this.Value);
+                var id = this.GetIDs()[0];
+                //construct the correlSheet
+                Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, xlSource, new Data.CorrelSheetSpecs());
+                //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
+                correlSheet.PrintToSheet();
+            }
+
             public static void ExpandCorrel(Excel.Range selection)
             {
                 //Verify that it's a correl string
@@ -231,6 +255,7 @@ namespace CorrelationTest
             {
                 xlCell.Value = this.Value;
                 xlCell.NumberFormat = "\"In Correl\";;;\"IN_CORREL\"";
+                xlCell.EntireColumn.ColumnWidth = 10;
             }
         }
     }

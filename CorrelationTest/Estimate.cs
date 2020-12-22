@@ -100,41 +100,66 @@ namespace CorrelationTest
             return this.uID.Equals(estimate.uID) ? true : false;
         }
 
-        public void LoadSubEstimates()      //Returns a list of sub-estimates for this estimate
+        public void LoadSubEstimates()
+        {
+            this.SubEstimates = GetSubEstimates();
+        }
+
+        public List<Estimate> GetSubEstimates()     //Attach this to the sheet? Check sheet type?
         {
             Excel.Worksheet xlSheet = this.xlRow.Worksheet;
-            List<Estimate> returnList = new List<Estimate>();
-
-            Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row, dispCoords.Type_Offset];
-            Excel.Range lastCell = xlSheet.Cells[1000000, dispCoords.Type_Offset].End[Excel.XlDirection.xlUp];
-            Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-            Excel.Range[] estRows = this.ContainingSheetObject.PullEstimates(pullRange, CostItem.I);
-            for (int next = 1; next < estRows.Count(); next++)
+            SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
+            CostItem ci;
+            switch (sheetType)
             {
-                Estimate nextEstimate;
-                Estimate existingEstimate = null;
+                case SheetType.Estimate:
+                    ci = CostItem.I;
+                    break;
+                case SheetType.WBS:
+                    ci = CostItem.E;
+                    break;
+                default:
+                    throw new Exception("Unexpected sheet type");
+            }
+            List<Estimate> subestimates = new List<Estimate>();
+
+            Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row+1, dispCoords.Type_Offset];
+            //iterate until you find <= level
+            Excel.Range lastCell = firstCell.Offset[1,0];
+            int offset = 0;
+            while(true)
+            {
+                offset++;
+                if (firstCell.Offset[offset, 0].Value != ci.ToString())
+                    break;
+                else
+                    lastCell = firstCell.Offset[offset, 0];
+            }
+            Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
+            Excel.Range[] estRows = this.ContainingSheetObject.PullEstimates(pullRange, ci);
+            for (int next = 0; next < estRows.Count(); next++)
+            {
                 //search for sub-estimate
-                nextEstimate = new Estimate(estRows[next].EntireRow, this.ContainingSheetObject);      //build temp sub-estimate
-                //if(ContainingSheetObject != null)
-                //    existingEstimate = (from Estimate est in Estimates where est.ID == nextEstimate.ID select est).First();
-                if (existingEstimate != null)
-                    nextEstimate = existingEstimate;        //If you find a matching ID, use that instead of keeping the temp
+                Estimate nextEstimate = new Estimate(estRows[next].EntireRow, this.ContainingSheetObject);      //build temp sub-estimate
                 if (nextEstimate.Level - 1 == this.Level)
                 {
                     //sub-estimate
-                    this.SubEstimates.Add(nextEstimate);
+                    subestimates.Add(nextEstimate);
                     nextEstimate.ParentEstimate = this;
                 }
                 else if (nextEstimate.Level <= this.Level)
                 {
                     LoadCorrelatedValues();
-                    return;
+                    return subestimates;
                 }
             }
             LoadCorrelatedValues();
+            return subestimates;
         }
+        
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
+            this.Siblings = new List<Estimate>();
             Estimate parentEstimate = this.ParentEstimate;
             if (parentEstimate == null) { return; }
             if (parentEstimate.ParentEstimate == null) { return; }

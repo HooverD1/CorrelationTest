@@ -47,9 +47,12 @@ namespace CorrelationTest
              */
             if (estimate.SubEstimates.Count >= 2)
             {
-
+                //DAVID
+                //This has too many subestimates
                 UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
                 //check if any of the subestimates have NonZeroCorrel entries
+                
+                //This is sending in too many IDs
                 Data.CorrelationString_Inputs correlationString_inputs = Data.CorrelationString_Inputs.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
                 correlationString_inputs.PrintToSheet(estimate.xlCorrelCell_Inputs);
             }

@@ -77,8 +77,8 @@ namespace CorrelationTest
             {       //returning 2,2 instead of 3,3
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] fieldString1 = myValue.Split('&');          //broken by line
-                string[] fieldString = new string[fieldString1.Length - 1];
-                for(int i = 1; i < fieldString1.Length; i++) { fieldString[i - 1] = fieldString1[i]; }
+                string[] fieldString = new string[fieldString1.Length - 2];
+                for(int i = 2; i < fieldString1.Length; i++) { fieldString[i - 2] = fieldString1[i]; }  //dump the header and fields
                 object[,] matrix = new object[fieldString.Length+1, fieldString.Length+1];
 
                 for (int row = 0; row < fieldString.Length+1; row++)
@@ -109,37 +109,56 @@ namespace CorrelationTest
                 return matrix;
             }
 
+            public virtual bool ValidateAgainstMatrix(object[] outsideFields)
+            {
+                var localFields = this.GetFields();
+                if (localFields.Count() != outsideFields.Count())
+                {
+                    return false;
+                }
+                foreach (object field in localFields)
+                {
+                    if (!outsideFields.Contains<object>(field))
+                        return false;
+                }
+                return true;
+            }
+
             protected virtual string CreateValue(UniqueID[] ids, object[,] correlArray)
             {
-                correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
-                StringBuilder sb = new StringBuilder();
+                return null;
 
-                for (int field = 0; field < correlArray.GetLength(1); field++)
-                {
-                    //Add fields
-                    sb.Append(ids[field].ID);
-                    if (field < correlArray.GetLength(1) - 1)
-                        sb.Append(",");
-                }
-                sb.AppendLine();
-                for (int row = 0; row < correlArray.GetLength(0); row++)
-                {
-                    for (int col = row + 1; col < correlArray.GetLength(1); col++)
-                    {
-                        sb.Append(correlArray[row, col]);
-                        if (col < correlArray.GetLength(1) - 1)
-                            sb.Append(",");
-                    }
-                    if (row < correlArray.GetLength(0) - 2)
-                        sb.AppendLine();
-                }
-                return sb.ToString();
+                //correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
+                //StringBuilder sb = new StringBuilder();
+                //sb.AppendLine();
+                //sb.Append($"{ids.Length},");
+                //sb.AppendLine();
+                //for (int field = 0; field < correlArray.GetLength(1); field++)
+                //{
+                //    //Add fields
+                //    sb.Append(ids[field].ID);
+                //    if (field < correlArray.GetLength(1) - 1)
+                //        sb.Append(",");
+                //}
+                //sb.AppendLine();
+                //for (int row = 0; row < correlArray.GetLength(0); row++)
+                //{
+                //    for (int col = row + 1; col < correlArray.GetLength(1); col++)
+                //    {
+                //        sb.Append(correlArray[row, col]);
+                //        if (col < correlArray.GetLength(1) - 1)
+                //            sb.Append(",");
+                //    }
+                //    if (row < correlArray.GetLength(0) - 2)
+                //        sb.AppendLine();
+                //}
+                //return sb.ToString();
             }
 
             public virtual UniqueID GetParentID() { return null; }
 
             public virtual void Expand(Excel.Range xlSource) { }
-
+            
             #region CorrelString Factory
             private static CorrelStringType ParseCorrelType(string correlStringValue)
             {
@@ -243,7 +262,7 @@ namespace CorrelationTest
                     case CorrelStringType.PhasingMatrix:
                         return new CorrelationString_Periods(correlStringValue);
                     case CorrelStringType.InputsMatrix:
-                        throw new NotImplementedException();
+                        return new CorrelationString_Inputs(correlStringValue);
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();
                     default:

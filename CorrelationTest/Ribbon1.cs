@@ -17,21 +17,7 @@ namespace CorrelationTest
 
         private void BuildCorrelation_Click(object sender, RibbonControlEventArgs e)
         {
-            //build all default correlations if they don't exist
-            Excel.Worksheet xlSheet = ThisAddIn.MyApp.ActiveSheet;
-            SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-            if(sheetType == SheetType.WBS)
-            {
-                Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "SheetType", sheetType }, { "xlSheet", xlSheet } };
-                ICostSheet wbs_sheet = CostSheetFactory.Construct(sheetData);       
-                wbs_sheet.BuildCorrelations();
-            }
-            else if(sheetType == SheetType.Estimate)
-            {
-                Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "SheetType", sheetType }, { "xlSheet", xlSheet } };
-                ICostSheet est_sheet = CostSheetFactory.Construct(sheetData);
-                est_sheet.BuildCorrelations();
-            }            
+          
         }
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -204,6 +190,22 @@ namespace CorrelationTest
             foreach(IEstimate est in estimates)
             {
                 est.xlCorrelCell_Periods.Value = $"8,PT&E|{est.uID.Name}|{est.uID.Created}&.75,.8,.6";
+            }
+
+            //build all default correlations if they don't exist
+            Excel.Worksheet xlSheet = ThisAddIn.MyApp.ActiveSheet;
+            SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
+            if (sheetType == SheetType.WBS)
+            {
+                Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "SheetType", sheetType }, { "xlSheet", xlSheet } };
+                ICostSheet wbs_sheet = CostSheetFactory.Construct(sheetData);
+                wbs_sheet.BuildCorrelations();
+            }
+            else if (sheetType == SheetType.Estimate)
+            {
+                Dictionary<string, object> sheetData = new Dictionary<string, object>() { { "SheetType", sheetType }, { "xlSheet", xlSheet } };
+                ICostSheet est_sheet = CostSheetFactory.Construct(sheetData);
+                est_sheet.BuildCorrelations();
             }
         }
 

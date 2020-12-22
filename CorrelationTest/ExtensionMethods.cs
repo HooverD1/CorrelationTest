@@ -116,11 +116,11 @@ namespace CorrelationTest
 
         public static object[,] GetSubArray(object[][] mainArray, int startIndex)
         {
-            int maxWidth = (from object[] subArray in mainArray select subArray.Length).Max();
-            object[,] returnArray = new object[mainArray.GetLength(0) - startIndex, maxWidth];
+            int matrixSize = mainArray[1].GetLength(0);
+            object[,] returnArray = new object[matrixSize, matrixSize];
             for(int row = startIndex; row < mainArray.GetLength(0); row++)
             {
-                for(int col = 0; col < returnArray.GetLength(1); col++)
+                for(int col = 0; col < mainArray[row].Length; col++)
                 {
                     returnArray[row - startIndex, col] = mainArray[row][col];
                 }
