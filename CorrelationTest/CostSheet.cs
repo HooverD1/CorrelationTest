@@ -69,8 +69,8 @@ namespace CorrelationTest
              */
             //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
             //Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Periods.ConstructString(periodIDs, this.xlSheet.Name);
-            Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString.Construct(estimate.xlCorrelCell_Periods.Value);
-            correlationString_periods.PrintToSheet(estimate.xlCorrelCell_Periods);
+            Data.CorrelationString correlationString = Data.CorrelationString.Construct(estimate.xlCorrelCell_Periods.Value);
+            correlationString.PrintToSheet(estimate.xlCorrelCell_Periods);
         }
 
         public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType) { return null; }

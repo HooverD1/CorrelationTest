@@ -186,6 +186,7 @@
     <Compile Include="CorrelationString_Inputs.cs" />
     <Compile Include="CorrelationString.cs" />
     <Compile Include="CorrelationString_Periods.cs" />
+    <Compile Include="CorrelationString_Triple.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
     <Compile Include="CostSheet.cs" />
     <Compile Include="DisplayCoords.cs" />

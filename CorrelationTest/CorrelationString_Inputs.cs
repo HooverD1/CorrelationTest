@@ -17,11 +17,11 @@ namespace CorrelationTest
 
             public CorrelationString_Inputs(string correlString)
             {
-                this.Value = correlString;
+                this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
             public CorrelationString_Inputs(object[,] correlArray, UniqueID[] ids)
             {
-                this.Value = CreateValue(ids, correlArray);               
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(ids, correlArray));               
             }
 
             private CorrelationString_Inputs(UniqueID[] ids, string sheet)     //create 0 string (independence)
@@ -36,12 +36,12 @@ namespace CorrelationTest
                         correlArray[row, col] = 0;
                     }
                 }
-                this.Value = CreateValue(ids, correlArray);
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(ids, correlArray));
             }
 
             public CorrelationString_Inputs(Data.CorrelationMatrix matrix)
             {
-                this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix());
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(matrix.GetIDs(), matrix.GetMatrix()));
             }
 
             //private object[] BuildIDsFromFields(object[] fields, string sheet)

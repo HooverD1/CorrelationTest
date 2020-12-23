@@ -28,7 +28,7 @@ namespace CorrelationTest
 
             public CorrelationString(string[] fields)     //creates zero string
             {
-                this.Value = CreateValue_Zero(fields);
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields));
             }
 
 
@@ -68,12 +68,12 @@ namespace CorrelationTest
 
             protected string[] DelimitString()
             {
-                string correlString = ExtensionMethods.CleanStringLinebreaks(this.Value);
+                string correlString = this.Value;
                 string[] correlLines = correlString.Split('&');         //split lines
                 return correlLines;
             }
 
-            public object[,] GetMatrix()
+            public virtual object[,] GetMatrix()
             {       //returning 2,2 instead of 3,3
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] fieldString1 = myValue.Split('&');          //broken by line
@@ -109,6 +109,12 @@ namespace CorrelationTest
                 return matrix;
             }
 
+            public virtual string GetCorrelType()
+            {
+                string[] lines = DelimitString();
+                return lines[0].Split(',')[1];
+            }
+
             public virtual bool ValidateAgainstMatrix(object[] outsideFields)
             {
                 var localFields = this.GetFields();
@@ -122,6 +128,12 @@ namespace CorrelationTest
                         return false;
                 }
                 return true;
+            }
+
+            public int GetNumberOfPeriods()
+            {
+                string[] lines = DelimitString();
+                return Convert.ToInt32(lines[0].Split(',')[0]);
             }
 
             protected virtual string CreateValue(UniqueID[] ids, object[,] correlArray)
@@ -258,7 +270,7 @@ namespace CorrelationTest
                 {
                     case CorrelStringType.PhasingTriple:
                         PhasingTriple pt = new PhasingTriple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
-                        return pt.GetCorrelationString(Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
+                        return new Data.CorrelationString_Triple(pt, Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
                     case CorrelStringType.PhasingMatrix:
                         return new CorrelationString_Periods(correlStringValue);
                     case CorrelStringType.InputsMatrix:

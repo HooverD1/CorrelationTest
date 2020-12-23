@@ -19,12 +19,12 @@ namespace CorrelationTest
                 {
                     fields[t - 1] = $"T{t}";
                 }
-                this.Value = CreateValue_Zero(fields, defaultCorrel);
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields, defaultCorrel));
             }
 
             public CorrelationString_Periods(string correlString)
             {
-                this.Value = correlString;
+                this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
 
             public static CorrelationString_Periods CreateZeroString(string[] fields)
@@ -36,18 +36,7 @@ namespace CorrelationTest
 
             public CorrelationString_Periods(Data.CorrelationMatrix matrix)
             {
-                this.Value = CreateValue(matrix.GetIDs(), matrix.GetMatrix()); 
-            }
-
-            public CorrelationString_Periods(PhasingTriple pt, int periods, string parent_id)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{periods},PT");
-                sb.AppendLine();
-                sb.Append(parent_id);
-                sb.AppendLine();
-                sb.Append(pt.ToString());
-                this.Value = sb.ToString();
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(matrix.GetIDs(), matrix.GetMatrix())); 
             }
 
             public static Data.CorrelationString_Periods ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
@@ -104,10 +93,9 @@ namespace CorrelationTest
 
             public override void Expand(Excel.Range xlSource)
             {
-                Data.CorrelationString_Periods correlStringObj = new Data.CorrelationString_Periods(this.Value);
                 var id = this.GetIDs()[0];
                 //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, xlSource, new Data.CorrelSheetSpecs());
+                Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(this, xlSource, new Data.CorrelSheetSpecs());
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
             }

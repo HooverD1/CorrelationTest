@@ -75,11 +75,6 @@ namespace CorrelationTest
             return $"{TopLeft},{DiagonalMultiplier},{VerticalMultiplier}";
         }
 
-        public Data.CorrelationString_Periods GetCorrelationString(int periods, string parent_uid)
-        {
-            return new Data.CorrelationString_Periods(this, periods, parent_uid);
-        }
-
         public Data.CorrelationMatrix GetPhasingCorrelationMatrix(int periods)
         {
             if (CorrelMatrix == null)

@@ -22,7 +22,7 @@ namespace CorrelationTest
             public Dictionary<UniqueID, int> FieldDict { get; set; }
             private object[,] PartialArray { get; set; }
             private object[,] SecondaryArray { get; set; }
-            private object[,] Matrix { get; set; }
+            public object[,] Matrix { get; set; }
             private double[,] DoubleMatrix { get; set; }
             private int Midpoint { get; set; }
             private bool IsEven { get; set; }
@@ -58,6 +58,17 @@ namespace CorrelationTest
             }
 
             public CorrelationMatrix(Data.CorrelationString_Periods correlStringObj)
+            {
+                //expand from string
+                this.Fields = correlStringObj.GetFields();
+                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                this.FieldCount = this.Fields.Count();
+                this.IsEven = Even(this.FieldCount);
+                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
+                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            }
+
+            public CorrelationMatrix(Data.CorrelationString_Triple correlStringObj)
             {
                 //expand from string
                 this.Fields = correlStringObj.GetFields();

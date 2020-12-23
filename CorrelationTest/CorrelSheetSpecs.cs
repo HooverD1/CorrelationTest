@@ -16,16 +16,20 @@ namespace CorrelationTest
             public Tuple<int, int> LinkCoords { get; }
             public Tuple<int, int> IdCoords { get; }
             public Tuple<int, int> DistributionCoords { get; }
+            public Tuple<int, int> CorrelTypeCoords { get; }
+            public Tuple<int, int> CorrelStringCoords { get; }
 
             public string LinkFormat { get; }
 
-            public CorrelSheetSpecs(int matrixRow = 4, int matrixCol = 5, int linkRow = 3, int linkCol = 1, string linkFormat = "\"Correl\";;;\"CORREL\"", int idRow=4, int idCol=1, int distRow=5, int distCol=1)
+            public CorrelSheetSpecs(int matrixRow = 4, int matrixCol = 5, int linkRow = 3, int linkCol = 1, string linkFormat = "\"Correl\";;;\"CORREL\"", int idRow = 4, int idCol = 1, int distRow = 5, int distCol = 1, int typeRow = 4, int typeCol = 2, int stringRow = 3, int stringCol = 2)
             {
                 this.MatrixCoords = new Tuple<int, int>(matrixRow, matrixCol);
                 this.LinkCoords = new Tuple<int, int>(linkRow, linkCol);
                 this.LinkFormat = linkFormat;
                 this.IdCoords = new Tuple<int, int>(idRow, idCol);
                 this.DistributionCoords = new Tuple<int, int>(distRow, distCol);
+                this.CorrelTypeCoords = new Tuple<int, int>(typeRow, typeCol);
+                this.CorrelStringCoords = new Tuple<int, int>(stringRow, stringCol);
             }
 
             public void PrintLinkCoords(Excel.Worksheet xlSheet)
