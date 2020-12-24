@@ -22,11 +22,18 @@ namespace CorrelationTest
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
-            SendKeys.Send("{ESC}");
-            //Need correlation string to expand depending on the value in Selection
-            Excel.Range selection = ThisAddIn.MyApp.Selection;
-            Data.CorrelationString cs = Data.CorrelationString.Construct(selection.Value);
-            cs.Expand(selection);
+            try
+            {
+                SendKeys.Send("{ESC}");
+                //Need correlation string to expand depending on the value in Selection
+                Excel.Range selection = ThisAddIn.MyApp.Selection;
+                Data.CorrelationString cs = Data.CorrelationString.Construct(Convert.ToString(selection.Value));
+                cs.Expand(selection);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)

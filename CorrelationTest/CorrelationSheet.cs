@@ -158,8 +158,6 @@ namespace CorrelationTest
                     default:
                         throw new Exception("GetCorrelType() error");
                 }
-                
-                
             }
 
             private Excel.Worksheet CreateXLCorrelSheet()
@@ -374,6 +372,23 @@ namespace CorrelationTest
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
                 CorrelVisual.Show();
             }
+
+            public static CorrelationSheet Construct(Data.CorrelationString correlString)       //CorrelationSheet dynamic creator
+            {
+                if(correlString is Data.CorrelationString_Inputs)
+                {
+                    return new CorrelationSheet_Inputs();
+                }
+                else if(correlString is Data.CorrelationString_Periods || correlString is Data.CorrelationString_Triple)
+                {
+                    return new CorrelationSheet_Phasing();
+                }
+                else
+                {
+                    throw new Exception("Unknown correlation string type.");
+                }
+            }
+
         }
     }
 }

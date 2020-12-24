@@ -257,8 +257,28 @@ namespace CorrelationTest
                 return values;
             }
 
+            public static bool Validate(string correlString)
+            {
+                string[][] ss = SplitString(correlString);
+                if (ss.GetLength(0) < 3)        //header, field, and at least one value row
+                    return false;
+                if (ss[0].Length != 2)          //header has two components
+                    return false;
+                foreach(string s in ss[2])      //values can all be resolved to doubles
+                {
+                    bool pass = false;
+                    pass = double.TryParse(s, out double result);
+                    if (!pass)
+                        return false;
+                }
+                return true;
+            }
+
             public static CorrelationString Construct(string correlStringValue)     //construct a variety of CorrelationStrings from the string
             {
+                //validate that it is a valid correlation string
+                if (!Validate(correlStringValue))
+                    throw new Exception("Invalid correlation string.");
                 CorrelStringType csType = ParseCorrelType(correlStringValue);
                 correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
                 string[][] values = SplitString(correlStringValue);
