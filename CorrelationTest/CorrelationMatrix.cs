@@ -291,14 +291,13 @@ namespace CorrelationTest
             {
                 if (cm.Matrix.GetLength(0) != this.Matrix.GetLength(0) || cm.Matrix.GetLength(1) != this.Matrix.GetLength(1))
                     return false;
-                for(int zero = 0; zero < this.Matrix.GetLength(0); zero++)
+                for(int row = 0; row < this.Matrix.GetLength(0); row++)
                 {
-                    for(int one = 0; one < this.Matrix.GetLength(1); one++)
+                    for(int col = row; col < this.Matrix.GetLength(1); col++)
                     {
-                        double internalVal, externalVal;
-                        if (!Double.TryParse(this.Matrix[zero, one].ToString(), out internalVal))
+                        if (!Double.TryParse(this.Matrix[row, col].ToString(), out double internalVal))
                             throw new Exception("Invalid matrix value");
-                        if (!Double.TryParse(cm.Matrix[zero, one].ToString(), out externalVal))
+                        if (!Double.TryParse(cm.Matrix[row, col].ToString(), out double externalVal))
                             throw new Exception("Invalid matrix value");
                         if (internalVal != externalVal)
                             return false;

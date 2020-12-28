@@ -63,7 +63,7 @@ namespace CorrelationTest
 
             public CorrelationSheet_Phasing(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
             {
-                this.xlSheet = GetXlSheet(false);
+                this.xlSheet = GetXlSheet();
                 this.Specs = specs;
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
@@ -73,8 +73,10 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 //
                 //Build the CorrelMatrix
-                Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1,0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
-                this.CorrelMatrix = new Data.CorrelationMatrix(this, xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange);
+                int fields = Convert.ToInt32(Convert.ToString(xlCorrelStringCell.Value).Split(',')[0]);
+                Excel.Range fieldRange = xlMatrixCell.Resize[1, fields];
+                Excel.Range matrixRange = xlMatrixCell.Offset[1, 0].Resize[fields, fields];
+                this.CorrelMatrix = new Data.CorrelationMatrix(this, fieldRange, matrixRange);
                 //Build the CorrelString, which can print itself during collapse
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 if (sheetType == SheetType.Correlation_PM)
@@ -99,6 +101,20 @@ namespace CorrelationTest
                 {
                     throw new Exception("Invalid sheet type.");
                 }
+            }
+
+            protected Excel.Worksheet GetXlSheet() { return GetXlSheet(false); }
+
+            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
+            {
+                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_PM" || sheet.Cells[1, 1].value == "$CORRELATION_PT"
+                                     select sheet;
+                if (xlCorrelSheets.Any())
+                    xlSheet = xlCorrelSheets.First();
+                else
+                    throw new Exception("No correlation sheet found.");
+                return xlSheet;
             }
 
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
