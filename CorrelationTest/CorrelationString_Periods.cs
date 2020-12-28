@@ -95,7 +95,7 @@ namespace CorrelationTest
             {
                 var id = this.GetIDs()[0];
                 //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(this, xlSource, new Data.CorrelSheetSpecs());
+                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_PM));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
             }

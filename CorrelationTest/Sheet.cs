@@ -12,7 +12,10 @@ namespace CorrelationTest
     {
         WBS,
         Estimate,
-        Correlation,
+        Correlation_PM,
+        Correlation_IM,
+        Correlation_PT,
+        Correlation_DM,
         Data,
         Model,
         FilterData,

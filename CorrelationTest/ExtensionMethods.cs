@@ -71,8 +71,14 @@ namespace CorrelationTest
                     return "$INPUT";
                 case SheetType.FilterData:
                     return "$FILTER";
-                case SheetType.Correlation:
-                    return "$CORRELATION";
+                case SheetType.Correlation_IM:
+                    return "$CORRELATION_IM";
+                case SheetType.Correlation_PM:
+                    return "$CORRELATION_PM";
+                case SheetType.Correlation_PT:
+                    return "$CORRELATION_PT";
+                case SheetType.Correlation_DM:
+                    return "$CORRELATION_DM";
                 default:
                     return null;
             }
@@ -83,8 +89,14 @@ namespace CorrelationTest
             string sheetIdent = xlSheet.Cells[1, 1].Value;
             switch (sheetIdent)
             {
-                case "$CORRELATION":
-                    return SheetType.Correlation;
+                case "$CORRELATION_IM":
+                    return SheetType.Correlation_IM;
+                case "$CORRELATION_PM":
+                    return SheetType.Correlation_PM;
+                case "$CORRELATION_PT":
+                    return SheetType.Correlation_PT;
+                case "$CORRELATION_DM":
+                    return SheetType.Correlation_DM;
                 case "$WBS":
                     return SheetType.WBS;
                 case "$EST":
@@ -92,6 +104,22 @@ namespace CorrelationTest
                 default:
                     return SheetType.Unknown;
             }
+        }
+
+        public static object[,] AddLowerTriangular(object[,] upperTriangular)
+        {
+            //upperTriangular should be zero-based
+            //upperTriangular = ReIndexArray<object>(upperTriangular);
+            if (upperTriangular.GetLength(0) != upperTriangular.GetLength(1))
+                throw new Exception("Correlation array not square");
+            for(int row = 1; row < upperTriangular.GetLength(0); row++)
+            {
+                for(int col=0;col < row; col++)
+                {
+                    upperTriangular[row, col] = upperTriangular[col, row];
+                }
+            }
+            return upperTriangular;
         }
 
         public static Excel.Worksheet GetWorksheet(string sheetName, SheetType sheetType = SheetType.Unknown)

@@ -23,153 +23,25 @@ namespace CorrelationTest
             public readonly static Tuple<int, int> param_RowDist = new Tuple<int, int>(1, 10);    //where to find the last col param for the Distribution
             public readonly static Tuple<int, int> param_ColDist = new Tuple<int, int>(1, 11);    //where to find the last col param for the Distribution
 
-            private Data.CorrelationString CorrelString { get; set; }
-            private Data.CorrelationMatrix CorrelMatrix { get; set; }
-            private Excel.Range xlMatrixCell { get; set; }
-            private Data.Link LinkToOrigin { get; set; }
-            private Excel.Range xlLinkCell { get; set; }
-            private Excel.Range xlIDCell { get; set; }
-            private Excel.Range xlCorrelTypeCell { get; set; }
-            private Excel.Range xlCorrelStringCell { get; set; }
-            private Excel.Range xlDistCell { get; set; }
-            private Data.CorrelSheetSpecs Specs { get; set; }
+            protected Data.CorrelationString CorrelString { get; set; }
+            protected Data.CorrelationMatrix CorrelMatrix { get; set; }
+            protected Excel.Range xlMatrixCell { get; set; }
+            protected Data.Link LinkToOrigin { get; set; }
+            public Excel.Range xlLinkCell { get; set; }
+            protected Excel.Range xlIDCell { get; set; }
+            protected Excel.Range xlCorrelStringCell { get; set; }
+            protected Excel.Range xlDistCell { get; set; }
+            protected Data.CorrelSheetSpecs Specs { get; set; }
 
-            public CorrelationSheet(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
-            public CorrelationSheet(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
-            {
-                this.CorrelString = correlString;
-                this.Specs = specs;
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                    where sheet.Cells[1, 1].Value == "$Correlation"
-                                    select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
-                else
-                    xlSheet = CreateXLCorrelSheet();
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Inputs)CorrelString);
-                this.LinkToOrigin = new Data.Link(launchedFrom);
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelTypeCell = xlSheet.Cells[specs.CorrelTypeCoords.Item1, specs.CorrelTypeCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.CorrelStringCoords.Item1, specs.CorrelStringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
-                this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
-                this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
-                this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-            }
+            //public CorrelationSheet(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
 
-            public CorrelationSheet(Data.CorrelationString_Periods correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
-            {
-                this.CorrelString = correlString;
-                this.Specs = specs;
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$Correlation"
-                                     select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
-                else
-                    xlSheet = CreateXLCorrelSheet();
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Periods)CorrelString);
-                this.LinkToOrigin = new Data.Link(launchedFrom);
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelTypeCell = xlSheet.Cells[specs.CorrelTypeCoords.Item1, specs.CorrelTypeCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.CorrelStringCoords.Item1, specs.CorrelStringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
-                this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
-                this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
-                this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-            }
 
-            public CorrelationSheet(Data.CorrelationString_Triple correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
-            {
-                this.CorrelString = correlString;
-                this.Specs = specs;
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$Correlation"
-                                     select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
-                else
-                    xlSheet = CreateXLCorrelSheet();
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Triple)CorrelString);
-                this.LinkToOrigin = new Data.Link(launchedFrom);
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelTypeCell = xlSheet.Cells[specs.CorrelTypeCoords.Item1, specs.CorrelTypeCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.CorrelStringCoords.Item1, specs.CorrelStringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
-                this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
-                this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
-                this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-            }
+            protected virtual Excel.Worksheet CreateXLCorrelSheet(string postfix) { throw new Exception("Failed override"); }
+            protected virtual Excel.Worksheet GetXlSheet(bool CreateNew = true) { throw new Exception("Failed override"); }
+            protected virtual Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true) { throw new Exception("Failed override"); }
 
-            private CorrelationSheet(Excel.Worksheet xlSheet)  //constructor for collapsing existing sheet back to a string and for working with the existing xlSheet
-            {
-                this.xlSheet = xlSheet;                
-                int matrixRow = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_RowMatrix.Item1, CorrelationSheet.param_RowMatrix.Item2].Value);
-                int matrixCol = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_ColMatrix.Item1, CorrelationSheet.param_ColMatrix.Item2].Value);
-                int matrixRow_end = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_RowMatrix2.Item1, CorrelationSheet.param_RowMatrix2.Item2].Value);
-                int matrixCol_end = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_ColMatrix2.Item1, CorrelationSheet.param_ColMatrix2.Item2].Value);
-                int linkRow = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_RowLink.Item1, CorrelationSheet.param_RowLink.Item2].Value);
-                int linkCol = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_ColLink.Item1, CorrelationSheet.param_ColLink.Item2].Value);
-                int idRow = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_RowID.Item1, CorrelationSheet.param_RowID.Item2].Value);
-                int idCol = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_ColID.Item1, CorrelationSheet.param_ColID.Item2].Value);
-                int distRow = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_RowDist.Item1, CorrelationSheet.param_RowDist.Item2].Value);
-                int distCol = Convert.ToInt32(xlSheet.Cells[CorrelationSheet.param_ColDist.Item1, CorrelationSheet.param_ColDist.Item2].Value);
-                this.Specs = new Data.CorrelSheetSpecs(matrixRow, matrixCol, linkRow, linkCol);
-                this.xlLinkCell = xlSheet.Cells[linkRow, linkCol];
-                this.xlCorrelTypeCell = xlSheet.Cells[Specs.CorrelTypeCoords.Item1, Specs.CorrelTypeCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[Specs.CorrelStringCoords.Item1, Specs.CorrelStringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[idRow, idCol];
-                this.xlDistCell = xlSheet.Cells[distRow, distCol];
-                //need to be able to parse a link into sheetname and address to reconstruct the linkSource sheet
-                this.LinkToOrigin = new Data.Link(xlLinkCell.Value);     //bootstrap the Link from the address
-                this.xlMatrixCell = xlSheet.Cells[matrixRow, matrixCol];
-                Excel.Range matrix_end = xlSheet.Cells[matrixRow_end, matrixCol_end];
-                Excel.Range matrixRange = xlSheet.Range[xlMatrixCell, matrix_end];
-                //Need to find the correl type and switch what correlString gets created here!
-                switch (GetCorrelType())
-                {
-                    case Data.CorrelStringType.DurationMatrix:
-                        //CollapseDM()
-                        break;
-                    case Data.CorrelStringType.InputsMatrix:
-                        this.CorrelString = new Data.CorrelationString_Inputs(matrixRange);
-                        this.CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Inputs)this.CorrelString);
-                        break;
-                    case Data.CorrelStringType.PhasingMatrix:
-                        this.CorrelString = new Data.CorrelationString_Periods(matrixRange);
-                        this.CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Periods)this.CorrelString);
-                        break;
-                    case Data.CorrelStringType.PhasingTriple:
-                        this.CorrelString = new Data.CorrelationString_Triple(xlCorrelStringCell.Value);
-                        this.CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Triple)this.CorrelString);
-                        break;
-                    default:
-                        throw new Exception("GetCorrelType() error");
-                }
-            }
 
-            private Excel.Worksheet CreateXLCorrelSheet()
-            {
-                Excel.Worksheet xlCorrelSheet = ThisAddIn.MyApp.Worksheets.Add(After: ThisAddIn.MyApp.ActiveWorkbook.Sheets[ThisAddIn.MyApp.ActiveWorkbook.Sheets.Count]);
-                xlCorrelSheet.Name = "Correlation";
-                xlCorrelSheet.Cells[1, 1] = "$Correlation";
-                xlCorrelSheet.Rows[1].Hidden = true;
-                return xlCorrelSheet;
-            }
 
-           
             public Data.CorrelationString CollapseToString(object[,] correlArray)
             {
                 throw new NotImplementedException();
@@ -200,11 +72,11 @@ namespace CorrelationTest
             {
                 return new Tuple<int, int>(xlMatrixCell.Row + fieldCount, xlMatrixCell.Column + fieldCount-1);
             }
-            private void PrintMatrixEndCoords(Excel.Worksheet xlCorrelSheet)
+            protected void PrintMatrixEndCoords(Excel.Worksheet xlCorrelSheet)
             {
-                Tuple<int, int> MatrixEndCoords = GetMatrixEndCoords(xlMatrixCell, this.CorrelMatrix.FieldCount);
-                xlCorrelSheet.Cells[Sheets.CorrelationSheet.param_RowMatrix2.Item1, Sheets.CorrelationSheet.param_RowMatrix2.Item2].Value = MatrixEndCoords.Item1;  //prints the row coord
-                xlCorrelSheet.Cells[Sheets.CorrelationSheet.param_ColMatrix2.Item1, Sheets.CorrelationSheet.param_ColMatrix2.Item2].Value = MatrixEndCoords.Item2;  //prints the col coord
+                this.Specs.MatrixCoords_End = GetMatrixEndCoords(xlMatrixCell, this.CorrelMatrix.FieldCount);
+                xlCorrelSheet.Cells[Sheets.CorrelationSheet.param_RowMatrix2.Item1, Sheets.CorrelationSheet.param_RowMatrix2.Item2].Value = this.Specs.MatrixCoords_End.Item1;  //prints the row coord
+                xlCorrelSheet.Cells[Sheets.CorrelationSheet.param_ColMatrix2.Item1, Sheets.CorrelationSheet.param_ColMatrix2.Item2].Value = this.Specs.MatrixCoords_End.Item2;  //prints the col coord
             }
             public override void PrintToSheet()  //expanding from string
             {
@@ -217,7 +89,6 @@ namespace CorrelationTest
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
-                this.xlCorrelTypeCell.Value = CorrelString.GetCorrelType().ToString();
                 CorrelString.PrintToSheet(xlCorrelStringCell);
                 for(int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
@@ -225,7 +96,7 @@ namespace CorrelationTest
                 }                
             }
 
-            private string GetDistributionString(Estimate est, int subIndex)
+            protected string GetDistributionString(Estimate est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"{est.SubEstimates[subIndex].EstimateDistribution.Name}");
@@ -282,23 +153,76 @@ namespace CorrelationTest
                 }
             }
 
-            public static CorrelationSheet BuildFromExisting()
+            public static CorrelationSheet Construct()      //Overload for Building object from EXISTING correlation xlsheet -- used for correl collapse
             {
-                //default to grabbing the correlation sheet matrix range, convert to string (inside private sheet constructor), and dropping it in the linked location
-                Excel.Worksheet xlSheet;
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$Correlation"
-                                     select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
+                Excel.Worksheet xlCorrelSheet;
+                List<Excel.Worksheet> xlCorrelSheets = new List<Excel.Worksheet>();
+                foreach(Excel.Worksheet sht in ThisAddIn.MyApp.Worksheets)
+                {
+                    SheetType sht_type = ExtensionMethods.GetSheetType(sht);
+                    if(sht_type == SheetType.Correlation_DM ||
+                        sht_type == SheetType.Correlation_IM ||
+                        sht_type == SheetType.Correlation_PM || 
+                        sht_type == SheetType.Correlation_PT)
+                    {
+                        xlCorrelSheets.Add(sht);
+                    }                    
+                }
+                if (xlCorrelSheets.Count() == 1)
+                    xlCorrelSheet = xlCorrelSheets.First();
+                else if (xlCorrelSheets.Count() > 1)
+                    throw new Exception("Multiple correlation sheets");
+                else if (!xlCorrelSheets.Any())
+                    throw new Exception("No correlation sheets");
                 else
-                    return null;
-                return new CorrelationSheet(xlSheet);  //bootstrap off the xlSheet
+                    throw new Exception("Unknown error finding correlation sheet");
+
+                //Need to build the components from the xlSheet here instead of in the constructor, then build the sheet using .Construct()
+                //CorrelString, Excel.Range source, new CorrelSheetSpecs()
+                
+                SheetType sheet_type = ExtensionMethods.GetSheetType(xlCorrelSheet);
+                Data.CorrelSheetSpecs csSpecs = new Data.CorrelSheetSpecs(sheet_type);
+                //Data.CorrelationString cs = Data.CorrelationString.Construct(xlCorrelSheet.Cells[csSpecs.StringCoords.Item1, csSpecs.StringCoords.Item2].value);
+                Excel.Range source = ThisAddIn.MyApp.get_Range((object)xlCorrelSheet.Cells[csSpecs.LinkCoords.Item1, csSpecs.LinkCoords.Item2].value);
+                //Make the sheetid cell in 1,1 list the type of correlation
+                CorrelationSheet newSheet;
+                switch (sheet_type)
+                {
+                    case SheetType.Correlation_DM:
+                        throw new NotImplementedException();
+                    case SheetType.Correlation_IM:
+                        newSheet = new CorrelationSheet_Inputs(csSpecs);
+                        break;
+                    case SheetType.Correlation_PM:
+                        newSheet = new CorrelationSheet_Phasing(csSpecs);
+                        break;
+                    case SheetType.Correlation_PT:
+                        newSheet = new CorrelationSheet_Phasing(csSpecs);
+                        break;
+                    default:
+                        throw new Exception("Not a valid Correlation Sheet type");
+                }
+
+                newSheet.xlSheet = xlCorrelSheet;
+                newSheet.xlLinkCell = newSheet.xlSheet.Cells[csSpecs.LinkCoords.Item1, csSpecs.LinkCoords.Item2];
+                newSheet.xlCorrelStringCell = newSheet.xlSheet.Cells[csSpecs.StringCoords.Item1, csSpecs.StringCoords.Item2];
+                newSheet.xlIDCell = newSheet.xlSheet.Cells[csSpecs.IdCoords.Item1, csSpecs.IdCoords.Item2];
+                newSheet.xlDistCell = newSheet.xlSheet.Cells[csSpecs.DistributionCoords.Item1, csSpecs.DistributionCoords.Item2];
+                //need to be able to parse a link into sheetname and address to reconstruct the linkSource sheet
+                newSheet.LinkToOrigin = new Data.Link(newSheet.xlLinkCell.Value);     //bootstrap the Link from the address
+                newSheet.xlMatrixCell = newSheet.xlSheet.Cells[csSpecs.MatrixCoords.Item1, csSpecs.MatrixCoords.Item2];
+                Excel.Range matrix_end = newSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown];
+                Excel.Range matrixRange = newSheet.xlSheet.Range[newSheet.xlMatrixCell.Offset[1,0], matrix_end];
+
+                newSheet.CorrelMatrix = new Data.CorrelationMatrix(newSheet, newSheet.xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange);
+                newSheet.UpdateCorrelationString();     //Updates the string off the matrix
+
+                return newSheet;
             }
 
-            private Data.CorrelStringType GetCorrelType()
+            private Data.CorrelStringType GetCorrelType(string correlStringValue)
             {
-                switch (this.xlCorrelTypeCell.Value)
+                switch (correlStringValue)
                 {
                     case "IM":
                         return Data.CorrelStringType.InputsMatrix;
@@ -313,9 +237,11 @@ namespace CorrelationTest
                 }
             }
 
+            public virtual void UpdateCorrelationString() { }
+
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
-                CorrelationSheet correlSheet = BuildFromExisting();
+                CorrelationSheet correlSheet = Construct();
                 if (correlSheet == null)
                     return;
 
@@ -373,15 +299,19 @@ namespace CorrelationTest
                 CorrelVisual.Show();
             }
 
-            public static CorrelationSheet Construct(Data.CorrelationString correlString)       //CorrelationSheet dynamic creator
+            public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
             {
                 if(correlString is Data.CorrelationString_Inputs)
                 {
-                    return new CorrelationSheet_Inputs();
+                    return new CorrelationSheet_Inputs((Data.CorrelationString_Inputs)correlString, source, specs);
                 }
-                else if(correlString is Data.CorrelationString_Periods || correlString is Data.CorrelationString_Triple)
+                else if(correlString is Data.CorrelationString_Periods)
                 {
-                    return new CorrelationSheet_Phasing();
+                    return new CorrelationSheet_Phasing((Data.CorrelationString_Periods)correlString, source, specs);
+                }
+                else if (correlString is Data.CorrelationString_Triple)
+                {
+                    return new CorrelationSheet_Phasing((Data.CorrelationString_Triple)correlString, source, specs);
                 }
                 else
                 {

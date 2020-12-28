@@ -20,15 +20,11 @@ namespace CorrelationTest
         public class CorrelationMatrix
         {
             public Dictionary<UniqueID, int> FieldDict { get; set; }
-            private object[,] PartialArray { get; set; }
-            private object[,] SecondaryArray { get; set; }
             public object[,] Matrix { get; set; }
             private double[,] DoubleMatrix { get; set; }
-            private int Midpoint { get; set; }
-            private bool IsEven { get; set; }
             public int FieldCount { get; set; }
             public object[] Fields { get; set; }
-            public Tuple<int, int> MatrixCoords { get; }
+            public Sheets.CorrelationSheet ContainingSheet { get; set; }
 
             private CorrelationMatrix(double[,] phasingTriple)
             {
@@ -36,14 +32,14 @@ namespace CorrelationTest
 
             }
 
-            public CorrelationMatrix(Excel.Range correlMatrix)       //from matrix
+            public CorrelationMatrix(Sheets.CorrelationSheet containingSheet, Excel.Range fieldsRange, Excel.Range matrixRange)       //from matrix
             {
-                this.FieldCount = correlMatrix.Columns.Count;
-                this.IsEven = Even(this.FieldCount);
-                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
-                Matrix = GetMainRange(correlMatrix);
-                SecondaryArray = GetSecondaryRange(correlMatrix);
-                FieldDict = GetFieldDict(correlMatrix);
+                if (fieldsRange.Cells.Count != matrixRange.Columns.Count)
+                    throw new Exception("Names do not match matrix.");
+                this.ContainingSheet = containingSheet;
+                this.FieldCount = fieldsRange.Cells.Count;
+                Matrix = ExtensionMethods.ReIndexArray<object>(matrixRange.Value);
+                FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
             public CorrelationMatrix(Data.CorrelationString_Inputs correlStringObj)
@@ -52,8 +48,6 @@ namespace CorrelationTest
                 this.Fields = correlStringObj.GetFields();
                 this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                 this.FieldCount = this.Fields.Count();
-                this.IsEven = Even(this.FieldCount);
-                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
@@ -63,8 +57,6 @@ namespace CorrelationTest
                 this.Fields = correlStringObj.GetFields();
                 this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                 this.FieldCount = this.Fields.Count();
-                this.IsEven = Even(this.FieldCount);
-                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
@@ -74,8 +66,6 @@ namespace CorrelationTest
                 this.Fields = correlStringObj.GetFields();
                 this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                 this.FieldCount = this.Fields.Count();
-                this.IsEven = Even(this.FieldCount);
-                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
@@ -86,8 +76,6 @@ namespace CorrelationTest
                 //validate parent_uid and matrix
                 PeriodID[] pids = PeriodID.GeneratePeriodIDs(parent_uid, FieldCount);
                 this.Fields = (from PeriodID pid in pids select pid.Name).ToArray<object>();
-                this.IsEven = Even(this.FieldCount);
-                this.Midpoint = GetMidpoint(this.FieldCount, this.IsEven);
                 this.FieldDict = GetFieldDict(pids);
             }
 
@@ -107,92 +95,20 @@ namespace CorrelationTest
                     return fieldCount / 2 + 1;
             }
 
-            private object[,] GetMainRange(string[] fields, double[,] matrix)
+            private Dictionary<UniqueID, int> GetFieldDict(Excel.Range fieldRange, Excel.Range matrixRange)       //get the field index by unique id
             {
-                object[,] mainRange = new object[this.Midpoint, this.Midpoint];
-                for (int row = 0; row < this.Midpoint; row++)
-                {
-                    for (int col = 0; col < this.Midpoint; col++)
-                    {
-                        int col2 = this.Midpoint - col;
-                        mainRange[row, col] = matrix[row, col2];
-                    }
-                }
-                return mainRange;
-            }
-
-            private object[,] GetMainRange(Excel.Range myRange)
-            {
-                Excel.Range mainRange;
-                Excel.Range mainFirstCell;
-                Excel.Range mainLastCell;
-                if (this.IsEven == true)
-                {
-                    mainFirstCell = myRange.Cells[1, this.Midpoint];
-                    mainLastCell = myRange.Cells[this.Midpoint, this.FieldCount];
-                }
-                else
-                {
-                    mainFirstCell = myRange.Offset[0, this.Midpoint + 1];
-                    mainLastCell = myRange.Offset[this.Midpoint - 1, this.FieldCount];
-                }
-                mainRange = myRange.Range[mainFirstCell, mainLastCell];
-                return mainRange.Value2;
-            }
-
-            private object[,] GetSecondaryRange(Excel.Range myRange)
-            {
-                Excel.Range secondRange;
-                Excel.Range secondFirstCell;
-                Excel.Range secondLastCell;
-                if (this.IsEven == true)
-                {
-                    secondFirstCell = myRange.Cells[1, 1];
-                    secondLastCell = myRange.Cells[this.Midpoint, this.Midpoint];
-                }
-                else
-                {
-                    secondFirstCell = myRange.Offset[1, 1];
-                    secondLastCell = myRange.Offset[this.Midpoint, this.Midpoint];
-                }
-                secondRange = myRange.Range[secondFirstCell, secondLastCell];
-                object[,] topLeft = secondRange.Value2;
-                if (this.IsEven == true)
-                {
-                    secondFirstCell = myRange.Cells[this.Midpoint + 1, this.Midpoint + 1];
-                    secondLastCell = myRange.Cells[this.FieldCount, this.FieldCount];
-                }
-                else
-                {
-                    secondFirstCell = myRange.Offset[this.Midpoint + 1, this.Midpoint + 1];
-                    secondLastCell = myRange.Offset[this.FieldCount, this.FieldCount];
-                }
-                secondRange = myRange.Range[secondFirstCell, secondLastCell];
-                object[,] bottomRight = secondRange.Value2;
-                for (int row = this.Midpoint + 1; row < this.FieldCount; row++)
-                {
-                    for (int col = row + 1; col < this.FieldCount; col++)
-                    {
-                        var coords = this.TransformField(row, col);
-                        topLeft[coords.Item2, coords.Item3] = bottomRight[row - this.Midpoint, col - this.Midpoint];
-                    }
-                }
-                return topLeft;
-            }
-
-            private Dictionary<UniqueID, int> GetFieldDict(Excel.Range myRange)       //get the field index by unique id
-            {
-                FieldDict = new Dictionary<UniqueID, int>();
-                Excel.Range fieldStart = myRange.Offset[-1, 0];
-                Excel.Range fieldEnd = myRange.Offset[myRange.Columns.Count, 0];
-                Excel.Range fieldRange = myRange.Worksheet.Range[fieldStart, fieldEnd];
-                object[,] fieldStrings = new object[1, this.FieldCount];
-                fieldStrings = fieldRange.Value2;
+                var fieldDict = new Dictionary<UniqueID, int>();      //<field name, index>
+                //Excel.Range fieldEnd = fieldStart.Offset[0, matrixRange.Columns.Count];
+                //Excel.Range fieldRange = matrixRange.Worksheet.Range[fieldStart, fieldEnd];
+                object[,] fieldStrings = fieldRange.Value;  // field names
+                //fieldStrings = fieldRange.Value2;
+                Excel.Worksheet sourceSheet = ThisAddIn.MyApp.get_Range((object)this.ContainingSheet.xlLinkCell.Value).Worksheet;
+                
                 for (int i = 1; i <= this.FieldCount; i++)
                 {
-                    FieldDict.Add(new UniqueID(myRange.Worksheet.Name, fieldStrings[1, i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
+                    fieldDict.Add(new UniqueID(sourceSheet.Name, fieldStrings[1,i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
                 }
-                return FieldDict;
+                return fieldDict;
             }
 
             private Dictionary<UniqueID, int> GetFieldDict(UniqueID[] ids)
@@ -245,53 +161,7 @@ namespace CorrelationTest
             {
                 Matrix[FieldDict[id1], FieldDict[id2]] = correlation;
             }
-
-            private enum ArrayType
-            {
-                Main,
-                Secondary
-            }
-            private Tuple<ArrayType, int, int> TransformField(int rowIndex, int colIndex)
-            {
-                //Take a field name, check it's index with the dictionary, and transform it if need be
-
-                if (this.IsEven == true)
-                {
-                    if (rowIndex < this.Midpoint)
-                    {
-                        if (colIndex > this.Midpoint)
-                        {
-                            //top right quadrant
-                            return new Tuple<ArrayType, int, int>(ArrayType.Main, rowIndex, colIndex);
-                        }
-                        else
-                        {
-                            //top left quadrant
-                            return new Tuple<ArrayType, int, int>(ArrayType.Secondary, rowIndex, colIndex);
-                        }
-                    }
-                    else
-                    {
-                        if (colIndex > this.Midpoint)
-                        {
-                            //bottom right quadrant
-                            int newRowIndex = this.FieldCount - rowIndex;
-                            int newColIndex = this.FieldCount - colIndex;
-                            return new Tuple<ArrayType, int, int>(ArrayType.Secondary, newRowIndex, newColIndex);
-                        }
-                        else
-                        {
-                            //bottom left quadrant
-                            //Convert to top right
-                            return new Tuple<ArrayType, int, int>(ArrayType.Main, this.FieldCount - rowIndex, this.FieldCount - colIndex);
-                        }
-                    }
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
+         
             public void PrintToSheet(Excel.Range xlRange)
             {
                 xlRange.Resize[1, this.FieldCount].Value = this.Fields;                                     //print fields
@@ -317,6 +187,8 @@ namespace CorrelationTest
             }
             private double[,] GetDoubleMatrix(object[,] objectMatrix)
             {
+                objectMatrix = ExtensionMethods.ReIndexArray<object>(objectMatrix);
+                objectMatrix = ExtensionMethods.AddLowerTriangular(objectMatrix);
                 if (this.DoubleMatrix == null)
                 {
                     this.DoubleMatrix = new double[objectMatrix.GetLength(0), objectMatrix.GetLength(1)];
@@ -362,7 +234,7 @@ namespace CorrelationTest
                         }
                         if(col < row)
                         {
-                            if (this.Matrix[row,col] == null)
+                            if (DoubleMatrix[row, col] == Convert.ToDouble(this.Matrix[col, row]))
                                 errorMatrix[row, col] = MatrixErrors.None;
                             else
                                 errorMatrix[row, col] = MatrixErrors.MisplacedValue;
@@ -413,6 +285,32 @@ namespace CorrelationTest
                 double Pxy = this.DoubleMatrix[x, y];
                 double Pyz = this.DoubleMatrix[y, z];
                 return Pxy * Pyz + Math.Sqrt((1 - Pxy * Pxy) * (1 - Pyz * Pyz));
+            }
+
+            public bool Equals(CorrelationMatrix cm)
+            {
+                if (cm.Matrix.GetLength(0) != this.Matrix.GetLength(0) || cm.Matrix.GetLength(1) != this.Matrix.GetLength(1))
+                    return false;
+                for(int zero = 0; zero < this.Matrix.GetLength(0); zero++)
+                {
+                    for(int one = 0; one < this.Matrix.GetLength(1); one++)
+                    {
+                        double internalVal, externalVal;
+                        if (!Double.TryParse(this.Matrix[zero, one].ToString(), out internalVal))
+                            throw new Exception("Invalid matrix value");
+                        if (!Double.TryParse(cm.Matrix[zero, one].ToString(), out externalVal))
+                            throw new Exception("Invalid matrix value");
+                        if (internalVal != externalVal)
+                            return false;
+                    }
+                }
+                return true;
+            }
+
+            public bool ValidateAgainstTriple(PhasingTriple pt)
+            {
+                Data.CorrelationMatrix tripleMatrix = pt.GetPhasingCorrelationMatrix(this.FieldCount);
+                return this.Equals(tripleMatrix);
             }
         }   //class
     }//Data

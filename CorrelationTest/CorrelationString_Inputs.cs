@@ -13,6 +13,7 @@ namespace CorrelationTest
         {
             public CorrelationString_Inputs(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange)) { }
             
+
             
 
             public CorrelationString_Inputs(string correlString)
@@ -54,7 +55,7 @@ namespace CorrelationTest
             
             private static UniqueID[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
             {
-                var specs = new CorrelSheetSpecs();
+                var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
                 string parentID = Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
                 string sheetID = parentID.Split('|').First();
                 
@@ -207,7 +208,7 @@ namespace CorrelationTest
                 Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(this.Value);
                 var id = this.GetIDs()[0];
                 //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, xlSource, new Data.CorrelSheetSpecs());
+                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
             }
@@ -223,7 +224,7 @@ namespace CorrelationTest
                     //construct the correlString
                     Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(Convert.ToString(tempEstimate.xlCorrelCell_Inputs.Value));
                     //construct the correlSheet
-                    Sheets.CorrelationSheet correlSheet = new Sheets.CorrelationSheet(correlStringObj, selection, new Data.CorrelSheetSpecs());
+                    Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, selection, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
                     //print the correlSheet
                     correlSheet.PrintToSheet();
                 }
@@ -250,6 +251,7 @@ namespace CorrelationTest
                 }
                 this.Value = sb.ToString();
             }
+
 
             public override void PrintToSheet(Excel.Range xlCell)
             {
