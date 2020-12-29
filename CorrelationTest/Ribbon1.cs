@@ -187,6 +187,149 @@ namespace CorrelationTest
 
             est_1.Activate();
 
+            wbs_1.Cells[4, 1] = "ID";
+            wbs_1.Cells[4, 2] = "Level";
+            wbs_1.Cells[4, 4] = "Name";
+            wbs_1.Cells[4, 7] = "Distribution";
+            wbs_1.Cells[4, 8] = "Param1";
+            wbs_1.Cells[4, 9] = "Param2";
+            wbs_1.Cells[4, 10] = "Param3";
+
+            wbs_1.Cells[5, 2] = 1;
+            wbs_1.Cells[5, 3] = "E";
+            wbs_1.Cells[5, 4] = "Est1";
+            wbs_1.Cells[5, 7] = "Normal";
+            wbs_1.Cells[5, 8] = 0;
+            wbs_1.Cells[5, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[5, k] = 7;
+            }
+
+            wbs_1.Cells[6, 2] = 2;
+            wbs_1.Cells[6, 3] = "I";
+            wbs_1.Cells[6, 4] = "Est2";
+            wbs_1.Cells[6, 7] = "Triangular";
+            wbs_1.Cells[6, 8] = 10;
+            wbs_1.Cells[6, 9] = 30;
+            wbs_1.Cells[6, 10] = 20;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[6, k] = 7;
+            }
+
+            wbs_1.Cells[7, 2] = 2;
+            wbs_1.Cells[7, 3] = "I";
+            wbs_1.Cells[7, 4] = "Est3";
+            wbs_1.Cells[7, 7] = "Triangular";
+            wbs_1.Cells[7, 8] = 10;
+            wbs_1.Cells[7, 9] = 30;
+            wbs_1.Cells[7, 10] = 20;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[7, k] = 7;
+            }
+
+            wbs_1.Cells[8, 2] = 2;
+            wbs_1.Cells[8, 3] = "I";
+            wbs_1.Cells[8, 4] = "Est4";
+            wbs_1.Cells[8, 7] = "Triangular";
+            wbs_1.Cells[8, 8] = 10;
+            wbs_1.Cells[8, 9] = 30;
+            wbs_1.Cells[8, 10] = 20;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[8, k] = 7;
+            }
+
+            wbs_1.Cells[9, 2] = 2;
+            wbs_1.Cells[9, 3] = "I";
+            wbs_1.Cells[9, 4] = "Est5";
+            wbs_1.Cells[9, 7] = "Normal";
+            wbs_1.Cells[9, 8] = 0;
+            wbs_1.Cells[9, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[9, k] = 7;
+            }
+
+            wbs_1.Cells[10, 2] = 1;
+            wbs_1.Cells[10, 3] = "E";
+            wbs_1.Cells[10, 4] = "Est5.2";
+            wbs_1.Cells[10, 7] = "Normal";
+            wbs_1.Cells[10, 8] = 0;
+            wbs_1.Cells[10, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[10, k] = 7;
+            }
+
+            wbs_1.Cells[11, 2] = 1;
+            wbs_1.Cells[11, 3] = "E";
+            wbs_1.Cells[11, 4] = "Est6";
+            wbs_1.Cells[11, 7] = "Normal";
+            wbs_1.Cells[11, 8] = 0;
+            wbs_1.Cells[11, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[11, k] = 7;
+            }
+
+            wbs_1.Cells[12, 2] = 2;
+            wbs_1.Cells[12, 3] = "I";
+            wbs_1.Cells[12, 4] = "Est7";
+            wbs_1.Cells[12, 7] = "Normal";
+            wbs_1.Cells[12, 8] = 0;
+            wbs_1.Cells[12, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[12, k] = 7;
+            }
+
+            wbs_1.Cells[13, 2] = 2;
+            wbs_1.Cells[13, 3] = "I";
+            wbs_1.Cells[13, 4] = "Est8";
+            wbs_1.Cells[13, 7] = "Normal";
+            wbs_1.Cells[13, 8] = 0;
+            wbs_1.Cells[13, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[13, k] = 7;
+            }
+
+            wbs_1.Cells[14, 2] = 2;
+            wbs_1.Cells[14, 3] = "I";
+            wbs_1.Cells[14, 4] = "Est9";
+            wbs_1.Cells[14, 7] = "Lognormal";
+            wbs_1.Cells[14, 8] = 0;
+            wbs_1.Cells[14, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[14, k] = 7;
+            }
+
+            wbs_1.Cells[15, 2] = 1;
+            wbs_1.Cells[15, 3] = "E";
+            wbs_1.Cells[15, 4] = "Est10";
+            wbs_1.Cells[15, 7] = "Normal";
+            wbs_1.Cells[15, 8] = 0;
+            wbs_1.Cells[15, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[15, k] = 7;
+            }
+
+            wbs_1.Cells[16, 2] = 2;
+            wbs_1.Cells[16, 3] = "I";
+            wbs_1.Cells[16, 4] = "Est11";
+            wbs_1.Cells[16, 7] = "Normal";
+            wbs_1.Cells[16, 8] = 0;
+            wbs_1.Cells[16, 9] = 1;
+            for (int k = 14; k < 20; k++)
+            {
+                wbs_1.Cells[16, k] = 7;
+            }
+
             List<IEstimate> estimates = BuildEstimates();
             foreach(IEstimate est in estimates)
             {

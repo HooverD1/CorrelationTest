@@ -69,7 +69,7 @@ namespace CorrelationTest
 
             public override object[] GetFields()
             {
-                string[] fields = this.DelimitString()[0].Split(',');
+                string[] fields = this.DelimitString()[1].Split(',');
                 return fields.ToArray<object>();
             }
 

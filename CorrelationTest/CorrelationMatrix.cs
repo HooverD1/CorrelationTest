@@ -39,6 +39,9 @@ namespace CorrelationTest
                 this.ContainingSheet = containingSheet;
                 this.FieldCount = fieldsRange.Cells.Count;
                 Matrix = ExtensionMethods.ReIndexArray<object>(matrixRange.Value);
+                object[,] fieldTemp = fieldsRange.Value;
+                this.Fields = new object[fieldTemp.GetLength(1)];
+                for(int i = 0; i < fieldTemp.GetLength(1); i++) { this.Fields[i] = fieldTemp[1, i + 1]; }
                 FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
@@ -66,7 +69,8 @@ namespace CorrelationTest
                 this.Fields = correlStringObj.GetFields();
                 this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                 this.FieldCount = this.Fields.Count();
-                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+                PeriodID[] pids = PeriodID.GeneratePeriodIDs(correlStringObj.GetIDs().First(), FieldCount);
+                this.FieldDict = GetFieldDict(pids);
             }
 
             public CorrelationMatrix(UniqueID parent_uid, object[,] matrix)     //used for creating phasing correlation matrices
@@ -164,7 +168,7 @@ namespace CorrelationTest
          
             public void PrintToSheet(Excel.Range xlRange)
             {
-                xlRange.Resize[1, this.FieldCount].Value = this.Fields;                                     //print fields
+                xlRange.Resize[1, this.FieldDict.Count].Value = this.Fields;                                     //print fields
                 object[,] transpose = new object[this.Fields.Length,1];
                 for (int i = 0; i < this.Fields.Length; i++)
                     transpose[i, 0] = this.Fields[i];
