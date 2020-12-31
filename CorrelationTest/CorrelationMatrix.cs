@@ -79,8 +79,9 @@ namespace CorrelationTest
                 this.FieldCount = Matrix.GetLength(0);
                 //validate parent_uid and matrix
                 PeriodID[] pids = PeriodID.GeneratePeriodIDs(parent_uid, FieldCount);
-                this.Fields = (from PeriodID pid in pids select pid.Name).ToArray<object>();
+                this.Fields = null; //No names in IDs anymore..
                 this.FieldDict = GetFieldDict(pids);
+
             }
 
             private bool Even(int fieldCount)
@@ -135,7 +136,8 @@ namespace CorrelationTest
 
             public object[] GetFields()
             {
-                return FieldDict.Keys.Select(x => x.Name).ToArray<object>();
+                return null; //No names in UniqueIDs anymore..
+                //return FieldDict.Keys.Select(x => x.Name).ToArray<object>();
             }
 
             public UniqueID[] GetIDs()

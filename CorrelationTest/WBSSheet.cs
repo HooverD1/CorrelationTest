@@ -10,7 +10,7 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class WBSSheet: CostSheet, ICostSheet, IHas_xlFields
+        public class WBSSheet: CostSheet
         {
             private const SheetType sheetType = SheetType.WBS;
             
@@ -18,12 +18,12 @@ namespace CorrelationTest
             {
                 this.dc = DisplayCoords.ConstructDisplayCoords(sheetType);
                 this.xlSheet = xlSheet;
-                this.Estimates = LoadEstimates();
+                LoadEstimates(false);
             }
 
-            public override List<IEstimate> LoadEstimates()      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
+            public override List<Estimate> GetEstimates(bool LoadSubs)      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
             {
-                List<IEstimate> returnList = new List<IEstimate>();
+                List<Estimate> returnList = new List<Estimate>();
                 Excel.Range lastCell = xlSheet.Cells[1000000, dc.Type_Offset].End[Excel.XlDirection.xlUp];
                 Excel.Range firstCell = xlSheet.Cells[2, dc.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
@@ -36,7 +36,8 @@ namespace CorrelationTest
                     for (int index = 0; index < topLevels.Count(); index++)
                     {
                         Estimate parentEstimate = new Estimate(topLevels[index].EntireRow, this);
-                        parentEstimate.LoadSubEstimates();
+                        if(LoadSubs)
+                            parentEstimate.LoadSubEstimates();
                         returnList.Add(parentEstimate);
                     }
                 }
@@ -103,7 +104,7 @@ namespace CorrelationTest
                 }
             }
 
-            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<IEstimate> Estimates)
+            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<Estimate> Estimates)
             {
                 var correlTemp = new Dictionary<Tuple<UniqueID, UniqueID>, double>();   //<ID, ID>, correl_value
                 if (this.Estimates.Any())

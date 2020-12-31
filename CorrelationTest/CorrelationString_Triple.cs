@@ -54,7 +54,8 @@ namespace CorrelationTest
             public override object[] GetFields()
             {
                 //return the fields based on the parent uid and the number of periods
-                return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods()).Select(x=>x.Name).ToArray<string>();
+                return null;
+                //return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods()).Select(x=>x.Name).ToArray<string>();
             }
 
             public override UniqueID[] GetIDs()

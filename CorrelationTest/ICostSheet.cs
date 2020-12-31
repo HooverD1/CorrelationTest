@@ -17,26 +17,4 @@ namespace CorrelationTest
         void BuildCorrelations();
         Excel.Range[] PullEstimates(Excel.Range pullEstimates, CostItem costType);
     }
-
-    public static class CostSheetFactory       
-    {                                   
-        public static ICostSheet Construct(Dictionary<string, object> data)
-        {
-            ICostSheet sheetObj;
-            SheetType sheetType = (SheetType)data["SheetType"];
-            switch (sheetType)
-            {
-                case SheetType.WBS:
-                    sheetObj = new Sheets.WBSSheet((Excel.Worksheet)data["xlSheet"]);
-                    break;
-                case SheetType.Estimate:
-                    sheetObj = new Sheets.EstimateSheet((Excel.Worksheet)data["xlSheet"]);
-                    break;
-                default:
-                    sheetObj = null;
-                    break;
-            }
-            return sheetObj;
-        }
-    }
 }

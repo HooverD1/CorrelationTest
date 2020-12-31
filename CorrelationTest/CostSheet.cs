@@ -16,17 +16,28 @@ namespace CorrelationTest
         T
     }
 
-    public abstract class CostSheet : Sheet, ICostSheet
+    public abstract class CostSheet : Sheet
     {
         protected DialogResult OverwriteRepeatedIDs { get; set; }
         protected DisplayCoords dc { get; set; }
         protected int LevelColumn { get; set; }
 
-        public List<IEstimate> Estimates { get; set; }
+        public List<Estimate> Estimates { get; set; }
 
-        public virtual List<IEstimate> LoadEstimates()
+        public virtual List<Estimate> GetEstimates(bool LoadSubs) { throw new Exception("Failed override"); }
+        public virtual void LoadEstimates(bool LoadSubs)
         {
-            throw new NotImplementedException();
+            this.Estimates = GetEstimates(LoadSubs);
+        }
+        public virtual void PrintDefaultCorrelStrings()
+        {
+            List<Estimate> estimates = GetEstimates(true);
+            foreach(Estimate est in estimates)
+            {
+                est.PrintInputCorrelString();
+                est.PrintPhasingCorrelString();
+                est.PrintDurationCorrelString();
+            }
         }
 
         public virtual object[] Get_xlFields()
@@ -74,6 +85,23 @@ namespace CorrelationTest
         }
 
         public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType) { return null; }
+
+        public static CostSheet Construct(Excel.Worksheet xlSheet)
+        {
+            CostSheet sheetObj;
+            switch(ExtensionMethods.GetSheetType(xlSheet))
+            {
+                case SheetType.WBS:
+                    sheetObj = new Sheets.WBSSheet(xlSheet);
+                    break;
+                case SheetType.Estimate:
+                    sheetObj = new Sheets.EstimateSheet(xlSheet);
+                    break;
+                default:
+                    throw new Exception("Not a cost sheet type.");
+            }
+            return sheetObj;
+        }
 
     }
 }

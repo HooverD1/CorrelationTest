@@ -274,6 +274,48 @@ namespace CorrelationTest
                 return true;
             }
 
+            public static CorrelationString Construct(Estimate est, CorrelStringType csType)        //Construct default correlation string for estimate
+            {
+                
+                switch (csType)
+                {
+                    case CorrelStringType.PhasingTriple:
+                        if(est.xlCorrelCell_Periods.Value == null)
+                        {
+                            PhasingTriple pt = new PhasingTriple(est.uID.ID, "0,0,0");
+                            return new Data.CorrelationString_Triple(pt, est.Periods.Length, est.uID.ID);
+                        }
+                        else
+                        {
+                            return Construct(est.xlCorrelCell_Periods.Value);
+                        }                        
+                    case CorrelStringType.PhasingMatrix:
+                        if(est.xlCorrelCell_Periods.Value == null)
+                        {
+                            IEnumerable<string> start_dates = from Period prd in est.Periods select prd.pID.PeriodTag.ToString();
+                            return CorrelationString_Periods.ConstructZeroString(start_dates.ToArray());
+                        }
+                        else
+                        {
+                            return Construct(est.xlCorrelCell_Periods.Value);
+                        }                        
+                    case CorrelStringType.InputsMatrix:
+                        if(est.xlCorrelCell_Inputs.Value == null)
+                        {
+                            IEnumerable<string> fields = from Estimate sub in est.GetSubEstimates() select sub.Name;
+                            return CorrelationString_Inputs.ConstructZeroString(fields.ToArray());
+                        }
+                        else
+                        {
+                            return Construct(est.xlCorrelCell_Inputs.Value);
+                        }                        
+                    case CorrelStringType.DurationMatrix:
+                        throw new NotImplementedException();
+                    default:
+                        throw new Exception("Cannot construct CorrelationString");
+                }
+            }
+
             public static CorrelationString Construct(string correlStringValue)     //construct a variety of CorrelationStrings from the string
             {
                 //validate that it is a valid correlation string

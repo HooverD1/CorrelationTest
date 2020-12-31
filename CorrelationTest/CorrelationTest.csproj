@@ -197,6 +197,7 @@
     <Compile Include="Estimate.cs" />
     <Compile Include="EstimateSheet.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="ICostSheet.cs" />
     <Compile Include="IEstimate.cs" />
     <Compile Include="IHasFields.cs" />
     <Compile Include="Link.cs" />
@@ -213,8 +214,6 @@
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </Compile>
     <Compile Include="Sheet.cs" />
-    <Compile Include="CostSheetFactory.cs" />
-    <Compile Include="SheetItem.cs" />
     <Compile Include="UniqueID.cs" />
     <Compile Include="WBSSheet.cs" />
     <Compile Include="WBS_Item.cs" />

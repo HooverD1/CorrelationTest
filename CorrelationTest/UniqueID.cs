@@ -11,9 +11,7 @@ namespace CorrelationTest
     {
         private const int SheetType_Placement = 0;
         public string SheetType { get; set; }
-        private const int Name_Placement = 1;
-        public string Name { get; set; }
-        private const int Created_Placement = 2; 
+        private const int Created_Placement = 1; 
         public string Created { get; set; }
         protected const char Delimiter = '|';
         protected const char Delimiter2 = '.';
@@ -24,7 +22,6 @@ namespace CorrelationTest
             this.ID = FullID;
             Dictionary<string, string> ID_Components = ParseID(this.ID);
             this.SheetType = ID_Components["SheetType"];
-            this.Name = ID_Components["Name"];
             this.Created = ID_Components["Created"];
             
         }
@@ -32,33 +29,25 @@ namespace CorrelationTest
         public UniqueID(string SheetType, string Name, string Created = null)
         {
             this.SheetType = SheetType;
-            this.Name = Name;
             if (Created == null)
                 this.Created = UniqueID.Timestamp();
             else
                 this.Created = Created;
             this.ID = CreateID(new Dictionary<string, string>() { { "SheetType", this.SheetType },
-                                                                            { "Name", this.Name },
                                                                             { "Created", this.Created } });
         }
 
         public UniqueID(Dictionary<string, string> ID_Components)
         {
             this.SheetType = string.Empty;
-            this.Name = string.Empty;
             this.Created = string.Empty;
             if (ID_Components.ContainsKey("SheetType"))
                 this.SheetType = ID_Components["SheetType"];
-            if (ID_Components.ContainsKey("Name"))
-                this.Name = ID_Components["Name"];
             if (ID_Components.ContainsKey("Created"))
                 this.Created = ID_Components["Created"];
             else
                 this.Created = UniqueID.Timestamp();
-            if (string.IsNullOrEmpty(this.SheetType) || string.IsNullOrEmpty(this.Name))
-                throw new Exception("Malformed dictionary parameter");
-            else
-                this.ID = CreateID(ID_Components);
+            this.ID = CreateID(ID_Components);
         }
 
         public void PrintToCell(Excel.Range xlUniqueID)
@@ -69,7 +58,6 @@ namespace CorrelationTest
         public void RefreshID()
         {
             this.ID = CreateID(new Dictionary<string, string>() { { "SheetType", this.SheetType },
-                                                                  { "Name", this.Name },
                                                                   { "Created", this.Created } });
         }
 
@@ -82,9 +70,6 @@ namespace CorrelationTest
                 {
                     case SheetType_Placement:
                         sb.Append(ParamDict["SheetType"]);
-                        break;
-                    case Name_Placement:
-                        sb.Append($"{ParamDict["Name"]}");
                         break;
                     case Created_Placement:
                         sb.Append(ParamDict["Created"]);
@@ -111,7 +96,6 @@ namespace CorrelationTest
             Dictionary<string, string> UniqueID_Properties = new Dictionary<string, string>();
             string[] valueSplit = Value.Split(Delimiter);
             UniqueID_Properties.Add("SheetType", valueSplit[SheetType_Placement]);
-            UniqueID_Properties.Add("Name", valueSplit[Name_Placement]);
             UniqueID_Properties.Add("Created", valueSplit[Created_Placement]);
             return UniqueID_Properties;
         }

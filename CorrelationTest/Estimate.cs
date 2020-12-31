@@ -13,7 +13,7 @@ namespace CorrelationTest
         private DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
         public UniqueID uID { get; set; }
-        public ICostSheet ContainingSheetObject { get; set; }
+        public CostSheet ContainingSheetObject { get; set; }
         public Distribution EstimateDistribution { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
         public char Type { get; set; }
@@ -36,10 +36,10 @@ namespace CorrelationTest
         public string WBS_String { get; set; }
         public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
-        public Estimate(Excel.Range itemRow, ICostSheet ContainingSheetObject)
+        public Estimate(Excel.Range itemRow, CostSheet ContainingSheetObject)
         {
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(itemRow.Worksheet));
-            
+
             //this.TemporalCorrelStringObj = new Data.CorrelationString_Inputs
             this.xlRow = itemRow;
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
@@ -60,7 +60,7 @@ namespace CorrelationTest
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
             this.EstimateDistribution = new Distribution(this.DistributionParameters);
             this.SubEstimates = new List<Estimate>();
-            
+
             this.Level = Convert.ToInt32(xlLevelCell.Value);
             this.Type = Convert.ToChar(xlTypeCell.Value);
             this.Name = Convert.ToString(xlNameCell.Value);
@@ -79,7 +79,7 @@ namespace CorrelationTest
         {
             double[] dollars = LoadDollars();
             Period[] periods = new Period[10];
-            for(int i = 0; i < periods.Length; i++)
+            for (int i = 0; i < periods.Length; i++)
             {
                 periods[i] = new Period(this.uID, i + 1, dollars[i]);
             }
@@ -88,7 +88,7 @@ namespace CorrelationTest
         private double[] LoadDollars()
         {
             double[] dollars = new double[10];
-            for(int d = 0; d < dollars.Length; d++)
+            for (int d = 0; d < dollars.Length; d++)
             {
                 dollars[d] = xlDollarCell.Offset[0, d].Value ?? 0;
             }
@@ -123,11 +123,11 @@ namespace CorrelationTest
             }
             List<Estimate> subestimates = new List<Estimate>();
 
-            Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row+1, dispCoords.Type_Offset];
+            Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row + 1, dispCoords.Type_Offset];
             //iterate until you find <= level
-            Excel.Range lastCell = firstCell.Offset[1,0];
+            Excel.Range lastCell = firstCell.Offset[1, 0];
             int offset = 0;
-            while(true)
+            while (true)
             {
                 offset++;
                 if (firstCell.Offset[offset, 0].Value != ci.ToString())
@@ -156,7 +156,7 @@ namespace CorrelationTest
             LoadCorrelatedValues();
             return subestimates;
         }
-        
+
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
             this.Siblings = new List<Estimate>();
@@ -180,7 +180,7 @@ namespace CorrelationTest
             {
                 Data.CorrelationString_Inputs csi = new Data.CorrelationString_Inputs(xlCorrelCell_Inputs.Value);
                 this.InputCorrelStringObj = csi;
-                
+
             }
             if (this.xlCorrelCell_Periods != null)
             {
@@ -193,7 +193,7 @@ namespace CorrelationTest
         {
             UniqueID[] subIDs = new UniqueID[this.SubEstimates.Count];
             int index = 0;
-            foreach(Estimate est in this.SubEstimates)
+            foreach (Estimate est in this.SubEstimates)
             {
                 subIDs[index] = est.uID;
                 index++;
@@ -211,7 +211,19 @@ namespace CorrelationTest
             this.xlNameCell.Value = this.Name;
         }
 
+        public void PrintInputCorrelString()
+        {
+            Data.CorrelationString inString = Data.CorrelationString.Construct(this, Data.CorrelStringType.InputsMatrix);
+            this.xlCorrelCell_Inputs.Value = inString.Value;
+        }
+        public void PrintPhasingCorrelString()
+        {
 
+        }
+        public void PrintDurationCorrelString()
+        {
+
+        }
     }
 
 }

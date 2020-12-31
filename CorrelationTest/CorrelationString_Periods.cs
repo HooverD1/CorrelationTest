@@ -27,11 +27,38 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
 
-            public static CorrelationString_Periods CreateZeroString(string[] fields)
+            private CorrelationString_Periods(string[] start_dates)     //Zero string constructor
             {
-                //Need to downcast csi 
-                var csi = new CorrelationString(fields);
-                return new CorrelationString_Periods(csi.Value);
+                StringBuilder sb = new StringBuilder();
+                sb.Append(start_dates.Length);
+                sb.Append(",");
+                sb.Append("PM");
+                //No parent uid for a PM string
+                sb.AppendLine();
+                //Append the start dates
+                for (int i = 0; i < start_dates.Length-1; i++)
+                {
+                    sb.Append(start_dates[i]);
+                    sb.Append(",");
+                }
+                sb.Append(start_dates[start_dates.Length - 1]);
+                sb.AppendLine();
+                //Append default values (zeroes)
+                for(int row = 0; row < start_dates.Length - 1; row++)
+                {
+                    for (int i = row; i < start_dates.Length - 2; i++)
+                    {
+                        sb.Append("0,");
+                    }
+                    sb.Append("0");
+                    sb.AppendLine();
+                }
+                this.Value = sb.ToString();
+            }
+
+            public static CorrelationString_Periods ConstructZeroString(string[] start_dates)
+            {
+                return new CorrelationString_Periods(start_dates);
             }
 
             public CorrelationString_Periods(Data.CorrelationMatrix matrix)
@@ -41,7 +68,7 @@ namespace CorrelationTest
 
             public static Data.CorrelationString_Periods ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
-                Data.CorrelationString_Periods correlationString = (CorrelationString_Periods)CreateZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
+                Data.CorrelationString_Periods correlationString = (CorrelationString_Periods)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
                     return correlationString;       //return zero string
                 else

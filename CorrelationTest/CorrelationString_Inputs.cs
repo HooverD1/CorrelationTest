@@ -136,8 +136,9 @@ namespace CorrelationTest
 
             public override object[] GetFields()
             {
-                var ids = this.GetIDs();
-                return (from UniqueID uid in ids select uid.Name).ToArray<object>();
+                return null;    //No names in IDs anymore
+                //var ids = this.GetIDs();
+                //return (from UniqueID uid in ids select uid.Name).ToArray<object>();
             }
 
             public static bool Validate(Excel.Range correlCell)      //validate that it is in fact a correlString
@@ -168,7 +169,7 @@ namespace CorrelationTest
             //        return null;                            //if malformed, return null
             //}
 
-            public static CorrelationString_Inputs CreateZeroString(string[] fields)
+            public static CorrelationString_Inputs ConstructZeroString(string[] fields)
             {
                 //Need to downcast csi 
                 var csi = new CorrelationString(fields);
@@ -177,7 +178,7 @@ namespace CorrelationTest
 
             public static Data.CorrelationString_Inputs ConstructString(UniqueID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
-                Data.CorrelationString_Inputs correlationString = CreateZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
+                Data.CorrelationString_Inputs correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
                     return correlationString;       //return zero string
                 else
@@ -238,12 +239,12 @@ namespace CorrelationTest
                 string[] id_strings = correlLines[0].Split(',');            //get fields (first line) and delimit
                 //recombine with the newIDs
                 StringBuilder sb = new StringBuilder();
-                for(int i=0; i < newIDs.Length; i++)
-                {
-                    sb.Append(newIDs[i].Name);
-                    if (i < newIDs.Length - 1)
-                        sb.Append(",");
-                }
+                //for(int i=0; i < newIDs.Length; i++)
+                //{
+                //    sb.Append(newIDs[i].Name);
+                //    if (i < newIDs.Length - 1)
+                //        sb.Append(",");
+                //}
                 sb.AppendLine();
                 for(int j=1;j<correlLines.Length;j++)
                 {

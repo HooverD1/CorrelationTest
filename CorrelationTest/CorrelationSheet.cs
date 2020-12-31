@@ -81,9 +81,7 @@ namespace CorrelationTest
             public override void PrintToSheet()  //expanding from string
             {
                 //build a sheet object off the linksource
-                ICostSheet costSheet = CostSheetFactory.Construct(new Dictionary<string, object>() {
-                    { "SheetType", ExtensionMethods.GetSheetType(this.LinkToOrigin.LinkSource.Worksheet) },
-                    { "xlSheet", this.LinkToOrigin.LinkSource.Worksheet } });
+                CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
                 Estimate tempEst = new Estimate(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix

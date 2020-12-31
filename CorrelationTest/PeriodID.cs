@@ -12,7 +12,6 @@ namespace CorrelationTest
         public PeriodID(UniqueID uID, int period) : base(uID.ID)
         {
             this.PeriodTag = period;
-            this.Name = $"{uID.Name}_P{period}";
             this.RefreshID();
         }
 
