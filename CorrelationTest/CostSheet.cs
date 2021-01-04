@@ -8,7 +8,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public enum CostItem
+    public enum CostItems
     {
         I,
         E,
@@ -20,8 +20,6 @@ namespace CorrelationTest
     {
         protected DialogResult OverwriteRepeatedIDs { get; set; }
         protected DisplayCoords Specs { get; set; }
-        protected int LevelColumn { get; set; }
-
         public List<Estimate> Estimates { get; set; }
 
         public virtual List<Estimate> GetEstimates(bool LoadSubs) { throw new Exception("Failed override"); }
@@ -65,8 +63,8 @@ namespace CorrelationTest
                 //check if any of the subestimates have NonZeroCorrel entries
                 
                 //This is sending in too many IDs
-                Data.CorrelationString_Inputs correlationString_inputs = Data.CorrelationString_Inputs.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
-                correlationString_inputs.PrintToSheet(estimate.xlCorrelCell_Inputs);
+                Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
+                CorrelationString_IM.PrintToSheet(estimate.xlCorrelCell_Inputs);
             }
         }
 
@@ -80,12 +78,13 @@ namespace CorrelationTest
              * The saved values should already be loaded into the estimates
              */
             //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
-            //Data.CorrelationString_Periods correlationString_periods = Data.CorrelationString_Periods.ConstructString(periodIDs, this.xlSheet.Name);
+            //Data.CorrelationString_PM CorrelationString_PM = Data.CorrelationString_PM.ConstructString(periodIDs, this.xlSheet.Name);
             Data.CorrelationString correlationString = Data.CorrelationString.Construct(estimate.xlCorrelCell_Periods.Value);
             correlationString.PrintToSheet(estimate.xlCorrelCell_Periods);
         }
 
-        public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType) { return null; }
+        public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType) { throw new Exception("Failed override"); }
+        public virtual Excel.Range[] PullEstimates(Excel.Range pullRange) { throw new Exception("Failed override"); }
 
         public static CostSheet Construct(Excel.Worksheet xlSheet)
         {

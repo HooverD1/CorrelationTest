@@ -16,7 +16,6 @@ namespace CorrelationTest
 
             public EstimateSheet(Excel.Worksheet xlSheet)
             {
-                this.LevelColumn = 2;
                 this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
                 this.xlSheet = xlSheet;
                 //LoadEstimates(false);
@@ -67,11 +66,11 @@ namespace CorrelationTest
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
-                        Data.CorrelationString_Inputs correlString;
+                        Data.CorrelationString_IM correlString;
                         if (estimate.xlCorrelCell_Inputs.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString_Inputs.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
+                            correlString = Data.CorrelationString_IM.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
                         else
-                            correlString = new Data.CorrelationString_Inputs(estimate.xlCorrelCell_Inputs.Value);       //construct from string
+                            correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
                         var correlMatrix = new Data.CorrelationMatrix(correlString);
                         var matrixIDs = correlMatrix.GetIDs();
                         foreach (UniqueID id1 in matrixIDs)
@@ -101,7 +100,7 @@ namespace CorrelationTest
                 Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
                 Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange, CostItem.E);       //Pull the estimates (not the inputs)
+                Excel.Range[] estRows = PullEstimates(pullRange, CostItems.E);       //Pull the estimates (not the inputs)
                 for (int index = 0; index < estRows.Count(); index++)
                 {
                     Estimate parentEstimate = new Estimate(estRows[index].EntireRow, this);
@@ -134,7 +133,7 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType)
+            public override Excel.Range[] PullEstimates(Excel.Range pullRange, CostItems costType)
             {
                 Excel.Worksheet xlSheet = pullRange.Worksheet;
                 IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells

@@ -9,10 +9,10 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_Triple : CorrelationString
+        public class CorrelationString_PT : CorrelationString
         {
-            public PhasingTriple Triple { get; set; }
-            public CorrelationString_Triple(PhasingTriple pt, int periods, string parent_id)        //build a triple string out of a triple
+            public Triple Triple { get; set; }
+            public CorrelationString_PT(Triple pt, int periods, string parent_id)        //build a triple string out of a triple
             {
                 this.Triple = pt;
                 StringBuilder sb = new StringBuilder();
@@ -24,11 +24,11 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
-            public CorrelationString_Triple(string correlString)
+            public CorrelationString_PT(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
                 string triple = this.Value.Split('&')[2];
-                this.Triple = new PhasingTriple(this.GetParentID().ID, triple);
+                this.Triple = new Triple(this.GetParentID().ID, triple);
             }
 
             public override void Expand(Excel.Range xlSource)
@@ -75,14 +75,14 @@ namespace CorrelationTest
                 return new UniqueID(lines[1]);
             }
 
-            public PhasingTriple GetTriple()
+            public Triple GetTriple()
             {
                 string[] correlLines = DelimitString();
                 if (correlLines.Length != 3)
                     throw new Exception("Malformed triple string.");
                 string uidString = correlLines[1];
                 string tripleString = correlLines[2];
-                return new PhasingTriple(uidString, tripleString);
+                return new Triple(uidString, tripleString);
             }
         }
     }    

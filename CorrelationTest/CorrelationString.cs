@@ -12,9 +12,11 @@ namespace CorrelationTest
         public enum CorrelStringType
         {
             InputsMatrix,
+            InputsTriple,
             PhasingMatrix,
             PhasingTriple,
-            DurationMatrix
+            DurationMatrix,
+            DurationTriple
         }
 
         public class CorrelationString
@@ -276,14 +278,13 @@ namespace CorrelationTest
 
             public static CorrelationString Construct(Estimate est, CorrelStringType csType)        //Construct default correlation string for estimate
             {
-                
                 switch (csType)
                 {
                     case CorrelStringType.PhasingTriple:
                         if(est.xlCorrelCell_Periods.Value == null)
                         {
-                            PhasingTriple pt = new PhasingTriple(est.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_Triple(pt, est.Periods.Length, est.uID.ID);
+                            Triple pt = new Triple(est.uID.ID, "0,0,0");
+                            return new Data.CorrelationString_PT(pt, est.Periods.Length, est.uID.ID);
                         }
                         else
                         {
@@ -293,23 +294,39 @@ namespace CorrelationTest
                         if(est.xlCorrelCell_Periods.Value == null)
                         {
                             IEnumerable<string> start_dates = from Period prd in est.Periods select prd.pID.PeriodTag.ToString();
-                            return CorrelationString_Periods.ConstructZeroString(start_dates.ToArray());
+                            return CorrelationString_PM.ConstructZeroString(start_dates.ToArray());
                         }
                         else
                         {
                             return Construct(est.xlCorrelCell_Periods.Value);
-                        }                        
+                        }
+                    case CorrelStringType.InputsTriple:
+                        if (est.xlCorrelCell_Inputs.Value == null)
+                        {
+                            if (est.SubEstimates.Count < 2)
+                                return null;
+                            Triple it = new Triple(est.uID.ID, "0,0,0");
+                            return new Data.CorrelationString_IT(it, est.SubEstimates.Count, est.uID.ID);
+                        }
+                        else
+                        {
+                            return Construct(est.xlCorrelCell_Inputs.Value);
+                        }
                     case CorrelStringType.InputsMatrix:
                         if(est.xlCorrelCell_Inputs.Value == null)
                         {
+                            if (est.SubEstimates.Count < 2)
+                                return null;
                             IEnumerable<string> fields = from Estimate sub in est.ContainingSheetObject.GetSubEstimates(est.xlRow) select sub.Name;
-                            return CorrelationString_Inputs.ConstructZeroString(fields.ToArray());
+                            return CorrelationString_IM.ConstructZeroString(fields.ToArray());
                         }
                         else
                         {
                             return Construct(est.xlCorrelCell_Inputs.Value);
                         }                        
                     case CorrelStringType.DurationMatrix:
+                        throw new NotImplementedException();
+                    case CorrelStringType.DurationTriple:
                         throw new NotImplementedException();
                     default:
                         throw new Exception("Cannot construct CorrelationString");
@@ -331,12 +348,16 @@ namespace CorrelationTest
                 switch (csType)
                 {
                     case CorrelStringType.PhasingTriple:
-                        PhasingTriple pt = new PhasingTriple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
-                        return new Data.CorrelationString_Triple(pt, Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
+                        Triple pt = new Triple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
+                        return new Data.CorrelationString_PT(pt, Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
                     case CorrelStringType.PhasingMatrix:
-                        return new CorrelationString_Periods(correlStringValue);
+                        return new CorrelationString_PM(correlStringValue);
+                    case CorrelStringType.InputsTriple:
+                        return new CorrelationString_IT(correlStringValue);
                     case CorrelStringType.InputsMatrix:
-                        return new CorrelationString_Inputs(correlStringValue);
+                        return new CorrelationString_IM(correlStringValue);
+                    case CorrelStringType.DurationTriple:
+                        throw new NotImplementedException();
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();
                     default:

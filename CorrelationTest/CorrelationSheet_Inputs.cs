@@ -11,12 +11,12 @@ namespace CorrelationTest
     {
         public class CorrelationSheet_Inputs : CorrelationSheet
         {            
-            public CorrelationSheet_Inputs(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Inputs(Data.CorrelationString_IM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet();
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Inputs)CorrelString);
+                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_IM)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -45,7 +45,7 @@ namespace CorrelationTest
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1,0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
                 this.CorrelMatrix = new Data.CorrelationMatrix(this, xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange);  
                 //Build the CorrelString, which can print itself during collapse
-                this.CorrelString = new Data.CorrelationString_Inputs(this.CorrelMatrix);
+                this.CorrelString = new Data.CorrelationString_IM(this.CorrelMatrix);
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -73,7 +73,7 @@ namespace CorrelationTest
 
             public override void UpdateCorrelationString()
             {
-                this.CorrelString = new Data.CorrelationString_Inputs(this.CorrelMatrix);
+                this.CorrelString = new Data.CorrelationString_IM(this.CorrelMatrix);
             }
 
             public override void PrintToSheet()  //expanding from string

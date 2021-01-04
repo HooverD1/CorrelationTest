@@ -50,6 +50,7 @@ namespace CorrelationTest
             this.Type_Offset = WBS_Type_Offset;
             this.Name_Offset = WBS_Name_Offset;
             this.InputCorrel_Offset = WBS_InputCorrel_Offset;
+            this.PhasingCorrel_Offset = WBS_PhasingCorrel_Offset;
             this.Distribution_Offset = WBS_Distribution_Offset;
             this.Dollar_Offset = WBS_Dollar_Offset;
         }

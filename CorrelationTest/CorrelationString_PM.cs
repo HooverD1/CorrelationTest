@@ -9,9 +9,9 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_Periods : CorrelationString
+        public class CorrelationString_PM : CorrelationString
         {
-            public CorrelationString_Periods(Excel.Range xlDollarRange, double defaultCorrel = 0)     //Create new -- default correlation
+            public CorrelationString_PM(Excel.Range xlDollarRange, double defaultCorrel = 0)     //Create new -- default correlation
             {
                 int numberOfPeriods = xlDollarRange.Columns.Count;
                 string[] fields = new string[numberOfPeriods];
@@ -22,12 +22,12 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields, defaultCorrel));
             }
 
-            public CorrelationString_Periods(string correlString)
+            public CorrelationString_PM(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
 
-            private CorrelationString_Periods(string[] start_dates)     //Zero string constructor
+            private CorrelationString_PM(string[] start_dates)     //Zero string constructor
             {
                 StringBuilder sb = new StringBuilder();
                 sb.Append(start_dates.Length);
@@ -56,19 +56,19 @@ namespace CorrelationTest
                 this.Value = sb.ToString();
             }
 
-            public static CorrelationString_Periods ConstructZeroString(string[] start_dates)
+            public static CorrelationString_PM ConstructZeroString(string[] start_dates)
             {
-                return new CorrelationString_Periods(start_dates);
+                return new CorrelationString_PM(start_dates);
             }
 
-            public CorrelationString_Periods(Data.CorrelationMatrix matrix)
+            public CorrelationString_PM(Data.CorrelationMatrix matrix)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(matrix.GetIDs(), matrix.GetMatrix())); 
             }
 
-            public static Data.CorrelationString_Periods ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
+            public static Data.CorrelationString_PM ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
-                Data.CorrelationString_Periods correlationString = (CorrelationString_Periods)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
+                Data.CorrelationString_PM correlationString = (CorrelationString_PM)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
                     return correlationString;       //return zero string
                 else
@@ -90,7 +90,7 @@ namespace CorrelationTest
                         }
                     }
                     //convert to a string
-                    return new Data.CorrelationString_Periods(matrix);      //return modified zero matrix as correl string
+                    return new Data.CorrelationString_PM(matrix);      //return modified zero matrix as correl string
                 }
             }
 

@@ -185,11 +185,15 @@
     <Compile Include="CorrelationSheet.cs" />
     <Compile Include="CorrelationSheet_Inputs.cs" />
     <Compile Include="CorrelationSheet_Phasing.cs" />
-    <Compile Include="CorrelationString_Inputs.cs" />
+    <Compile Include="CorrelationString_DM.cs" />
+    <Compile Include="CorrelationString_DT.cs" />
+    <Compile Include="CorrelationString_IM.cs" />
     <Compile Include="CorrelationString.cs" />
-    <Compile Include="CorrelationString_Periods.cs" />
-    <Compile Include="CorrelationString_Triple.cs" />
+    <Compile Include="CorrelationString_IT.cs" />
+    <Compile Include="CorrelationString_PM.cs" />
+    <Compile Include="CorrelationString_PT.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
+    <Compile Include="CostItem.cs" />
     <Compile Include="CostSheet.cs" />
     <Compile Include="DisplayCoords.cs" />
     <Compile Include="Distribution.cs" />
@@ -202,7 +206,7 @@
     <Compile Include="Link.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PeriodID.cs" />
-    <Compile Include="PhasingTriple.cs" />
+    <Compile Include="Triple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

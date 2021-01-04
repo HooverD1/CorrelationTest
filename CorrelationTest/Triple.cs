@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class PhasingTriple
+    public class Triple
     {
         public UniqueID uID { get; set; }
         public double TopLeft { get; set; }
@@ -15,14 +15,14 @@ namespace CorrelationTest
         public double VerticalMultiplier { get; set; }
         private Data.CorrelationMatrix CorrelMatrix { get; set; }
 
-        public PhasingTriple(Excel.Range xlUIdCell, Excel.Range tripleRange) : this((string)xlUIdCell.Value, (string)tripleRange.Value) { }
+        public Triple(Excel.Range xlUIdCell, Excel.Range tripleRange) : this((string)xlUIdCell.Value, (string)tripleRange.Value) { }
         
-        public PhasingTriple(string uidString, string triple)
+        public Triple(string uidString, string triple)
         {
             this.uID = new UniqueID(uidString);
             object[,] tripleValues = SplitTriple(triple);
             if (!ValidateTriple(tripleValues))
-                throw new Exception("Invalid phasing correlation triple.");
+                throw new Exception("Invalid correlation triple.");
             else
             {
                 this.TopLeft = Convert.ToDouble(tripleValues[0,0]);

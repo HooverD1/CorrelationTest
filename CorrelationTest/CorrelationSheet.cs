@@ -33,7 +33,7 @@ namespace CorrelationTest
             protected Excel.Range xlDistCell { get; set; }
             protected Data.CorrelSheetSpecs Specs { get; set; }
 
-            //public CorrelationSheet(Data.CorrelationString_Inputs correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
+            //public CorrelationSheet(Data.CorrelationString_IM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
 
 
             protected virtual Excel.Worksheet CreateXLCorrelSheet(string postfix) { throw new Exception("Failed override"); }
@@ -299,17 +299,17 @@ namespace CorrelationTest
 
             public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
             {
-                if(correlString is Data.CorrelationString_Inputs)
+                if(correlString is Data.CorrelationString_IM)
                 {
-                    return new CorrelationSheet_Inputs((Data.CorrelationString_Inputs)correlString, source, specs);
+                    return new CorrelationSheet_Inputs((Data.CorrelationString_IM)correlString, source, specs);
                 }
-                else if(correlString is Data.CorrelationString_Periods)
+                else if(correlString is Data.CorrelationString_PM)
                 {
-                    return new CorrelationSheet_Phasing((Data.CorrelationString_Periods)correlString, source, specs);
+                    return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
                 }
-                else if (correlString is Data.CorrelationString_Triple)
+                else if (correlString is Data.CorrelationString_PT)
                 {
-                    return new CorrelationSheet_Phasing((Data.CorrelationString_Triple)correlString, source, specs);
+                    return new CorrelationSheet_Phasing((Data.CorrelationString_PT)correlString, source, specs);
                 }
                 else
                 {

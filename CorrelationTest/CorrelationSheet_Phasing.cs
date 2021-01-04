@@ -11,7 +11,7 @@ namespace CorrelationTest
     {
         public class CorrelationSheet_Phasing : CorrelationSheet
         {
-            public CorrelationSheet_Phasing(Data.CorrelationString_Periods correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Phasing(Data.CorrelationString_PM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {
                 this.CorrelString = correlString;
                 this.Specs = specs;
@@ -22,7 +22,7 @@ namespace CorrelationTest
                     xlSheet = xlCorrelSheets.First();
                 else
                     xlSheet = CreateXLCorrelSheet("_PM");
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Periods)CorrelString);
+                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_PM)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -36,7 +36,7 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
-            public CorrelationSheet_Phasing(Data.CorrelationString_Triple correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Phasing(Data.CorrelationString_PT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {
                 this.CorrelString = correlString;
                 this.Specs = specs;
@@ -47,7 +47,7 @@ namespace CorrelationTest
                     xlSheet = xlCorrelSheets.First();
                 else
                     xlSheet = CreateXLCorrelSheet("_PT");
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_Triple)CorrelString);
+                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_PT)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -80,13 +80,13 @@ namespace CorrelationTest
                 //Build the CorrelString, which can print itself during collapse
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 if (sheetType == SheetType.Correlation_PM)
-                    this.CorrelString = new Data.CorrelationString_Periods(this.CorrelMatrix);
+                    this.CorrelString = new Data.CorrelationString_PM(this.CorrelMatrix);
                 else if (sheetType == SheetType.Correlation_PT)
                 {
                     //Build the triple from the string
                     string correlStringVal = this.xlCorrelStringCell.Value;
-                    Data.CorrelationString_Triple existing_cst = new Data.CorrelationString_Triple(correlStringVal);
-                    PhasingTriple pt = existing_cst.GetTriple();
+                    Data.CorrelationString_PT existing_cst = new Data.CorrelationString_PT(correlStringVal);
+                    Triple pt = existing_cst.GetTriple();
                     //Check if the matrix still matches the triple.
                     if (this.CorrelMatrix.ValidateAgainstTriple(pt))
                     {       //If YES - create cs_triple object
@@ -94,7 +94,7 @@ namespace CorrelationTest
                     }
                     else
                     {       //If NO - create cs_periods object
-                        this.CorrelString = new Data.CorrelationString_Periods(this.CorrelMatrix);
+                        this.CorrelString = new Data.CorrelationString_PM(this.CorrelMatrix);
                     }
                 }
                 else

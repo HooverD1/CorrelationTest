@@ -45,7 +45,7 @@ namespace CorrelationTest
                 FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
-            public CorrelationMatrix(Data.CorrelationString_Inputs correlStringObj)
+            public CorrelationMatrix(Data.CorrelationString_IM correlStringObj)
             {
                 //expand from string
                 this.Fields = correlStringObj.GetFields();
@@ -54,7 +54,7 @@ namespace CorrelationTest
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
-            public CorrelationMatrix(Data.CorrelationString_Periods correlStringObj)
+            public CorrelationMatrix(Data.CorrelationString_PM correlStringObj)
             {
                 //expand from string
                 this.Fields = correlStringObj.GetFields();
@@ -63,7 +63,7 @@ namespace CorrelationTest
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
-            public CorrelationMatrix(Data.CorrelationString_Triple correlStringObj)
+            public CorrelationMatrix(Data.CorrelationString_PT correlStringObj)
             {
                 //expand from string
                 this.Fields = correlStringObj.GetFields();
@@ -312,7 +312,7 @@ namespace CorrelationTest
                 return true;
             }
 
-            public bool ValidateAgainstTriple(PhasingTriple pt)
+            public bool ValidateAgainstTriple(Triple pt)
             {
                 Data.CorrelationMatrix tripleMatrix = pt.GetPhasingCorrelationMatrix(this.FieldCount);
                 return this.Equals(tripleMatrix);

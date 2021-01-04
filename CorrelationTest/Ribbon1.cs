@@ -109,7 +109,7 @@ namespace CorrelationTest
             }
             System.Threading.Thread.Sleep(1);
             est_1.Cells[10, 1] = $"E|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[10, 2] = 0;
+            est_1.Cells[10, 2] = 4;
             est_1.Cells[10, 3] = "E";
             est_1.Cells[10, 4] = "Est5.2";
             est_1.Cells[10, 7] = "Normal";
@@ -121,8 +121,7 @@ namespace CorrelationTest
             }
             System.Threading.Thread.Sleep(1);
             est_1.Cells[11, 1] = $"E|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[11, 2] = 3;
-            est_1.Cells[11, 3] = "E";
+            est_1.Cells[11, 3] = "I";
             est_1.Cells[11, 4] = "Est6";
             est_1.Cells[11, 7] = "Normal";
             est_1.Cells[11, 8] = 0;
@@ -332,8 +331,8 @@ namespace CorrelationTest
 
 
             //Repeat for wbs_1
-            //CostSheet wbsSheet_example = CostSheet.Construct(wbs_1);
-
+            CostSheet wbsSheet_example = CostSheet.Construct(wbs_1);
+            wbsSheet_example.PrintDefaultCorrelStrings();
             //foreach(Estimate est in estimates)
             //{
             //    est.xlCorrelCell_Periods.Value = $"8,PT&{est.uID.ID}&.75,.8,.6";
