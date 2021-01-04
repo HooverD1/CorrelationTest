@@ -19,7 +19,7 @@ namespace CorrelationTest
     public abstract class CostSheet : Sheet
     {
         protected DialogResult OverwriteRepeatedIDs { get; set; }
-        protected DisplayCoords dc { get; set; }
+        protected DisplayCoords Specs { get; set; }
         protected int LevelColumn { get; set; }
 
         public List<Estimate> Estimates { get; set; }
@@ -29,6 +29,7 @@ namespace CorrelationTest
         {
             this.Estimates = GetEstimates(LoadSubs);
         }
+        protected virtual List<Estimate> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
         public virtual void PrintDefaultCorrelStrings()
         {
             List<Estimate> estimates = GetEstimates(true);

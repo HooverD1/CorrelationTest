@@ -17,7 +17,7 @@ namespace CorrelationTest
             public EstimateSheet(Excel.Worksheet xlSheet)
             {
                 this.LevelColumn = 2;
-                this.dc = DisplayCoords.ConstructDisplayCoords(sheetType);
+                this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
                 this.xlSheet = xlSheet;
                 //LoadEstimates(false);
             }
@@ -98,18 +98,30 @@ namespace CorrelationTest
             public override List<Estimate> GetEstimates(bool LoadSubs)
             {
                 List<Estimate> returnList = new List<Estimate>();
-                Excel.Range lastCell = xlSheet.Cells[1000000, dc.Type_Offset].End[Excel.XlDirection.xlUp];
-                Excel.Range firstCell = xlSheet.Cells[2, dc.Type_Offset];
+                Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
+                Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange, CostItem.E);
+                Excel.Range[] estRows = PullEstimates(pullRange, CostItem.E);       //Pull the estimates (not the inputs)
                 for (int index = 0; index < estRows.Count(); index++)
                 {
                     Estimate parentEstimate = new Estimate(estRows[index].EntireRow, this);
                     if(LoadSubs)
-                        parentEstimate.LoadSubEstimates();
+                        parentEstimate.SubEstimates = this.GetSubEstimates(estRows[index].EntireRow);     //Get the subestimates for this parent row
                     returnList.Add(parentEstimate);
                 }
                 return returnList;
+            }
+
+            protected override List<Estimate> GetSubEstimates(Excel.Range parentRow)
+            {
+                List<Estimate> subEstimates = new List<Estimate>();
+                //Get the number of inputs
+                int inputCount = Convert.ToInt32(parentRow.Cells[1, this.Specs.Level_Offset].value);    //Get the number of inputs
+                for(int i = 1; i <= inputCount; i++)
+                {
+                    subEstimates.Add(new Estimate(parentRow.Offset[i, 0].EntireRow, this));
+                }
+                return subEstimates;
             }
 
             public override void PrintToSheet()

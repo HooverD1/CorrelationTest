@@ -141,17 +141,8 @@ namespace CorrelationTest
             {
                 //search for sub-estimate
                 Estimate nextEstimate = new Estimate(estRows[next].EntireRow, this.ContainingSheetObject);      //build temp sub-estimate
-                if (nextEstimate.Level - 1 == this.Level)
-                {
-                    //sub-estimate
-                    subestimates.Add(nextEstimate);
-                    nextEstimate.ParentEstimate = this;
-                }
-                else if (nextEstimate.Level <= this.Level)
-                {
-                    LoadCorrelatedValues();
-                    return subestimates;
-                }
+                subestimates.Add(nextEstimate);
+                nextEstimate.ParentEstimate = this;
             }
             LoadCorrelatedValues();
             return subestimates;

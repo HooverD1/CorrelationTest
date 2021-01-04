@@ -50,6 +50,7 @@ namespace CorrelationTest
             est_1.Cells[4, 10] = "Param3";
 
             est_1.Cells[5, 1] = $"E|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[5, 2] = 4;  //# of inputs
             est_1.Cells[5, 3] = "E";
             est_1.Cells[5, 4] = "Est1";
             est_1.Cells[5, 7] = "Normal";
@@ -108,6 +109,7 @@ namespace CorrelationTest
             }
             System.Threading.Thread.Sleep(1);
             est_1.Cells[10, 1] = $"E|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[10, 2] = 0;
             est_1.Cells[10, 3] = "E";
             est_1.Cells[10, 4] = "Est5.2";
             est_1.Cells[10, 7] = "Normal";
@@ -119,6 +121,7 @@ namespace CorrelationTest
             }
             System.Threading.Thread.Sleep(1);
             est_1.Cells[11, 1] = $"E|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[11, 2] = 3;
             est_1.Cells[11, 3] = "E";
             est_1.Cells[11, 4] = "Est6";
             est_1.Cells[11, 7] = "Normal";
@@ -163,6 +166,7 @@ namespace CorrelationTest
             }
             System.Threading.Thread.Sleep(1);
             est_1.Cells[15, 1] = $"E|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[15, 2] = 1;
             est_1.Cells[15, 3] = "E";
             est_1.Cells[15, 4] = "Est10";
             est_1.Cells[15, 7] = "Normal";

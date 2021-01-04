@@ -16,7 +16,7 @@ namespace CorrelationTest
             
             public WBSSheet(Excel.Worksheet xlSheet)
             {
-                this.dc = DisplayCoords.ConstructDisplayCoords(sheetType);
+                this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
                 this.xlSheet = xlSheet;
                 LoadEstimates(false);
             }
@@ -24,8 +24,8 @@ namespace CorrelationTest
             public override List<Estimate> GetEstimates(bool LoadSubs)      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
             {
                 List<Estimate> returnList = new List<Estimate>();
-                Excel.Range lastCell = xlSheet.Cells[1000000, dc.Type_Offset].End[Excel.XlDirection.xlUp];
-                Excel.Range firstCell = xlSheet.Cells[2, dc.Type_Offset];
+                Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
+                Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
                 Excel.Range[] estRows = PullEstimates(pullRange.Address);
                 int maxDepth = Convert.ToInt32((from Excel.Range row in estRows select row.Cells[1, LevelColumn].value).Max());
