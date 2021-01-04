@@ -193,7 +193,6 @@
     <Compile Include="CostSheet.cs" />
     <Compile Include="DisplayCoords.cs" />
     <Compile Include="Distribution.cs" />
-    <Compile Include="EstimateFactory.cs" />
     <Compile Include="Estimate.cs" />
     <Compile Include="EstimateSheet.cs" />
     <Compile Include="ExtensionMethods.cs" />

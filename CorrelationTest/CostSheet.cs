@@ -29,7 +29,7 @@ namespace CorrelationTest
         {
             this.Estimates = GetEstimates(LoadSubs);
         }
-        protected virtual List<Estimate> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
+        public virtual List<Estimate> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
         public virtual void PrintDefaultCorrelStrings()
         {
             List<Estimate> estimates = GetEstimates(true);

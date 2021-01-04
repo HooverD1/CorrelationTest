@@ -8,7 +8,7 @@ using Accord.Statistics.Distributions.Univariate;
 
 namespace CorrelationTest
 {
-    public class Estimate : IEstimate
+    public class Estimate
     {
         private DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
@@ -100,53 +100,53 @@ namespace CorrelationTest
             return this.uID.Equals(estimate.uID) ? true : false;
         }
 
-        public void LoadSubEstimates()
-        {
-            this.SubEstimates = GetSubEstimates();
-        }
+        //public void LoadSubEstimates()
+        //{
+        //    this.SubEstimates = GetSubEstimates();
+        //}
 
-        public List<Estimate> GetSubEstimates()     //Attach this to the sheet? Check sheet type?
-        {
-            Excel.Worksheet xlSheet = this.xlRow.Worksheet;
-            SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-            CostItem ci;
-            switch (sheetType)
-            {
-                case SheetType.Estimate:
-                    ci = CostItem.I;
-                    break;
-                case SheetType.WBS:
-                    ci = CostItem.E;
-                    break;
-                default:
-                    throw new Exception("Unexpected sheet type");
-            }
-            List<Estimate> subestimates = new List<Estimate>();
+        //public List<Estimate> GetSubEstimates()     //Attach this to the sheet? Check sheet type?
+        //{
+        //    Excel.Worksheet xlSheet = this.xlRow.Worksheet;
+        //    SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
+        //    CostItem ci;
+        //    switch (sheetType)
+        //    {
+        //        case SheetType.Estimate:
+        //            ci = CostItem.I;
+        //            break;
+        //        case SheetType.WBS:
+        //            ci = CostItem.E;
+        //            break;
+        //        default:
+        //            throw new Exception("Unexpected sheet type");
+        //    }
+        //    List<Estimate> subestimates = new List<Estimate>();
 
-            Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row + 1, dispCoords.Type_Offset];
-            //iterate until you find <= level
-            Excel.Range lastCell = firstCell.Offset[1, 0];
-            int offset = 0;
-            while (true)
-            {
-                offset++;
-                if (firstCell.Offset[offset, 0].Value != ci.ToString())
-                    break;
-                else
-                    lastCell = firstCell.Offset[offset, 0];
-            }
-            Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-            Excel.Range[] estRows = this.ContainingSheetObject.PullEstimates(pullRange, ci);
-            for (int next = 0; next < estRows.Count(); next++)
-            {
-                //search for sub-estimate
-                Estimate nextEstimate = new Estimate(estRows[next].EntireRow, this.ContainingSheetObject);      //build temp sub-estimate
-                subestimates.Add(nextEstimate);
-                nextEstimate.ParentEstimate = this;
-            }
-            LoadCorrelatedValues();
-            return subestimates;
-        }
+        //    Excel.Range firstCell = xlSheet.Cells[this.xlRow.Row + 1, dispCoords.Type_Offset];
+        //    //iterate until you find <= level
+        //    Excel.Range lastCell = firstCell.Offset[1, 0];
+        //    int offset = 0;
+        //    while (true)
+        //    {
+        //        offset++;
+        //        if (firstCell.Offset[offset, 0].Value != ci.ToString())
+        //            break;
+        //        else
+        //            lastCell = firstCell.Offset[offset, 0];
+        //    }
+        //    Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
+        //    Excel.Range[] estRows = this.ContainingSheetObject.PullEstimates(pullRange, ci);
+        //    for (int next = 0; next < estRows.Count(); next++)
+        //    {
+        //        //search for sub-estimate
+        //        Estimate nextEstimate = new Estimate(estRows[next].EntireRow, this.ContainingSheetObject);      //build temp sub-estimate
+        //        subestimates.Add(nextEstimate);
+        //        nextEstimate.ParentEstimate = this;
+        //    }
+        //    LoadCorrelatedValues();
+        //    return subestimates;
+        //}
 
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {

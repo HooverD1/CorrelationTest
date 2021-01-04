@@ -37,7 +37,7 @@ namespace CorrelationTest
                     {
                         Estimate parentEstimate = new Estimate(topLevels[index].EntireRow, this);
                         if(LoadSubs)
-                            parentEstimate.LoadSubEstimates();
+                            parentEstimate.ContainingSheetObject.GetSubEstimates(parentEstimate.xlRow);
                         returnList.Add(parentEstimate);
                     }
                 }

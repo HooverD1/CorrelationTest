@@ -220,10 +220,8 @@ namespace CorrelationTest
                 bool valid = CorrelationString_Inputs.Validate(selection);
                 if (valid)
                 {
-                    //Construct the estimate
-                    IEstimate tempEstimate = EstimateFactory.Construct(selection);
                     //construct the correlString
-                    Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(Convert.ToString(tempEstimate.xlCorrelCell_Inputs.Value));
+                    Data.CorrelationString_Inputs correlStringObj = new Data.CorrelationString_Inputs(Convert.ToString(selection.Value));
                     //construct the correlSheet
                     Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, selection, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
                     //print the correlSheet

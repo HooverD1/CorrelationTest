@@ -302,7 +302,7 @@ namespace CorrelationTest
                     case CorrelStringType.InputsMatrix:
                         if(est.xlCorrelCell_Inputs.Value == null)
                         {
-                            IEnumerable<string> fields = from Estimate sub in est.GetSubEstimates() select sub.Name;
+                            IEnumerable<string> fields = from Estimate sub in est.ContainingSheetObject.GetSubEstimates(est.xlRow) select sub.Name;
                             return CorrelationString_Inputs.ConstructZeroString(fields.ToArray());
                         }
                         else
