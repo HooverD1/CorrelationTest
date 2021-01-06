@@ -11,27 +11,32 @@ namespace CorrelationTest
     public enum CostItems
     {
         I,
-        E,
+        CASE,
+        SACE,
+        CE,
+        SE,
         W,
-        T
+        F,
+        S,
+        Null
     }
 
     public abstract class CostSheet : Sheet
     {
         protected DialogResult OverwriteRepeatedIDs { get; set; }
-        protected DisplayCoords Specs { get; set; }
-        public List<Estimate> Estimates { get; set; }
+        public DisplayCoords Specs { get; set; }
+        public List<Item> CostRows { get; set; }
 
-        public virtual List<Estimate> GetEstimates(bool LoadSubs) { throw new Exception("Failed override"); }
+        public virtual List<Item> GetCostRows(bool LoadSubs) { throw new Exception("Failed override"); }
         public virtual void LoadEstimates(bool LoadSubs)
         {
-            this.Estimates = GetEstimates(LoadSubs);
+            this.CostRows = GetCostRows(LoadSubs);
         }
-        public virtual List<Estimate> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
+        public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
         public virtual void PrintDefaultCorrelStrings()
         {
-            List<Estimate> estimates = GetEstimates(true);
-            foreach(Estimate est in estimates)
+            List<Item> estimates = GetCostRows(true);
+            foreach(IHasSubs est in estimates)
             {
                 est.PrintInputCorrelString();
                 est.PrintPhasingCorrelString();
@@ -49,7 +54,7 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
-        protected virtual void PrintCorrel_Inputs(Estimate estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Inputs(Estimate_Item estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
         {
             /*
              * This is being called when "Build" is run. 
@@ -59,7 +64,7 @@ namespace CorrelationTest
             {
                 //DAVID
                 //This has too many subestimates
-                UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
+                UniqueID[] subIDs = (from Estimate_Item est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
                 //check if any of the subestimates have NonZeroCorrel entries
                 
                 //This is sending in too many IDs
@@ -68,7 +73,7 @@ namespace CorrelationTest
             }
         }
 
-        protected virtual void PrintCorrel_Periods(Estimate estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Periods(Estimate_Item estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
         {
             /*
              * The print methods on the sheet object are there to compile a list of estimates
@@ -83,7 +88,7 @@ namespace CorrelationTest
             correlationString.PrintToSheet(estimate.xlCorrelCell_Periods);
         }
 
-        public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItem costType) { throw new Exception("Failed override"); }
+        public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItems costType) { throw new Exception("Failed override"); }
         public virtual Excel.Range[] PullEstimates(Excel.Range pullRange) { throw new Exception("Failed override"); }
 
         public static CostSheet Construct(Excel.Worksheet xlSheet)

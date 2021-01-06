@@ -22,19 +22,17 @@ namespace CorrelationTest
         public class CorrelationString
         {
             public string Value { get; set; }
-            public virtual object[] GetFields() { return null; }
-            public virtual UniqueID[] GetIDs() { return null; }
+            public virtual object[] GetFields() { throw new Exception("Failed override"); }
+            public virtual UniqueID[] GetIDs() { throw new Exception("Failed override"); }
 
-            public virtual void PrintToSheet(Excel.Range xlCell) { }
+            public virtual void PrintToSheet(Excel.Range xlCell) { throw new Exception("Failed override"); }
+
             protected CorrelationString() { }
-
             public CorrelationString(string[] fields)     //creates zero string
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields));
             }
-
-
-
+                       
             public string CreateValue_Zero(string[] fields, double defaultValue = 0) //create a zero correlstring from very generic params
             {
                 StringBuilder sb = new StringBuilder();
@@ -169,9 +167,9 @@ namespace CorrelationTest
                 //return sb.ToString();
             }
 
-            public virtual UniqueID GetParentID() { return null; }
+            public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
 
-            public virtual void Expand(Excel.Range xlSource) { }
+            public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
             
             #region CorrelString Factory
             private static CorrelStringType ParseCorrelType(string correlStringValue)
@@ -184,10 +182,14 @@ namespace CorrelationTest
                 {
                     case "IM":
                         return CorrelStringType.InputsMatrix;
+                    case "IT":
+                        return CorrelStringType.InputsTriple;
                     case "PM":
                         return CorrelStringType.PhasingMatrix;
                     case "PT":
                         return CorrelStringType.PhasingTriple;
+                    case "DT":
+                        return CorrelStringType.DurationTriple;
                     case "DM":
                         return CorrelStringType.DurationMatrix;
                     default:
@@ -276,53 +278,53 @@ namespace CorrelationTest
                 return true;
             }
 
-            public static CorrelationString Construct(Estimate est, CorrelStringType csType)        //Construct default correlation string for estimate
+            public static CorrelationString Construct(IHasSubs item, CorrelStringType csType)        //Construct default correlation string for estimate
             {
                 switch (csType)
                 {
                     case CorrelStringType.PhasingTriple:
-                        if(est.xlCorrelCell_Periods.Value == null)
+                        if(item.xlCorrelCell_Periods.Value == null)
                         {
-                            Triple pt = new Triple(est.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_PT(pt, est.Periods.Length, est.uID.ID);
+                            Triple pt = new Triple(item.uID.ID, "0,0,0");
+                            return new Data.CorrelationString_PT(pt, item.Periods.Length, item.uID.ID);
                         }
                         else
                         {
-                            return Construct(est.xlCorrelCell_Periods.Value);
+                            return Construct(item.xlCorrelCell_Periods.Value);
                         }                        
                     case CorrelStringType.PhasingMatrix:
-                        if(est.xlCorrelCell_Periods.Value == null)
+                        if(item.xlCorrelCell_Periods.Value == null)
                         {
-                            IEnumerable<string> start_dates = from Period prd in est.Periods select prd.pID.PeriodTag.ToString();
+                            IEnumerable<string> start_dates = from Period prd in item.Periods select prd.pID.PeriodTag.ToString();
                             return CorrelationString_PM.ConstructZeroString(start_dates.ToArray());
                         }
                         else
                         {
-                            return Construct(est.xlCorrelCell_Periods.Value);
+                            return Construct(item.xlCorrelCell_Periods.Value);
                         }
                     case CorrelStringType.InputsTriple:
-                        if (est.xlCorrelCell_Inputs.Value == null)
+                        if (item.xlCorrelCell_Inputs.Value == null)
                         {
-                            if (est.SubEstimates.Count < 2)
+                            if (item.SubEstimates.Count < 2)
                                 return null;
-                            Triple it = new Triple(est.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_IT(it, est.SubEstimates.Count, est.uID.ID);
+                            Triple it = new Triple(item.uID.ID, "0,0,0");
+                            return new Data.CorrelationString_IT(it, item.SubEstimates.Count, item.uID.ID);
                         }
                         else
                         {
-                            return Construct(est.xlCorrelCell_Inputs.Value);
+                            return Construct(item.xlCorrelCell_Inputs.Value);
                         }
                     case CorrelStringType.InputsMatrix:
-                        if(est.xlCorrelCell_Inputs.Value == null)
+                        if(item.xlCorrelCell_Inputs.Value == null)
                         {
-                            if (est.SubEstimates.Count < 2)
+                            if (item.SubEstimates.Count < 2)
                                 return null;
-                            IEnumerable<string> fields = from Estimate sub in est.ContainingSheetObject.GetSubEstimates(est.xlRow) select sub.Name;
+                            IEnumerable<string> fields = from Estimate_Item sub in item.ContainingSheetObject.GetSubEstimates(item.xlRow) select sub.Name;
                             return CorrelationString_IM.ConstructZeroString(fields.ToArray());
                         }
                         else
                         {
-                            return Construct(est.xlCorrelCell_Inputs.Value);
+                            return Construct(item.xlCorrelCell_Inputs.Value);
                         }                        
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();

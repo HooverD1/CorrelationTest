@@ -21,9 +21,9 @@ namespace CorrelationTest
                 //LoadEstimates(false);
             }
 
-            public override List<Estimate> GetEstimates(bool LoadSubs)      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
+            public override List<Item> GetCostRows(bool LoadSubs)      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
             {
-                List<Estimate> returnList = new List<Estimate>();
+                List<Item> returnList = new List<Item>();
                 Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
                 Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
@@ -42,21 +42,21 @@ namespace CorrelationTest
                     Excel.Range[] topLevels = (from Excel.Range row in estRows where row.Cells[1, Specs.Level_Offset].value == i select row).ToArray<Excel.Range>();
                     for (int index = 0; index < topLevels.Count(); index++)
                     {
-                        Estimate parentEstimate = new Estimate(topLevels[index].EntireRow, this);
-                        if(LoadSubs)
-                            parentEstimate.SubEstimates = parentEstimate.ContainingSheetObject.GetSubEstimates(parentEstimate.xlRow);
-                        returnList.Add(parentEstimate);
+                        Item parentRow = Item.Construct(topLevels[index].EntireRow, this);
+                        if(LoadSubs && parentRow is IHasSubs)
+                            ((IHasSubs)parentRow).SubEstimates = parentRow.ContainingSheetObject.GetSubEstimates(parentRow.xlRow);
+                        returnList.Add(parentRow);
                     }
                 }
                 return returnList;
             }
             
-            public override List<Estimate> GetSubEstimates(Excel.Range parentRow)     //Attach this to the sheet? Check sheet type?
+            public override List<ISub> GetSubEstimates(Excel.Range parentRow)     //Attach this to the sheet? Check sheet type?
             {
                 Excel.Worksheet xlSheet = parentRow.Worksheet;
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-                CostItem ci = CostItems.E;
-                List<Estimate> subestimates = new List<Estimate>();
+                CostItems ci = CostItems.CE;
+                List<ISub> subestimates = new List<ISub>();
 
                 Excel.Range firstCell = xlSheet.Cells[parentRow.Row + 1, Specs.Type_Offset];
                 //iterate until you find <= level
@@ -71,20 +71,18 @@ namespace CorrelationTest
                         lastCell = firstCell.Offset[offset, 0];
                 }
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange, ci);
+                Excel.Range[] estRows = PullEstimates(pullRange);
                 for (int next = 0; next < estRows.Count(); next++)
                 {
-                    //search for sub-estimate
-                    Estimate nextEstimate = new Estimate(estRows[next].EntireRow, this);      //build temp sub-estimate
+                    Estimate_Item nextEstimate = (Estimate_Item)Item.Construct(estRows[next].EntireRow, this);      //build temp sub-estimate
                     subestimates.Add(nextEstimate);
                 }
-                //LoadCorrelatedValues();
                 return subestimates;
             }
 
             public override object[] Get_xlFields()
             {
-                string[] Estimate_WBSNames = (from Estimate est in Estimates select est.Name).ToArray();
+                string[] Estimate_WBSNames = (from Estimate_Item est in CostRows select est.Name).ToArray();
                 return Array.ConvertAll<string, object>(Estimate_WBSNames, new Converter<string, object>(x => (object)x));
             }
             public Data.CorrelationString LoadCorrelation(string correlString)
@@ -116,11 +114,11 @@ namespace CorrelationTest
             private void BuildCorrelations_Input()
             {
                 //Input correlation
-                int maxDepth = (from Estimate est in this.Estimates select est.Level).Max();
-                var correlTemp = BuildCorrelTemp(this.Estimates);
-                if (Estimates.Any())
-                    Estimates[0].xlCorrelCell_Inputs.EntireColumn.Clear();
-                foreach (Estimate est in this.Estimates)
+                int maxDepth = (from Estimate_Item est in this.CostRows select est.Level).Max();
+                var correlTemp = BuildCorrelTemp();
+                if (CostRows.Any())
+                    CostRows[0].xlCorrelCell_Inputs.EntireColumn.Clear();
+                foreach (Estimate_Item est in this.CostRows)
                 {
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
                 }
@@ -129,7 +127,7 @@ namespace CorrelationTest
             private void BuildCorrelations_Periods()
             {
                 //Period correlation
-                foreach (Estimate est in this.Estimates)
+                foreach (Estimate_Item est in this.CostRows)
                 {
                     //Save the existing values
                     if (est.xlCorrelCell_Periods != null)
@@ -141,14 +139,14 @@ namespace CorrelationTest
                 }
             }
 
-            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<Estimate> Estimates)
+            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp()
             {
                 var correlTemp = new Dictionary<Tuple<UniqueID, UniqueID>, double>();   //<ID, ID>, correl_value
-                if (this.Estimates.Any())
+                if (this.CostRows.Any())
                 {
                     //Save off existing correlations
                     //Create a correl string from the column
-                    foreach (Estimate estimate in this.Estimates)
+                    foreach (Estimate_Item estimate in this.CostRows)
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
@@ -175,7 +173,7 @@ namespace CorrelationTest
                 return correlTemp;
             }
 
-            protected override void PrintCorrel_Inputs(Estimate estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
+            protected override void PrintCorrel_Inputs(Estimate_Item estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
             {
                 /*
                  * This is being called when "Build" is run. 
@@ -184,14 +182,14 @@ namespace CorrelationTest
                 if (estimate.SubEstimates.Count >= 2)
                 {
                     
-                    UniqueID[] subIDs = (from Estimate est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
+                    UniqueID[] subIDs = (from Estimate_Item est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
                     //check if any of the subestimates have NonZeroCorrel entries
                     Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
                     CorrelationString_IM.PrintToSheet(estimate.xlCorrelCell_Inputs);
                 }
             }
 
-            protected override void PrintCorrel_Periods(Estimate estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+            protected override void PrintCorrel_Periods(Estimate_Item estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
             {
                 /*
                  * The print methods on the sheet object are there to compile a list of estimates

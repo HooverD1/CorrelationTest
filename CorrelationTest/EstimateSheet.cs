@@ -30,10 +30,10 @@ namespace CorrelationTest
             private void BuildCorrelations_Input()
             {
                 //Input correlation
-                var correlTemp = BuildCorrelTemp(this.Estimates);
-                if (Estimates.Any())
-                    Estimates[0].xlCorrelCell_Inputs.EntireColumn.Clear();
-                foreach (Estimate est in this.Estimates)
+                var correlTemp = BuildCorrelTemp(this.CostRows);
+                if (CostRows.Any())
+                    CostRows[0].xlCorrelCell_Inputs.EntireColumn.Clear();
+                foreach (Estimate_Item est in this.CostRows)
                 {
                     est.ContainingSheetObject.GetSubEstimates(est.xlRow);     //this is returning too many subestimates       DAVID
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
@@ -43,7 +43,7 @@ namespace CorrelationTest
             private void BuildCorrelations_Periods()
             {
                 //Period correlation
-                foreach (Estimate est in this.Estimates)
+                foreach (Estimate_Item est in this.CostRows)
                 {
                     //Save the existing values
                     //if (est.xlCorrelCell_Periods != null)
@@ -55,14 +55,14 @@ namespace CorrelationTest
                 }
             }
 
-            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<Estimate> Estimates)
+            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<Item> Estimates)
             {
                 var correlTemp = new Dictionary<Tuple<UniqueID, UniqueID>, double>();   //<ID, ID>, correl_value
-                if (this.Estimates.Any())
+                if (this.CostRows.Any())
                 {
                     //Save off existing correlations
                     //Create a correl string from the column
-                    foreach (Estimate estimate in this.Estimates)
+                    foreach (Estimate_Item estimate in this.CostRows)
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
@@ -94,16 +94,16 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override List<Estimate> GetEstimates(bool LoadSubs)
+            public override List<Item> GetCostRows(bool LoadSubs)
             {
-                List<Estimate> returnList = new List<Estimate>();
+                List<Item> returnList = new List<Item>();
                 Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
                 Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange, CostItems.E);       //Pull the estimates (not the inputs)
+                Excel.Range[] estRows = PullEstimates(pullRange, CostItems.CE);       //Pull the estimates (not the inputs)
                 for (int index = 0; index < estRows.Count(); index++)
                 {
-                    Estimate parentEstimate = new Estimate(estRows[index].EntireRow, this);
+                    Estimate_Item parentEstimate = new Estimate_Item(estRows[index].EntireRow, this);
                     if(LoadSubs)
                         parentEstimate.SubEstimates = this.GetSubEstimates(estRows[index].EntireRow);     //Get the subestimates for this parent row
                     returnList.Add(parentEstimate);
@@ -111,14 +111,14 @@ namespace CorrelationTest
                 return returnList;
             }
 
-            public override List<Estimate> GetSubEstimates(Excel.Range parentRow)
+            public override List<ISub> GetSubEstimates(Excel.Range parentRow)
             {
-                List<Estimate> subEstimates = new List<Estimate>();
+                List<ISub> subEstimates = new List<ISub>();
                 //Get the number of inputs
                 int inputCount = Convert.ToInt32(parentRow.Cells[1, this.Specs.Level_Offset].value);    //Get the number of inputs
                 for(int i = 1; i <= inputCount; i++)
                 {
-                    subEstimates.Add(new Estimate(parentRow.Offset[i, 0].EntireRow, this));
+                    subEstimates.Add(new Estimate_Item(parentRow.Offset[i, 0].EntireRow, this));
                 }
                 return subEstimates;
             }

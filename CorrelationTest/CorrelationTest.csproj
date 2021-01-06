@@ -193,19 +193,23 @@
     <Compile Include="CorrelationString_PM.cs" />
     <Compile Include="CorrelationString_PT.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
-    <Compile Include="CostItem.cs" />
+    <Compile Include="ISub.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="CostSheet.cs" />
     <Compile Include="DisplayCoords.cs" />
     <Compile Include="Distribution.cs" />
-    <Compile Include="Estimate.cs" />
+    <Compile Include="Estimate_Item.cs" />
     <Compile Include="EstimateSheet.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ICostSheet.cs" />
     <Compile Include="IEstimate.cs" />
     <Compile Include="IHasFields.cs" />
+    <Compile Include="IHasSubs.cs" />
+    <Compile Include="Input_Item.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PeriodID.cs" />
+    <Compile Include="Sum_Item.cs" />
     <Compile Include="Triple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

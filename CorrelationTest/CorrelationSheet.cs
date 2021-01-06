@@ -82,7 +82,7 @@ namespace CorrelationTest
             {
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
-                Estimate tempEst = new Estimate(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
+                Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
@@ -94,10 +94,10 @@ namespace CorrelationTest
                 }                
             }
 
-            protected string GetDistributionString(Estimate est, int subIndex)
+            protected string GetDistributionString(Estimate_Item est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{est.SubEstimates[subIndex].EstimateDistribution.Name}");
+                sb.Append($"{est.SubEstimates[subIndex].ItemDistribution.Name}");
                 for(int i = 1; i < est.SubEstimates[subIndex].DistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";
@@ -249,7 +249,7 @@ namespace CorrelationTest
                                
 
                 //validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
-                if (new Estimate(correlSheet.LinkToOrigin.LinkSource.EntireRow, null).uID.ID == correlSheet.xlIDCell.Value)
+                if (new Estimate_Item(correlSheet.LinkToOrigin.LinkSource.EntireRow, null).uID.ID == correlSheet.xlIDCell.Value)
                 {
                     correlSheet.CorrelString.PrintToSheet(correlSheet.LinkToOrigin.LinkSource);
                     if (!correlSheet.CorrelMatrix.CheckForPSD())

@@ -8,41 +8,33 @@ using Accord.Statistics.Distributions.Univariate;
 
 namespace CorrelationTest
 {
-    public class Estimate : CostItem
+    public class Estimate_Item : Item, IHasSubs, ISub
     {
-        private DisplayCoords dispCoords { get; set; }
+        public DisplayCoords dispCoords { get; set; }
         public int PeriodCount { get; set; }
         public Period[] Periods { get; set; }
         public UniqueID uID { get; set; }
-        public CostSheet ContainingSheetObject { get; set; }
-        public Distribution EstimateDistribution { get; set; }
+        public Distribution ItemDistribution { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
-        public char Type { get; set; }
-        public Estimate ParentEstimate { get; set; }
-        public List<Estimate> SubEstimates { get; set; }
-        public List<Estimate> Siblings { get; set; }
+        public string Type { get; set; }
+        public Estimate_Item ParentEstimate { get; set; }
+        public List<ISub> SubEstimates { get; set; }
+        public List<Estimate_Item> Siblings { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
         public Data.CorrelationString_IM InputCorrelStringObj { get; set; }
         public int Level { get; set; }
         public string Name { get; set; }
-        public Excel.Range xlRow { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
-        public Excel.Range xlTypeCell { get; set; }
-        public Excel.Range xlNameCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
-        public Excel.Range xlCorrelCell_Inputs { get; set; }
-        public Excel.Range xlCorrelCell_Periods { get; set; }
         public Excel.Range xlLevelCell { get; set; }
         public string WBS_String { get; set; }
-        public Dictionary<Estimate, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
+        public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
-        public Estimate(Excel.Range itemRow, CostSheet ContainingSheetObject)
+        public Estimate_Item(Excel.Range itemRow, CostSheet ContainingSheetObject) : base(itemRow, ContainingSheetObject)
         {
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(itemRow.Worksheet));
-
             this.PeriodCount = 5;
-            //this.TemporalCorrelStringObj = new Data.CorrelationString_IM
             this.xlRow = itemRow;
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
@@ -60,11 +52,11 @@ namespace CorrelationTest
                 { "Param3", xlDistributionCell.Offset[0,3].Value },
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.EstimateDistribution = new Distribution(this.DistributionParameters);
-            this.SubEstimates = new List<Estimate>();
+            this.ItemDistribution = new Distribution(this.DistributionParameters);
+            this.SubEstimates = new List<ISub>();
 
             this.Level = Convert.ToInt32(xlLevelCell.Value);
-            this.Type = Convert.ToChar(xlTypeCell.Value);
+            this.Type = Convert.ToString(xlTypeCell.Value);
             this.Name = Convert.ToString(xlNameCell.Value);
 
             if (xlIDCell.Value == null)
@@ -75,7 +67,7 @@ namespace CorrelationTest
             else
                 this.uID = new UniqueID(xlIDCell.Value);
             this.Periods = LoadPeriods();
-            this.CorrelPairs = new Dictionary<Estimate, double>();
+            this.CorrelPairs = new Dictionary<Estimate_Item, double>();
         }
         private Period[] LoadPeriods()
         {
@@ -97,7 +89,7 @@ namespace CorrelationTest
             return dollars;
         }
 
-        public bool Equals(Estimate estimate)       //check the ID to determine equality
+        public bool Equals(Estimate_Item estimate)       //check the ID to determine equality
         {
             return this.uID.Equals(estimate.uID) ? true : false;
         }
@@ -106,12 +98,12 @@ namespace CorrelationTest
 
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
-            this.Siblings = new List<Estimate>();
-            Estimate parentEstimate = this.ParentEstimate;
+            this.Siblings = new List<Estimate_Item>();
+            Estimate_Item parentEstimate = this.ParentEstimate;
             if (parentEstimate == null) { return; }
             if (parentEstimate.ParentEstimate == null) { return; }
             Data.CorrelationMatrix parentMatrix = new Data.CorrelationMatrix(parentEstimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
-            foreach (Estimate sibling in ParentEstimate.SubEstimates)
+            foreach (Estimate_Item sibling in ParentEstimate.SubEstimates)
             {
                 if (sibling == this)
                     continue;
@@ -140,7 +132,7 @@ namespace CorrelationTest
         {
             UniqueID[] subIDs = new UniqueID[this.SubEstimates.Count];
             int index = 0;
-            foreach (Estimate est in this.SubEstimates)
+            foreach (Estimate_Item est in this.SubEstimates)
             {
                 subIDs[index] = est.uID;
                 index++;

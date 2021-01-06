@@ -12,9 +12,6 @@ namespace CorrelationTest
         public class CorrelationString_IM : CorrelationString
         {
             public CorrelationString_IM(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange)) { }
-            
-
-            
 
             public CorrelationString_IM(string correlString)
             {
@@ -72,7 +69,7 @@ namespace CorrelationTest
                 return correlRange.Offset[1, 0].Resize[correlRange.Rows.Count - 1, correlRange.Columns.Count].Value;
             }
 
-            private string CreateValue(Estimate parentEstimate)
+            private string CreateValue(Estimate_Item parentEstimate)
             {
                 //Convert all the sub-estimates to a correlation string
                 int fields = parentEstimate.SubEstimates.Count;
@@ -89,7 +86,7 @@ namespace CorrelationTest
                 for (int sub = 0; sub < fields; sub++)  //vertical
                 {
                     //sb.Append(parentEstimate.SubEstimates[sub].GetID());
-                    foreach(KeyValuePair<Estimate, double> pair in parentEstimate.SubEstimates[sub].CorrelPairs)
+                    foreach(KeyValuePair<Estimate_Item, double> pair in parentEstimate.SubEstimates[sub].CorrelPairs)
                     {
                         sb.Append(pair.Value);
                         sb.Append(",");
