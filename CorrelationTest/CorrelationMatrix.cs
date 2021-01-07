@@ -111,7 +111,7 @@ namespace CorrelationTest
                 
                 for (int i = 1; i <= this.FieldCount; i++)
                 {
-                    fieldDict.Add(new UniqueID(sourceSheet.Name, fieldStrings[1,i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
+                    fieldDict.Add(UniqueID.BuildNew(sourceSheet.Name, fieldStrings[1,i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
                 }
                 return fieldDict;
             }

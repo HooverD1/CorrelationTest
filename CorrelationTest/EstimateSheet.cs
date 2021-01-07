@@ -94,13 +94,13 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override List<Item> GetCostRows(bool LoadSubs)
+            public override List<Item> GetItemRows(bool LoadSubs)
             {
                 List<Item> returnList = new List<Item>();
                 Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
                 Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange, CostItems.CE);       //Pull the estimates (not the inputs)
+                Excel.Range[] estRows = PullEstimates(pullRange);       //Pull the estimates (not the inputs)
                 for (int index = 0; index < estRows.Count(); index++)
                 {
                     Estimate_Item parentEstimate = new Estimate_Item(estRows[index].EntireRow, this);
@@ -133,11 +133,11 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override Excel.Range[] PullEstimates(Excel.Range pullRange, CostItems costType)
+            public override Excel.Range[] PullEstimates(Excel.Range pullRange)
             {
                 Excel.Worksheet xlSheet = pullRange.Worksheet;
                 IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells
-                                                     where Convert.ToString(cell.Value) == costType.ToString()
+                                                     where Convert.ToString(cell.Value) == "CE" || Convert.ToString(cell.Value) == "I"
                                                      select cell;
                 return returnVal.ToArray<Excel.Range>();
             }

@@ -8,7 +8,7 @@ using Accord.Statistics.Distributions.Univariate;
 
 namespace CorrelationTest
 {
-    public class Estimate_Item : Item, IHasSubs, ISub
+    public class Estimate_Item : Item, IHasInputSubs, IHasDurationSubs, IHasPhasingSubs, ISub
     {
         public DisplayCoords dispCoords { get; set; }
         public int PeriodCount { get; set; }
@@ -65,11 +65,26 @@ namespace CorrelationTest
                 this.uID.PrintToCell(xlIDCell);
             }
             else
-                this.uID = new UniqueID(xlIDCell.Value);
-            this.Periods = LoadPeriods();
+                this.uID = UniqueID.BuildFromExisting(xlIDCell.Value);
+            LoadPeriods();
             this.CorrelPairs = new Dictionary<Estimate_Item, double>();
         }
-        private Period[] LoadPeriods()
+
+        public void LoadSubEstimates()
+        {
+            this.SubEstimates = GetSubs();
+        }
+
+        private List<ISub> GetSubs()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LoadPeriods()
+        {
+            this.Periods = GetPeriods();
+        }
+        private Period[] GetPeriods()
         {
             double[] dollars = LoadDollars();
             Period[] periods = new Period[PeriodCount];
@@ -140,9 +155,28 @@ namespace CorrelationTest
             return subIDs;
         }
 
+        public void LoadUID()
+        {
+            this.uID = GetUID();
+        }
+
+        protected virtual UniqueID GetUID()
+        {
+            if (this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value != null)
+            {
+                string idString = Convert.ToString(this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value);
+                return UniqueID.BuildFromExisting(idString);
+            }
+            else
+            {
+                //Create new ID
+                return UniqueID.BuildNew("E");
+            }
+        }
+
         public UniqueID CreateID()
         {
-            return new UniqueID(this.xlRow.Worksheet.Name, this.Name);
+            return UniqueID.BuildNew("E");
         }
 
         public void PrintName()

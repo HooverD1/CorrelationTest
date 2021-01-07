@@ -24,7 +24,9 @@ namespace CorrelationTest
             public string Value { get; set; }
             public virtual object[] GetFields() { throw new Exception("Failed override"); }
             public virtual UniqueID[] GetIDs() { throw new Exception("Failed override"); }
-
+            protected virtual string CreateValue(UniqueID[] ids, object[,] correlArray) { throw new Exception("Failed override"); }
+            public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
+            public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
             public virtual void PrintToSheet(Excel.Range xlCell) { throw new Exception("Failed override"); }
 
             protected CorrelationString() { }
@@ -136,41 +138,6 @@ namespace CorrelationTest
                 return Convert.ToInt32(lines[0].Split(',')[0]);
             }
 
-            protected virtual string CreateValue(UniqueID[] ids, object[,] correlArray)
-            {
-                return null;
-
-                //correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
-                //StringBuilder sb = new StringBuilder();
-                //sb.AppendLine();
-                //sb.Append($"{ids.Length},");
-                //sb.AppendLine();
-                //for (int field = 0; field < correlArray.GetLength(1); field++)
-                //{
-                //    //Add fields
-                //    sb.Append(ids[field].ID);
-                //    if (field < correlArray.GetLength(1) - 1)
-                //        sb.Append(",");
-                //}
-                //sb.AppendLine();
-                //for (int row = 0; row < correlArray.GetLength(0); row++)
-                //{
-                //    for (int col = row + 1; col < correlArray.GetLength(1); col++)
-                //    {
-                //        sb.Append(correlArray[row, col]);
-                //        if (col < correlArray.GetLength(1) - 1)
-                //            sb.Append(",");
-                //    }
-                //    if (row < correlArray.GetLength(0) - 2)
-                //        sb.AppendLine();
-                //}
-                //return sb.ToString();
-            }
-
-            public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
-
-            public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
-            
             #region CorrelString Factory
             private static CorrelStringType ParseCorrelType(string correlStringValue)
             {
@@ -206,8 +173,12 @@ namespace CorrelationTest
                         return ParsePhasingTriple(stringValues);
                     case CorrelStringType.PhasingMatrix:
                         return ParsePhasingMatrix(stringValues);
+                    case CorrelStringType.InputsTriple:
+                        return ParseInputsTriple(stringValues);
                     case CorrelStringType.InputsMatrix:
                         return ParseInputsMatrix(stringValues);
+                    case CorrelStringType.DurationTriple:
+                        return ParseDurationTriple(stringValues);
                     case CorrelStringType.DurationMatrix:
                         return ParseDurationMatrix(stringValues);
                     default:
@@ -220,7 +191,6 @@ namespace CorrelationTest
                 Dictionary<string, object> dict = new Dictionary<string, object>();
                 dict.Add("Periods", values[0][0]);
                 dict.Add("Parent_ID", values[1][0]);
-                //object[,] tripleArray = ExtensionMethods.GetSubArray(values, 2);
                 dict.Add("Triple", $"{values[2][0]},{values[2][1]},{values[2][2]}");
                 return dict;
             }
@@ -232,6 +202,10 @@ namespace CorrelationTest
                 dict.Add("Matrix", ExtensionMethods.GetSubArray(values, 2));
                 return dict;
             }
+            private static Dictionary<string, object> ParseInputsTriple(string[][] values)
+            {
+                throw new NotImplementedException();
+            }
             private static Dictionary<string, object> ParseInputsMatrix(string[][] values)
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>();
@@ -239,6 +213,10 @@ namespace CorrelationTest
                 dict.Add("IDs", values[1]);
                 dict.Add("Matrix", ExtensionMethods.GetSubArray(values, 2));
                 return dict;
+            }
+            private static Dictionary<string, object> ParseDurationTriple(string[][] values)
+            {
+                throw new NotImplementedException();
             }
             private static Dictionary<string, object> ParseDurationMatrix(string[][] values)
             {
@@ -280,51 +258,52 @@ namespace CorrelationTest
 
             public static CorrelationString Construct(IHasSubs item, CorrelStringType csType)        //Construct default correlation string for estimate
             {
+
                 switch (csType)
                 {
                     case CorrelStringType.PhasingTriple:
-                        if(item.xlCorrelCell_Periods.Value == null)
+                        if(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value == null)
                         {
                             Triple pt = new Triple(item.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_PT(pt, item.Periods.Length, item.uID.ID);
+                            return new Data.CorrelationString_PT(pt, ((IHasPhasingSubs)item).Periods.Length, item.uID.ID);
                         }
                         else
                         {
-                            return Construct(item.xlCorrelCell_Periods.Value);
+                            return Construct(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
                         }                        
                     case CorrelStringType.PhasingMatrix:
-                        if(item.xlCorrelCell_Periods.Value == null)
+                        if(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value == null)
                         {
-                            IEnumerable<string> start_dates = from Period prd in item.Periods select prd.pID.PeriodTag.ToString();
+                            IEnumerable<string> start_dates = from Period prd in ((IHasPhasingSubs)item).Periods select prd.pID.PeriodTag.ToString();
                             return CorrelationString_PM.ConstructZeroString(start_dates.ToArray());
                         }
                         else
                         {
-                            return Construct(item.xlCorrelCell_Periods.Value);
+                            return Construct(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
                         }
                     case CorrelStringType.InputsTriple:
-                        if (item.xlCorrelCell_Inputs.Value == null)
+                        if (((IHasInputSubs)item).xlCorrelCell_Inputs.Value == null)
                         {
-                            if (item.SubEstimates.Count < 2)
+                            if (((IHasInputSubs)item).SubEstimates.Count < 2)
                                 return null;
                             Triple it = new Triple(item.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_IT(it, item.SubEstimates.Count, item.uID.ID);
+                            return new Data.CorrelationString_IT(it, ((IHasInputSubs)item).SubEstimates.Count, item.uID.ID);
                         }
                         else
                         {
-                            return Construct(item.xlCorrelCell_Inputs.Value);
+                            return Construct(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
                         }
                     case CorrelStringType.InputsMatrix:
-                        if(item.xlCorrelCell_Inputs.Value == null)
+                        if(((IHasInputSubs)item).xlCorrelCell_Inputs.Value == null)
                         {
-                            if (item.SubEstimates.Count < 2)
+                            if (((IHasInputSubs)item).SubEstimates.Count < 2)
                                 return null;
                             IEnumerable<string> fields = from Estimate_Item sub in item.ContainingSheetObject.GetSubEstimates(item.xlRow) select sub.Name;
                             return CorrelationString_IM.ConstructZeroString(fields.ToArray());
                         }
                         else
                         {
-                            return Construct(item.xlCorrelCell_Inputs.Value);
+                            return Construct(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
                         }                        
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();

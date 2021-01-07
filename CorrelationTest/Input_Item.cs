@@ -7,8 +7,9 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class Input_Item : Item, ISub
+    public class Input_Item : Item, ISub, IHasPhasingSubs
     {
+        public Excel.Range xlDollarCell { get; set; }
         public DisplayCoords dispCoords { get; set; }
         public int PeriodCount { get; set; }
         public Period[] Periods { get; set; }
@@ -21,6 +22,30 @@ namespace CorrelationTest
         {
 
         }
-        
+
+        public void LoadPeriods()
+        {
+            this.Periods = GetPeriods();
+        }
+        private Period[] GetPeriods()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LoadUID()
+        {
+            this.uID = GetUID();
+        }
+        private UniqueID GetUID()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void PrintPhasingCorrelString()
+        {
+            Data.CorrelationString phString = Data.CorrelationString.Construct(this, Data.CorrelStringType.PhasingTriple);
+            if (phString != null)
+                phString.PrintToSheet(xlCorrelCell_Periods);
+        }
     }
 }

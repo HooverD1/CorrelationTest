@@ -60,7 +60,7 @@ namespace CorrelationTest
                 UniqueID[] returnArray = new UniqueID[tempArray.GetLength(1)];
                 for(int i = 0; i < tempArray.GetLength(1); i++)
                 {
-                    returnArray[i] = new UniqueID(sheetID, tempArray[1, i+1].ToString());
+                    returnArray[i] = UniqueID.BuildNew(sheetID, tempArray[1, i+1].ToString());
                 }
                 return returnArray;
             }
@@ -150,7 +150,7 @@ namespace CorrelationTest
             {
                 string[] correlLines = DelimitString();
                 string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => new UniqueID(x)).ToArray();
+                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.BuildFromExisting(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
                     return returnIDs;
                 else

@@ -9,8 +9,9 @@ namespace CorrelationTest
     public class PeriodID : UniqueID
     {
         public int PeriodTag { get; set; }
-        public PeriodID(UniqueID uID, int period) : base(uID.ID)
+        public PeriodID(UniqueID uID, int period)
         {
+
             this.PeriodTag = period;
             this.RefreshID();
         }

@@ -27,20 +27,23 @@ namespace CorrelationTest
         public DisplayCoords Specs { get; set; }
         public List<Item> CostRows { get; set; }
 
-        public virtual List<Item> GetCostRows(bool LoadSubs) { throw new Exception("Failed override"); }
+        public virtual List<Item> GetItemRows(bool LoadSubs) { throw new Exception("Failed override"); }
         public virtual void LoadEstimates(bool LoadSubs)
         {
-            this.CostRows = GetCostRows(LoadSubs);
+            this.CostRows = GetItemRows(LoadSubs);
         }
         public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
-        public virtual void PrintDefaultCorrelStrings()
+        public void PrintDefaultCorrelStrings()
         {
-            List<Item> estimates = GetCostRows(true);
-            foreach(IHasSubs est in estimates)
+            List<Item> items = GetItemRows(true);
+            foreach(IHasSubs item in items)
             {
-                est.PrintInputCorrelString();
-                est.PrintPhasingCorrelString();
-                est.PrintDurationCorrelString();
+                if(item is IHasInputSubs)
+                    ((IHasInputSubs)item).PrintInputCorrelString();
+                if(item is IHasPhasingSubs)
+                    ((IHasPhasingSubs)item).PrintPhasingCorrelString();
+                if(item is IHasDurationSubs)
+                    ((IHasDurationSubs)item).PrintDurationCorrelString();
             }
         }
 

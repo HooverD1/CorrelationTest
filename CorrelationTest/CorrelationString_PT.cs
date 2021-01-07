@@ -62,7 +62,7 @@ namespace CorrelationTest
             {
                 string[] correlLines = DelimitString();
                 string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => new UniqueID(x)).ToArray();
+                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.BuildFromExisting(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
                     return returnIDs;
                 else
@@ -72,7 +72,7 @@ namespace CorrelationTest
             public override UniqueID GetParentID()
             {
                 string[] lines = this.Value.Split('&');
-                return new UniqueID(lines[1]);
+                return UniqueID.BuildFromExisting(lines[1]);
             }
 
             public Triple GetTriple()

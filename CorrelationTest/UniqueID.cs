@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class UniqueID       //UniqueID form: SheetType | Name | CreatedDateTime
+    public class UniqueID       //UniqueID form: SheetType | CreatedDateTime
     {
         private const int SheetType_Placement = 0;
         public string SheetType { get; set; }
@@ -17,38 +17,41 @@ namespace CorrelationTest
         protected const char Delimiter2 = '.';
         public string ID { get; set; }
 
-        public UniqueID(string FullID)
+        public static UniqueID BuildFromExisting(string existingID)
         {
-            this.ID = FullID;
-            Dictionary<string, string> ID_Components = ParseID(this.ID);
-            this.SheetType = ID_Components["SheetType"];
-            this.Created = ID_Components["Created"];
-            
+            UniqueID returnID = new UniqueID();
+            returnID.ID = existingID;
+            Dictionary<string, string> ID_Components = ParseID(returnID.ID);
+            returnID.SheetType = ID_Components["SheetType"];
+            returnID.Created = ID_Components["Created"];
+            return returnID;
         }
 
-        public UniqueID(string SheetType, string Name, string Created = null)
+        public static UniqueID BuildNew(string prefix, string created = null)
         {
-            this.SheetType = SheetType;
-            if (Created == null)
-                this.Created = UniqueID.Timestamp();
+            UniqueID returnID = new UniqueID();
+            returnID.SheetType = prefix;
+            if (created == null)
+                returnID.Created = UniqueID.Timestamp();
             else
-                this.Created = Created;
-            this.ID = CreateID(new Dictionary<string, string>() { { "SheetType", this.SheetType },
-                                                                            { "Created", this.Created } });
+                returnID.Created = created;
+            returnID.ID = returnID.CreateID(new Dictionary<string, string>() { { "SheetType", returnID.SheetType },
+                                                                            { "Created", returnID.Created } });
+            return returnID;
         }
 
-        public UniqueID(Dictionary<string, string> ID_Components)
-        {
-            this.SheetType = string.Empty;
-            this.Created = string.Empty;
-            if (ID_Components.ContainsKey("SheetType"))
-                this.SheetType = ID_Components["SheetType"];
-            if (ID_Components.ContainsKey("Created"))
-                this.Created = ID_Components["Created"];
-            else
-                this.Created = UniqueID.Timestamp();
-            this.ID = CreateID(ID_Components);
-        }
+        //public UniqueID(Dictionary<string, string> ID_Components)
+        //{
+        //    this.SheetType = string.Empty;
+        //    this.Created = string.Empty;
+        //    if (ID_Components.ContainsKey("SheetType"))
+        //        this.SheetType = ID_Components["SheetType"];
+        //    if (ID_Components.ContainsKey("Created"))
+        //        this.Created = ID_Components["Created"];
+        //    else
+        //        this.Created = UniqueID.Timestamp();
+        //    this.ID = CreateID(ID_Components);
+        //}
 
         public void PrintToCell(Excel.Range xlUniqueID)
         {

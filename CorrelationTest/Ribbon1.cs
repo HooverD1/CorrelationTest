@@ -27,7 +27,6 @@ namespace CorrelationTest
                 Excel.Range selection = ThisAddIn.MyApp.Selection;
                 Data.CorrelationString cs = Data.CorrelationString.Construct(Convert.ToString(selection.Value));
                 cs.Expand(selection);
-            
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -198,6 +197,8 @@ namespace CorrelationTest
             wbs_1.Cells[4, 9] = "Param2";
             wbs_1.Cells[4, 10] = "Param3";
 
+            System.Threading.Thread.Sleep(1);
+            wbs_1.Cells[5, 1] = $"S|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[5, 2] = 1;
             wbs_1.Cells[5, 3] = "S";
 
@@ -253,6 +254,8 @@ namespace CorrelationTest
                 wbs_1.Cells[9, k] = 7;
             }
 
+            System.Threading.Thread.Sleep(1);
+            wbs_1.Cells[10, 1] = $"S|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[10, 2] = 1;
             wbs_1.Cells[10, 3] = "S";
 
@@ -305,6 +308,8 @@ namespace CorrelationTest
                 wbs_1.Cells[14, k] = 7;
             }
 
+            System.Threading.Thread.Sleep(1);
+            wbs_1.Cells[15, 1] = $"S|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[15, 2] = 1;
             wbs_1.Cells[15, 3] = "S";
 
@@ -333,10 +338,7 @@ namespace CorrelationTest
             //Repeat for wbs_1
             CostSheet wbsSheet_example = CostSheet.Construct(wbs_1);
             wbsSheet_example.PrintDefaultCorrelStrings();
-            //foreach(Estimate est in estimates)
-            //{
-            //    est.xlCorrelCell_Periods.Value = $"8,PT&{est.uID.ID}&.75,.8,.6";
-            //}            
+
         }
 
         private void btnVisualize_Click(object sender, RibbonControlEventArgs e)

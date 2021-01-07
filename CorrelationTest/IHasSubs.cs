@@ -10,15 +10,29 @@ namespace CorrelationTest
     public interface IHasSubs
     {
         Excel.Range xlRow { get; set; }
-        Period[] Periods { get; set; }
         CostSheet ContainingSheetObject { get; set; }
         UniqueID uID { get; set; }
-        Excel.Range xlCorrelCell_Inputs { get; set; }
-        Excel.Range xlCorrelCell_Periods { get; set; }
-        List<ISub> SubEstimates { get; set; }
-        void PrintInputCorrelString();
-        void PrintPhasingCorrelString();
-        void PrintDurationCorrelString();
+        void LoadUID();
+    }
 
+    public interface IHasInputSubs : IHasSubs
+    {
+        List<ISub> SubEstimates { get; set; }
+        void LoadSubEstimates();
+        Excel.Range xlCorrelCell_Inputs { get; set; }
+        void PrintInputCorrelString();
+    }
+    public interface IHasPhasingSubs : IHasSubs
+    {
+        Excel.Range xlCorrelCell_Periods { get; set; }
+        Excel.Range xlDollarCell { get; set; }
+        Period[] Periods { get; set; }
+        void LoadPeriods();
+        int PeriodCount { get; set; }
+        void PrintPhasingCorrelString();
+    }
+    public interface IHasDurationSubs : IHasSubs
+    {
+        void PrintDurationCorrelString();
     }
 }

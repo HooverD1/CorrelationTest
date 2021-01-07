@@ -21,7 +21,7 @@ namespace CorrelationTest
                 //LoadEstimates(false);
             }
 
-            public override List<Item> GetCostRows(bool LoadSubs)      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
+            public override List<Item> GetItemRows(bool LoadSubs)      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
             {
                 List<Item> returnList = new List<Item>();
                 Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
@@ -43,8 +43,8 @@ namespace CorrelationTest
                     for (int index = 0; index < topLevels.Count(); index++)
                     {
                         Item parentRow = Item.Construct(topLevels[index].EntireRow, this);
-                        if(LoadSubs && parentRow is IHasSubs)
-                            ((IHasSubs)parentRow).SubEstimates = parentRow.ContainingSheetObject.GetSubEstimates(parentRow.xlRow);
+                        if (LoadSubs && parentRow is IHasInputSubs)
+                            ((IHasInputSubs)parentRow).LoadSubEstimates();
                         returnList.Add(parentRow);
                     }
                 }
