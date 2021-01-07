@@ -23,7 +23,6 @@ namespace CorrelationTest
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
         public Data.CorrelationString_IM InputCorrelStringObj { get; set; }
         public int Level { get; set; }
-        public string Name { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
@@ -77,7 +76,14 @@ namespace CorrelationTest
 
         private List<ISub> GetSubs()
         {
-            throw new NotImplementedException();
+            List<ISub> subEstimates = new List<ISub>();
+            //Get the number of inputs
+            int inputCount = Convert.ToInt32(xlRow.Cells[1, ContainingSheetObject.Specs.Level_Offset].value);    //Get the number of inputs
+            for (int i = 1; i <= inputCount; i++)
+            {
+                subEstimates.Add(new Estimate_Item(xlRow.Offset[i, 0].EntireRow, ContainingSheetObject));
+            }
+            return subEstimates;
         }
 
         public void LoadPeriods()
@@ -117,7 +123,7 @@ namespace CorrelationTest
             Estimate_Item parentEstimate = this.ParentEstimate;
             if (parentEstimate == null) { return; }
             if (parentEstimate.ParentEstimate == null) { return; }
-            Data.CorrelationMatrix parentMatrix = new Data.CorrelationMatrix(parentEstimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
+            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructNew(parentEstimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
             foreach (Estimate_Item sibling in ParentEstimate.SubEstimates)
             {
                 if (sibling == this)

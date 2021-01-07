@@ -243,20 +243,9 @@ namespace CorrelationTest
                 return values;
             }
 
-            public static bool Validate(string correlString)
+            public static bool Validate(string correlStringValue)
             {
-                string[][] ss = SplitString(correlString);
-                if (ss.GetLength(0) < 3)        //header, field, and at least one value row
-                    return false;
-                if (ss[0].Length != 2)          //header has two components
-                    return false;
-                foreach(string s in ss[2])      //values can all be resolved to doubles
-                {
-                    bool pass = false;
-                    pass = double.TryParse(s, out double result);
-                    if (!pass)
-                        return false;
-                }
+                //act as a switch for sending a string to its proper subclass validation
                 return true;
             }
 
@@ -291,7 +280,8 @@ namespace CorrelationTest
                             if (((IHasInputSubs)item).SubEstimates.Count < 2)
                                 return null;
                             Triple it = new Triple(item.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_IT(it, ((IHasInputSubs)item).SubEstimates.Count, item.uID.ID);
+                            IEnumerable<string> ids = from ISub sub in ((IHasInputSubs)item).SubEstimates select sub.uID.ID;
+                            return new Data.CorrelationString_IT(ids.ToArray(), it, ((IHasInputSubs)item).SubEstimates.Count, item.uID.ID);
                         }
                         else
                         {
@@ -321,7 +311,7 @@ namespace CorrelationTest
             public static CorrelationString Construct(string correlStringValue)     //construct a variety of CorrelationStrings from the string
             {
                 //validate that it is a valid correlation string
-                if (!Validate(correlStringValue))
+                if (!CorrelationString.Validate(correlStringValue))
                     throw new Exception("Invalid correlation string.");
                 CorrelStringType csType = ParseCorrelType(correlStringValue);
                 correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);

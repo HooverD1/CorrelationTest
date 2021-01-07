@@ -15,6 +15,7 @@ namespace CorrelationTest
         public Excel.Range xlCorrelCell_Inputs { get; set; }
         public Excel.Range xlCorrelCell_Periods { get; set; }
         public CostSheet ContainingSheetObject { get; set; }
+        public string Name { get; set; }
 
         protected Item(Excel.Range xlRow, CostSheet ContainingSheetObject)
         {

@@ -156,6 +156,11 @@ namespace CorrelationTest
                     throw new Exception("Duplicated IDs");
             }
 
+            public static bool Validate()
+            {
+                return true;
+            }
+
             public static CorrelationString_IM ConstructZeroString(string[] fields)
             {
                 //Need to downcast csi 
@@ -170,7 +175,7 @@ namespace CorrelationTest
                     return correlationString;       //return zero string
                 else
                 {
-                    Data.CorrelationMatrix matrix = new Data.CorrelationMatrix(correlationString);      //convert to zero matrix for modification
+                    Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
                     var matrixIDs = matrix.GetIDs();
                     foreach (UniqueID id1 in matrixIDs)
                     {

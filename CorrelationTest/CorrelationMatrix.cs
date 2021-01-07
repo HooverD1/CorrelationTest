@@ -26,6 +26,8 @@ namespace CorrelationTest
             public object[] Fields { get; set; }
             public Sheets.CorrelationSheet ContainingSheet { get; set; }
 
+            private CorrelationMatrix() { }       //default
+
             private CorrelationMatrix(double[,] phasingTriple)
             {
                 //build a phasing correlation matrix from a provided triple
@@ -45,42 +47,41 @@ namespace CorrelationTest
                 FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
-            public CorrelationMatrix(Data.CorrelationString_IM correlStringObj)
-            {
-                //expand from string
-                this.Fields = correlStringObj.GetFields();
-                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-                this.FieldCount = this.Fields.Count();
-                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            }
+            //public CorrelationMatrix(Data.CorrelationString_IM correlStringObj)
+            //{
+            //    //expand from string
+            //    this.Fields = correlStringObj.GetFields();
+            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+            //    this.FieldCount = this.Fields.Count();
+            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            //}
 
-            public CorrelationMatrix(Data.CorrelationString_IT correlStringObj)
-            {
-                //expand from string
-                this.Fields = correlStringObj.GetFields();
-                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-                this.FieldCount = this.Fields.Count();
-                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            }
+            //public CorrelationMatrix(Data.CorrelationString_IT correlStringObj)
+            //{
+            //    //expand from string
+            //    this.Fields = correlStringObj.GetFields();
+            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+            //    this.FieldCount = this.Fields.Count();
+            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            //}
 
-            public CorrelationMatrix(Data.CorrelationString_PM correlStringObj)
-            {
-                //expand from string
-                this.Fields = correlStringObj.GetFields();
-                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-                this.FieldCount = this.Fields.Count();
-                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            }
+            //public CorrelationMatrix(Data.CorrelationString_PM correlStringObj)
+            //{
+            //    //expand from string
+            //    this.Fields = correlStringObj.GetFields();
+            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+            //    this.FieldCount = this.Fields.Count();
+            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            //}
 
-            public CorrelationMatrix(Data.CorrelationString_PT correlStringObj)
-            {
-                //expand from string
-                this.Fields = correlStringObj.GetFields();
-                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-                this.FieldCount = this.Fields.Count();
-                PeriodID[] pids = PeriodID.GeneratePeriodIDs(correlStringObj.GetIDs().First(), FieldCount);
-                this.FieldDict = GetFieldDict(pids);
-            }
+            //public CorrelationMatrix(Data.CorrelationString_PT correlStringObj)
+            //{
+            //    //expand from string
+            //    this.Fields = correlStringObj.GetFields();
+            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+            //    this.FieldCount = this.Fields.Count();
+            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            //}
 
             public CorrelationMatrix(UniqueID parent_uid, object[,] matrix)     //used for creating phasing correlation matrices
             {       //THIS NEEDS TO SET UP FIELD DICT
@@ -91,6 +92,17 @@ namespace CorrelationTest
                 this.Fields = null; //No names in IDs anymore..
                 this.FieldDict = GetFieldDict(pids);
 
+            }
+
+            public static CorrelationMatrix ConstructNew(Data.CorrelationString correlStringObj)
+            {
+                CorrelationMatrix matrix = new CorrelationMatrix();
+                //expand from string
+                matrix.Fields = correlStringObj.GetFields();
+                matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                matrix.FieldCount = matrix.Fields.Count();
+                matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                return matrix;
             }
 
             private bool Even(int fieldCount)

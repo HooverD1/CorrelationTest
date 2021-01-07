@@ -58,17 +58,6 @@ namespace CorrelationTest
                 //return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods()).Select(x=>x.Name).ToArray<string>();
             }
 
-            public override UniqueID[] GetIDs()
-            {
-                string[] correlLines = DelimitString();
-                string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
-                if (id_strings.Distinct().Count() == id_strings.Count())
-                    return returnIDs;
-                else
-                    throw new Exception("Duplicated IDs");
-            }
-
             public override UniqueID GetParentID()
             {
                 string[] lines = this.Value.Split('&');
@@ -83,6 +72,16 @@ namespace CorrelationTest
                 string uidString = correlLines[1];
                 string tripleString = correlLines[2];
                 return new Triple(uidString, tripleString);
+            }
+
+            public override UniqueID[] GetIDs()
+            {
+                return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+            }
+
+            public static bool Validate()
+            {
+                return true;
             }
         }
     }    

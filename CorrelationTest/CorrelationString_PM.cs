@@ -66,6 +66,11 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(matrix.GetIDs(), matrix.GetMatrix())); 
             }
 
+            public static bool Validate()
+            {
+                return true;
+            }
+
             public static Data.CorrelationString_PM ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
                 Data.CorrelationString_PM correlationString = (CorrelationString_PM)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
@@ -73,7 +78,7 @@ namespace CorrelationTest
                     return correlationString;       //return zero string
                 else
                 {
-                    Data.CorrelationMatrix matrix = new Data.CorrelationMatrix(correlationString);      //convert to zero matrix for modification
+                    Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
                     var matrixIDs = matrix.GetIDs();
                     foreach (UniqueID id1 in matrixIDs)
                     {

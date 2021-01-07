@@ -19,13 +19,18 @@ namespace CorrelationTest
                 this.InputTriple = new Triple(this.GetParentID().ID, triple);
             }
 
-            public CorrelationString_IT(Triple it, int subs, string parent_id)        //build a triple string out of a triple
+            public CorrelationString_IT(string[] fields, Triple it, int subs, string parent_id)        //build a triple string out of a triple
             {
                 this.InputTriple = it;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{subs},IT");
+                sb.Append($"{subs},IT,{parent_id}");
                 sb.AppendLine();
-                sb.Append(parent_id);
+                for (int i = 0; i < fields.Length - 1; i++)
+                {
+                    sb.Append(fields[i]);
+                    sb.Append(",");
+                }
+                sb.Append(fields[fields.Length-1]);
                 sb.AppendLine();
                 sb.Append(it.ToString());
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
@@ -53,10 +58,15 @@ namespace CorrelationTest
                     throw new Exception("Duplicated IDs");
             }
 
+            public static bool Validate()
+            {
+                return true;
+            }
+
             public override UniqueID GetParentID()
             {            
                 string[] lines = this.Value.Split('&');
-                return UniqueID.ConstructFromExisting(lines[1]);
+                return UniqueID.ConstructFromExisting(lines[0]);
             }
 
             public override void PrintToSheet(Excel.Range xlCell)

@@ -10,7 +10,10 @@ namespace CorrelationTest
     {
         public class CorrelationString_DM : CorrelationString
         {
-
+            public static bool Validate()
+            {
+                return true;
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace CorrelationTest
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet();
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_IM)CorrelString);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IM)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -35,7 +35,7 @@ namespace CorrelationTest
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet();
-                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_IT)CorrelString);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IT)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];

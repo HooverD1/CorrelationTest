@@ -155,7 +155,7 @@ namespace CorrelationTest
                             correlString = Data.CorrelationString_IM.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
                         else
                             correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
-                        var correlMatrix = new Data.CorrelationMatrix(correlString);
+                        var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
                         var matrixIDs = correlMatrix.GetIDs();
                         foreach (UniqueID id1 in matrixIDs)
                         {
