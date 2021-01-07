@@ -60,7 +60,7 @@ namespace CorrelationTest
                 UniqueID[] returnArray = new UniqueID[tempArray.GetLength(1)];
                 for(int i = 0; i < tempArray.GetLength(1); i++)
                 {
-                    returnArray[i] = UniqueID.BuildNew(sheetID, tempArray[1, i+1].ToString());
+                    returnArray[i] = UniqueID.ConstructNew(sheetID, tempArray[1, i+1].ToString());
                 }
                 return returnArray;
             }
@@ -133,9 +133,8 @@ namespace CorrelationTest
 
             public override object[] GetFields()
             {
-                return null;    //No names in IDs anymore
-                //var ids = this.GetIDs();
-                //return (from UniqueID uid in ids select uid.Name).ToArray<object>();
+                string[] splitString = DelimitString();
+                return splitString[1].Split(',');
             }
 
             public static bool Validate(Excel.Range correlCell)      //validate that it is in fact a correlString
@@ -150,21 +149,12 @@ namespace CorrelationTest
             {
                 string[] correlLines = DelimitString();
                 string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.BuildFromExisting(x)).ToArray();
+                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
                     return returnIDs;
                 else
                     throw new Exception("Duplicated IDs");
             }
-
-            //private string ParseID(string id)
-            //{
-            //    string[] id_pieces = id.Split('|');         //split lines
-            //    if (id_pieces.Length == 2)
-            //        return id_pieces[1];                    //return the name portion of the ID
-            //    else
-            //        return null;                            //if malformed, return null
-            //}
 
             public static CorrelationString_IM ConstructZeroString(string[] fields)
             {

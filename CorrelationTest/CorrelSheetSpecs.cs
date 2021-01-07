@@ -48,6 +48,19 @@ namespace CorrelationTest
                         stringRow = 3;
                         stringCol = 2;
                         break;
+                    case SheetType.Correlation_IT:
+                        matrixRow = 4;
+                        matrixCol = 5;
+                        linkRow = 3;
+                        linkCol = 1;
+                        linkFormat = "\"Correl\";;;\"CORREL\"";
+                        idRow = 4;
+                        idCol = 1;
+                        distRow = 5;
+                        distCol = 1;
+                        stringRow = 3;
+                        stringCol = 2;
+                        break;
                     case SheetType.Correlation_PM:
                         matrixRow = 4;
                         matrixCol = 5;
@@ -87,6 +100,21 @@ namespace CorrelationTest
                         stringRow = 3;
                         stringCol = 2;
                         break;
+                    case SheetType.Correlation_DT:
+                        matrixRow = 4;
+                        matrixCol = 5;
+                        linkRow = 3;
+                        linkCol = 1;
+                        linkFormat = "\"Correl\";;;\"CORREL\"";
+                        idRow = 4;
+                        idCol = 1;
+                        distRow = 5;
+                        distCol = 1;
+                        stringRow = 3;
+                        stringCol = 2;
+                        break;
+                    default:
+                        throw new Exception("Unknown correl sheet type");
                 }
                 this.MatrixCoords = new Tuple<int, int>(matrixRow, matrixCol);
                 this.LinkCoords = new Tuple<int, int>(linkRow, linkCol);

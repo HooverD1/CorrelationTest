@@ -54,6 +54,15 @@ namespace CorrelationTest
                 this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             }
 
+            public CorrelationMatrix(Data.CorrelationString_IT correlStringObj)
+            {
+                //expand from string
+                this.Fields = correlStringObj.GetFields();
+                this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                this.FieldCount = this.Fields.Count();
+                this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
+            }
+
             public CorrelationMatrix(Data.CorrelationString_PM correlStringObj)
             {
                 //expand from string
@@ -111,7 +120,7 @@ namespace CorrelationTest
                 
                 for (int i = 1; i <= this.FieldCount; i++)
                 {
-                    fieldDict.Add(UniqueID.BuildNew(sourceSheet.Name, fieldStrings[1,i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
+                    fieldDict.Add(UniqueID.ConstructNew(sourceSheet.Name, fieldStrings[1,i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
                 }
                 return fieldDict;
             }

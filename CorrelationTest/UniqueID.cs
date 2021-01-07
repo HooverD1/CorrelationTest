@@ -17,7 +17,7 @@ namespace CorrelationTest
         protected const char Delimiter2 = '.';
         public string ID { get; set; }
 
-        public static UniqueID BuildFromExisting(string existingID)
+        public static UniqueID ConstructFromExisting(string existingID)
         {
             UniqueID returnID = new UniqueID();
             returnID.ID = existingID;
@@ -27,7 +27,7 @@ namespace CorrelationTest
             return returnID;
         }
 
-        public static UniqueID BuildNew(string prefix, string created = null)
+        public static UniqueID ConstructNew(string prefix, string created = null)
         {
             UniqueID returnID = new UniqueID();
             returnID.SheetType = prefix;
@@ -39,19 +39,6 @@ namespace CorrelationTest
                                                                             { "Created", returnID.Created } });
             return returnID;
         }
-
-        //public UniqueID(Dictionary<string, string> ID_Components)
-        //{
-        //    this.SheetType = string.Empty;
-        //    this.Created = string.Empty;
-        //    if (ID_Components.ContainsKey("SheetType"))
-        //        this.SheetType = ID_Components["SheetType"];
-        //    if (ID_Components.ContainsKey("Created"))
-        //        this.Created = ID_Components["Created"];
-        //    else
-        //        this.Created = UniqueID.Timestamp();
-        //    this.ID = CreateID(ID_Components);
-        //}
 
         public void PrintToCell(Excel.Range xlUniqueID)
         {

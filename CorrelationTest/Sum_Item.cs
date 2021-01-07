@@ -34,12 +34,12 @@ namespace CorrelationTest
             if(this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value != null)
             {
                 string idString = Convert.ToString(this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value);
-                return UniqueID.BuildFromExisting(idString);                
+                return UniqueID.ConstructFromExisting(idString);                
             }
             else
             {
                 //Create new ID
-                return UniqueID.BuildNew("S");
+                return UniqueID.ConstructNew("S");
             }
         }
 

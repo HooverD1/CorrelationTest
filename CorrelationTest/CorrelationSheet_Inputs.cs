@@ -30,6 +30,25 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
+            public CorrelationSheet_Inputs(Data.CorrelationString_IT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            {   //Build from the correlString to get the xlSheet
+                this.CorrelString = correlString;
+                this.Specs = specs;
+                this.xlSheet = GetXlSheet();
+                CorrelMatrix = new Data.CorrelationMatrix((Data.CorrelationString_IT)CorrelString);
+                this.LinkToOrigin = new Data.Link(launchedFrom);
+                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
+                this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
+                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
+                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
+                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
+                this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
+                this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
+                this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
+            }
+
             public CorrelationSheet_Inputs(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
             {
                 this.xlSheet = GetXlSheet(false);

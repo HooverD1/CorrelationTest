@@ -159,6 +159,8 @@ namespace CorrelationTest
                 {
                     SheetType sht_type = ExtensionMethods.GetSheetType(sht);
                     if(sht_type == SheetType.Correlation_DM ||
+                        sht_type == SheetType.Correlation_DT ||
+                        sht_type == SheetType.Correlation_IT ||
                         sht_type == SheetType.Correlation_IM ||
                         sht_type == SheetType.Correlation_PM || 
                         sht_type == SheetType.Correlation_PT)
@@ -222,12 +224,16 @@ namespace CorrelationTest
             {
                 switch (correlStringValue)
                 {
+                    case "IT":
+                        return Data.CorrelStringType.InputsTriple;
                     case "IM":
                         return Data.CorrelStringType.InputsMatrix;
                     case "PM":
                         return Data.CorrelStringType.PhasingMatrix;
                     case "PT":
                         return Data.CorrelStringType.PhasingTriple;
+                    case "DT":
+                        return Data.CorrelStringType.DurationTriple;
                     case "DM":
                         return Data.CorrelStringType.DurationMatrix;
                     default:
@@ -302,6 +308,10 @@ namespace CorrelationTest
                 if(correlString is Data.CorrelationString_IM)
                 {
                     return new CorrelationSheet_Inputs((Data.CorrelationString_IM)correlString, source, specs);
+                }
+                else if(correlString is Data.CorrelationString_IT)
+                {
+                    return new CorrelationSheet_Inputs((Data.CorrelationString_IT)correlString, source, specs);
                 }
                 else if(correlString is Data.CorrelationString_PM)
                 {

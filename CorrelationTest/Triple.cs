@@ -19,7 +19,7 @@ namespace CorrelationTest
         
         public Triple(string uidString, string triple)
         {
-            this.uID = UniqueID.BuildFromExisting(uidString);
+            this.uID = UniqueID.ConstructFromExisting(uidString);
             object[,] tripleValues = SplitTriple(triple);
             if (!ValidateTriple(tripleValues))
                 throw new Exception("Invalid correlation triple.");

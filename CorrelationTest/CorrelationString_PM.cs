@@ -104,14 +104,14 @@ namespace CorrelationTest
             {
                 string[] lines = this.Value.Split('&');
                 string[] header = lines[1].Split(',');
-                return UniqueID.BuildFromExisting(header[3]);
+                return UniqueID.ConstructFromExisting(header[3]);
             }
 
             public override UniqueID[] GetIDs()
             {
                 string[] correlLines = DelimitString();
                 string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.BuildFromExisting(x)).ToArray();
+                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
                     return returnIDs;
                 else

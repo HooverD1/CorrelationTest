@@ -204,7 +204,11 @@ namespace CorrelationTest
             }
             private static Dictionary<string, object> ParseInputsTriple(string[][] values)
             {
-                throw new NotImplementedException();
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                dict.Add("Children", values[0][0]);
+                dict.Add("Parent_ID", values[1][0]);
+                dict.Add("Triple", $"{values[2][0]},{values[2][1]},{values[2][2]}");
+                return dict;
             }
             private static Dictionary<string, object> ParseInputsMatrix(string[][] values)
             {

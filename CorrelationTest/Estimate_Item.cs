@@ -65,7 +65,7 @@ namespace CorrelationTest
                 this.uID.PrintToCell(xlIDCell);
             }
             else
-                this.uID = UniqueID.BuildFromExisting(xlIDCell.Value);
+                this.uID = UniqueID.ConstructFromExisting(xlIDCell.Value);
             LoadPeriods();
             this.CorrelPairs = new Dictionary<Estimate_Item, double>();
         }
@@ -165,18 +165,18 @@ namespace CorrelationTest
             if (this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value != null)
             {
                 string idString = Convert.ToString(this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value);
-                return UniqueID.BuildFromExisting(idString);
+                return UniqueID.ConstructFromExisting(idString);
             }
             else
             {
                 //Create new ID
-                return UniqueID.BuildNew("E");
+                return UniqueID.ConstructNew("E");
             }
         }
 
         public UniqueID CreateID()
         {
-            return UniqueID.BuildNew("E");
+            return UniqueID.ConstructNew("E");
         }
 
         public void PrintName()
