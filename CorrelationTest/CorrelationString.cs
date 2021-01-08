@@ -251,7 +251,6 @@ namespace CorrelationTest
 
             public static CorrelationString Construct(IHasSubs item, CorrelStringType csType)        //Construct default correlation string for estimate
             {
-
                 switch (csType)
                 {
                     case CorrelStringType.PhasingTriple:
@@ -280,7 +279,7 @@ namespace CorrelationTest
                             if (((IHasInputSubs)item).SubEstimates.Count < 2)
                                 return null;
                             Triple it = new Triple(item.uID.ID, "0,0,0");
-                            IEnumerable<string> ids = from ISub sub in ((IHasInputSubs)item).SubEstimates select sub.uID.ID;
+                            IEnumerable<string> ids = from ISub sub in ((IHasInputSubs)item).SubEstimates select sub.uID.ID;        //need to print names, but get them from IDs?
                             return new Data.CorrelationString_IT(ids.ToArray(), it, ((IHasInputSubs)item).SubEstimates.Count, item.uID.ID);
                         }
                         else

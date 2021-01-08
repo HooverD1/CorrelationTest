@@ -12,9 +12,7 @@ namespace CorrelationTest
         public Excel.Range xlDollarCell { get; set; }
         public Period[] Periods { get; set; }
         public int PeriodCount { get; set; } = 5;
-        public UniqueID uID { get; set; }
-        public int Level { get; set; }
-        public List<ISub> SubEstimates { get; set; }
+        public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
 
         public Sum_Item(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)

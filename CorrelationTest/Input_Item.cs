@@ -13,23 +13,25 @@ namespace CorrelationTest
         public DisplayCoords dispCoords { get; set; }
         public int PeriodCount { get; set; }
         public Period[] Periods { get; set; }
-        public UniqueID uID { get; set; }
         public Distribution ItemDistribution { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
 
         public Input_Item(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)
         {
-
+            LoadPeriods();
         }
 
         public void LoadPeriods()
         {
             this.Periods = GetPeriods();
         }
-        private Period[] GetPeriods()
+        private Period[] GetPeriods()       //should these be constructed as a static under Period?
         {
-            throw new NotImplementedException();
+            Period[] periods = new Period[5];
+            for (int i = 0; i < periods.Length; i++)
+                periods[i] = new Period(uID, i + 1);
+            return periods;
         }
 
         public void LoadUID()

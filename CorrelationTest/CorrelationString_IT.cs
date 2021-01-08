@@ -40,6 +40,7 @@ namespace CorrelationTest
             {
                 string[] splitString = DelimitString();
                 return splitString[1].Split(',');
+                //This is getting the IDs, not the fields... how to get the fields?
             }
 
             public override object[,] GetMatrix()

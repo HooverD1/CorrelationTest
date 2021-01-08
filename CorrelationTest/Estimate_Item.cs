@@ -13,20 +13,17 @@ namespace CorrelationTest
         public DisplayCoords dispCoords { get; set; }
         public int PeriodCount { get; set; }
         public Period[] Periods { get; set; }
-        public UniqueID uID { get; set; }
         public Distribution ItemDistribution { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
         public string Type { get; set; }
         public Estimate_Item ParentEstimate { get; set; }
-        public List<ISub> SubEstimates { get; set; }
+        public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public List<Estimate_Item> Siblings { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
         public Data.CorrelationString_IM InputCorrelStringObj { get; set; }
-        public int Level { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
-        public Excel.Range xlLevelCell { get; set; }
         public string WBS_String { get; set; }
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
@@ -52,7 +49,6 @@ namespace CorrelationTest
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
             this.ItemDistribution = new Distribution(this.DistributionParameters);
-            this.SubEstimates = new List<ISub>();
 
             this.Level = Convert.ToInt32(xlLevelCell.Value);
             this.Type = Convert.ToString(xlTypeCell.Value);

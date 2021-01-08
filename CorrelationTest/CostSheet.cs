@@ -25,27 +25,17 @@ namespace CorrelationTest
     {
         protected DialogResult OverwriteRepeatedIDs { get; set; }
         public DisplayCoords Specs { get; set; }
-        public List<Item> CostRows { get; set; }
+        public List<Item> Items { get; set; }
 
-        public virtual List<Item> GetItemRows(bool LoadSubs) { throw new Exception("Failed override"); }
-        public virtual void LoadEstimates(bool LoadSubs)
+        public virtual List<Item> GetItemRows() { throw new Exception("Failed override"); }
+        public virtual void LinkItemRows() { throw new Exception("Failed override"); }
+        public virtual void LoadItems()
         {
-            this.CostRows = GetItemRows(LoadSubs);
+            this.Items = GetItemRows();
+            LinkItemRows();
         }
         public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
-        public void PrintDefaultCorrelStrings()
-        {
-            List<Item> items = GetItemRows(true);
-            foreach(IHasSubs item in items)
-            {
-                if(item is IHasInputSubs)
-                    ((IHasInputSubs)item).PrintInputCorrelString();
-                if(item is IHasPhasingSubs)
-                    ((IHasPhasingSubs)item).PrintPhasingCorrelString();
-                if(item is IHasDurationSubs)
-                    ((IHasDurationSubs)item).PrintDurationCorrelString();
-            }
-        }
+        public virtual void PrintDefaultCorrelStrings() { throw new Exception("Failed override"); }
 
         public virtual object[] Get_xlFields()
         {
@@ -57,7 +47,7 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
-        protected virtual void PrintCorrel_Inputs(Estimate_Item estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Inputs(IHasInputSubs estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
         {
             /*
              * This is being called when "Build" is run. 
@@ -76,7 +66,7 @@ namespace CorrelationTest
             }
         }
 
-        protected virtual void PrintCorrel_Periods(Estimate_Item estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Periods(IHasPhasingSubs estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
         {
             /*
              * The print methods on the sheet object are there to compile a list of estimates

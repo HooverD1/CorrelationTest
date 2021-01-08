@@ -30,10 +30,10 @@ namespace CorrelationTest
             private void BuildCorrelations_Input()
             {
                 //Input correlation
-                var correlTemp = BuildCorrelTemp(this.CostRows);
-                if (CostRows.Any())
-                    CostRows[0].xlCorrelCell_Inputs.EntireColumn.Clear();
-                foreach (Estimate_Item est in this.CostRows)
+                var correlTemp = BuildCorrelTemp(this.Items);
+                if (Items.Any())
+                    Items[0].xlCorrelCell_Inputs.EntireColumn.Clear();
+                foreach (Estimate_Item est in this.Items)
                 {
                     est.ContainingSheetObject.GetSubEstimates(est.xlRow);     //this is returning too many subestimates       DAVID
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
@@ -43,7 +43,7 @@ namespace CorrelationTest
             private void BuildCorrelations_Periods()
             {
                 //Period correlation
-                foreach (Estimate_Item est in this.CostRows)
+                foreach (Estimate_Item est in this.Items)
                 {
                     //Save the existing values
                     //if (est.xlCorrelCell_Periods != null)
@@ -58,11 +58,11 @@ namespace CorrelationTest
             private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<Item> Estimates)
             {
                 var correlTemp = new Dictionary<Tuple<UniqueID, UniqueID>, double>();   //<ID, ID>, correl_value
-                if (this.CostRows.Any())
+                if (this.Items.Any())
                 {
                     //Save off existing correlations
                     //Create a correl string from the column
-                    foreach (Estimate_Item estimate in this.CostRows)
+                    foreach (Estimate_Item estimate in this.Items)
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
@@ -94,21 +94,54 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override List<Item> GetItemRows(bool LoadSubs)
+            public override List<Item> GetItemRows()
             {
                 List<Item> returnList = new List<Item>();
                 Excel.Range lastCell = xlSheet.Cells[1000000, Specs.Type_Offset].End[Excel.XlDirection.xlUp];
                 Excel.Range firstCell = xlSheet.Cells[2, Specs.Type_Offset];
                 Excel.Range pullRange = xlSheet.Range[firstCell, lastCell];
-                Excel.Range[] estRows = PullEstimates(pullRange);       //Pull the estimates (not the inputs)
+                Excel.Range[] estRows = PullEstimates(pullRange);      
                 for (int index = 0; index < estRows.Count(); index++)
                 {
-                    Estimate_Item parentEstimate = new Estimate_Item(estRows[index].EntireRow, this);
-                    if(LoadSubs)
-                        parentEstimate.SubEstimates = this.GetSubEstimates(estRows[index].EntireRow);     //Get the subestimates for this parent row
-                    returnList.Add(parentEstimate);
+                    var currentItem = Item.Construct(estRows[index].EntireRow, this);
+                    returnList.Add(currentItem);
                 }
                 return returnList;
+            }
+
+            public override void LinkItemRows()
+            {
+                for (int index = 0; index < Items.Count; index++)
+                {
+                    int thisLevel = Items[index].Level;
+                    int indexStart = index;
+                    while (Items[indexStart++].Level < thisLevel)
+                    {
+                        if (Items[indexStart].Level == thisLevel - 1)
+                        {
+                            string sub_uid = Items[indexStart].uID.ID;
+                            IEnumerable<Item> theseSubs = from Item item in Items where item.uID.ID == sub_uid select item;
+                            if (theseSubs.Count() > 1)
+                                throw new Exception("Duplicated ID");
+                            else if (theseSubs.Any())
+                                ((IHasInputSubs)Items[index]).SubEstimates.Add((ISub)Items[index]); //If it found it, it must be a sub
+                        }
+                    }
+                }
+            }
+
+            public override void PrintDefaultCorrelStrings()
+            {
+                List<Item> items = GetItemRows();       //List of all row items on the sheet
+                foreach (IHasSubs item in items)
+                {
+                    if (item is IHasInputSubs)
+                        ((IHasInputSubs)item).PrintInputCorrelString();
+                    if (item is IHasPhasingSubs)
+                        ((IHasPhasingSubs)item).PrintPhasingCorrelString();
+                    if (item is IHasDurationSubs)
+                        ((IHasDurationSubs)item).PrintDurationCorrelString();
+                }
             }
 
             public override List<ISub> GetSubEstimates(Excel.Range parentRow)
