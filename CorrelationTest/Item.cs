@@ -66,7 +66,7 @@ namespace CorrelationTest
             }
         }
 
-        public static Item Construct(Excel.Range xlRow, CostSheet containing_sheet_object)
+        public static Item ConstructFromRow(Excel.Range xlRow, CostSheet containing_sheet_object)
         {
             //What kind of sheet object is constructing it?
             //What kind of CostRow is this?

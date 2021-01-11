@@ -97,11 +97,48 @@ namespace CorrelationTest
             public static CorrelationMatrix ConstructNew(Data.CorrelationString correlStringObj)
             {
                 CorrelationMatrix matrix = new CorrelationMatrix();
-                //expand from string
-                matrix.Fields = correlStringObj.GetFields();
-                matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-                matrix.FieldCount = matrix.Fields.Count();
-                matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                //this should vary based on what type of CorrelationString!!
+                switch (correlStringObj)
+                {
+                    case Data.CorrelationString_IT t1:
+                        matrix.Fields = correlStringObj.GetFields();
+                        matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                        matrix.FieldCount = matrix.Fields.Count();
+                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        break;
+                    case Data.CorrelationString_IM t2:
+                        matrix.Fields = correlStringObj.GetFields();
+                        matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                        matrix.FieldCount = matrix.Fields.Count();
+                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        break;
+                    case Data.CorrelationString_PT t3:
+                        matrix.Fields = correlStringObj.GetFields();
+                        matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                        matrix.FieldCount = matrix.Fields.Count();
+                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        break;
+                    case Data.CorrelationString_PM t4:
+                        matrix.Fields = correlStringObj.GetFields();
+                        matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                        matrix.FieldCount = matrix.Fields.Count();
+                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        break;
+                    case Data.CorrelationString_DT t5:
+                        matrix.Fields = correlStringObj.GetFields();
+                        matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                        matrix.FieldCount = matrix.Fields.Count();
+                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        break;
+                    case Data.CorrelationString_DM t6:
+                        matrix.Fields = correlStringObj.GetFields();
+                        matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
+                        matrix.FieldCount = matrix.Fields.Count();
+                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        break;
+                    default:
+                        throw new Exception("Invalid CorrelationString type.");
+                }
                 return matrix;
             }
 
@@ -157,8 +194,7 @@ namespace CorrelationTest
 
             public object[] GetFields()
             {
-                return null; //No names in UniqueIDs anymore..
-                //return FieldDict.Keys.Select(x => x.Name).ToArray<object>();
+                return Fields;
             }
 
             public UniqueID[] GetIDs()

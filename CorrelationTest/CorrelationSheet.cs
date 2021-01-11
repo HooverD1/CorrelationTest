@@ -250,12 +250,13 @@ namespace CorrelationTest
                     return;
 
                 //Validate matrix checks
-
                 //Validate link source ID
-                               
-
-                //validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
-                if (new Estimate_Item(correlSheet.LinkToOrigin.LinkSource.EntireRow, null).uID.ID == correlSheet.xlIDCell.Value)
+                //Validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
+                CostSheet originSheet = CostSheet.Construct(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+                object id_followLink = correlSheet.LinkToOrigin.LinkSource.EntireRow.Cells[1, originSheet.Specs.ID_Offset].value;
+                object id_correlSheet = correlSheet.xlIDCell.Value;
+                
+                if (id_followLink.ToString() == id_correlSheet.ToString())
                 {
                     correlSheet.CorrelString.PrintToSheet(correlSheet.LinkToOrigin.LinkSource);
                     if (!correlSheet.CorrelMatrix.CheckForPSD())

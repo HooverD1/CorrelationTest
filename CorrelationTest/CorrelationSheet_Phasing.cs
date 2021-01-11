@@ -80,7 +80,7 @@ namespace CorrelationTest
                 //Build the CorrelString, which can print itself during collapse
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 if (sheetType == SheetType.Correlation_PM)
-                    this.CorrelString = new Data.CorrelationString_PM(this.CorrelMatrix);
+                    this.CorrelString = new Data.CorrelationString_PM(this.CorrelMatrix, Convert.ToString(this.xlIDCell.Value));
                 else if (sheetType == SheetType.Correlation_PT)
                 {
                     //Build the triple from the string
@@ -94,7 +94,7 @@ namespace CorrelationTest
                     }
                     else
                     {       //If NO - create cs_periods object
-                        this.CorrelString = new Data.CorrelationString_PM(this.CorrelMatrix);
+                        this.CorrelString = new Data.CorrelationString_PM(this.CorrelMatrix, Convert.ToString(this.xlIDCell.Value));
                     }
                 }
                 else

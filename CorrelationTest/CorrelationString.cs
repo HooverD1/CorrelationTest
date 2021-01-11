@@ -24,6 +24,7 @@ namespace CorrelationTest
             public string Value { get; set; }
             public virtual object[] GetFields() { throw new Exception("Failed override"); }
             public virtual UniqueID[] GetIDs() { throw new Exception("Failed override"); }
+            protected virtual string CreateValue(string parentID, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
             protected virtual string CreateValue(UniqueID[] ids, object[,] correlArray) { throw new Exception("Failed override"); }
             public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
             public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
@@ -68,10 +69,9 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            protected string[] DelimitString()
+            protected static string[] DelimitString(string correlStringValue)
             {
-                string correlString = this.Value;
-                string[] correlLines = correlString.Split('&');         //split lines
+                string[] correlLines = correlStringValue.Split('&');         //split lines
                 return correlLines;
             }
 
@@ -113,7 +113,7 @@ namespace CorrelationTest
 
             public virtual string GetCorrelType()
             {
-                string[] lines = DelimitString();
+                string[] lines = DelimitString(this.Value);
                 return lines[0].Split(',')[1];
             }
 
@@ -134,7 +134,7 @@ namespace CorrelationTest
 
             public int GetNumberOfPeriods()
             {
-                string[] lines = DelimitString();
+                string[] lines = DelimitString(this.Value);
                 return Convert.ToInt32(lines[0].Split(',')[0]);
             }
 
@@ -249,7 +249,30 @@ namespace CorrelationTest
                 return true;
             }
 
-            public static CorrelationString Construct(IHasSubs item, CorrelStringType csType)        //Construct default correlation string for estimate
+            public static CorrelationString ConstructFromExisting(string correlStringValue)
+            {
+                string[] lines = DelimitString(correlStringValue);
+                string[] header = lines[0].Split(',');
+                switch (header[1])
+                {
+                    case "IT":
+                        return new CorrelationString_IT(correlStringValue);
+                    case "IM":
+                        return new CorrelationString_IM(correlStringValue);
+                    case "PT":
+                        return new CorrelationString_PT(correlStringValue);
+                    case "PM":
+                        return new CorrelationString_PM(correlStringValue);
+                    case "DT":
+                        return new CorrelationString_DT(correlStringValue);
+                    case "DM":
+                        return new CorrelationString_DM(correlStringValue);
+                    default:
+                        throw new Exception("Malformed correlation string");
+                }
+            }
+
+            public static CorrelationString ConstructNew(IHasSubs item, CorrelStringType csType)        //Construct default correlation string for estimate
             {
                 switch (csType)
                 {
@@ -257,11 +280,12 @@ namespace CorrelationTest
                         if(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value == null)
                         {
                             Triple pt = new Triple(item.uID.ID, "0,0,0");
-                            return new Data.CorrelationString_PT(pt, ((IHasPhasingSubs)item).Periods.Length, item.uID.ID);
+                            string[] start_dates = ((IHasPhasingSubs)item).Periods.Select(x => x.Start_Date).ToArray();
+                            return new Data.CorrelationString_PT(pt, start_dates, item.uID.ID);
                         }
                         else
                         {
-                            return Construct(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
+                            return ConstructFromExisting(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
                         }                        
                     case CorrelStringType.PhasingMatrix:
                         if(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value == null)
@@ -271,7 +295,7 @@ namespace CorrelationTest
                         }
                         else
                         {
-                            return Construct(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
+                            return ConstructFromExisting(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
                         }
                     case CorrelStringType.InputsTriple:
                         if (((IHasInputSubs)item).xlCorrelCell_Inputs.Value == null)
@@ -284,7 +308,7 @@ namespace CorrelationTest
                         }
                         else
                         {
-                            return Construct(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
+                            return ConstructFromExisting(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
                         }
                     case CorrelStringType.InputsMatrix:
                         if(((IHasInputSubs)item).xlCorrelCell_Inputs.Value == null)
@@ -296,7 +320,7 @@ namespace CorrelationTest
                         }
                         else
                         {
-                            return Construct(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
+                            return ConstructFromExisting(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
                         }                        
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();
@@ -307,37 +331,37 @@ namespace CorrelationTest
                 }
             }
 
-            public static CorrelationString Construct(string correlStringValue)     //construct a variety of CorrelationStrings from the string
-            {
-                //validate that it is a valid correlation string
-                if (!CorrelationString.Validate(correlStringValue))
-                    throw new Exception("Invalid correlation string.");
-                CorrelStringType csType = ParseCorrelType(correlStringValue);
-                correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
-                string[][] values = SplitString(correlStringValue);
-                Dictionary<string, object> parameters = ParseStringValue(values, csType);
-                //parse string values
-                //return a dictionary
-                //use that to build the object
-                switch (csType)
-                {
-                    case CorrelStringType.PhasingTriple:
-                        Triple pt = new Triple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
-                        return new Data.CorrelationString_PT(pt, Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
-                    case CorrelStringType.PhasingMatrix:
-                        return new CorrelationString_PM(correlStringValue);
-                    case CorrelStringType.InputsTriple:
-                        return new CorrelationString_IT(correlStringValue);
-                    case CorrelStringType.InputsMatrix:
-                        return new CorrelationString_IM(correlStringValue);
-                    case CorrelStringType.DurationTriple:
-                        throw new NotImplementedException();
-                    case CorrelStringType.DurationMatrix:
-                        throw new NotImplementedException();
-                    default:
-                        throw new Exception("Cannot construct CorrelationString");
-                }
-            }
+            //public static CorrelationString ConstructFromExisting(string correlStringValue)     //construct a variety of CorrelationStrings from the string
+            //{
+            //    //validate that it is a valid correlation string
+            //    if (!CorrelationString.Validate(correlStringValue))
+            //        throw new Exception("Invalid correlation string.");
+            //    CorrelStringType csType = ParseCorrelType(correlStringValue);
+            //    correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
+            //    string[][] values = SplitString(correlStringValue);
+            //    Dictionary<string, object> parameters = ParseStringValue(values, csType);
+            //    //parse string values
+            //    //return a dictionary
+            //    //use that to build the object
+            //    switch (csType)
+            //    {
+            //        case CorrelStringType.PhasingTriple:
+            //            Triple pt = new Triple((string)parameters["Parent_ID"], (string)parameters["Triple"]);
+            //            return new Data.CorrelationString_PT(pt, Convert.ToInt32(parameters["Periods"]), values[1][0].ToString());
+            //        case CorrelStringType.PhasingMatrix:
+            //            return new CorrelationString_PM(correlStringValue);
+            //        case CorrelStringType.InputsTriple:
+            //            return new CorrelationString_IT(correlStringValue);
+            //        case CorrelStringType.InputsMatrix:
+            //            return new CorrelationString_IM(correlStringValue);
+            //        case CorrelStringType.DurationTriple:
+            //            throw new NotImplementedException();
+            //        case CorrelStringType.DurationMatrix:
+            //            throw new NotImplementedException();
+            //        default:
+            //            throw new Exception("Cannot construct CorrelationString");
+            //    }
+            //}
 
             #endregion
 

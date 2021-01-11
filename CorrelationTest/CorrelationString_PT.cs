@@ -12,13 +12,18 @@ namespace CorrelationTest
         public class CorrelationString_PT : CorrelationString
         {
             public Triple Triple { get; set; }
-            public CorrelationString_PT(Triple pt, int periods, string parent_id)        //build a triple string out of a triple
+            public CorrelationString_PT(Triple pt, string[] start_dates, string parent_id)        //build a triple string out of a triple
             {
                 this.Triple = pt;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{periods},PT");
+                sb.Append($"{start_dates.Length},PT,{parent_id}");  //Header
                 sb.AppendLine();
-                sb.Append(parent_id);
+                foreach (string start_date in start_dates)
+                {
+                    sb.Append(start_date);    //Period start dates as fields
+                    sb.Append(",");
+                }
+                sb.Remove(sb.Length - 1, 1);    //remove the final comma on the fields
                 sb.AppendLine();
                 sb.Append(pt.ToString());
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
@@ -53,23 +58,30 @@ namespace CorrelationTest
 
             public override object[] GetFields()
             {
-                //return the fields based on the parent uid and the number of periods
-                return null;
-                //return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods()).Select(x=>x.Name).ToArray<string>();
+                //HEADER [Array size,Correl type,ParentID]
+                //FIELDS [Field1,Field2, ... ,Field n]      //Store start dates as fields for PT
+                //VALUES [0,0,0]
+                string[] lines = DelimitString(this.Value);
+                string[] header = lines[0].Split(',');                
+                string[] fields = lines[1].Split(',');
+                if (!int.TryParse(Convert.ToString(header[0]), out int size)) { throw new Exception("Malformed Correlation String"); }
+                if (size != fields.Length) { throw new Exception("Malformed Correlation String"); }
+                return fields.ToArray<object>();
             }
 
             public override UniqueID GetParentID()
             {
-                string[] lines = this.Value.Split('&');
-                return UniqueID.ConstructFromExisting(lines[1]);
+                string[] lines = CorrelationString.DelimitString(this.Value);
+                string[] header = lines[0].Split(',');
+                return UniqueID.ConstructFromExisting(header[2]);
             }
 
             public Triple GetTriple()
             {
-                string[] correlLines = DelimitString();
+                string[] correlLines = DelimitString(this.Value);
                 if (correlLines.Length != 3)
                     throw new Exception("Malformed triple string.");
-                string uidString = correlLines[1];
+                string uidString = correlLines[0].Split(',')[2];
                 string tripleString = correlLines[2];
                 return new Triple(uidString, tripleString);
             }

@@ -92,7 +92,7 @@ namespace CorrelationTest
             Period[] periods = new Period[PeriodCount];
             for (int i = 0; i < periods.Length; i++)
             {
-                periods[i] = new Period(this.uID, i + 1, dollars[i]);
+                periods[i] = new Period(this.uID, $"P{i}", dollars[i]);     //Need to be able to pull the dates off the sheet here.
             }
             return periods;
         }
@@ -188,13 +188,13 @@ namespace CorrelationTest
 
         public void PrintInputCorrelString()
         {
-            Data.CorrelationString inString = Data.CorrelationString.Construct(this, Data.CorrelStringType.InputsTriple);
+            Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.InputsTriple);
             if (inString != null)
                 inString.PrintToSheet(xlCorrelCell_Inputs);
         }
         public void PrintPhasingCorrelString()
         {
-            Data.CorrelationString phString = Data.CorrelationString.Construct(this, Data.CorrelStringType.PhasingTriple);
+            Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
             if (phString != null)
                 phString.PrintToSheet(xlCorrelCell_Periods);
         }

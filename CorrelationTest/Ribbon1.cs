@@ -25,7 +25,7 @@ namespace CorrelationTest
                 SendKeys.Send("{ESC}");
                 //Need correlation string to expand depending on the value in Selection
                 Excel.Range selection = ThisAddIn.MyApp.Selection;
-                Data.CorrelationString cs = Data.CorrelationString.Construct(Convert.ToString(selection.Value));
+                Data.CorrelationString cs = Data.CorrelationString.ConstructFromExisting(Convert.ToString(selection.Value));
                 cs.Expand(selection);
         }
 

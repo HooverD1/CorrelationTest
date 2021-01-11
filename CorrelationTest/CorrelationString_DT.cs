@@ -10,6 +10,11 @@ namespace CorrelationTest
     {
         public class CorrelationString_DT : CorrelationString
         {
+            public CorrelationString_DT(string correlStringValue)
+            {
+                this.Value = correlStringValue;
+            }
+
             public static bool Validate()
             {
                 return true;

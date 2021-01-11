@@ -26,10 +26,18 @@ namespace CorrelationTest
         protected DialogResult OverwriteRepeatedIDs { get; set; }
         public DisplayCoords Specs { get; set; }
         public List<Item> Items { get; set; }
+        protected SheetType sheetType{get;set;}
+
+        public CostSheet(Excel.Worksheet xlSheet)
+        {
+            this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
+            this.xlSheet = xlSheet;
+            LoadItems();
+        }
 
         public virtual List<Item> GetItemRows() { throw new Exception("Failed override"); }
         public virtual void LinkItemRows() { throw new Exception("Failed override"); }
-        public virtual void LoadItems()
+        public void LoadItems()
         {
             this.Items = GetItemRows();
             LinkItemRows();
@@ -77,7 +85,7 @@ namespace CorrelationTest
              */
             //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
             //Data.CorrelationString_PM CorrelationString_PM = Data.CorrelationString_PM.ConstructString(periodIDs, this.xlSheet.Name);
-            Data.CorrelationString correlationString = Data.CorrelationString.Construct(estimate.xlCorrelCell_Periods.Value);
+            Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromExisting(estimate.xlCorrelCell_Periods.Value);
             correlationString.PrintToSheet(estimate.xlCorrelCell_Periods);
         }
 

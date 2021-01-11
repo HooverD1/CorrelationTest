@@ -133,7 +133,7 @@ namespace CorrelationTest
 
             public override object[] GetFields()
             {
-                string[] splitString = DelimitString();
+                string[] splitString = DelimitString(this.Value);
                 return splitString[1].Split(',');
             }
 
@@ -147,7 +147,7 @@ namespace CorrelationTest
 
             public override UniqueID[] GetIDs()
             {
-                string[] correlLines = DelimitString();
+                string[] correlLines = DelimitString(this.Value);
                 string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
                 UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())

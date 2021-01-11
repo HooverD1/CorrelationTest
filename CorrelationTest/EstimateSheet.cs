@@ -11,14 +11,11 @@ namespace CorrelationTest
     namespace Sheets
     {
         public class EstimateSheet : CostSheet
-        {
-            private const SheetType sheetType = SheetType.Estimate;
+        {           
 
-            public EstimateSheet(Excel.Worksheet xlSheet)
+            public EstimateSheet(Excel.Worksheet xlSheet) : base(xlSheet)
             {
-                this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
-                this.xlSheet = xlSheet;
-                //LoadEstimates(false);
+                sheetType = SheetType.Estimate;
             }
 
             public override void BuildCorrelations()
@@ -103,7 +100,7 @@ namespace CorrelationTest
                 Excel.Range[] estRows = PullEstimates(pullRange);      
                 for (int index = 0; index < estRows.Count(); index++)
                 {
-                    var currentItem = Item.Construct(estRows[index].EntireRow, this);
+                    var currentItem = Item.ConstructFromRow(estRows[index].EntireRow, this);
                     returnList.Add(currentItem);
                 }
                 return returnList;
@@ -132,8 +129,7 @@ namespace CorrelationTest
 
             public override void PrintDefaultCorrelStrings()
             {
-                List<Item> items = GetItemRows();       //List of all row items on the sheet
-                foreach (IHasSubs item in items)
+                foreach (IHasSubs item in Items)
                 {
                     if (item is IHasInputSubs)
                         ((IHasInputSubs)item).PrintInputCorrelString();

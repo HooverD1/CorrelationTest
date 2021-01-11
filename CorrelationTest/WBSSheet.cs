@@ -12,13 +12,9 @@ namespace CorrelationTest
     {
         public class WBSSheet: CostSheet
         {
-            private const SheetType sheetType = SheetType.WBS;
-            
-            public WBSSheet(Excel.Worksheet xlSheet)
+            public WBSSheet(Excel.Worksheet xlSheet) : base(xlSheet)
             {
-                this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
-                this.xlSheet = xlSheet;
-                LoadItems();
+                sheetType = SheetType.WBS;
             }
 
             public override List<Item> GetItemRows()      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
@@ -31,7 +27,7 @@ namespace CorrelationTest
                 Excel.Range[] estRows = PullEstimates(pullRange);
                 foreach(Excel.Range row in estRows)
                 {
-                    returnList.Add(Item.Construct(row, this));
+                    returnList.Add(Item.ConstructFromRow(row, this));
                 }
                 return returnList;
             }
@@ -59,7 +55,6 @@ namespace CorrelationTest
     
             public override void PrintDefaultCorrelStrings()
             {
-                
                 foreach (IHasSubs item in Items)
                 {
                     if (item is IHasInputSubs)
@@ -94,7 +89,7 @@ namespace CorrelationTest
                 Excel.Range[] estRows = PullEstimates(pullRange);
                 for (int next = 0; next < estRows.Count(); next++)
                 {
-                    Estimate_Item nextEstimate = (Estimate_Item)Item.Construct(estRows[next].EntireRow, this);      //build temp sub-estimate
+                    Estimate_Item nextEstimate = (Estimate_Item)Item.ConstructFromRow(estRows[next].EntireRow, this);      //build temp sub-estimate
                     subestimates.Add(nextEstimate);
                 }
                 return subestimates;

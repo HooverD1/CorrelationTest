@@ -11,7 +11,7 @@ namespace CorrelationTest
     {
         public Excel.Range xlDollarCell { get; set; }
         public DisplayCoords dispCoords { get; set; }
-        public int PeriodCount { get; set; }
+        public int PeriodCount { get; set; } = 5;
         public Period[] Periods { get; set; }
         public Distribution ItemDistribution { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
@@ -28,9 +28,9 @@ namespace CorrelationTest
         }
         private Period[] GetPeriods()       //should these be constructed as a static under Period?
         {
-            Period[] periods = new Period[5];
+            Period[] periods = new Period[PeriodCount];
             for (int i = 0; i < periods.Length; i++)
-                periods[i] = new Period(uID, i + 1);
+                periods[i] = new Period(uID, $"P{i + 1}");
             return periods;
         }
 
@@ -45,7 +45,7 @@ namespace CorrelationTest
 
         public void PrintPhasingCorrelString()
         {
-            Data.CorrelationString phString = Data.CorrelationString.Construct(this, Data.CorrelStringType.PhasingTriple);
+            Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
             if (phString != null)
                 phString.PrintToSheet(xlCorrelCell_Periods);
         }

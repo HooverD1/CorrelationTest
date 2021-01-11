@@ -21,7 +21,7 @@ namespace CorrelationTest
             PeriodID[] pids = new PeriodID[numOfPeriods];
             for(int i = 0; i < numOfPeriods; i++)
             {
-                pids[i] = new PeriodID(uid, i + 1);
+                pids[i] = new PeriodID(uid, i+1);
             }
             return pids;
         }

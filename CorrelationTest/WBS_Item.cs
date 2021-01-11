@@ -59,7 +59,7 @@ namespace CorrelationTest
             Period[] periods = new Period[PeriodCount];
             for (int i = 0; i < periods.Length; i++)
             {
-                periods[i] = new Period(this.uID, i + 1, dollars[i]);
+                periods[i] = new Period(this.uID, $"P{i + 1}", dollars[i]);
             }
             return periods;
         }

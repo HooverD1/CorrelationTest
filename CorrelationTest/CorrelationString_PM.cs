@@ -61,9 +61,9 @@ namespace CorrelationTest
                 return new CorrelationString_PM(start_dates);
             }
 
-            public CorrelationString_PM(Data.CorrelationMatrix matrix)
+            public CorrelationString_PM(Data.CorrelationMatrix matrix, string parentID)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(matrix.GetIDs(), matrix.GetMatrix())); 
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parentID, matrix.GetFields(), matrix.GetMatrix())); 
             }
 
             public static bool Validate()
@@ -71,7 +71,7 @@ namespace CorrelationTest
                 return true;
             }
 
-            public static Data.CorrelationString_PM ConstructString(PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
+            public static Data.CorrelationString_PM ConstructString(UniqueID parentID, PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
             {
                 Data.CorrelationString_PM correlationString = (CorrelationString_PM)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
@@ -95,13 +95,13 @@ namespace CorrelationTest
                         }
                     }
                     //convert to a string
-                    return new Data.CorrelationString_PM(matrix);      //return modified zero matrix as correl string
+                    return new Data.CorrelationString_PM(matrix, parentID.ID);      //return modified zero matrix as correl string
                 }
             }
 
             public override object[] GetFields()
             {
-                string[] fields = this.DelimitString()[1].Split(',');
+                string[] fields = CorrelationString.DelimitString(this.Value)[1].Split(',');
                 return fields.ToArray<object>();
             }
 
@@ -114,7 +114,7 @@ namespace CorrelationTest
 
             public override UniqueID[] GetIDs()
             {
-                string[] correlLines = DelimitString();
+                string[] correlLines = DelimitString(this.Value);
                 string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
                 UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
                 if (id_strings.Distinct().Count() == id_strings.Count())
@@ -139,16 +139,16 @@ namespace CorrelationTest
                 xlCell.EntireColumn.ColumnWidth = 10;
             }
 
-            protected override string CreateValue(UniqueID[] ids, object[,] correlArray)
+            protected override string CreateValue(string parentID, object[] fields, object[,] correlArray)
             {
                 correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{ids.Length},PM");
+                sb.Append($"{fields.Length},PM,{parentID}");
                 sb.AppendLine();
                 for (int field = 0; field < correlArray.GetLength(1); field++)
                 {
                     //Add fields
-                    sb.Append(ids[field].ID);
+                    sb.Append(fields[field]);
                     if (field < correlArray.GetLength(1) - 1)
                         sb.Append(",");
                 }
