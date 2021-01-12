@@ -15,6 +15,7 @@ namespace CorrelationTest
             public WBSSheet(Excel.Worksheet xlSheet) : base(xlSheet)
             {
                 sheetType = SheetType.WBS;
+
             }
 
             public override List<Item> GetItemRows()      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
@@ -32,15 +33,16 @@ namespace CorrelationTest
                 return returnList;
             }
 
-            public override void LinkItemRows()
+            public override void LinkItemRows()     //This is not working for WBS Sum Items
             {
-                for (int index = 0; index < Items.Count; index++)
+                for (int index = 0; index < Items.Count - 1; index++)
                 {
-                    int thisLevel = Items[index].Level;
-                    int indexStart = index;
-                    while (Items[indexStart++].Level < thisLevel)
+                    int parentLevel = Items[index].Level;
+                    int indexStart = index+1;
+                    int subLevel = Items[indexStart].Level;
+                    while (subLevel > parentLevel && indexStart < Items.Count)
                     {
-                        if (Items[indexStart].Level == thisLevel - 1)
+                        if (Items[indexStart].Level == parentLevel - 1)
                         {
                             string sub_uid = Items[indexStart].uID.ID;
                             IEnumerable<Item> theseSubs = from Item item in Items where item.uID.ID == sub_uid select item;
@@ -49,6 +51,7 @@ namespace CorrelationTest
                             else if (theseSubs.Any())
                                 ((IHasInputSubs)Items[index]).SubEstimates.Add((ISub)Items[index]); //If it found it, it must be a sub
                         }
+                        indexStart++;
                     }
                 }
             }

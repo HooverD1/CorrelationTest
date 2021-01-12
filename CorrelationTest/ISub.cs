@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
@@ -10,6 +11,7 @@ namespace CorrelationTest
     {
         //Estimates, inputs
         DisplayCoords dispCoords { get; set; }
+        Excel.Range xlTypeCell { get; set; }
         int PeriodCount { get; set; }
         Period[] Periods { get; set; }
         UniqueID uID { get; set; }

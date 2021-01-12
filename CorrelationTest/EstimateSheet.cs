@@ -106,22 +106,44 @@ namespace CorrelationTest
                 return returnList;
             }
 
-            public override void LinkItemRows()
+            public override void LinkItemRows()     //There are no levels on an estimate sheet!
             {
                 for (int index = 0; index < Items.Count; index++)
                 {
-                    int thisLevel = Items[index].Level;
-                    int indexStart = index;
-                    while (Items[indexStart++].Level < thisLevel)
+                    if (Items[index].xlTypeCell.Value == "CE")
                     {
-                        if (Items[indexStart].Level == thisLevel - 1)
+                        IHasInputSubs parentItem = (IHasInputSubs)Items[index];
+                        int input_index = index;
+                        while (input_index < Items.Count - 1)
                         {
-                            string sub_uid = Items[indexStart].uID.ID;
-                            IEnumerable<Item> theseSubs = from Item item in Items where item.uID.ID == sub_uid select item;
-                            if (theseSubs.Count() > 1)
-                                throw new Exception("Duplicated ID");
-                            else if (theseSubs.Any())
-                                ((IHasInputSubs)Items[index]).SubEstimates.Add((ISub)Items[index]); //If it found it, it must be a sub
+                            ISub thisItem = (ISub)Items[++input_index];
+                            if (thisItem.xlTypeCell.Value != "I" && thisItem.xlTypeCell.Value != "SE")
+                            {
+                                index = input_index-1;
+                                break;
+                            }
+                            else
+                            {
+                                parentItem.SubEstimates.Add(thisItem);
+                            }
+                        }
+                    }
+                    else if (Items[index].xlTypeCell.Value == "SE")
+                    {
+                        IHasInputSubs parentItem = (IHasInputSubs)Items[index];
+                        int input_index = index;
+                        while (true)
+                        {
+                            ISub thisItem = (ISub)Items[input_index++];
+                            if (thisItem.xlTypeCell.Value != "I" || thisItem.xlTypeCell.Value != "CE")
+                            {
+                                index = input_index;
+                                break;
+                            }
+                            else
+                            {
+                                parentItem.SubEstimates.Add(thisItem);
+                            }
                         }
                     }
                 }
