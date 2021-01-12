@@ -108,24 +108,18 @@ namespace CorrelationTest
             public override UniqueID GetParentID()
             {
                 string[] lines = this.Value.Split('&');
-                string[] header = lines[1].Split(',');
-                return UniqueID.ConstructFromExisting(header[3]);
+                string[] header = lines[0].Split(',');
+                return UniqueID.ConstructFromExisting(header[2]);
             }
 
             public override UniqueID[] GetIDs()
             {
-                string[] correlLines = DelimitString(this.Value);
-                string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
-                if (id_strings.Distinct().Count() == id_strings.Count())
-                    return returnIDs;
-                else
-                    throw new Exception("Duplicated IDs");
+                return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
             }
 
             public override void Expand(Excel.Range xlSource)
             {
-                var id = this.GetIDs()[0];
+                var id = this.GetParentID();
                 //construct the correlSheet
                 Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_PM));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS

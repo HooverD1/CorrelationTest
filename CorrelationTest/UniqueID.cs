@@ -9,10 +9,14 @@ namespace CorrelationTest
 {
     public class UniqueID       //UniqueID form: SheetType | CreatedDateTime
     {
-        private const int SheetType_Placement = 0;
+        private const int SheetType_Placement = 1;
         public string SheetType { get; set; }
-        private const int Created_Placement = 1; 
+        private const int Created_Placement = 3; 
         public string Created { get; set; }
+        private const int ProgramTag_Placement = 0;
+        public string ProgramTag { get; set; }
+        private const int User_Placement = 2;
+        public string User { get; set; }
         protected const char Delimiter = '|';
         protected const char Delimiter2 = '.';
         public string ID { get; set; }
@@ -24,6 +28,8 @@ namespace CorrelationTest
             Dictionary<string, string> ID_Components = ParseID(returnID.ID);
             returnID.SheetType = ID_Components["SheetType"];
             returnID.Created = ID_Components["Created"];
+            returnID.User = ID_Components["User"];
+            returnID.ProgramTag = ID_Components["ProgramTag"];
             return returnID;
         }
 
@@ -35,8 +41,10 @@ namespace CorrelationTest
                 returnID.Created = UniqueID.Timestamp();
             else
                 returnID.Created = created;
-            returnID.ID = returnID.CreateID(new Dictionary<string, string>() { { "SheetType", returnID.SheetType },
-                                                                            { "Created", returnID.Created } });
+            returnID.ID = returnID.CreateID(new Dictionary<string, string>() {  { "SheetType", returnID.SheetType },
+                                                                                { "Created", returnID.Created },
+                                                                                { "User", ThisAddIn.MyApp.UserName },
+                                                                                { "ProgramTag", "DH"} });
             return returnID;
         }
 
@@ -48,7 +56,9 @@ namespace CorrelationTest
         public void RefreshID()
         {
             this.ID = CreateID(new Dictionary<string, string>() { { "SheetType", this.SheetType },
-                                                                  { "Created", this.Created } });
+                                                                  { "Created", this.Created },
+                                                                  { "User", ThisAddIn.MyApp.UserName },
+                                                                  { "ProgramTag", this.ProgramTag} });
         }
 
         private string CreateID(Dictionary<string, string> ParamDict)
@@ -63,6 +73,12 @@ namespace CorrelationTest
                         break;
                     case Created_Placement:
                         sb.Append(ParamDict["Created"]);
+                        break;
+                    case User_Placement:
+                        sb.Append(ParamDict["User"]);
+                        break;
+                    case ProgramTag_Placement:
+                        sb.Append(ParamDict["ProgramTag"]);
                         break;
                     default:
                         break;
@@ -87,6 +103,8 @@ namespace CorrelationTest
             string[] valueSplit = Value.Split(Delimiter);
             UniqueID_Properties.Add("SheetType", valueSplit[SheetType_Placement]);
             UniqueID_Properties.Add("Created", valueSplit[Created_Placement]);
+            UniqueID_Properties.Add("User", valueSplit[User_Placement]);
+            UniqueID_Properties.Add("ProgramTag", valueSplit[ProgramTag_Placement]);
             return UniqueID_Properties;
         }
 
