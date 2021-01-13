@@ -23,9 +23,9 @@ namespace CorrelationTest
         {
             public string Value { get; set; }
             public virtual object[] GetFields() { throw new Exception("Failed override"); }
-            public virtual UniqueID[] GetIDs() { throw new Exception("Failed override"); }
+            public virtual string[] GetIDs() { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
-            protected virtual string CreateValue(UniqueID[] ids, object[,] correlArray) { throw new Exception("Failed override"); }
+            protected virtual string CreateValue(string[] ids, object[,] correlArray) { throw new Exception("Failed override"); }
             public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
             public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
             public virtual void PrintToSheet(Excel.Range xlCell) { throw new Exception("Failed override"); }
@@ -303,8 +303,8 @@ namespace CorrelationTest
                             if (((IHasInputSubs)item).SubEstimates.Count < 2)
                                 return null;
                             Triple it = new Triple(item.uID.ID, "0,0,0");
-                            IEnumerable<string> ids = from ISub sub in ((IHasInputSubs)item).SubEstimates select sub.uID.ID;        //need to print names, but get them from IDs?
-                            return new Data.CorrelationString_IT(ids.ToArray(), it, ((IHasInputSubs)item).SubEstimates.Count, item.uID.ID);
+                            IEnumerable<string> fields = from ISub sub in ((IHasInputSubs)item).SubEstimates select sub.Name;        //need to print names, but get them from IDs?
+                            return new Data.CorrelationString_IT(fields.ToArray(), it, item.uID.ID, ((IHasInputSubs)item).SubEstimates.Select(x=>x.uID.ID).ToArray());
                         }
                         else
                         {

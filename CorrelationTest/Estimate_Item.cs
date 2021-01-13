@@ -126,7 +126,7 @@ namespace CorrelationTest
                     continue;
                 this.Siblings.Add(sibling);
                 //create the string >> create the matrix >> retrieve values & store
-                this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.uID, sibling.uID));
+                this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.uID.ID, sibling.uID.ID));
             }
         }
 
@@ -145,13 +145,13 @@ namespace CorrelationTest
             }
         }
 
-        public UniqueID[] GetSubEstimateIDs()
+        public string[] GetSubEstimateIDs()
         {
-            UniqueID[] subIDs = new UniqueID[this.SubEstimates.Count];
+            string[] subIDs = new string[this.SubEstimates.Count];
             int index = 0;
             foreach (Estimate_Item est in this.SubEstimates)
             {
-                subIDs[index] = est.uID;
+                subIDs[index] = est.uID.ID;
                 index++;
             }
             return subIDs;

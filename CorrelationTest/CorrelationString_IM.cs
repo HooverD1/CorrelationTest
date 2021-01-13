@@ -17,12 +17,12 @@ namespace CorrelationTest
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
-            public CorrelationString_IM(object[,] correlArray, UniqueID[] ids)
+            public CorrelationString_IM(object[,] correlArray, string[] ids)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(ids, correlArray));               
             }
 
-            private CorrelationString_IM(UniqueID[] ids, string sheet)     //create 0 string (independence)
+            private CorrelationString_IM(string[] ids, string sheet)     //create 0 string (independence)
             {
                 int fieldCount = ids.Count();
 
@@ -50,17 +50,17 @@ namespace CorrelationTest
             //    return ids;
             //}
             
-            private static UniqueID[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
+            private static string[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
             {
                 var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
                 string parentID = Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
                 string sheetID = parentID.Split('|').First();
                 
                 object[,] tempArray = correlRange.Resize[1, correlRange.Columns.Count].Value;
-                UniqueID[] returnArray = new UniqueID[tempArray.GetLength(1)];
+                string[] returnArray = new string[tempArray.GetLength(1)];
                 for(int i = 0; i < tempArray.GetLength(1); i++)
                 {
-                    returnArray[i] = UniqueID.ConstructNew(sheetID, tempArray[1, i+1].ToString());
+                    returnArray[i] = tempArray[1, i+1].ToString();
                 }
                 return returnArray;
             }
@@ -98,7 +98,7 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            protected override string CreateValue(UniqueID[] ids, object[,] correlArray)
+            protected override string CreateValue(string[] ids, object[,] correlArray)
             {
                 correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
                 StringBuilder sb = new StringBuilder();
@@ -107,7 +107,7 @@ namespace CorrelationTest
                 for (int field = 0; field < correlArray.GetLength(1); field++)
                 {
                     //Add fields
-                    sb.Append(ids[field].ID);
+                    sb.Append(ids[field]);
                     if (field < correlArray.GetLength(1) - 1)
                         sb.Append(",");
                 }
@@ -145,15 +145,16 @@ namespace CorrelationTest
                     return false;
             }
 
-            public override UniqueID[] GetIDs()
+            public override string[] GetIDs()
             {
+                //HEADER: # INPUTS, TYPE, PARENT_ID, SUB_ID1 ... SUB_IDn
                 string[] correlLines = DelimitString(this.Value);
-                string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
-                if (id_strings.Distinct().Count() == id_strings.Count())
-                    return returnIDs;
-                else
-                    throw new Exception("Duplicated IDs");
+                string[] header = correlLines[0].Split(',');            //get fields (first line) and delimit
+                string parentID = header[2];
+                string[] returnIDs = new string[header.Length - 3];
+                for (int i = 3; i < header.Length; i++)
+                    returnIDs[i - 3] = header[i];
+                return returnIDs;
             }
 
             public static bool Validate()
@@ -168,7 +169,7 @@ namespace CorrelationTest
                 return new CorrelationString_IM(csi.Value);
             }
 
-            public static Data.CorrelationString_IM ConstructString(UniqueID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
+            public static Data.CorrelationString_IM ConstructString(string[] ids, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
             {
                 Data.CorrelationString_IM correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
@@ -176,18 +177,18 @@ namespace CorrelationTest
                 else
                 {
                     Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
-                    var matrixIDs = matrix.GetIDs();
-                    foreach (UniqueID id1 in matrixIDs)
+                    string[] matrixIDs = matrix.GetIDs();
+                    foreach (string id1 in matrixIDs)
                     {
-                        foreach (UniqueID id2 in matrixIDs)
+                        foreach (string id2 in matrixIDs)
                         {
-                            if (correls.ContainsKey(new Tuple<UniqueID, UniqueID>(id1, id2)))
+                            if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
                             {
-                                matrix.SetCorrelation(id1, id2, correls[new Tuple<UniqueID, UniqueID>(id1, id2)]);
+                                matrix.SetCorrelation(id1, id2, correls[new Tuple<string, string>(id1, id2)]);
                             }
-                            if(correls.ContainsKey(new Tuple<UniqueID, UniqueID>(id2, id1)))
+                            if(correls.ContainsKey(new Tuple<string, string>(id2, id1)))
                             {
-                                matrix.SetCorrelation(id2, id1, correls[new Tuple<UniqueID, UniqueID>(id2, id1)]);
+                                matrix.SetCorrelation(id2, id1, correls[new Tuple<string, string>(id2, id1)]);
                             }
                         }
                     }

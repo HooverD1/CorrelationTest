@@ -19,7 +19,7 @@ namespace CorrelationTest
         
         public class CorrelationMatrix
         {
-            public Dictionary<UniqueID, int> FieldDict { get; set; }
+            public Dictionary<string, int> FieldDict { get; set; }
             public object[,] Matrix { get; set; }
             private double[,] DoubleMatrix { get; set; }
             public int FieldCount { get; set; }
@@ -90,7 +90,7 @@ namespace CorrelationTest
                 //validate parent_uid and matrix
                 PeriodID[] pids = PeriodID.GeneratePeriodIDs(parent_uid, FieldCount);
                 this.Fields = null; //No names in IDs anymore..
-                this.FieldDict = GetFieldDict(pids);
+                this.FieldDict = GetFieldDict(pids.Select(x=>x.ID).ToArray());
 
             }
 
@@ -158,9 +158,9 @@ namespace CorrelationTest
                     return fieldCount / 2 + 1;
             }
 
-            private Dictionary<UniqueID, int> GetFieldDict(Excel.Range fieldRange, Excel.Range matrixRange)       //get the field index by unique id
+            private Dictionary<string, int> GetFieldDict(Excel.Range fieldRange, Excel.Range matrixRange)       //get the field index by unique id
             {
-                var fieldDict = new Dictionary<UniqueID, int>();      //<field name, index>
+                var fieldDict = new Dictionary<string, int>();      //<field name, index>
                 //Excel.Range fieldEnd = fieldStart.Offset[0, matrixRange.Columns.Count];
                 //Excel.Range fieldRange = matrixRange.Worksheet.Range[fieldStart, fieldEnd];
                 object[,] fieldStrings = fieldRange.Value;  // field names
@@ -169,14 +169,14 @@ namespace CorrelationTest
                 
                 for (int i = 1; i <= this.FieldCount; i++)
                 {
-                    fieldDict.Add(UniqueID.ConstructNew(sourceSheet.Name, fieldStrings[1,i].ToString()), i);      //is this being launched off correlation sheet? If so, have to follow the link
+                    fieldDict.Add(fieldStrings[1,i].ToString(), i);      //is this being launched off correlation sheet? If so, have to follow the link
                 }
                 return fieldDict;
             }
 
-            private Dictionary<UniqueID, int> GetFieldDict(UniqueID[] ids)
+            private Dictionary<string, int> GetFieldDict(string[] ids)
             {
-                FieldDict = new Dictionary<UniqueID, int>();
+                FieldDict = new Dictionary<string, int>();
                 for (int i = 0; i < ids.Count(); i++)
                 {
                     if (!FieldDict.ContainsKey(ids[i]))
@@ -197,7 +197,7 @@ namespace CorrelationTest
                 return Fields;
             }
 
-            public UniqueID[] GetIDs()
+            public string[] GetIDs()
             {
                 return FieldDict.Keys.ToArray();
             }
@@ -211,7 +211,7 @@ namespace CorrelationTest
                     return null;                            //if malformed, return null
             }
 
-            public double AccessArray(UniqueID id1, UniqueID id2)
+            public double AccessArray(string id1, string id2)
             {
                 //Access values by unique id pairs
                 if (id1.Equals(id2))
@@ -220,7 +220,7 @@ namespace CorrelationTest
                     return Convert.ToDouble(Matrix[FieldDict[id1], FieldDict[id2]]);
             }
 
-            public void SetCorrelation(UniqueID id1, UniqueID id2, double correlation)
+            public void SetCorrelation(string id1, string id2, double correlation)
             {
                 Matrix[FieldDict[id1], FieldDict[id2]] = correlation;
             }

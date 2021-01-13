@@ -35,6 +35,7 @@ namespace CorrelationTest
                 if(int.TryParse(Convert.ToString(xlLevelCell.Value),out int level))
                     this.Level = level;
             }
+            this.Name = Convert.ToString(xlNameCell.Value);
         }
 
         protected void LoadUniqueID()

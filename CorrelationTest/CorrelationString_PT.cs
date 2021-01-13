@@ -86,9 +86,10 @@ namespace CorrelationTest
                 return new Triple(uidString, tripleString);
             }
 
-            public override UniqueID[] GetIDs()
+            public override string[] GetIDs()
             {
-                return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+                var period_ids = PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+                return period_ids.Select(x => x.ID).ToArray();
             }
 
             public static bool Validate()

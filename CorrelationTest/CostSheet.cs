@@ -55,7 +55,7 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
-        protected virtual void PrintCorrel_Inputs(IHasInputSubs estimate, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Inputs(IHasInputSubs estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
         {
             /*
              * This is being called when "Build" is run. 
@@ -65,7 +65,7 @@ namespace CorrelationTest
             {
                 //DAVID
                 //This has too many subestimates
-                UniqueID[] subIDs = (from Estimate_Item est in estimate.SubEstimates select est.uID).ToArray<UniqueID>();
+                string[] subIDs = (from Estimate_Item est in estimate.SubEstimates select est.uID.ID).ToArray();
                 //check if any of the subestimates have NonZeroCorrel entries
                 
                 //This is sending in too many IDs

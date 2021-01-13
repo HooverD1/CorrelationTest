@@ -19,11 +19,16 @@ namespace CorrelationTest
                 this.InputTriple = new Triple(this.GetParentID().ID, triple);
             }
 
-            public CorrelationString_IT(string[] fields, Triple it, int subs, string parent_id)        //build a triple string out of a triple
+            public CorrelationString_IT(string[] fields, Triple it, string parent_id, string[] sub_ids)        //build a triple string out of a triple
             {
                 this.InputTriple = it;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{subs},IT,{parent_id}");
+                sb.Append($"{fields.Length},IT,{parent_id}");
+                for (int j = 0; j < sub_ids.Length; j++)
+                {
+                    sb.Append(",");
+                    sb.Append(sub_ids[j]);
+                }
                 sb.AppendLine();
                 for (int i = 0; i < fields.Length - 1; i++)
                 {
@@ -48,15 +53,16 @@ namespace CorrelationTest
                 return this.InputTriple.GetPhasingCorrelationMatrix(this.GetNumberOfPeriods()).Matrix;
             }
 
-            public override UniqueID[] GetIDs()
+            public override string[] GetIDs()
             {
+                //HEADER: # INPUTS, TYPE, PARENT_ID, SUB_ID1 ... SUB_IDn
                 string[] correlLines = DelimitString(this.Value);
-                string[] id_strings = correlLines[1].Split(',');            //get fields (first line) and delimit
-                UniqueID[] returnIDs = id_strings.Select(x => UniqueID.ConstructFromExisting(x)).ToArray();
-                if (id_strings.Distinct().Count() == id_strings.Count())
-                    return returnIDs;
-                else
-                    throw new Exception("Duplicated IDs");
+                string[] header = correlLines[0].Split(',');            //get fields (first line) and delimit
+                string parentID = header[2];
+                string[] returnIDs = new string[header.Length - 3];
+                for (int i = 3; i < header.Length; i++)
+                    returnIDs[i - 3] = header[i];
+                return returnIDs;
             }
 
             public static bool Validate()

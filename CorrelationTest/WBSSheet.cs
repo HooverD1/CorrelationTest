@@ -40,19 +40,20 @@ namespace CorrelationTest
                     int parentLevel = Items[index].Level;
                     int indexStart = index+1;
                     int subLevel = Items[indexStart].Level;
-                    while (subLevel > parentLevel && indexStart < Items.Count)
+                    while (subLevel > parentLevel && indexStart < Items.Count-1)
                     {
-                        if (Items[indexStart].Level == parentLevel - 1)
+                        if (Items[indexStart].Level == parentLevel + 1)
                         {
                             string sub_uid = Items[indexStart].uID.ID;
                             IEnumerable<Item> theseSubs = from Item item in Items where item.uID.ID == sub_uid select item;
                             if (theseSubs.Count() > 1)
                                 throw new Exception("Duplicated ID");
                             else if (theseSubs.Any())
-                                ((IHasInputSubs)Items[index]).SubEstimates.Add((ISub)Items[index]); //If it found it, it must be a sub
+                                ((IHasInputSubs)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
                         }
-                        indexStart++;
+                        subLevel = Items[++indexStart].Level;
                     }
+
                 }
             }
     
@@ -157,9 +158,9 @@ namespace CorrelationTest
                 }
             }
 
-            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp()
+            private Dictionary<Tuple<string, string>, double> BuildCorrelTemp()
             {
-                var correlTemp = new Dictionary<Tuple<UniqueID, UniqueID>, double>();   //<ID, ID>, correl_value
+                var correlTemp = new Dictionary<Tuple<string, string>, double>();   //<ID, ID>, correl_value
                 if (this.Items.Any())
                 {
                     //Save off existing correlations
@@ -175,11 +176,11 @@ namespace CorrelationTest
                             correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
                         var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
                         var matrixIDs = correlMatrix.GetIDs();
-                        foreach (UniqueID id1 in matrixIDs)
+                        foreach (string id1 in matrixIDs)
                         {
-                            foreach (UniqueID id2 in matrixIDs)
+                            foreach (string id2 in matrixIDs)
                             {
-                                var newKey = new Tuple<UniqueID, UniqueID>(id1, id2);
+                                var newKey = new Tuple<string, string>(id1, id2);
                                 if (!correlTemp.ContainsKey(newKey))
                                     correlTemp.Add(newKey, correlMatrix.AccessArray(id1, id2));
                             }
@@ -191,7 +192,7 @@ namespace CorrelationTest
                 return correlTemp;
             }
 
-            protected override void PrintCorrel_Inputs(IHasInputSubs item, Dictionary<Tuple<UniqueID, UniqueID>, double> inputTemp = null)
+            protected override void PrintCorrel_Inputs(IHasInputSubs item, Dictionary<Tuple<string, string>, double> inputTemp = null)
             {
                 /*
                  * This is being called when "Build" is run. 
@@ -200,7 +201,7 @@ namespace CorrelationTest
                 if (item.SubEstimates.Count >= 2)
                 {
                     
-                    UniqueID[] subIDs = (from Estimate_Item est in item.SubEstimates select est.uID).ToArray<UniqueID>();
+                    string[] subIDs = (from Estimate_Item est in item.SubEstimates select est.uID.ID).ToArray();
                     //check if any of the subestimates have NonZeroCorrel entries
                     Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
                     CorrelationString_IM.PrintToSheet(item.xlCorrelCell_Inputs);

@@ -71,7 +71,7 @@ namespace CorrelationTest
                 return true;
             }
 
-            public static Data.CorrelationString_PM ConstructString(UniqueID parentID, PeriodID[] ids, string sheet, Dictionary<Tuple<UniqueID, UniqueID>, double> correls = null)
+            public static Data.CorrelationString_PM ConstructString(string parentID, PeriodID[] ids, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
             {
                 Data.CorrelationString_PM correlationString = (CorrelationString_PM)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
@@ -80,22 +80,22 @@ namespace CorrelationTest
                 {
                     Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
                     var matrixIDs = matrix.GetIDs();
-                    foreach (UniqueID id1 in matrixIDs)
+                    foreach (string id1 in matrixIDs)
                     {
-                        foreach (UniqueID id2 in matrixIDs)
+                        foreach (string id2 in matrixIDs)
                         {
-                            if (correls.ContainsKey(new Tuple<UniqueID, UniqueID>(id1, id2)))
+                            if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
                             {
-                                matrix.SetCorrelation(id1, id2, correls[new Tuple<UniqueID, UniqueID>(id1, id2)]);
+                                matrix.SetCorrelation(id1, id2, correls[new Tuple<string, string>(id1, id2)]);
                             }
-                            if (correls.ContainsKey(new Tuple<UniqueID, UniqueID>(id2, id1)))
+                            if (correls.ContainsKey(new Tuple<string, string>(id2, id1)))
                             {
-                                matrix.SetCorrelation(id2, id1, correls[new Tuple<UniqueID, UniqueID>(id2, id1)]);
+                                matrix.SetCorrelation(id2, id1, correls[new Tuple<string, string>(id2, id1)]);
                             }
                         }
                     }
                     //convert to a string
-                    return new Data.CorrelationString_PM(matrix, parentID.ID);      //return modified zero matrix as correl string
+                    return new Data.CorrelationString_PM(matrix, parentID);      //return modified zero matrix as correl string
                 }
             }
 
@@ -112,9 +112,10 @@ namespace CorrelationTest
                 return UniqueID.ConstructFromExisting(header[2]);
             }
 
-            public override UniqueID[] GetIDs()
+            public override string[] GetIDs()
             {
-                return PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+                var period_ids = PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+                return period_ids.Select(x => x.ID).ToArray();
             }
 
             public override void Expand(Excel.Range xlSource)

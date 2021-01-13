@@ -52,9 +52,9 @@ namespace CorrelationTest
                 }
             }
 
-            private Dictionary<Tuple<UniqueID, UniqueID>, double> BuildCorrelTemp(List<Item> Estimates)
+            private Dictionary<Tuple<string, string>, double> BuildCorrelTemp(List<Item> Estimates)
             {
-                var correlTemp = new Dictionary<Tuple<UniqueID, UniqueID>, double>();   //<ID, ID>, correl_value
+                var correlTemp = new Dictionary<Tuple<string, string>, double>();   //<ID, ID>, correl_value
                 if (this.Items.Any())
                 {
                     //Save off existing correlations
@@ -70,11 +70,11 @@ namespace CorrelationTest
                             correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
                         var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
                         var matrixIDs = correlMatrix.GetIDs();
-                        foreach (UniqueID id1 in matrixIDs)
+                        foreach (string id1 in matrixIDs)
                         {
-                            foreach (UniqueID id2 in matrixIDs)
+                            foreach (string id2 in matrixIDs)
                             {
-                                var newKey = new Tuple<UniqueID, UniqueID>(id1, id2);
+                                var newKey = new Tuple<string, string>(id1, id2);
                                 if (!correlTemp.ContainsKey(newKey))
                                     correlTemp.Add(newKey, correlMatrix.AccessArray(id1, id2));
                             }
