@@ -23,15 +23,15 @@ namespace CorrelationTest
             public readonly static Tuple<int, int> param_RowDist = new Tuple<int, int>(1, 10);    //where to find the last col param for the Distribution
             public readonly static Tuple<int, int> param_ColDist = new Tuple<int, int>(1, 11);    //where to find the last col param for the Distribution
 
-            protected Data.CorrelationString CorrelString { get; set; }
+            public Data.CorrelationString CorrelString { get; set; }
             protected Data.CorrelationMatrix CorrelMatrix { get; set; }
-            protected Excel.Range xlMatrixCell { get; set; }
-            protected Data.Link LinkToOrigin { get; set; }
+            public Excel.Range xlMatrixCell { get; set; }
+            public Data.Link LinkToOrigin { get; set; }
             public Excel.Range xlLinkCell { get; set; }
-            protected Excel.Range xlIDCell { get; set; }
-            protected Excel.Range xlCorrelStringCell { get; set; }
-            protected Excel.Range xlDistCell { get; set; }
-            protected Data.CorrelSheetSpecs Specs { get; set; }
+            public Excel.Range xlIDCell { get; set; }
+            public Excel.Range xlCorrelStringCell { get; set; }
+            public Excel.Range xlDistCell { get; set; }
+            public Data.CorrelSheetSpecs Specs { get; set; }
 
             //public CorrelationSheet(Data.CorrelationString_IM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
 
@@ -39,7 +39,17 @@ namespace CorrelationTest
             protected virtual Excel.Worksheet CreateXLCorrelSheet(string postfix) { throw new Exception("Failed override"); }
             protected virtual Excel.Worksheet GetXlSheet(bool CreateNew = true) { throw new Exception("Failed override"); }
             protected virtual Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true) { throw new Exception("Failed override"); }
+            public virtual void UpdateCorrelationString(string[] ids) { throw new Exception("Failed override"); }
 
+            public virtual string[] GetIDs()
+            {
+                string[] lines = Data.CorrelationString.DelimitString(Convert.ToString(this.xlCorrelStringCell.Value));
+                string[] header = lines[0].Split(',');
+                string[] ids = new string[header.Length - 3];
+                for (int i = 3; i < header.Length; i++)
+                    ids[i - 3] = header[i];
+                return ids;
+            }
 
 
             public Data.CorrelationString CollapseToString(object[,] correlArray)
@@ -213,9 +223,8 @@ namespace CorrelationTest
                 newSheet.xlMatrixCell = newSheet.xlSheet.Cells[csSpecs.MatrixCoords.Item1, csSpecs.MatrixCoords.Item2];
                 Excel.Range matrix_end = newSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown];
                 Excel.Range matrixRange = newSheet.xlSheet.Range[newSheet.xlMatrixCell.Offset[1,0], matrix_end];
-
-                newSheet.CorrelMatrix = new Data.CorrelationMatrix(newSheet, newSheet.xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange);
-                newSheet.UpdateCorrelationString();     //Updates the string off the matrix
+                newSheet.CorrelMatrix = new Data.CorrelationMatrix(newSheet, newSheet.xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange.Offset[1,0].Resize[matrixRange.Columns.Count, matrixRange.Columns.Count]);
+                newSheet.UpdateCorrelationString(newSheet.GetIDs());     //Updates the string off the matrix
 
                 return newSheet;
             }

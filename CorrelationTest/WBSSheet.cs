@@ -171,14 +171,14 @@ namespace CorrelationTest
                             continue;
                         Data.CorrelationString_IM correlString;
                         if (estimate.xlCorrelCell_Inputs.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString_IM.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
+                            correlString = Data.CorrelationString_IM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
                         else
                             correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
                         var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
-                        var matrixIDs = correlMatrix.GetIDs();
-                        foreach (string id1 in matrixIDs)
+                        string[] ids = Items.Select(x => x.uID.ID).ToArray();
+                        foreach (string id1 in ids)
                         {
-                            foreach (string id2 in matrixIDs)
+                            foreach (string id2 in ids)
                             {
                                 var newKey = new Tuple<string, string>(id1, id2);
                                 if (!correlTemp.ContainsKey(newKey))
@@ -200,10 +200,9 @@ namespace CorrelationTest
                  */
                 if (item.SubEstimates.Count >= 2)
                 {
-                    
                     string[] subIDs = (from Estimate_Item est in item.SubEstimates select est.uID.ID).ToArray();
                     //check if any of the subestimates have NonZeroCorrel entries
-                    Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
+                    Data.CorrelationString_IM CorrelationString_IM = (Data.CorrelationString_IM)Data.CorrelationString.ConstructNew(item, Data.CorrelStringType.InputsMatrix);
                     CorrelationString_IM.PrintToSheet(item.xlCorrelCell_Inputs);
                 }
             }

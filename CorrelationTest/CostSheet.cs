@@ -67,9 +67,10 @@ namespace CorrelationTest
                 //This has too many subestimates
                 string[] subIDs = (from Estimate_Item est in estimate.SubEstimates select est.uID.ID).ToArray();
                 //check if any of the subestimates have NonZeroCorrel entries
-                
+
                 //This is sending in too many IDs
-                Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(subIDs, this.xlSheet.Name, inputTemp);
+                object[] fields = estimate.SubEstimates.Select(x => x.Name).ToArray();
+                Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(estimate.uID.ID, subIDs, fields, this.xlSheet.Name, inputTemp);
                 CorrelationString_IM.PrintToSheet(estimate.xlCorrelCell_Inputs);
             }
         }

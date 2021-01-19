@@ -103,6 +103,11 @@ namespace CorrelationTest
                 }
             }
 
+            //public override void UpdateCorrelationString(string[] ids)
+            //{
+            //    this.CorrelString = new Data.CorrelationString_PM(ids, this.CorrelMatrix);
+            //}
+
             protected Excel.Worksheet GetXlSheet() { return GetXlSheet(false); }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)

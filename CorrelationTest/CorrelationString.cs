@@ -16,7 +16,8 @@ namespace CorrelationTest
             PhasingMatrix,
             PhasingTriple,
             DurationMatrix,
-            DurationTriple
+            DurationTriple,
+            Null
         }
 
         public class CorrelationString
@@ -25,7 +26,7 @@ namespace CorrelationTest
             public virtual object[] GetFields() { throw new Exception("Failed override"); }
             public virtual string[] GetIDs() { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
-            protected virtual string CreateValue(string[] ids, object[,] correlArray) { throw new Exception("Failed override"); }
+            protected virtual string CreateValue(string parentID, object[] ids, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
             public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
             public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
             public virtual void PrintToSheet(Excel.Range xlCell) { throw new Exception("Failed override"); }
@@ -35,7 +36,15 @@ namespace CorrelationTest
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields));
             }
-                       
+
+            public static object[] GetIDsFromHeader(string[] header)
+            {
+                string[] ids = new string[header.Length - 3];
+                for (int i = 3; i < header.Length; i++)
+                    ids[i - 3] = header[i];
+                return ids;
+            }
+
             public string CreateValue_Zero(string[] fields, double defaultValue = 0) //create a zero correlstring from very generic params
             {
                 StringBuilder sb = new StringBuilder();
@@ -69,7 +78,7 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            protected static string[] DelimitString(string correlStringValue)
+            public static string[] DelimitString(string correlStringValue)
             {
                 string[] correlLines = correlStringValue.Split('&');         //split lines
                 return correlLines;
@@ -132,7 +141,7 @@ namespace CorrelationTest
                 return true;
             }
 
-            public int GetNumberOfPeriods()
+            public int GetNumberOfSubs()
             {
                 string[] lines = DelimitString(this.Value);
                 return Convert.ToInt32(lines[0].Split(',')[0]);
@@ -247,6 +256,18 @@ namespace CorrelationTest
             {
                 //act as a switch for sending a string to its proper subclass validation
                 return true;
+            }
+
+            public static CorrelationString ConstructFromCorrelSheet()
+            {
+                //Need to get the values from the matrix
+                //Need to get the string type from the header
+                //Need to get the parentID from the header
+
+                //Get the type of correlation sheet
+                Sheets.CorrelationSheet cSheet = Sheets.CorrelationSheet.Construct();
+                return cSheet.CorrelString;                
+                //CREATE VALUE: string parentID, object[] fields, object[,] correlArray
             }
 
             public static CorrelationString ConstructFromExisting(string correlStringValue)

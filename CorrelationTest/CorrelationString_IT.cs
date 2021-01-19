@@ -50,7 +50,7 @@ namespace CorrelationTest
 
             public override object[,] GetMatrix()
             {
-                return this.InputTriple.GetPhasingCorrelationMatrix(this.GetNumberOfPeriods()).Matrix;
+                return this.InputTriple.GetCorrelationMatrix(this.GetIDs(), this.GetFields()).Matrix;
             }
 
             public override string[] GetIDs()

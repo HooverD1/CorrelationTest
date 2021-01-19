@@ -16,7 +16,7 @@ namespace CorrelationTest
             MisplacedValue,
             None
         }
-        
+
         public class CorrelationMatrix
         {
             public Dictionary<string, int> FieldDict { get; set; }
@@ -24,6 +24,7 @@ namespace CorrelationTest
             private double[,] DoubleMatrix { get; set; }
             public int FieldCount { get; set; }
             public object[] Fields { get; set; }
+            public object[] IDs { get; set; }
             public Sheets.CorrelationSheet ContainingSheet { get; set; }
 
             private CorrelationMatrix() { }       //default
@@ -83,15 +84,17 @@ namespace CorrelationTest
             //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
             //}
 
-            public CorrelationMatrix(UniqueID parent_uid, object[,] matrix)     //used for creating phasing correlation matrices
-            {       //THIS NEEDS TO SET UP FIELD DICT
-                this.Matrix = matrix;
-                this.FieldCount = Matrix.GetLength(0);
-                //validate parent_uid and matrix
-                PeriodID[] pids = PeriodID.GeneratePeriodIDs(parent_uid, FieldCount);
-                this.Fields = null; //No names in IDs anymore..
-                this.FieldDict = GetFieldDict(pids.Select(x=>x.ID).ToArray());
 
+            public static CorrelationMatrix ConstructFromExisting(object[] ids, object[] fields, object[,] matrix)
+            {
+                CorrelationMatrix matrix_obj = new CorrelationMatrix();
+                matrix_obj.IDs = ids;
+                matrix_obj.Matrix = ExtensionMethods.ReIndexArray(matrix);
+                matrix_obj.FieldCount = matrix.GetLength(0);
+                //validate parent_uid and matrix
+                matrix_obj.Fields = fields;
+                matrix_obj.FieldDict = matrix_obj.GetFieldDict(ids);
+                return matrix_obj;
             }
 
             public static CorrelationMatrix ConstructNew(Data.CorrelationString correlStringObj)
@@ -104,37 +107,43 @@ namespace CorrelationTest
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        matrix.IDs = correlStringObj.GetIDs();
+                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case Data.CorrelationString_IM t2:
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        matrix.IDs = correlStringObj.GetIDs();
+                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case Data.CorrelationString_PT t3:
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        matrix.IDs = correlStringObj.GetIDs();
+                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case Data.CorrelationString_PM t4:
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        matrix.IDs = correlStringObj.GetIDs();
+                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case Data.CorrelationString_DT t5:
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        matrix.IDs = correlStringObj.GetIDs();
+                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case Data.CorrelationString_DM t6:
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.FieldDict = matrix.GetFieldDict(correlStringObj.GetIDs());
+                        matrix.IDs = correlStringObj.GetIDs();
+                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     default:
                         throw new Exception("Invalid CorrelationString type.");
@@ -174,13 +183,14 @@ namespace CorrelationTest
                 return fieldDict;
             }
 
-            private Dictionary<string, int> GetFieldDict(string[] ids)
+            private Dictionary<string, int> GetFieldDict(object[] ids)
             {
+                string[] id_strings = ids.Select(x=>Convert.ToString(x)).ToArray();
                 FieldDict = new Dictionary<string, int>();
                 for (int i = 0; i < ids.Count(); i++)
                 {
-                    if (!FieldDict.ContainsKey(ids[i]))
-                        FieldDict.Add(ids[i], i);
+                    if (!FieldDict.ContainsKey(id_strings[i]))
+                        FieldDict.Add(id_strings[i], i);
                     else
                         throw new Exception("IDs are not unique");
                 }
@@ -195,11 +205,6 @@ namespace CorrelationTest
             public object[] GetFields()
             {
                 return Fields;
-            }
-
-            public string[] GetIDs()
-            {
-                return FieldDict.Keys.ToArray();
             }
 
             private string ParseID(string id)
@@ -278,6 +283,7 @@ namespace CorrelationTest
 
             public MatrixErrors[,] CheckMatrixForTransitivity()
             {
+                
                 this.DoubleMatrix = GetDoubleMatrix(this.Matrix);
                 MatrixErrors[,] errorMatrix = new MatrixErrors[this.Matrix.GetLength(0), this.Matrix.GetLength(1)];
 
@@ -371,7 +377,7 @@ namespace CorrelationTest
 
             public bool ValidateAgainstTriple(Triple pt)
             {
-                Data.CorrelationMatrix tripleMatrix = pt.GetPhasingCorrelationMatrix(this.FieldCount);
+                Data.CorrelationMatrix tripleMatrix = pt.GetCorrelationMatrix(this.IDs, this.Fields);
                 return this.Equals(tripleMatrix);
             }
         }   //class

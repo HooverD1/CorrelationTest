@@ -61,10 +61,19 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 //
                 //Build the CorrelMatrix
-                Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1,0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
-                this.CorrelMatrix = new Data.CorrelationMatrix(this, xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange);  
+                string old_string = Convert.ToString(xlCorrelStringCell.Value);
+                string[] lines = Data.CorrelationString.DelimitString(old_string);
+                string[] header = lines[0].Split(',');
+                object[] ids = Data.CorrelationString.GetIDsFromHeader(header);
+                object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
+                object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[1];
+                Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
+                object[,] matrix = matrixRange.Value;
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(ids, fields, matrix);
                 //Build the CorrelString, which can print itself during collapse
-                this.CorrelString = new Data.CorrelationString_IM(this.CorrelMatrix);
+                //Get these from the Header.
+                string parent_id = Convert.ToString(xlIDCell.Value);
+                this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, this.CorrelMatrix);
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -90,9 +99,15 @@ namespace CorrelationTest
                 return xlCorrelSheet;
             }
 
-            public override void UpdateCorrelationString()
+            public override void UpdateCorrelationString(string[] ids)
             {
-                this.CorrelString = new Data.CorrelationString_IM(this.CorrelMatrix);
+                //What is the purpose of this method? To update the matrix values?
+                //Update the string on the sheet to match the altered matrix
+                UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
+                object[,] matrix = this.xlMatrixCell.Offset[1,0].Resize[ids.Length, ids.Length].Value;
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(ids, this.CorrelMatrix.Fields, matrix);
+                this.CorrelString = new Data.CorrelationString_IM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
+                this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }
 
             public override void PrintToSheet()  //expanding from string

@@ -71,7 +71,7 @@ namespace CorrelationTest
                 return true;
             }
 
-            public static Data.CorrelationString_PM ConstructString(string parentID, PeriodID[] ids, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
+            public static Data.CorrelationString_PM ConstructString(string parentID, string[] ids, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
             {
                 Data.CorrelationString_PM correlationString = (CorrelationString_PM)ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
@@ -79,10 +79,9 @@ namespace CorrelationTest
                 else
                 {
                     Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
-                    var matrixIDs = matrix.GetIDs();
-                    foreach (string id1 in matrixIDs)
+                    foreach (string id1 in ids)
                     {
-                        foreach (string id2 in matrixIDs)
+                        foreach (string id2 in ids)
                         {
                             if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
                             {
@@ -114,7 +113,7 @@ namespace CorrelationTest
 
             public override string[] GetIDs()
             {
-                var period_ids = PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+                var period_ids = PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfSubs());
                 return period_ids.Select(x => x.ID).ToArray();
             }
 

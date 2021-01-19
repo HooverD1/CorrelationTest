@@ -11,21 +11,20 @@ namespace CorrelationTest
     {
         public class CorrelationString_IM : CorrelationString
         {
-            public CorrelationString_IM(Excel.Range xlRange) : this(GetCorrelArrayFromRange(xlRange), GetIDsFromRange(xlRange)) { }
+            public CorrelationString_IM(Excel.Range xlRange) : this(GetParentID(xlRange), GetIDsFromRange(xlRange), GetFieldsFromRange(xlRange), GetCorrelArrayFromRange(xlRange)) { }
 
             public CorrelationString_IM(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
-            public CorrelationString_IM(object[,] correlArray, string[] ids)
+            public CorrelationString_IM(string parent_id, object[] ids, object[] fields, object[,] correlArray)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(ids, correlArray));               
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, ids, fields, correlArray));               
             }
 
-            private CorrelationString_IM(string[] ids, string sheet)     //create 0 string (independence)
+            private CorrelationString_IM(string parent_id, object[] sub_ids, object[] sub_fields)     //create 0 string (independence)
             {
-                int fieldCount = ids.Count();
-
+                int fieldCount = sub_ids.Count();
                 object[,] correlArray = new object[fieldCount, fieldCount];
                 for(int row = 0; row < fieldCount; row++)
                 {
@@ -34,12 +33,12 @@ namespace CorrelationTest
                         correlArray[row, col] = 0;
                     }
                 }
-                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(ids, correlArray));
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, correlArray));
             }
 
-            public CorrelationString_IM(Data.CorrelationMatrix matrix)
+            public CorrelationString_IM(string parent_id, object[] sub_ids, object[] sub_fields, Data.CorrelationMatrix matrix)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(matrix.GetIDs(), matrix.GetMatrix()));
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, matrix.GetMatrix()));
             }
 
             //private object[] BuildIDsFromFields(object[] fields, string sheet)
@@ -49,8 +48,22 @@ namespace CorrelationTest
             //        ids[i] = $"{sheet}|{fields[i]}";
             //    return ids;
             //}
+            private static object[] GetFieldsFromRange(Excel.Range correlRange)
+            {
+                var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
+                Excel.Range firstCell = correlRange.Worksheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                Excel.Range lastCell = correlRange.Worksheet.Cells[specs.MatrixCoords_End.Item1, specs.MatrixCoords_End.Item2];
+                Excel.Range fieldRange = correlRange.Worksheet.Range[firstCell, lastCell];
+                return fieldRange.Value;
+            }
+
+            private static string GetParentID(Excel.Range correlRange)
+            {
+                var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
+                return Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
+            }
             
-            private static string[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
+            private static object[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
             {
                 var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
                 string parentID = Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
@@ -64,18 +77,26 @@ namespace CorrelationTest
                 }
                 return returnArray;
             }
+
             private static object[,] GetCorrelArrayFromRange(Excel.Range correlRange)
             {
                 return correlRange.Offset[1, 0].Resize[correlRange.Rows.Count - 1, correlRange.Columns.Count].Value;
             }
 
-            private string CreateValue(Estimate_Item parentEstimate)
+            private string CreateValue(IHasInputSubs parentEstimate)
             {
                 //Convert all the sub-estimates to a correlation string
                 int fields = parentEstimate.SubEstimates.Count;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{fields},IM");
+                //HEADER
+                sb.Append($"{fields},IM");  
+                for(int j = 0; j < fields; j++)
+                {
+                    sb.Append(",");
+                    sb.Append(parentEstimate.SubEstimates[j].uID.ID);
+                }
                 sb.AppendLine();
+                //FIELDS
                 for(int sub = 0; sub < fields; sub++)
                 {
                     sb.Append(parentEstimate.SubEstimates[sub].uID);
@@ -83,6 +104,7 @@ namespace CorrelationTest
                         sb.Append(",");
                 }
                 sb.AppendLine();
+                //VALUES
                 for (int sub = 0; sub < fields; sub++)  //vertical
                 {
                     //sb.Append(parentEstimate.SubEstimates[sub].GetID());
@@ -98,18 +120,24 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            protected override string CreateValue(string[] ids, object[,] correlArray)
+            protected override string CreateValue(string parentID, object[] ids, object[] fields, object[,] correlArray)
             {
                 correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{ids.Length},IM");
+                sb.Append($"{ids.Length},IM,");
+                sb.Append(parentID);
+                for(int i = 0; i < ids.Length; i++)
+                {
+                    sb.Append(",");
+                    sb.Append(ids[i]);
+                }
                 sb.AppendLine();
-                for (int field = 0; field < correlArray.GetLength(1); field++)
+                for (int field = 0; field < fields.Length; field++)
                 {
                     //Add fields
-                    sb.Append(ids[field]);
-                    if (field < correlArray.GetLength(1) - 1)
+                    if(field > 0)
                         sb.Append(",");
+                    sb.Append(fields[field]);
                 }
                 sb.AppendLine();
                 for (int row = 0; row < correlArray.GetLength(0); row++)
@@ -169,7 +197,7 @@ namespace CorrelationTest
                 return new CorrelationString_IM(csi.Value);
             }
 
-            public static Data.CorrelationString_IM ConstructString(string[] ids, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
+            public static Data.CorrelationString_IM ConstructString(string parentID, string[] ids, object[] fields, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
             {
                 Data.CorrelationString_IM correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
@@ -177,10 +205,9 @@ namespace CorrelationTest
                 else
                 {
                     Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
-                    string[] matrixIDs = matrix.GetIDs();
-                    foreach (string id1 in matrixIDs)
+                    foreach (string id1 in ids)
                     {
-                        foreach (string id2 in matrixIDs)
+                        foreach (string id2 in ids)
                         {
                             if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
                             {
@@ -193,7 +220,7 @@ namespace CorrelationTest
                         }
                     }
                     //convert to a string
-                    return new Data.CorrelationString_IM(matrix);      //return modified zero matrix as correl string
+                    return new Data.CorrelationString_IM(parentID, ids, fields, matrix);      //return modified zero matrix as correl string
                 }
             }
 

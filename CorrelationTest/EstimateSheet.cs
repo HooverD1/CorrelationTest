@@ -65,14 +65,14 @@ namespace CorrelationTest
                             continue;
                         Data.CorrelationString_IM correlString;
                         if (estimate.xlCorrelCell_Inputs.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString_IM.ConstructString(estimate.GetSubEstimateIDs(), this.xlSheet.Name);     //construct zero string
+                            correlString = Data.CorrelationString_IM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
                         else
                             correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
                         var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
-                        var matrixIDs = correlMatrix.GetIDs();
-                        foreach (string id1 in matrixIDs)
+                        string[] ids = Estimates.Select(x => x.uID.ID).ToArray();
+                        foreach (string id1 in ids)
                         {
-                            foreach (string id2 in matrixIDs)
+                            foreach (string id2 in ids)
                             {
                                 var newKey = new Tuple<string, string>(id1, id2);
                                 if (!correlTemp.ContainsKey(newKey))

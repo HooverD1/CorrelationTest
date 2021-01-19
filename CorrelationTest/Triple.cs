@@ -75,14 +75,15 @@ namespace CorrelationTest
             return $"{TopLeft},{DiagonalMultiplier},{VerticalMultiplier}";
         }
 
-        public Data.CorrelationMatrix GetPhasingCorrelationMatrix(int periods)
+        public Data.CorrelationMatrix GetCorrelationMatrix(object[] ids, object[] fields)
         {
+            int size = fields.Length;
             if (CorrelMatrix == null)
             {
-                object[,] matrix = new object[periods, periods];
-                for (int row = 0; row < periods; row++)
+                object[,] matrix = new object[size, size];
+                for (int row = 0; row < size; row++)
                 {
-                    for (int col = row; col < periods; col++)
+                    for (int col = row; col < size; col++)
                     {
                         if (row == col)
                             matrix[row, col] = 1;
@@ -90,7 +91,7 @@ namespace CorrelationTest
                             matrix[row, col] = TopLeft * Math.Pow(DiagonalMultiplier, col - 1) * Math.Pow(VerticalMultiplier, col - row - 1);
                     }
                 }
-                this.CorrelMatrix = new Data.CorrelationMatrix(this.uID, matrix);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(ids, fields, matrix);
             }
             return CorrelMatrix;
         }

@@ -46,7 +46,7 @@ namespace CorrelationTest
 
             public override object[,] GetMatrix()
             {
-                return this.Triple.GetPhasingCorrelationMatrix(this.GetNumberOfPeriods()).Matrix;
+                return this.Triple.GetCorrelationMatrix(this.GetIDs(), this.GetFields()).Matrix;
             }
 
             public override void PrintToSheet(Excel.Range xlCell)
@@ -88,7 +88,7 @@ namespace CorrelationTest
 
             public override string[] GetIDs()
             {
-                var period_ids = PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfPeriods());
+                var period_ids = PeriodID.GeneratePeriodIDs(this.GetParentID(), this.GetNumberOfSubs());
                 return period_ids.Select(x => x.ID).ToArray();
             }
 
