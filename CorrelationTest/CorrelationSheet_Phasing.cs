@@ -76,7 +76,8 @@ namespace CorrelationTest
                 int fields = Convert.ToInt32(Convert.ToString(xlCorrelStringCell.Value).Split(',')[0]);
                 Excel.Range fieldRange = xlMatrixCell.Resize[1, fields];
                 Excel.Range matrixRange = xlMatrixCell.Offset[1, 0].Resize[fields, fields];
-                this.CorrelMatrix = new Data.CorrelationMatrix(this, fieldRange, matrixRange);
+                //this.CorrelMatrix = new Data.CorrelationMatrix(this, fieldRange, matrixRange);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
                 //Build the CorrelString, which can print itself during collapse
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 if (sheetType == SheetType.Correlation_PM)
@@ -155,6 +156,15 @@ namespace CorrelationTest
                 xlCorrelSheet.Cells[1, 1] = $"$CORRELATION{postfix}";
                 xlCorrelSheet.Rows[1].Hidden = true;
                 return xlCorrelSheet;
+            }
+
+            public override void UpdateCorrelationString(string[] ids)
+            {
+                UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
+                object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
+                this.CorrelString = new Data.CorrelationString_IM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
+                this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }
 
             //Bring in the coordinates - use an enum to build them for each sheet type

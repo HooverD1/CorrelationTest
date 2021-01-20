@@ -182,6 +182,7 @@
       <DependentUpon>CorrelationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CorrelationMatrix.cs" />
+    <Compile Include="CorrelationMatrix_Duration.cs" />
     <Compile Include="CorrelationMatrix_Inputs.cs" />
     <Compile Include="CorrelationMatrix_Phasing.cs" />
     <Compile Include="CorrelationSheet.cs" />

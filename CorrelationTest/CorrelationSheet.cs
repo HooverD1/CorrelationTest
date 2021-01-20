@@ -221,10 +221,10 @@ namespace CorrelationTest
                 //need to be able to parse a link into sheetname and address to reconstruct the linkSource sheet
                 newSheet.LinkToOrigin = new Data.Link(newSheet.xlLinkCell.Value);     //bootstrap the Link from the address
                 newSheet.xlMatrixCell = newSheet.xlSheet.Cells[csSpecs.MatrixCoords.Item1, csSpecs.MatrixCoords.Item2];
-                Excel.Range matrix_end = newSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown];
-                Excel.Range matrixRange = newSheet.xlSheet.Range[newSheet.xlMatrixCell.Offset[1,0], matrix_end];
-                newSheet.CorrelMatrix = new Data.CorrelationMatrix(newSheet, newSheet.xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange.Offset[1,0].Resize[matrixRange.Columns.Count, matrixRange.Columns.Count]);
-                newSheet.UpdateCorrelationString(newSheet.GetIDs());     //Updates the string off the matrix
+                //Excel.Range matrix_end = newSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown];
+                //Excel.Range matrixRange = newSheet.xlSheet.Range[newSheet.xlMatrixCell.Offset[1,0], matrix_end];
+                //newSheet.CorrelMatrix = new Data.CorrelationMatrix(newSheet, newSheet.xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange.Offset[1,0].Resize[matrixRange.Columns.Count, matrixRange.Columns.Count]);
+                //newSheet.UpdateCorrelationString(newSheet.GetIDs());     //Updates the string off the matrix
 
                 return newSheet;
             }
@@ -250,7 +250,7 @@ namespace CorrelationTest
                 }
             }
 
-            public virtual void UpdateCorrelationString() { }
+            //public virtual void UpdateCorrelationString() { throw new Exception("Failed override"); }
 
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
