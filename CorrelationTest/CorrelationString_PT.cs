@@ -46,7 +46,7 @@ namespace CorrelationTest
 
             public override object[,] GetMatrix()
             {
-                return this.Triple.GetCorrelationMatrix(this.GetIDs(), this.GetFields()).Matrix;
+                return this.Triple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_PT).Matrix;
             }
 
             public override void PrintToSheet(Excel.Range xlCell)
@@ -56,7 +56,7 @@ namespace CorrelationTest
                 xlCell.EntireColumn.ColumnWidth = 10;
             }
 
-            public override object[] GetFields()
+            public override string[] GetFields()
             {
                 //HEADER [Array size,Correl type,ParentID]
                 //FIELDS [Field1,Field2, ... ,Field n]      //Store start dates as fields for PT
@@ -66,7 +66,7 @@ namespace CorrelationTest
                 string[] fields = lines[1].Split(',');
                 if (!int.TryParse(Convert.ToString(header[0]), out int size)) { throw new Exception("Malformed Correlation String"); }
                 if (size != fields.Length) { throw new Exception("Malformed Correlation String"); }
-                return fields.ToArray<object>();
+                return fields;
             }
 
             public override UniqueID GetParentID()

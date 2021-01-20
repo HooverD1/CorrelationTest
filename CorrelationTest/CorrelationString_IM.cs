@@ -159,7 +159,7 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override object[] GetFields()
+            public override string[] GetFields()
             {
                 string[] splitString = DelimitString(this.Value);
                 return splitString[1].Split(',');

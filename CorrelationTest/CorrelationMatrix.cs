@@ -23,13 +23,14 @@ namespace CorrelationTest
             public object[,] Matrix { get; set; }
             private double[,] DoubleMatrix { get; set; }
             public int FieldCount { get; set; }
-            public object[] Fields { get; set; }
-            public object[] IDs { get; set; }
+            public string[] Fields { get; set; }
+            public string[] IDs { get; set; }
+            public string Parent_ID { get; set; }
             public Sheets.CorrelationSheet ContainingSheet { get; set; }
 
-            private CorrelationMatrix() { }       //default
+            protected CorrelationMatrix() { }       //default
 
-            private CorrelationMatrix(double[,] phasingTriple)
+            protected CorrelationMatrix(double[,] phasingTriple)
             {
                 //build a phasing correlation matrix from a provided triple
 
@@ -43,57 +44,125 @@ namespace CorrelationTest
                 this.FieldCount = fieldsRange.Cells.Count;
                 Matrix = ExtensionMethods.ReIndexArray<object>(matrixRange.Value);
                 object[,] fieldTemp = fieldsRange.Value;
-                this.Fields = new object[fieldTemp.GetLength(1)];
-                for(int i = 0; i < fieldTemp.GetLength(1); i++) { this.Fields[i] = fieldTemp[1, i + 1]; }
+                this.Fields = new string[fieldTemp.GetLength(1)];
+                for(int i = 0; i < fieldTemp.GetLength(1); i++) { this.Fields[i] = fieldTemp[1, i + 1].ToString(); }
                 FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
-            //public CorrelationMatrix(Data.CorrelationString_IM correlStringObj)
-            //{
-            //    //expand from string
-            //    this.Fields = correlStringObj.GetFields();
-            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-            //    this.FieldCount = this.Fields.Count();
-            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            //}
-
-            //public CorrelationMatrix(Data.CorrelationString_IT correlStringObj)
-            //{
-            //    //expand from string
-            //    this.Fields = correlStringObj.GetFields();
-            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-            //    this.FieldCount = this.Fields.Count();
-            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            //}
-
-            //public CorrelationMatrix(Data.CorrelationString_PM correlStringObj)
-            //{
-            //    //expand from string
-            //    this.Fields = correlStringObj.GetFields();
-            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-            //    this.FieldCount = this.Fields.Count();
-            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            //}
-
-            //public CorrelationMatrix(Data.CorrelationString_PT correlStringObj)
-            //{
-            //    //expand from string
-            //    this.Fields = correlStringObj.GetFields();
-            //    this.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
-            //    this.FieldCount = this.Fields.Count();
-            //    this.FieldDict = GetFieldDict(correlStringObj.GetIDs());
-            //}
-
-
-            public static CorrelationMatrix ConstructFromExisting(object[] ids, object[] fields, object[,] matrix)
+            public static CorrelationMatrix ConstructFromExisting(Sheets.CorrelationSheet containing_sheet)
             {
-                CorrelationMatrix matrix_obj = new CorrelationMatrix();
-                matrix_obj.IDs = ids;
+                object old_correl = containing_sheet.xlCorrelStringCell.Value;
+                CorrelationMatrix matrix_obj;
+                
+                //=========================================================
+                //These values should not be changed on a Correlation Sheet:
+                string parent_ID = Data.CorrelationString.GetParentIDFromString(old_correl);
+                string[] sub_fields = Data.CorrelationString.GetFieldsFromString(old_correl);
+                //=========================================================
+
+                //=======================
+                //Pull the matrix from the xlSheet to get updates
+                Excel.Range first_cell = containing_sheet.xlSheet.Cells[containing_sheet.Specs.MatrixCoords.Item1, containing_sheet.Specs.MatrixCoords.Item2];
+                Excel.Range last_cell = containing_sheet.xlSheet.Cells[containing_sheet.Specs.MatrixCoords_End.Item1, containing_sheet.Specs.MatrixCoords_End.Item2];
+                object[,] matrix = containing_sheet.xlSheet.Range[first_cell, last_cell].Value;
+                //=======================
+
+                SheetType containing_sheet_type = ExtensionMethods.GetSheetType(containing_sheet.xlSheet);
+                switch (containing_sheet_type)
+                {
+                    case SheetType.Correlation_IM:
+                        matrix_obj = new CorrelationMatrix_Inputs();
+                        matrix_obj.Parent_ID = parent_ID;
+                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
+                    case SheetType.Correlation_IT:
+                        matrix_obj = new CorrelationMatrix_Inputs();
+                        matrix_obj.Parent_ID = parent_ID;
+                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
+                    case SheetType.Correlation_PM:
+                        matrix_obj = new CorrelationMatrix_Phasing();
+                        matrix_obj.Parent_ID = parent_ID;
+                        PeriodID[] pids = PeriodID.GeneratePeriodIDs(UniqueID.ConstructFromExisting(Convert.ToString(parent_ID)), sub_fields.Count());
+                        matrix_obj.IDs = pids.Select(x => x.ID).ToArray();
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
+                    case SheetType.Correlation_PT:
+                        matrix_obj = new CorrelationMatrix_Phasing();
+                        matrix_obj.Parent_ID = parent_ID;
+                        PeriodID[] pids2 = PeriodID.GeneratePeriodIDs(UniqueID.ConstructFromExisting(Convert.ToString(parent_ID)), sub_fields.Count());
+                        matrix_obj.IDs = pids2.Select(x => x.ID).ToArray();
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
+                    case SheetType.Correlation_DM:
+                        matrix_obj = new CorrelationMatrix_Phasing();
+                        matrix_obj.Parent_ID = parent_ID;
+                        throw new NotImplementedException();
+                    case SheetType.Correlation_DT:
+                        matrix_obj = new CorrelationMatrix_Phasing();
+                        matrix_obj.Parent_ID = parent_ID;
+                        throw new NotImplementedException();
+                    default:
+                        throw new Exception("Unknown correlation type");
+                }
                 matrix_obj.Matrix = ExtensionMethods.ReIndexArray(matrix);
-                matrix_obj.FieldCount = matrix.GetLength(0);
-                //validate parent_uid and matrix
-                matrix_obj.Fields = fields;
-                matrix_obj.FieldDict = matrix_obj.GetFieldDict(ids);
+                matrix_obj.FieldCount = matrix_obj.Fields.Count();
+                
+                return matrix_obj;
+            }
+
+            public static CorrelationMatrix ConstructFromExisting(string parent_ID, string[] sub_ids, string[] sub_fields, object[,] matrix, SheetType sheet_type)
+            {
+                CorrelationMatrix matrix_obj; 
+
+                switch (sheet_type)
+                {
+                    case SheetType.Correlation_IM:
+                        matrix_obj = new CorrelationMatrix_Inputs();
+                        matrix_obj.IDs = sub_ids;
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        break;
+                    case SheetType.Correlation_IT:
+                        matrix_obj = new CorrelationMatrix_Inputs();
+                        matrix_obj.IDs = sub_ids;
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        break;
+                    case SheetType.Correlation_PM:
+                        matrix_obj = new CorrelationMatrix_Phasing();
+                        PeriodID[] pids = PeriodID.GeneratePeriodIDs(UniqueID.ConstructFromExisting(Convert.ToString(parent_ID)), sub_fields.Count());
+                        matrix_obj.IDs = pids.Select(x => x.ID).ToArray();
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        break;
+                    case SheetType.Correlation_PT:
+                        matrix_obj = new CorrelationMatrix_Phasing();
+                        PeriodID[] pids2 = PeriodID.GeneratePeriodIDs(UniqueID.ConstructFromExisting(Convert.ToString(parent_ID)), sub_fields.Count());
+                        matrix_obj.IDs = pids2.Select(x => x.ID).ToArray();
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        break;
+                    case SheetType.Correlation_DM:
+                        throw new NotImplementedException();
+                    case SheetType.Correlation_DT:
+                        throw new NotImplementedException();
+                    default:
+                        throw new Exception("Unknown correlation type");
+                }
+                matrix_obj.Matrix = ExtensionMethods.ReIndexArray(matrix);
+                matrix_obj.FieldCount = matrix_obj.Fields.Count();
+                matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                 return matrix_obj;
             }
 
@@ -183,7 +252,7 @@ namespace CorrelationTest
                 return fieldDict;
             }
 
-            private Dictionary<string, int> GetFieldDict(object[] ids)
+            private Dictionary<string, int> GetFieldDict(string[] ids)
             {
                 string[] id_strings = ids.Select(x=>Convert.ToString(x)).ToArray();
                 FieldDict = new Dictionary<string, int>();
@@ -377,7 +446,16 @@ namespace CorrelationTest
 
             public bool ValidateAgainstTriple(Triple pt)
             {
-                Data.CorrelationMatrix tripleMatrix = pt.GetCorrelationMatrix(this.IDs, this.Fields);
+                SheetType sheet_type;
+                if (this is CorrelationMatrix_Inputs)
+                    sheet_type = SheetType.Correlation_IT;
+                else if (this is CorrelationMatrix_Phasing)
+                    sheet_type = SheetType.Correlation_PT;
+                else
+                {
+                    throw new Exception("Unknown matrix type");
+                }
+                Data.CorrelationMatrix tripleMatrix = pt.GetCorrelationMatrix(this.Parent_ID, this.IDs, this.Fields, sheet_type);
                 return this.Equals(tripleMatrix);
             }
         }   //class

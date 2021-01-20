@@ -11,9 +11,7 @@ namespace CorrelationTest
         public int PeriodTag { get; set; }
         public PeriodID(UniqueID uID, int period)
         {
-
-            this.PeriodTag = period;
-            this.RefreshID();
+            this.ID = $"{uID.ID}_P{period}";
         }
 
         public static PeriodID[] GeneratePeriodIDs(UniqueID uid, int numOfPeriods)

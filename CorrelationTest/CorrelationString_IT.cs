@@ -41,7 +41,7 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
-            public override object[] GetFields()
+            public override string[] GetFields()
             {
                 string[] splitString = DelimitString(this.Value);
                 return splitString[1].Split(',');
@@ -50,7 +50,7 @@ namespace CorrelationTest
 
             public override object[,] GetMatrix()
             {
-                return this.InputTriple.GetCorrelationMatrix(this.GetIDs(), this.GetFields()).Matrix;
+                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_IT).Matrix;
             }
 
             public override string[] GetIDs()

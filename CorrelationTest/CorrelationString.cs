@@ -23,7 +23,7 @@ namespace CorrelationTest
         public class CorrelationString
         {
             public string Value { get; set; }
-            public virtual object[] GetFields() { throw new Exception("Failed override"); }
+            public virtual string[] GetFields() { throw new Exception("Failed override"); }
             public virtual string[] GetIDs() { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] ids, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
@@ -37,8 +37,30 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields));
             }
 
-            public static object[] GetIDsFromHeader(string[] header)
+            public static string GetParentIDFromString(object correlString_Object)
             {
+                string correlString = Convert.ToString(correlString_Object);
+                correlString = ExtensionMethods.CleanStringLinebreaks(correlString);
+                string[] lines = DelimitString(correlString);
+                string[] header = lines[0].Split(',');
+                return header[2];
+            }
+
+            public static string[] GetFieldsFromString(object correlString_Object)
+            {
+                string correlString = Convert.ToString(correlString_Object);
+                correlString = ExtensionMethods.CleanStringLinebreaks(correlString);
+                string[] lines = DelimitString(correlString);
+                string[] fields = lines[1].Split(',');
+                return fields;
+            }
+            
+            public static string[] GetIDsFromString(object correlString_Object)
+            {
+                string correlString = Convert.ToString(correlString_Object);
+                correlString = ExtensionMethods.CleanStringLinebreaks(correlString);
+                string[] lines = DelimitString(correlString);
+                string[] header = lines[0].Split(',');
                 string[] ids = new string[header.Length - 3];
                 for (int i = 3; i < header.Length; i++)
                     ids[i - 3] = header[i];

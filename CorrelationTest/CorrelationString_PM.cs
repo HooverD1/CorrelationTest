@@ -98,10 +98,10 @@ namespace CorrelationTest
                 }
             }
 
-            public override object[] GetFields()
+            public override string[] GetFields()
             {
                 string[] fields = CorrelationString.DelimitString(this.Value)[1].Split(',');
-                return fields.ToArray<object>();
+                return fields;
             }
 
             public override UniqueID GetParentID()

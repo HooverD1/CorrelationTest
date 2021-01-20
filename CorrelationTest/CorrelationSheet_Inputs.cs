@@ -61,15 +61,12 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 //
                 //Build the CorrelMatrix
-                string old_string = Convert.ToString(xlCorrelStringCell.Value);
-                string[] lines = Data.CorrelationString.DelimitString(old_string);
-                string[] header = lines[0].Split(',');
-                object[] ids = Data.CorrelationString.GetIDsFromHeader(header);
+                object[] ids = Data.CorrelationString.GetIDsFromString(xlCorrelStringCell.Value);
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
                 object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[1];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
                 object[,] matrix = matrixRange.Value;
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(ids, fields, matrix);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
                 //Build the CorrelString, which can print itself during collapse
                 //Get these from the Header.
                 string parent_id = Convert.ToString(xlIDCell.Value);
@@ -105,7 +102,7 @@ namespace CorrelationTest
                 //Update the string on the sheet to match the altered matrix
                 UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
                 object[,] matrix = this.xlMatrixCell.Offset[1,0].Resize[ids.Length, ids.Length].Value;
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(ids, this.CorrelMatrix.Fields, matrix);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
                 this.CorrelString = new Data.CorrelationString_IM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
                 this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }
