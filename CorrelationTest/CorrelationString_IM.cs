@@ -41,13 +41,6 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, matrix.GetMatrix()));
             }
 
-            //private object[] BuildIDsFromFields(object[] fields, string sheet)
-            //{
-            //    object[] ids = new object[fields.Length];
-            //    for (int i = 0; i < fields.Length; i++)
-            //        ids[i] = $"{sheet}|{fields[i]}";
-            //    return ids;
-            //}
             private static object[] GetFieldsFromRange(Excel.Range correlRange)
             {
                 var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
@@ -226,10 +219,10 @@ namespace CorrelationTest
 
             public override void Expand(Excel.Range xlSource)
             {
-                Data.CorrelationString_IM correlStringObj = new Data.CorrelationString_IM(this.Value);
+                //Data.CorrelationString_IM correlStringObj = new Data.CorrelationString_IM(this.Value);
                 var id = this.GetIDs()[0];
                 //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
+                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
             }

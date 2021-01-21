@@ -34,7 +34,7 @@ namespace CorrelationTest
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = correlString;
                 this.Specs = specs;
-                this.xlSheet = GetXlSheet();
+                this.xlSheet = GetXlSheet(SheetType.Correlation_IT);
                 CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IT)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
@@ -51,7 +51,7 @@ namespace CorrelationTest
 
             public CorrelationSheet_Inputs(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
             {
-                this.xlSheet = GetXlSheet(false);
+                this.xlSheet = GetXlSheet();
                 this.Specs = specs;
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
@@ -63,20 +63,42 @@ namespace CorrelationTest
                 //Build the CorrelMatrix
                 object[] ids = Data.CorrelationString.GetIDsFromString(xlCorrelStringCell.Value);
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
-                object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[1];
+                fieldsValues = ExtensionMethods.ReIndexArray(fieldsValues);
+                object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[0];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
                 object[,] matrix = matrixRange.Value;
                 this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
                 //Build the CorrelString, which can print itself during collapse
                 //Get these from the Header.
                 string parent_id = Convert.ToString(xlIDCell.Value);
-                this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, this.CorrelMatrix);
+                SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
+                if(sheetType == SheetType.Correlation_IT)
+                {
+                    //Build the triple from the string
+                    string correlStringVal = this.xlCorrelStringCell.Value;
+                    Data.CorrelationString_IT existing_cst = new Data.CorrelationString_IT(correlStringVal);
+                    Triple pt = existing_cst.GetTriple();
+                    //Check if the matrix still matches the triple.
+                    if (this.CorrelMatrix.ValidateAgainstTriple(pt))
+                    {       //If YES - create cs_triple object
+                        this.CorrelString = existing_cst;
+                    }
+                    else
+                    {       //If NO - create cs_periods object
+                        this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, CorrelMatrix);
+                    }
+                }
+                else if(sheetType == SheetType.Correlation_IM)
+                {
+                    this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, this.CorrelMatrix);
+                }
+                
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_IM"
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_IM" || sheet.Cells[1,1].value == "$CORRELATION_IT"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
@@ -94,6 +116,32 @@ namespace CorrelationTest
                 xlCorrelSheet.Cells[1, 1] = $"$CORRELATION{postfix}";
                 xlCorrelSheet.Rows[1].Hidden = true;
                 return xlCorrelSheet;
+            }
+
+            protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
+            {
+                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_IM" || sheet.Cells[1, 1].value == "$CORRELATION_IT"
+                                     select sheet;
+                if (xlCorrelSheets.Any())
+                    xlSheet = xlCorrelSheets.First();
+                else if (CreateNew)
+                {
+                    switch (sheetType)
+                    {
+                        case SheetType.Correlation_IM:
+                            xlSheet = CreateXLCorrelSheet("_IM");
+                            break;
+                        case SheetType.Correlation_IT:
+                            xlSheet = CreateXLCorrelSheet("_IT");
+                            break;
+                        default:
+                            throw new Exception("Bad sheet type");
+                    }
+                }
+                else
+                    throw new Exception("No input matrix correlation sheet found.");
+                return xlSheet;
             }
 
             public override void UpdateCorrelationString(string[] ids)

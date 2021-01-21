@@ -200,6 +200,9 @@ namespace CorrelationTest
                 {
                     case SheetType.Correlation_DM:
                         throw new NotImplementedException();
+                    case SheetType.Correlation_IT:
+                        newSheet = new CorrelationSheet_Inputs(csSpecs);
+                        break;
                     case SheetType.Correlation_IM:
                         newSheet = new CorrelationSheet_Inputs(csSpecs);
                         break;

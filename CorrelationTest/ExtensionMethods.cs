@@ -71,12 +71,16 @@ namespace CorrelationTest
                     return "$INPUT";
                 case SheetType.FilterData:
                     return "$FILTER";
+                case SheetType.Correlation_IT:
+                    return "$CORRELATION_IT";
                 case SheetType.Correlation_IM:
                     return "$CORRELATION_IM";
                 case SheetType.Correlation_PM:
                     return "$CORRELATION_PM";
                 case SheetType.Correlation_PT:
                     return "$CORRELATION_PT";
+                case SheetType.Correlation_DT:
+                    return "$CORRELATION_DT";
                 case SheetType.Correlation_DM:
                     return "$CORRELATION_DM";
                 default:
@@ -89,6 +93,8 @@ namespace CorrelationTest
             string sheetIdent = xlSheet.Cells[1, 1].Value;
             switch (sheetIdent)
             {
+                case "$CORRELATION_IT":
+                    return SheetType.Correlation_IT;
                 case "$CORRELATION_IM":
                     return SheetType.Correlation_IM;
                 case "$CORRELATION_PM":
@@ -97,6 +103,8 @@ namespace CorrelationTest
                     return SheetType.Correlation_PT;
                 case "$CORRELATION_DM":
                     return SheetType.Correlation_DM;
+                case "$CORRELATION_DT":
+                    return SheetType.Correlation_DT;
                 case "$WBS":
                     return SheetType.WBS;
                 case "$EST":

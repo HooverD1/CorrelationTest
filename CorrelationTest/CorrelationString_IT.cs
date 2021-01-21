@@ -41,6 +41,16 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
+            public Triple GetTriple()
+            {
+                string[] correlLines = DelimitString(this.Value);
+                if (correlLines.Length != 3)
+                    throw new Exception("Malformed triple string.");
+                string uidString = correlLines[0].Split(',')[2];
+                string tripleString = correlLines[2];
+                return new Triple(uidString, tripleString);
+            }
+
             public override string[] GetFields()
             {
                 string[] splitString = DelimitString(this.Value);
