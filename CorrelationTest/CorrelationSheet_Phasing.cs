@@ -27,7 +27,8 @@ namespace CorrelationTest
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
+                this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
@@ -170,17 +171,33 @@ namespace CorrelationTest
             //Bring in the coordinates - use an enum to build them for each sheet type
             //Parse CorrelString to get type for collapse
 
+            protected override string GetDistributionString(IHasSubs est)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append($"{((IHasPhasingSubs)est).PhasingDistribution.Name}");
+                for (int i = 1; i < ((IHasPhasingSubs)est).PhasingDistribution.DistributionParameters.Count(); i++)
+                {
+                    string param = $"Param{i}";
+                    if (((IHasPhasingSubs)est).PhasingDistribution.DistributionParameters[param] != null)
+                        sb.Append($",{((IHasPhasingSubs)est).PhasingDistribution.DistributionParameters[param]}");
+                }
+                return sb.ToString();
+            }
+
             public override void PrintToSheet()  //expanding from string
             {
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
-                Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
+                IHasPhasingSubs tempEst = (IHasPhasingSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 //tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
+                //tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
+                this.xlIDCell.ColumnWidth = 40;
                 CorrelString.PrintToSheet(xlCorrelStringCell);
-                this.xlDistCell.Value = tempEst.ItemDistribution.Name;
+                this.xlDistCell.Value = GetDistributionString(tempEst);
+                //this.xlDistCell.Value = tempEst.ItemDistribution.Name;
             }
         }
     }

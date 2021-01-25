@@ -17,22 +17,28 @@ namespace CorrelationTest
 
     public interface IHasInputSubs : IHasSubs
     {
+        Data.CorrelationString CostCorrelationString { get; set; }
         List<ISub> SubEstimates { get; set; }
         void LoadSubEstimates();
         Excel.Range xlCorrelCell_Inputs { get; set; }
+        Distribution CostDistribution { get; set; }
         void PrintInputCorrelString();
     }
     public interface IHasPhasingSubs : IHasSubs
     {
+        Data.CorrelationString PhasingCorrelationString { get; set; }
         Excel.Range xlCorrelCell_Periods { get; set; }
         Excel.Range xlDollarCell { get; set; }
         Period[] Periods { get; set; }
-        void LoadPeriods();
-        int PeriodCount { get; set; }
+        Distribution PhasingDistribution { get; set; }
+        void LoadPhasing(Excel.Range xlRow);
         void PrintPhasingCorrelString();
     }
     public interface IHasDurationSubs : IHasSubs
     {
+        Data.CorrelationString DurationCorrelationString { get; set; }
+        List<ISub> SubEstimates { get; set; }
+        Distribution DurationDistribution { get; set; }
         void PrintDurationCorrelString();
     }
 }

@@ -32,7 +32,7 @@ namespace CorrelationTest
                     Items[0].xlCorrelCell_Inputs.EntireColumn.Clear();
                 foreach (Estimate_Item est in this.Items)
                 {
-                    est.ContainingSheetObject.GetSubEstimates(est.xlRow);     //this is returning too many subestimates       DAVID
+                    est.ContainingSheetObject.GetSubEstimates(est.xlRow); 
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
                 }
             }

@@ -11,10 +11,16 @@ namespace CorrelationTest
     public class Estimate_Item : Item, IHasInputSubs, IHasDurationSubs, IHasPhasingSubs, ISub
     {
         public DisplayCoords dispCoords { get; set; }
-        public int PeriodCount { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution ItemDistribution { get; set; }
-        public Dictionary<string, object> DistributionParameters { get; set; }
+        public Distribution CostDistribution { get; set; }
+        public Distribution DurationDistribution { get; set; }
+        public Distribution PhasingDistribution { get; set; }
+        public Data.CorrelationString CostCorrelationString { get; set; }
+        public Data.CorrelationString DurationCorrelationString { get; set; }
+        public Data.CorrelationString PhasingCorrelationString { get; set; }
+        public Dictionary<string, object> CostDistributionParameters { get; set; }
+        public Dictionary<string, object> PhasingDistributionParameters { get; set; }
+        public Dictionary<string, object> DurationDistributionParameters { get; set; }
         public string Type { get; set; }
         public Estimate_Item ParentEstimate { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
@@ -30,7 +36,6 @@ namespace CorrelationTest
         public Estimate_Item(Excel.Range itemRow, CostSheet ContainingSheetObject) : base(itemRow, ContainingSheetObject)
         {
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(itemRow.Worksheet));
-            this.PeriodCount = 5;
             this.xlRow = itemRow;
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
@@ -41,14 +46,23 @@ namespace CorrelationTest
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
-            this.DistributionParameters = new Dictionary<string, object>()
-              { { "Type", xlDistributionCell.Offset[0,0].Value },
+            this.CostDistributionParameters = new Dictionary<string, object>() { 
+                { "Type", xlDistributionCell.Offset[0,0].Value },
                 { "Param1", xlDistributionCell.Offset[0,1].Value },
                 { "Param2", xlDistributionCell.Offset[0,2].Value },
                 { "Param3", xlDistributionCell.Offset[0,3].Value },
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.ItemDistribution = new Distribution(this.DistributionParameters);
+            this.CostDistribution = new Distribution(CostDistributionParameters);       //Is this useless?
+
+            this.PhasingDistributionParameters = new Dictionary<string, object>() {
+                { "Type", "Normal" },
+                { "Param1", 1 },
+                { "Param2", 1 },
+                { "Param3", 1 },
+                { "Param4", 0 },
+                { "Param5", 0 } };
+            this.PhasingDistribution = new Distribution(PhasingDistributionParameters);    //Should this even be a Distribution object? More of a schedule.
 
             this.Level = Convert.ToInt32(xlLevelCell.Value);
             this.Type = Convert.ToString(xlTypeCell.Value);
@@ -61,7 +75,7 @@ namespace CorrelationTest
             }
             else
                 this.uID = UniqueID.ConstructFromExisting(xlIDCell.Value);
-            LoadPeriods();
+            LoadPhasing(xlRow);
             this.CorrelPairs = new Dictionary<Estimate_Item, double>();
         }
 
@@ -70,7 +84,7 @@ namespace CorrelationTest
             this.SubEstimates = GetSubs();
         }
 
-        private List<ISub> GetSubs()
+        private List<ISub> GetSubs()        //This only works for the estimate sheet because it tells you the number of subs and they're all contiguous
         {
             List<ISub> subEstimates = new List<ISub>();
             //Get the number of inputs
@@ -82,14 +96,14 @@ namespace CorrelationTest
             return subEstimates;
         }
 
-        public void LoadPeriods()
+        public void LoadPhasing(Excel.Range xlRow)
         {
             this.Periods = GetPeriods();
         }
         private Period[] GetPeriods()
         {
             double[] dollars = LoadDollars();
-            Period[] periods = new Period[PeriodCount];
+            Period[] periods = new Period[5];
             for (int i = 0; i < periods.Length; i++)
             {
                 periods[i] = new Period(this.uID, $"P{i}", dollars[i]);     //Need to be able to pull the dates off the sheet here.
@@ -98,7 +112,7 @@ namespace CorrelationTest
         }
         private double[] LoadDollars()
         {
-            double[] dollars = new double[PeriodCount];
+            double[] dollars = new double[5];
             for (int d = 0; d < dollars.Length; d++)
             {
                 dollars[d] = xlDollarCell.Offset[0, d].Value ?? 0;

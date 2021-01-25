@@ -31,6 +31,7 @@ namespace CorrelationTest
             public Excel.Range xlIDCell { get; set; }
             public Excel.Range xlCorrelStringCell { get; set; }
             public Excel.Range xlDistCell { get; set; }
+            public Excel.Range xlSubIdCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
 
             //public CorrelationSheet(Data.CorrelationString_IM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
@@ -90,32 +91,24 @@ namespace CorrelationTest
             }
             public override void PrintToSheet()  //expanding from string
             {
-                //build a sheet object off the linksource
-                CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
-                Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
-                this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
-                this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
-                CorrelString.PrintToSheet(xlCorrelStringCell);
-                for(int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
-                {
-                    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
-                }                
+                throw new Exception("Failed override");
+                ////build a sheet object off the linksource
+                //CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
+                //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
+                ////tempEst.LoadSubEstimates();
+                //tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
+                //this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
+                //this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
+                //this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
+                //CorrelString.PrintToSheet(xlCorrelStringCell);
+                //for(int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
+                //{
+                //    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
+                //}                
             }
 
-            protected string GetDistributionString(Estimate_Item est, int subIndex)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{est.SubEstimates[subIndex].ItemDistribution.Name}");
-                for(int i = 1; i < est.SubEstimates[subIndex].DistributionParameters.Count(); i++)
-                {
-                    string param = $"Param{i}";
-                    if (est.SubEstimates[subIndex].DistributionParameters[param] != null)
-                        sb.Append($",{est.SubEstimates[subIndex].DistributionParameters[param]}");
-                }
-                return sb.ToString();
-            }
+            protected virtual string GetDistributionString(IHasSubs est, int subIndex) { throw new Exception("Failed override"); }
+            protected virtual string GetDistributionString(IHasSubs est) { throw new Exception("Failed override"); }
 
             public bool PaintMatrixErrors(Data.MatrixErrors[,] matrixErrors)        //return false if no matrix errors found
             {

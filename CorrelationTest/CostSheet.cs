@@ -42,7 +42,7 @@ namespace CorrelationTest
             this.Items = GetItemRows();
             LinkItemRows();
         }
-        public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }
+        public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }    //Is this junk?
         public virtual void PrintDefaultCorrelStrings() { throw new Exception("Failed override"); }
 
         public virtual object[] Get_xlFields()

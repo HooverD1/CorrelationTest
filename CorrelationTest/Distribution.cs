@@ -21,14 +21,17 @@ namespace CorrelationTest
         public string Name { get; set; }
         public IUnivariateDistribution DistributionObj { get; set; }
         public string DistributionString { get; set; }
+        public Dictionary<string, object> DistributionParameters { get; set; }
         
         public Distribution(string distributionString)
         {
-            this.DistributionObj = BuildDistribution(ParseString(distributionString));
+            this.DistributionParameters = ParseString(distributionString);
+            this.DistributionObj = BuildDistribution(this.DistributionParameters);
         }
 
         public Distribution(Dictionary<string, object> distParameters)
         {
+            this.DistributionParameters = distParameters;
             this.Name = distParameters["Type"].ToString();
             this.DistributionObj = BuildDistribution(distParameters);
         }

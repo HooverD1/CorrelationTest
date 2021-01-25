@@ -12,12 +12,13 @@ namespace CorrelationTest
         //Estimates, inputs
         DisplayCoords dispCoords { get; set; }
         Excel.Range xlTypeCell { get; set; }
-        int PeriodCount { get; set; }
         Period[] Periods { get; set; }
         UniqueID uID { get; set; }
-        Distribution ItemDistribution { get; set; }
+        Distribution CostDistribution { get; set; }
+        Distribution DurationDistribution { get; set; }
         string Name { get; set; }
-        Dictionary<string, object> DistributionParameters { get; set; }
+        Dictionary<string, object> CostDistributionParameters { get; set; }
+        Dictionary<string, object> DurationDistributionParameters { get; set; }
         Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
     }
 }

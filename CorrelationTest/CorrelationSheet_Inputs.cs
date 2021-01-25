@@ -21,7 +21,8 @@ namespace CorrelationTest
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
+                this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
@@ -40,7 +41,8 @@ namespace CorrelationTest
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
+                this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
@@ -57,7 +59,8 @@ namespace CorrelationTest
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
+                this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 //
                 //Build the CorrelMatrix
@@ -155,19 +158,43 @@ namespace CorrelationTest
                 this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }
 
+            protected override string GetDistributionString(IHasSubs est, int subIndex)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append($"{((IHasInputSubs)est).SubEstimates[subIndex].CostDistribution.Name}");
+                for (int i = 1; i < ((IHasInputSubs)est).SubEstimates[subIndex].CostDistributionParameters.Count(); i++)
+                {
+                    string param = $"Param{i}";
+                    if (((IHasInputSubs)est).SubEstimates[subIndex].CostDistributionParameters[param] != null)
+                        sb.Append($",{((IHasInputSubs)est).SubEstimates[subIndex].CostDistributionParameters[param]}");
+                }
+                return sb.ToString();
+            }
+
+            protected string GetSubIdString(IHasSubs est, int subIndex)
+            {
+                return ((IHasInputSubs)est).SubEstimates[subIndex].uID.ID;
+            }
+
             public override void PrintToSheet()  //expanding from string
             {
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
-                Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
+                //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
+                IHasInputSubs tempEst = (IHasInputSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
+                tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
+                this.xlIDCell.ColumnWidth = 40;
                 CorrelString.PrintToSheet(xlCorrelStringCell);
                 for (int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
+                    //Distributions
                     this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
+                    //IDs
+                    this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(tempEst, subIndex);
+                    this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
             }
         }

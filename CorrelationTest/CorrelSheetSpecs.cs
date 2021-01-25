@@ -18,6 +18,8 @@ namespace CorrelationTest
             private string linkFormat { get; }
             private int idRow { get; }
             private int idCol { get; }
+            private int subIdRow { get; }
+            private int subIdCol { get; }
             private int distRow { get; }
             private int distCol { get; }
             private int stringRow { get; }
@@ -27,6 +29,7 @@ namespace CorrelationTest
             public Tuple<int, int> MatrixCoords_End { get; set; }
             public Tuple<int, int> LinkCoords { get; }
             public Tuple<int, int> IdCoords { get; }
+            public Tuple<int, int> SubIdCoords { get; }
             public Tuple<int, int> DistributionCoords { get; }
             public Tuple<int, int> StringCoords { get; }
             public string LinkFormat { get; }
@@ -37,81 +40,93 @@ namespace CorrelationTest
                 {
                     case SheetType.Correlation_IM:
                         matrixRow = 4;
-                        matrixCol = 5;
+                        matrixCol = 4;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
+                        subIdRow = 5;
+                        subIdCol = 2;
                         distRow = 5;
                         distCol = 1;
-                        stringRow = 3;
-                        stringCol = 2;
+                        stringRow = 2;
+                        stringCol = 1;
                         break;
                     case SheetType.Correlation_IT:
                         matrixRow = 4;
-                        matrixCol = 5;
+                        matrixCol = 4;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
+                        subIdRow = 5;
+                        subIdCol = 2;
                         distRow = 5;
                         distCol = 1;
-                        stringRow = 3;
-                        stringCol = 2;
+                        stringRow = 2;
+                        stringCol = 1;
                         break;
                     case SheetType.Correlation_PM:
                         matrixRow = 4;
-                        matrixCol = 5;
+                        matrixCol = 4;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
+                        subIdRow = 5;
+                        subIdCol = 2;
                         distRow = 5;
                         distCol = 1;
-                        stringRow = 3;
-                        stringCol = 2;
+                        stringRow = 2;
+                        stringCol = 1;
                         break;
                     case SheetType.Correlation_PT:
                         matrixRow = 4;
-                        matrixCol = 5;
+                        matrixCol = 4;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
+                        subIdRow = 5;
+                        subIdCol = 2;
                         distRow = 5;
                         distCol = 1;
-                        stringRow = 3;
-                        stringCol = 2;
+                        stringRow = 2;
+                        stringCol = 1;
                         break;
                     case SheetType.Correlation_DM:
                         matrixRow = 4;
-                        matrixCol = 5;
+                        matrixCol = 4;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
+                        subIdRow = 5;
+                        subIdCol = 2;
                         distRow = 5;
                         distCol = 1;
-                        stringRow = 3;
-                        stringCol = 2;
+                        stringRow = 2;
+                        stringCol = 1;
                         break;
                     case SheetType.Correlation_DT:
                         matrixRow = 4;
-                        matrixCol = 5;
+                        matrixCol = 9;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
+                        subIdRow = 5;
+                        subIdCol = 7;
                         distRow = 5;
                         distCol = 1;
-                        stringRow = 3;
-                        stringCol = 2;
+                        stringRow = 2;
+                        stringCol = 1;
                         break;
                     default:
                         throw new Exception("Unknown correl sheet type");
@@ -120,6 +135,7 @@ namespace CorrelationTest
                 this.LinkCoords = new Tuple<int, int>(linkRow, linkCol);
                 this.LinkFormat = linkFormat;
                 this.IdCoords = new Tuple<int, int>(idRow, idCol);
+                this.SubIdCoords = new Tuple<int, int>(subIdRow, subIdCol);
                 this.DistributionCoords = new Tuple<int, int>(distRow, distCol);
                 this.StringCoords = new Tuple<int, int>(stringRow, stringCol);
             }

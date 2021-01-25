@@ -9,15 +9,20 @@ namespace CorrelationTest
 {
     public class WBS_Item : Item, IHasInputSubs, IHasDurationSubs, IHasPhasingSubs
     {
-        public Excel.Range xlDollarCell { get; set; }
+        public Distribution CostDistribution { get; set; }
+        public Distribution DurationDistribution { get; set; }
+        public Distribution PhasingDistribution { get; set; }
+        public Data.CorrelationString CostCorrelationString { get; set; }
+        public Data.CorrelationString DurationCorrelationString { get; set; }
+        public Data.CorrelationString PhasingCorrelationString { get; set; }
         public Period[] Periods { get; set; }
-        public int PeriodCount { get; set; } = 5;
+        public Excel.Range xlDollarCell { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
 
         public WBS_Item(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)
         {
-
+            LoadPhasing(xlRow);
         }
 
         public void LoadSubEstimates()
@@ -49,14 +54,14 @@ namespace CorrelationTest
             }
         }
 
-        public void LoadPeriods()
+        public void LoadPhasing(Excel.Range xlRow)
         {
             this.Periods = GetPeriods();
         }
         private Period[] GetPeriods()
         {
             double[] dollars = LoadDollars();
-            Period[] periods = new Period[PeriodCount];
+            Period[] periods = new Period[this.Periods.Count()];
             for (int i = 0; i < periods.Length; i++)
             {
                 periods[i] = new Period(this.uID, $"P{i + 1}", dollars[i]);
@@ -65,7 +70,7 @@ namespace CorrelationTest
         }
         private double[] LoadDollars()
         {
-            double[] dollars = new double[PeriodCount];
+            double[] dollars = new double[this.Periods.Count()];
             for (int d = 0; d < dollars.Length; d++)
             {
                 dollars[d] = xlDollarCell.Offset[0, d].Value ?? 0;

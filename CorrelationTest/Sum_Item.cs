@@ -11,7 +11,12 @@ namespace CorrelationTest
     {
         public Excel.Range xlDollarCell { get; set; }
         public Period[] Periods { get; set; }
-        public int PeriodCount { get; set; } = 5;
+        public Distribution CostDistribution { get; set; }
+        public Distribution DurationDistribution { get; set; }
+        public Distribution PhasingDistribution { get; set; }
+        public Data.CorrelationString CostCorrelationString { get; set; }
+        public Data.CorrelationString DurationCorrelationString { get; set; }
+        public Data.CorrelationString PhasingCorrelationString { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
 
@@ -19,7 +24,7 @@ namespace CorrelationTest
         {
             LoadUID();
             this.xlDollarCell = xlRow.Cells[1, ContainingSheetObject.Specs.Dollar_Offset];
-            LoadPeriods();
+            LoadPhasing(xlRow);
         }
 
         public void LoadUID()
@@ -41,14 +46,22 @@ namespace CorrelationTest
             }
         }
 
-        public void LoadPeriods()
+        public void LoadPhasing(Excel.Range xlRow)
         {
+            var phasingDistributionParameters = new Dictionary<string, object>() {
+                { "Type", "Normal" },
+                { "Param1", 1 },
+                { "Param2", 1 },
+                { "Param3", 1 },
+                { "Param4", 0 },
+                { "Param5", 0 } };
+            this.PhasingDistribution = new Distribution(phasingDistributionParameters);
             this.Periods = GetPeriods();
         }
         private Period[] GetPeriods()
         {
             double[] dollars = LoadDollars();
-            Period[] periods = new Period[PeriodCount];
+            Period[] periods = new Period[5];
             for (int i = 0; i < periods.Length; i++)
             {
                 periods[i] = new Period(this.uID, $"P{i + 1}", dollars[i]);
@@ -57,7 +70,7 @@ namespace CorrelationTest
         }
         private double[] LoadDollars()
         {
-            double[] dollars = new double[PeriodCount];
+            double[] dollars = new double[5];
             for (int d = 0; d < dollars.Length; d++)
             {
                 dollars[d] = xlDollarCell.Offset[0, d].Value ?? 0;
@@ -67,10 +80,10 @@ namespace CorrelationTest
 
         public void LoadSubEstimates()
         {
-            this.SubEstimates = GetSubEstimates();
+            this.SubEstimates = GetSubs();
         }
-
-        private List<ISub> GetSubEstimates()
+        
+        private List<ISub> GetSubs()
         {
             List<ISub> subEstimates = new List<ISub>();
             //Get the number of inputs
