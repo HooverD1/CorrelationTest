@@ -8,15 +8,13 @@ using Accord.Statistics.Distributions.Univariate;
 
 namespace CorrelationTest
 {
-    public class Estimate_Item : Item, IHasInputSubs, IHasDurationSubs, IHasPhasingSubs, ISub
+    public class Estimate_Item : Item, IHasSubs
     {
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution CostDistribution { get; set; }
-        public Distribution DurationDistribution { get; set; }
         public Distribution PhasingDistribution { get; set; }
-        public Data.CorrelationString CostCorrelationString { get; set; }
-        public Data.CorrelationString DurationCorrelationString { get; set; }
+        public Distribution ValueDistribution { get; set; } //Cost or Schedule
+        public Data.CorrelationString ValueCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
         public Dictionary<string, object> CostDistributionParameters { get; set; }
         public Dictionary<string, object> PhasingDistributionParameters { get; set; }
@@ -39,21 +37,14 @@ namespace CorrelationTest
             this.xlRow = itemRow;
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
-            this.xlCorrelCell_Inputs = itemRow.Cells[1, dispCoords.InputCorrel_Offset];
+            this.xlCorrelCell_Inputs = itemRow.Cells[1, dispCoords.CostInputCorrel_Offset];
             this.xlCorrelCell_Periods = itemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
             this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
-            this.CostDistributionParameters = new Dictionary<string, object>() { 
-                { "Type", xlDistributionCell.Offset[0,0].Value },
-                { "Param1", xlDistributionCell.Offset[0,1].Value },
-                { "Param2", xlDistributionCell.Offset[0,2].Value },
-                { "Param3", xlDistributionCell.Offset[0,3].Value },
-                { "Param4", xlDistributionCell.Offset[0,4].Value },
-                { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new Distribution(CostDistributionParameters);       //Is this useless?
+
 
             this.PhasingDistributionParameters = new Dictionary<string, object>() {
                 { "Type", "Normal" },
@@ -91,7 +82,7 @@ namespace CorrelationTest
             int inputCount = Convert.ToInt32(xlRow.Cells[1, ContainingSheetObject.Specs.Level_Offset].value);    //Get the number of inputs
             for (int i = 1; i <= inputCount; i++)
             {
-                subEstimates.Add(new Estimate_Item(xlRow.Offset[i, 0].EntireRow, ContainingSheetObject));
+                subEstimates.Add((ISub)Item.ConstructFromRow(xlRow.Offset[i, 0].EntireRow, ContainingSheetObject));
             }
             return subEstimates;
         }
@@ -214,7 +205,9 @@ namespace CorrelationTest
         }
         public void PrintDurationCorrelString()
         {
-
+            Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.DurationTriple);
+            if (inString != null)
+                inString.PrintToSheet(xlCorrelCell_Inputs);
         }
     }
 

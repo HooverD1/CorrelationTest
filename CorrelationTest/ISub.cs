@@ -14,8 +14,7 @@ namespace CorrelationTest
         Excel.Range xlTypeCell { get; set; }
         Period[] Periods { get; set; }
         UniqueID uID { get; set; }
-        Distribution CostDistribution { get; set; }
-        Distribution DurationDistribution { get; set; }
+        Distribution ValueDistribution { get; set; }
         string Name { get; set; }
         Dictionary<string, object> CostDistributionParameters { get; set; }
         Dictionary<string, object> DurationDistributionParameters { get; set; }

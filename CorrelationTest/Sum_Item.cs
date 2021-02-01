@@ -11,11 +11,9 @@ namespace CorrelationTest
     {
         public Excel.Range xlDollarCell { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution CostDistribution { get; set; }
-        public Distribution DurationDistribution { get; set; }
+        public Distribution ValueDistribution { get; set; }
         public Distribution PhasingDistribution { get; set; }
-        public Data.CorrelationString CostCorrelationString { get; set; }
-        public Data.CorrelationString DurationCorrelationString { get; set; }
+        public Data.CorrelationString ValueCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
@@ -90,7 +88,7 @@ namespace CorrelationTest
             int inputCount = Convert.ToInt32(xlRow.Cells[1, ContainingSheetObject.Specs.Level_Offset].value);    //Get the number of inputs
             for (int i = 1; i <= inputCount; i++)
             {
-                subEstimates.Add(new Estimate_Item(xlRow.Offset[i, 0].EntireRow, ContainingSheetObject));
+                subEstimates.Add((ISub)Item.ConstructFromRow(xlRow.Offset[i, 0].EntireRow, ContainingSheetObject));
             }
             return subEstimates;
         }

@@ -161,7 +161,7 @@ namespace CorrelationTest
             protected override string GetDistributionString(IHasSubs est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasInputSubs)est).SubEstimates[subIndex].CostDistribution.Name}");
+                sb.Append($"{((IHasInputSubs)est).SubEstimates[subIndex].ValueDistribution.Name}");
                 for (int i = 1; i < ((IHasInputSubs)est).SubEstimates[subIndex].CostDistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";

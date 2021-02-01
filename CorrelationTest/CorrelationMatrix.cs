@@ -185,10 +185,10 @@ namespace CorrelationTest
                 {
                     case Data.CorrelationString_IT t1:
                         matrix = new Data.CorrelationMatrix_Inputs();
+                        matrix.IDs = correlStringObj.GetIDs();
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = correlStringObj.GetIDs();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case Data.CorrelationString_IM t2:

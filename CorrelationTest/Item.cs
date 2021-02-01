@@ -13,6 +13,7 @@ namespace CorrelationTest
         public Excel.Range xlTypeCell { get; set; }
         public Excel.Range xlNameCell { get; set; }
         public Excel.Range xlCorrelCell_Inputs { get; set; }
+        public Excel.Range xlCorrelCell_DurationInputs { get; set; }
         public Excel.Range xlCorrelCell_Periods { get; set; }
         public Excel.Range xlLevelCell { get; set; }
         public int Level { get; set; }
@@ -26,7 +27,8 @@ namespace CorrelationTest
             this.ContainingSheetObject = ContainingSheetObject;
             this.xlTypeCell = xlRow.Cells[1, ContainingSheetObject.Specs.Type_Offset];
             this.xlNameCell = xlRow.Cells[1, ContainingSheetObject.Specs.Name_Offset];
-            this.xlCorrelCell_Inputs = xlRow.Cells[1, ContainingSheetObject.Specs.InputCorrel_Offset];
+            this.xlCorrelCell_Inputs = xlRow.Cells[1, ContainingSheetObject.Specs.CostInputCorrel_Offset];
+
             this.xlCorrelCell_Periods = xlRow.Cells[1, ContainingSheetObject.Specs.PhasingCorrel_Offset];
             LoadUniqueID();
             if(ContainingSheetObject is Sheets.WBSSheet)
@@ -37,6 +39,8 @@ namespace CorrelationTest
             }
             this.Name = Convert.ToString(xlNameCell.Value);
         }
+
+        protected Item() { }
 
         protected void LoadUniqueID()
         {
@@ -85,7 +89,13 @@ namespace CorrelationTest
             switch (costRow_type)       //Construct subtypes based on the enum
             {
                 case CostItems.CE:
-                    return new Estimate_Item(xlRow, containing_sheet_object);
+                    return new CostEstimate(xlRow, containing_sheet_object);
+                case CostItems.SE:
+                    return new ScheduleEstimate(xlRow, containing_sheet_object);
+                case CostItems.CASE:
+                    return new CostScheduleEstimate(xlRow, containing_sheet_object);
+                case CostItems.SACE:
+                    return new ScheduleCostEstimate(xlRow, containing_sheet_object);
                 case CostItems.I:
                     return new Input_Item(xlRow, containing_sheet_object);
                 case CostItems.S:

@@ -13,7 +13,8 @@ namespace CorrelationTest
         public int Level_Offset { get; set; }
         public int Type_Offset { get; set; }
         public int Name_Offset { get; set; }
-        public int InputCorrel_Offset { get; set; }
+        public int CostInputCorrel_Offset { get; set; }
+        public int DurationInputCorrel_Offset { get; set; }
         public int PhasingCorrel_Offset { get; set; }
         public int Distribution_Offset { get; set; }
         public int Dollar_Offset { get; set; }
@@ -49,7 +50,7 @@ namespace CorrelationTest
             this.Level_Offset = WBS_Level_Offset;
             this.Type_Offset = WBS_Type_Offset;
             this.Name_Offset = WBS_Name_Offset;
-            this.InputCorrel_Offset = WBS_InputCorrel_Offset;
+            this.CostInputCorrel_Offset = WBS_InputCorrel_Offset;
             this.PhasingCorrel_Offset = WBS_PhasingCorrel_Offset;
             this.Distribution_Offset = WBS_Distribution_Offset;
             this.Dollar_Offset = WBS_Dollar_Offset;
@@ -73,7 +74,7 @@ namespace CorrelationTest
             this.Level_Offset = Est_Level_Offset;
             this.Type_Offset = Est_Type_Offset;
             this.Name_Offset = Est_Name_Offset;
-            this.InputCorrel_Offset = Est_InputCorrel_Offset;
+            this.CostInputCorrel_Offset = Est_InputCorrel_Offset;
             this.PhasingCorrel_Offset = Est_PhasingCorrel_Offset;
             this.Distribution_Offset = Est_Distribution_Offset;
             this.Dollar_Offset = Est_Dollar_Offset;

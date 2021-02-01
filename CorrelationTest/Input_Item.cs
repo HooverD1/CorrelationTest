@@ -12,8 +12,7 @@ namespace CorrelationTest
         public Excel.Range xlDollarCell { get; set; }
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution CostDistribution { get; set; }
-        public Distribution DurationDistribution { get; set; }
+        public Distribution ValueDistribution { get; set; }
         public Distribution PhasingDistribution { get; set; }
         public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString DurationCorrelationString { get; set; }
@@ -34,7 +33,7 @@ namespace CorrelationTest
                 { "Param3", xlDistributionCell.Offset[0,3].Value },
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new Distribution(costDistributionParameters);       //Is this useless?
+            this.ValueDistribution = new Distribution(costDistributionParameters);       //Is this useless?
             var phasingDistributionParameters = new Dictionary<string, object>() {
                 { "Type", "Normal" },
                 { "Param1", 1 },

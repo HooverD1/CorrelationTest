@@ -49,28 +49,20 @@ namespace CorrelationTest
             est_1.Cells[4, 10] = "Param3";
 
             est_1.Cells[5, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[5, 2] = 4;  //# of inputs
-            est_1.Cells[5, 3] = "CE";
+            est_1.Cells[5, 3] = "CASE";
             est_1.Cells[5, 4] = "Est1";
             est_1.Cells[5, 7] = "Normal";
             est_1.Cells[5, 8] = 0;
             est_1.Cells[5, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[5, k] = 7;
-            }
-            System.Threading.Thread.Sleep(1);
+
             est_1.Cells[6, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[6, 3] = "I";
-            est_1.Cells[6, 4] = "Est2";
-            est_1.Cells[6, 7] = "Triangular";
-            est_1.Cells[6, 8] = 10;
-            est_1.Cells[6, 9] = 30;
-            est_1.Cells[6, 10] = 20;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[6, k] = 7;
-            }
+            est_1.Cells[6, 2] = 3;  //# of inputs
+            est_1.Cells[6, 3] = "CE";
+            est_1.Cells[6, 4] = "Est1";
+            est_1.Cells[6, 7] = "Normal";
+            est_1.Cells[6, 8] = 0;
+            est_1.Cells[6, 9] = 1;
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[7, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[7, 3] = "I";
@@ -79,10 +71,7 @@ namespace CorrelationTest
             est_1.Cells[7, 8] = 10;
             est_1.Cells[7, 9] = 30;
             est_1.Cells[7, 10] = 20;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[7, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[8, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[8, 3] = "I";
@@ -91,10 +80,7 @@ namespace CorrelationTest
             est_1.Cells[8, 8] = 10;
             est_1.Cells[8, 9] = 30;
             est_1.Cells[8, 10] = 20;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[8, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[9, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[9, 3] = "I";
@@ -102,22 +88,16 @@ namespace CorrelationTest
             est_1.Cells[9, 7] = "Normal";
             est_1.Cells[9, 8] = 0;
             est_1.Cells[9, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[9, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[10, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[10, 2] = 4;
-            est_1.Cells[10, 3] = "CE";
+            est_1.Cells[10, 3] = "SE";
             est_1.Cells[10, 4] = "Est5.2";
             est_1.Cells[10, 7] = "Normal";
             est_1.Cells[10, 8] = 0;
             est_1.Cells[10, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[10, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[11, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[11, 3] = "I";
@@ -125,10 +105,7 @@ namespace CorrelationTest
             est_1.Cells[11, 7] = "Normal";
             est_1.Cells[11, 8] = 0;
             est_1.Cells[11, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[11, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[12, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[12, 3] = "I";
@@ -136,10 +113,7 @@ namespace CorrelationTest
             est_1.Cells[12, 7] = "Normal";
             est_1.Cells[12, 8] = 0;
             est_1.Cells[12, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[12, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[13, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[13, 3] = "I";
@@ -147,10 +121,7 @@ namespace CorrelationTest
             est_1.Cells[13, 7] = "Normal";
             est_1.Cells[13, 8] = 0;
             est_1.Cells[13, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[13, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[14, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[14, 3] = "I";
@@ -158,10 +129,7 @@ namespace CorrelationTest
             est_1.Cells[14, 7] = "Lognormal";
             est_1.Cells[14, 8] = 0;
             est_1.Cells[14, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                est_1.Cells[14, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[15, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[15, 2] = 1;
@@ -170,21 +138,17 @@ namespace CorrelationTest
             est_1.Cells[15, 7] = "Normal";
             est_1.Cells[15, 8] = 0;
             est_1.Cells[15, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            { 
-                est_1.Cells[15, k] = 7;
-            }
 
-            System.Threading.Thread.Sleep(1);
-            est_1.Cells[16, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[16, 3] = "I";
-            est_1.Cells[16, 4] = "Est11";
-            est_1.Cells[16, 7] = "Normal";
-            est_1.Cells[16, 8] = 0;
-            est_1.Cells[16, 9] = 1;
-            for (int k = 14; k < 20; k++)
+
+            for (int i = 0; i < 50; i++)
             {
-                est_1.Cells[16, k] = 7;
+                System.Threading.Thread.Sleep(1);
+                est_1.Cells[16 + i, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+                est_1.Cells[16 + i, 3] = "I";
+                est_1.Cells[16 + i, 4] = $"Est{11+i}";
+                est_1.Cells[16 + i, 7] = "Normal";
+                est_1.Cells[16 + i, 8] = 0;
+                est_1.Cells[16 + i, 9] = 1;
             }
 
             est_1.Activate();
@@ -211,10 +175,7 @@ namespace CorrelationTest
             wbs_1.Cells[6, 8] = 10;
             wbs_1.Cells[6, 9] = 30;
             wbs_1.Cells[6, 10] = 20;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[6, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[7, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[7, 2] = 2;
@@ -224,10 +185,7 @@ namespace CorrelationTest
             wbs_1.Cells[7, 8] = 10;
             wbs_1.Cells[7, 9] = 30;
             wbs_1.Cells[7, 10] = 20;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[7, k] = 7;
-            }
+ 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[8, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[8, 2] = 2;
@@ -237,10 +195,7 @@ namespace CorrelationTest
             wbs_1.Cells[8, 8] = 10;
             wbs_1.Cells[8, 9] = 30;
             wbs_1.Cells[8, 10] = 20;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[8, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[9, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[9, 2] = 2;
@@ -249,10 +204,6 @@ namespace CorrelationTest
             wbs_1.Cells[9, 7] = "Normal";
             wbs_1.Cells[9, 8] = 0;
             wbs_1.Cells[9, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[9, k] = 7;
-            }
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[10, 1] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
@@ -267,10 +218,7 @@ namespace CorrelationTest
             wbs_1.Cells[11, 7] = "Normal";
             wbs_1.Cells[11, 8] = 0;
             wbs_1.Cells[11, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[11, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[12, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[12, 2] = 2;
@@ -279,10 +227,7 @@ namespace CorrelationTest
             wbs_1.Cells[12, 7] = "Normal";
             wbs_1.Cells[12, 8] = 0;
             wbs_1.Cells[12, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[12, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[13, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[13, 2] = 2;
@@ -291,10 +236,7 @@ namespace CorrelationTest
             wbs_1.Cells[13, 7] = "Normal";
             wbs_1.Cells[13, 8] = 0;
             wbs_1.Cells[13, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[13, k] = 7;
-            }
+
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[14, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[14, 2] = 2;
@@ -303,10 +245,6 @@ namespace CorrelationTest
             wbs_1.Cells[14, 7] = "Lognormal";
             wbs_1.Cells[14, 8] = 0;
             wbs_1.Cells[14, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[14, k] = 7;
-            }
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[15, 1] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
@@ -321,10 +259,6 @@ namespace CorrelationTest
             wbs_1.Cells[16, 7] = "Normal";
             wbs_1.Cells[16, 8] = 0;
             wbs_1.Cells[16, 9] = 1;
-            for (int k = 14; k < 20; k++)
-            {
-                wbs_1.Cells[16, k] = 7;
-            }
 
             //Goal: Build the correlation strings on each example sheet
             //Steps

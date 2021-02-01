@@ -9,11 +9,9 @@ namespace CorrelationTest
 {
     public class WBS_Item : Item, IHasInputSubs, IHasDurationSubs, IHasPhasingSubs
     {
-        public Distribution CostDistribution { get; set; }
-        public Distribution DurationDistribution { get; set; }
+        public Distribution ValueDistribution { get; set; }
         public Distribution PhasingDistribution { get; set; }
-        public Data.CorrelationString CostCorrelationString { get; set; }
-        public Data.CorrelationString DurationCorrelationString { get; set; }
+        public Data.CorrelationString ValueCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
         public Period[] Periods { get; set; }
         public Excel.Range xlDollarCell { get; set; }

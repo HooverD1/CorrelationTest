@@ -220,7 +220,7 @@ namespace CorrelationTest
             public override void Expand(Excel.Range xlSource)
             {
                 //Data.CorrelationString_IM correlStringObj = new Data.CorrelationString_IM(this.Value);
-                var id = this.GetIDs()[0];
+                //var id = this.GetIDs()[0];
                 //construct the correlSheet
                 Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
@@ -268,7 +268,7 @@ namespace CorrelationTest
             public override void PrintToSheet(Excel.Range xlCell)
             {
                 xlCell.Value = this.Value;
-                xlCell.NumberFormat = "\"In Correl\";;;\"IN_CORREL\"";
+                xlCell.NumberFormat = "\"In Correl\";;;\"COST_CORREL\"";
                 xlCell.EntireColumn.ColumnWidth = 10;
             }
         }

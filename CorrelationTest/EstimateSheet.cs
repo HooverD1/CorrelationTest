@@ -30,7 +30,7 @@ namespace CorrelationTest
                 var correlTemp = BuildCorrelTemp(this.Items);
                 if (Items.Any())
                     Items[0].xlCorrelCell_Inputs.EntireColumn.Clear();
-                foreach (Estimate_Item est in this.Items)
+                foreach (IHasInputSubs est in this.Items)
                 {
                     est.ContainingSheetObject.GetSubEstimates(est.xlRow); 
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
@@ -40,14 +40,8 @@ namespace CorrelationTest
             private void BuildCorrelations_Periods()
             {
                 //Period correlation
-                foreach (Estimate_Item est in this.Items)
+                foreach (IHasPhasingSubs est in this.Items)
                 {
-                    //Save the existing values
-                    //if (est.xlCorrelCell_Periods != null)
-                    //{
-                    //    est.xlCorrelCell_Periods.Clear();
-                    //}
-
                     PrintCorrel_Periods(est);
                 }
             }
@@ -117,7 +111,7 @@ namespace CorrelationTest
                         while (input_index < Items.Count - 1)
                         {
                             ISub thisItem = (ISub)Items[++input_index];
-                            if (thisItem.xlTypeCell.Value != "I" && thisItem.xlTypeCell.Value != "SE")
+                            if (thisItem.xlTypeCell.Value != "I")
                             {
                                 index = input_index-1;
                                 break;
@@ -130,14 +124,14 @@ namespace CorrelationTest
                     }
                     else if (Items[index].xlTypeCell.Value == "SE")
                     {
-                        IHasInputSubs parentItem = (IHasInputSubs)Items[index];
+                        IHasDurationSubs parentItem = (IHasDurationSubs)Items[index];
                         int input_index = index;
                         while (true)
                         {
-                            ISub thisItem = (ISub)Items[input_index++];
-                            if (thisItem.xlTypeCell.Value != "I" || thisItem.xlTypeCell.Value != "CE")
+                            ISub thisItem = (ISub)Items[++input_index];
+                            if (thisItem.xlTypeCell.Value != "I")
                             {
-                                index = input_index;
+                                index = input_index-1;
                                 break;
                             }
                             else
@@ -169,7 +163,7 @@ namespace CorrelationTest
                 int inputCount = Convert.ToInt32(parentRow.Cells[1, this.Specs.Level_Offset].value);    //Get the number of inputs
                 for(int i = 1; i <= inputCount; i++)
                 {
-                    subEstimates.Add(new Estimate_Item(parentRow.Offset[i, 0].EntireRow, this));
+                    subEstimates.Add((ISub)Item.ConstructFromRow(parentRow.Offset[i, 0].EntireRow, this));
                 }
                 return subEstimates;
             }
@@ -188,7 +182,11 @@ namespace CorrelationTest
             {
                 Excel.Worksheet xlSheet = pullRange.Worksheet;
                 IEnumerable<Excel.Range> returnVal = from Excel.Range cell in pullRange.Cells
-                                                     where Convert.ToString(cell.Value) == "CE" || Convert.ToString(cell.Value) == "I"
+                                                     where Convert.ToString(cell.Value) == "CE" || 
+                                                           Convert.ToString(cell.Value) == "SE" ||
+                                                           Convert.ToString(cell.Value) == "CASE" ||
+                                                           Convert.ToString(cell.Value) == "SACE" ||
+                                                           Convert.ToString(cell.Value) == "I"
                                                      select cell;
                 return returnVal.ToArray<Excel.Range>();
             }

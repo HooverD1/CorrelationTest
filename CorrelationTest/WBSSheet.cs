@@ -93,7 +93,7 @@ namespace CorrelationTest
                 Excel.Range[] estRows = PullEstimates(pullRange);
                 for (int next = 0; next < estRows.Count(); next++)
                 {
-                    Estimate_Item nextEstimate = (Estimate_Item)Item.ConstructFromRow(estRows[next].EntireRow, this);      //build temp sub-estimate
+                    ISub nextEstimate = (ISub)Item.ConstructFromRow(estRows[next].EntireRow, this);      //build temp sub-estimate
                     subestimates.Add(nextEstimate);
                 }
                 return subestimates;
