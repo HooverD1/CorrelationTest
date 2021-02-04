@@ -9,20 +9,20 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_IM : CorrelationString
+        public class CorrelationString_CM : CorrelationString
         {
-            public CorrelationString_IM(Excel.Range xlRange) : this(GetParentID(xlRange), GetIDsFromRange(xlRange), GetFieldsFromRange(xlRange), GetCorrelArrayFromRange(xlRange)) { }
+            public CorrelationString_CM(Excel.Range xlRange) : this(GetParentID(xlRange), GetIDsFromRange(xlRange), GetFieldsFromRange(xlRange), GetCorrelArrayFromRange(xlRange)) { }
 
-            public CorrelationString_IM(string correlString)
+            public CorrelationString_CM(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
-            public CorrelationString_IM(string parent_id, object[] ids, object[] fields, object[,] correlArray)
+            public CorrelationString_CM(string parent_id, object[] ids, object[] fields, object[,] correlArray)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, ids, fields, correlArray));               
             }
 
-            private CorrelationString_IM(string parent_id, object[] sub_ids, object[] sub_fields)     //create 0 string (independence)
+            private CorrelationString_CM(string parent_id, object[] sub_ids, object[] sub_fields)     //create 0 string (independence)
             {
                 int fieldCount = sub_ids.Count();
                 object[,] correlArray = new object[fieldCount, fieldCount];
@@ -36,14 +36,14 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, correlArray));
             }
 
-            public CorrelationString_IM(string parent_id, object[] sub_ids, object[] sub_fields, Data.CorrelationMatrix matrix)
+            public CorrelationString_CM(string parent_id, object[] sub_ids, object[] sub_fields, Data.CorrelationMatrix matrix)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, matrix.GetMatrix()));
             }
 
             private static object[] GetFieldsFromRange(Excel.Range correlRange)
             {
-                var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
+                var specs = new CorrelSheetSpecs(SheetType.Correlation_CM);
                 Excel.Range firstCell = correlRange.Worksheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
                 Excel.Range lastCell = correlRange.Worksheet.Cells[specs.MatrixCoords_End.Item1, specs.MatrixCoords_End.Item2];
                 Excel.Range fieldRange = correlRange.Worksheet.Range[firstCell, lastCell];
@@ -52,13 +52,13 @@ namespace CorrelationTest
 
             private static string GetParentID(Excel.Range correlRange)
             {
-                var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
+                var specs = new CorrelSheetSpecs(SheetType.Correlation_CM);
                 return Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
             }
             
             private static object[] GetIDsFromRange(Excel.Range correlRange)        //build from correlation sheet
             {
-                var specs = new CorrelSheetSpecs(SheetType.Correlation_IM);
+                var specs = new CorrelSheetSpecs(SheetType.Correlation_CM);
                 string parentID = Convert.ToString(correlRange.Worksheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2].value);
                 string sheetID = parentID.Split('|').First();
                 
@@ -76,7 +76,7 @@ namespace CorrelationTest
                 return correlRange.Offset[1, 0].Resize[correlRange.Rows.Count - 1, correlRange.Columns.Count].Value;
             }
 
-            private string CreateValue(IHasInputSubs parentEstimate)
+            private string CreateValue(IHasCostSubs parentEstimate)
             {
                 //Convert all the sub-estimates to a correlation string
                 int fields = parentEstimate.SubEstimates.Count;
@@ -117,7 +117,7 @@ namespace CorrelationTest
             {
                 correlArray = ExtensionMethods.ReIndexArray<object>(correlArray);
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{ids.Length},IM,");
+                sb.Append($"{ids.Length},CM,");
                 sb.Append(parentID);
                 for(int i = 0; i < ids.Length; i++)
                 {
@@ -183,16 +183,16 @@ namespace CorrelationTest
                 return true;
             }
 
-            public static CorrelationString_IM ConstructZeroString(string[] fields)
+            public static CorrelationString_CM ConstructZeroString(string[] fields)
             {
                 //Need to downcast csi 
                 var csi = new CorrelationString(fields);
-                return new CorrelationString_IM(csi.Value);
+                return new CorrelationString_CM(csi.Value);
             }
 
-            public static Data.CorrelationString_IM ConstructString(string parentID, string[] ids, object[] fields, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
+            public static Data.CorrelationString_CM ConstructString(string parentID, string[] ids, object[] fields, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
             {
-                Data.CorrelationString_IM correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
+                Data.CorrelationString_CM correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
                 if (correls == null)
                     return correlationString;       //return zero string
                 else
@@ -213,16 +213,16 @@ namespace CorrelationTest
                         }
                     }
                     //convert to a string
-                    return new Data.CorrelationString_IM(parentID, ids, fields, matrix);      //return modified zero matrix as correl string
+                    return new Data.CorrelationString_CM(parentID, ids, fields, matrix);      //return modified zero matrix as correl string
                 }
             }
 
             public override void Expand(Excel.Range xlSource)
             {
-                //Data.CorrelationString_IM correlStringObj = new Data.CorrelationString_IM(this.Value);
+                //Data.CorrelationString_CM correlStringObj = new Data.CorrelationString_CM(this.Value);
                 //var id = this.GetIDs()[0];
                 //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
+                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_CM));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
             }
@@ -230,13 +230,13 @@ namespace CorrelationTest
             public static void ExpandCorrel(Excel.Range selection)
             {
                 //Verify that it's a correl string
-                bool valid = CorrelationString_IM.Validate(selection);
+                bool valid = CorrelationString_CM.Validate(selection);
                 if (valid)
                 {
                     //construct the correlString
-                    Data.CorrelationString_IM correlStringObj = new Data.CorrelationString_IM(Convert.ToString(selection.Value));
+                    Data.CorrelationString_CM correlStringObj = new Data.CorrelationString_CM(Convert.ToString(selection.Value));
                     //construct the correlSheet
-                    Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, selection, new Data.CorrelSheetSpecs(SheetType.Correlation_IM));
+                    Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, selection, new Data.CorrelSheetSpecs(SheetType.Correlation_CM));
                     //print the correlSheet
                     correlSheet.PrintToSheet();
                 }

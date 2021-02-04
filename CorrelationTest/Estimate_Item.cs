@@ -23,7 +23,7 @@ namespace CorrelationTest
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public List<Estimate_Item> Siblings { get; set; }
         public Data.CorrelationString TemporalCorrelStringObj { get; set; }
-        public Data.CorrelationString_IM InputCorrelStringObj { get; set; }
+        public Data.CorrelationString_CM InputCorrelStringObj { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
@@ -36,8 +36,9 @@ namespace CorrelationTest
             this.xlRow = itemRow;
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
-            this.xlCorrelCell_Inputs = itemRow.Cells[1, dispCoords.CostInputCorrel_Offset];
-            this.xlCorrelCell_Periods = itemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
+            this.xlCorrelCell_Cost = itemRow.Cells[1, dispCoords.CostCorrel_Offset];
+            this.xlCorrelCell_Phasing = itemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
+            this.xlCorrelCell_Duration = itemRow.Cells[1, dispCoords.DurationCorrel_Offset];
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
             this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
@@ -136,15 +137,15 @@ namespace CorrelationTest
 
         public void LoadExistingCorrelations()      //useful?
         {
-            if (this.xlCorrelCell_Inputs != null)
+            if (this.xlCorrelCell_Cost != null)
             {
-                Data.CorrelationString_IM csi = new Data.CorrelationString_IM(xlCorrelCell_Inputs.Value);
+                Data.CorrelationString_CM csi = new Data.CorrelationString_CM(xlCorrelCell_Cost.Value);
                 this.InputCorrelStringObj = csi;
 
             }
-            if (this.xlCorrelCell_Periods != null)
+            if (this.xlCorrelCell_Phasing != null)
             {
-                Data.CorrelationString_PM csp = new Data.CorrelationString_PM(xlCorrelCell_Periods.Value);
+                Data.CorrelationString_PM csp = new Data.CorrelationString_PM(xlCorrelCell_Phasing.Value);
                 this.TemporalCorrelStringObj = csp;
             }
         }
@@ -194,19 +195,19 @@ namespace CorrelationTest
         {
             Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.InputsTriple);
             if (inString != null)
-                inString.PrintToSheet(xlCorrelCell_Inputs);
+                inString.PrintToSheet(xlCorrelCell_Cost);
         }
         public void PrintPhasingCorrelString()
         {
             Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
             if (phString != null)
-                phString.PrintToSheet(xlCorrelCell_Periods);
+                phString.PrintToSheet(xlCorrelCell_Phasing);
         }
         public void PrintDurationCorrelString()
         {
             Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.DurationTriple);
             if (inString != null)
-                inString.PrintToSheet(xlCorrelCell_Inputs);
+                inString.PrintToSheet(xlCorrelCell_Cost);
         }
     }
 

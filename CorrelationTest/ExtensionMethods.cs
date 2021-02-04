@@ -71,9 +71,9 @@ namespace CorrelationTest
                     return "$INPUT";
                 case SheetType.FilterData:
                     return "$FILTER";
-                case SheetType.Correlation_IT:
+                case SheetType.Correlation_CT:
                     return "$CORRELATION_IT";
-                case SheetType.Correlation_IM:
+                case SheetType.Correlation_CM:
                     return "$CORRELATION_IM";
                 case SheetType.Correlation_PM:
                     return "$CORRELATION_PM";
@@ -94,9 +94,9 @@ namespace CorrelationTest
             switch (sheetIdent)
             {
                 case "$CORRELATION_IT":
-                    return SheetType.Correlation_IT;
+                    return SheetType.Correlation_CT;
                 case "$CORRELATION_IM":
-                    return SheetType.Correlation_IM;
+                    return SheetType.Correlation_CM;
                 case "$CORRELATION_PM":
                     return SheetType.Correlation_PM;
                 case "$CORRELATION_PT":

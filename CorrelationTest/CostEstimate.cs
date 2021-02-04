@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class CostEstimate : Estimate_Item, IHasInputSubs, IHasPhasingSubs, ISub
+    public class CostEstimate : Estimate_Item, IHasCostSubs, IHasPhasingSubs, ISub
     {
         public CostEstimate(Excel.Range itemRow, CostSheet ContainingSheetObject) : base(itemRow, ContainingSheetObject)
         {

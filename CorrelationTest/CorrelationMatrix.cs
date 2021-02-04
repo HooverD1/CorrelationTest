@@ -70,7 +70,7 @@ namespace CorrelationTest
                 SheetType containing_sheet_type = ExtensionMethods.GetSheetType(containing_sheet.xlSheet);
                 switch (containing_sheet_type)
                 {
-                    case SheetType.Correlation_IM:
+                    case SheetType.Correlation_CM:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.Parent_ID = parent_ID;
                         matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
@@ -78,7 +78,7 @@ namespace CorrelationTest
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
-                    case SheetType.Correlation_IT:
+                    case SheetType.Correlation_CT:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.Parent_ID = parent_ID;
                         matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
@@ -135,7 +135,7 @@ namespace CorrelationTest
 
                 switch (sheet_type)
                 {
-                    case SheetType.Correlation_IM:
+                    case SheetType.Correlation_CM:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.IDs = sub_ids;
                         matrix_obj.Fields = sub_fields;
@@ -144,7 +144,7 @@ namespace CorrelationTest
                         matrix_obj.FieldCount = matrix_obj.Fields.Count();
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
-                    case SheetType.Correlation_IT:
+                    case SheetType.Correlation_CT:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.IDs = sub_ids;
                         matrix_obj.Fields = sub_fields;
@@ -203,7 +203,7 @@ namespace CorrelationTest
                 //this should vary based on what type of CorrelationString!!
                 switch (correlStringObj)
                 {
-                    case Data.CorrelationString_IT t1:
+                    case Data.CorrelationString_CT t1:
                         matrix = new Data.CorrelationMatrix_Inputs();
                         matrix.IDs = correlStringObj.GetIDs();
                         matrix.Fields = correlStringObj.GetFields();
@@ -211,7 +211,7 @@ namespace CorrelationTest
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
-                    case Data.CorrelationString_IM t2:
+                    case Data.CorrelationString_CM t2:
                         matrix = new Data.CorrelationMatrix_Inputs();
                         matrix.Fields = correlStringObj.GetFields();
                         matrix.Matrix = correlStringObj.GetMatrix();      //creates a correlation matrix & loops
@@ -485,7 +485,7 @@ namespace CorrelationTest
             {
                 SheetType sheet_type;
                 if (this is CorrelationMatrix_Inputs)
-                    sheet_type = SheetType.Correlation_IT;
+                    sheet_type = SheetType.Correlation_CT;
                 else if (this is CorrelationMatrix_Phasing)
                     sheet_type = SheetType.Correlation_PT;
                 else if (this is CorrelationMatrix_Duration)

@@ -15,19 +15,19 @@ namespace CorrelationTest
         void LoadUID();
     }
 
-    public interface IHasInputSubs : IHasSubs
+    public interface IHasCostSubs : IHasSubs
     {
         Data.CorrelationString ValueCorrelationString { get; set; }
         List<ISub> SubEstimates { get; set; }
         void LoadSubEstimates();
-        Excel.Range xlCorrelCell_Inputs { get; set; }
+        Excel.Range xlCorrelCell_Cost { get; set; }
         Distribution ValueDistribution { get; set; }
         void PrintInputCorrelString();
     }
     public interface IHasPhasingSubs : IHasSubs
     {
         Data.CorrelationString PhasingCorrelationString { get; set; }
-        Excel.Range xlCorrelCell_Periods { get; set; }
+        Excel.Range xlCorrelCell_Phasing { get; set; }
         Excel.Range xlDollarCell { get; set; }
         Period[] Periods { get; set; }
         Distribution PhasingDistribution { get; set; }
@@ -39,7 +39,7 @@ namespace CorrelationTest
         Data.CorrelationString ValueCorrelationString { get; set; }
         List<ISub> SubEstimates { get; set; }
         Distribution ValueDistribution { get; set; }
-        Excel.Range xlCorrelCell_Inputs { get; set; }
+        Excel.Range xlCorrelCell_Duration { get; set; }
         void PrintDurationCorrelString();
     }
 }

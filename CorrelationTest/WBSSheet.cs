@@ -49,7 +49,7 @@ namespace CorrelationTest
                             if (theseSubs.Count() > 1)
                                 throw new Exception("Duplicated ID");
                             else if (theseSubs.Any())
-                                ((IHasInputSubs)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
+                                ((IHasCostSubs)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
                         }
                         subLevel = Items[++indexStart].Level;
                     }
@@ -61,8 +61,8 @@ namespace CorrelationTest
             {
                 foreach (IHasSubs item in Items)
                 {
-                    if (item is IHasInputSubs)
-                        ((IHasInputSubs)item).PrintInputCorrelString();
+                    if (item is IHasCostSubs)
+                        ((IHasCostSubs)item).PrintInputCorrelString();
                     if (item is IHasPhasingSubs)
                         ((IHasPhasingSubs)item).PrintPhasingCorrelString();
                     if (item is IHasDurationSubs)
@@ -136,8 +136,8 @@ namespace CorrelationTest
                 int maxDepth = (from Item item in Items select item.Level).Max();
                 var correlTemp = BuildCorrelTemp();
                 if (Items.Any())
-                    Items[0].xlCorrelCell_Inputs.EntireColumn.Clear();
-                foreach (IHasInputSubs item in Items)
+                    Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
+                foreach (IHasCostSubs item in Items)
                 {
                     PrintCorrel_Inputs(item, correlTemp);  //recursively build out children
                 }
@@ -149,9 +149,9 @@ namespace CorrelationTest
                 foreach (IHasPhasingSubs item in Items)
                 {
                     //Save the existing values
-                    if (item.xlCorrelCell_Periods != null)
+                    if (item.xlCorrelCell_Phasing != null)
                     {
-                        item.xlCorrelCell_Periods.Clear();
+                        item.xlCorrelCell_Phasing.Clear();
                     }
                     
                     PrintCorrel_Periods(item);
@@ -169,11 +169,11 @@ namespace CorrelationTest
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
-                        Data.CorrelationString_IM correlString;
-                        if (estimate.xlCorrelCell_Inputs.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString_IM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
+                        Data.CorrelationString_CM correlString;
+                        if (estimate.xlCorrelCell_Cost.Value == null)        //No correlation string exists
+                            correlString = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
                         else
-                            correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
+                            correlString = new Data.CorrelationString_CM(estimate.xlCorrelCell_Cost.Value);       //construct from string
                         var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
                         string[] ids = Items.Select(x => x.uID.ID).ToArray();
                         foreach (string id1 in ids)
@@ -192,7 +192,7 @@ namespace CorrelationTest
                 return correlTemp;
             }
 
-            protected override void PrintCorrel_Inputs(IHasInputSubs item, Dictionary<Tuple<string, string>, double> inputTemp = null)
+            protected override void PrintCorrel_Inputs(IHasCostSubs item, Dictionary<Tuple<string, string>, double> inputTemp = null)
             {
                 /*
                  * This is being called when "Build" is run. 
@@ -202,8 +202,8 @@ namespace CorrelationTest
                 {
                     string[] subIDs = (from Estimate_Item est in item.SubEstimates select est.uID.ID).ToArray();
                     //check if any of the subestimates have NonZeroCorrel entries
-                    Data.CorrelationString_IM CorrelationString_IM = (Data.CorrelationString_IM)Data.CorrelationString.ConstructNew(item, Data.CorrelStringType.InputsMatrix);
-                    CorrelationString_IM.PrintToSheet(item.xlCorrelCell_Inputs);
+                    Data.CorrelationString_CM CorrelationString_CM = (Data.CorrelationString_CM)Data.CorrelationString.ConstructNew(item, Data.CorrelStringType.InputsMatrix);
+                    CorrelationString_CM.PrintToSheet(item.xlCorrelCell_Cost);
                 }
             }
 

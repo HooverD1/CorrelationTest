@@ -11,12 +11,12 @@ namespace CorrelationTest
     {
         public class CorrelationSheet_Inputs : CorrelationSheet
         {            
-            public CorrelationSheet_Inputs(Data.CorrelationString_IM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Inputs(Data.CorrelationString_CM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet();
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IM)CorrelString);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_CM)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -31,12 +31,12 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
-            public CorrelationSheet_Inputs(Data.CorrelationString_IT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Inputs(Data.CorrelationString_CT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = correlString;
                 this.Specs = specs;
-                this.xlSheet = GetXlSheet(SheetType.Correlation_IT);
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IT)CorrelString);
+                this.xlSheet = GetXlSheet(SheetType.Correlation_CT);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_CT)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -75,11 +75,11 @@ namespace CorrelationTest
                 //Get these from the Header.
                 string parent_id = Convert.ToString(xlIDCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-                if(sheetType == SheetType.Correlation_IT)
+                if(sheetType == SheetType.Correlation_CT)
                 {
                     //Build the triple from the string
                     string correlStringVal = this.xlCorrelStringCell.Value;
-                    Data.CorrelationString_IT existing_cst = new Data.CorrelationString_IT(correlStringVal);
+                    Data.CorrelationString_CT existing_cst = new Data.CorrelationString_CT(correlStringVal);
                     Triple pt = existing_cst.GetTriple();
                     //Check if the matrix still matches the triple.
                     if (this.CorrelMatrix.ValidateAgainstTriple(pt))
@@ -88,12 +88,12 @@ namespace CorrelationTest
                     }
                     else
                     {       //If NO - create cs_periods object
-                        this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, CorrelMatrix);
+                        this.CorrelString = new Data.CorrelationString_CM(parent_id, ids, fields, CorrelMatrix);
                     }
                 }
-                else if(sheetType == SheetType.Correlation_IM)
+                else if(sheetType == SheetType.Correlation_CM)
                 {
-                    this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, this.CorrelMatrix);
+                    this.CorrelString = new Data.CorrelationString_CM(parent_id, ids, fields, this.CorrelMatrix);
                 }
                 
             }
@@ -132,10 +132,10 @@ namespace CorrelationTest
                 {
                     switch (sheetType)
                     {
-                        case SheetType.Correlation_IM:
+                        case SheetType.Correlation_CM:
                             xlSheet = CreateXLCorrelSheet("_IM");
                             break;
-                        case SheetType.Correlation_IT:
+                        case SheetType.Correlation_CT:
                             xlSheet = CreateXLCorrelSheet("_IT");
                             break;
                         default:
@@ -154,26 +154,26 @@ namespace CorrelationTest
                 UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
                 object[,] matrix = this.xlMatrixCell.Offset[1,0].Resize[ids.Length, ids.Length].Value;
                 this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
-                this.CorrelString = new Data.CorrelationString_IM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
+                this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
                 this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }
 
             protected override string GetDistributionString(IHasSubs est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasInputSubs)est).SubEstimates[subIndex].ValueDistribution.Name}");
-                for (int i = 1; i < ((IHasInputSubs)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
+                sb.Append($"{((IHasCostSubs)est).SubEstimates[subIndex].ValueDistribution.Name}");
+                for (int i = 1; i < ((IHasCostSubs)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";
-                    if (((IHasInputSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param] != null)
-                        sb.Append($",{((IHasInputSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param]}");
+                    if (((IHasCostSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param] != null)
+                        sb.Append($",{((IHasCostSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param]}");
                 }
                 return sb.ToString();
             }
 
             protected string GetSubIdString(IHasSubs est, int subIndex)
             {
-                return ((IHasInputSubs)est).SubEstimates[subIndex].uID.ID;
+                return ((IHasCostSubs)est).SubEstimates[subIndex].uID.ID;
             }
 
             public override void PrintToSheet()  //expanding from string
@@ -181,7 +181,7 @@ namespace CorrelationTest
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
                 //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                IHasInputSubs tempEst = (IHasInputSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
+                IHasCostSubs tempEst = (IHasCostSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
                 tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link

@@ -38,7 +38,7 @@ namespace CorrelationTest
             {
                 switch (correlSheetType)
                 {
-                    case SheetType.Correlation_IM:
+                    case SheetType.Correlation_CM:
                         matrixRow = 4;
                         matrixCol = 4;
                         linkRow = 3;
@@ -53,7 +53,7 @@ namespace CorrelationTest
                         stringRow = 2;
                         stringCol = 1;
                         break;
-                    case SheetType.Correlation_IT:
+                    case SheetType.Correlation_CT:
                         matrixRow = 4;
                         matrixCol = 4;
                         linkRow = 3;

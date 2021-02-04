@@ -55,7 +55,7 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
-        protected virtual void PrintCorrel_Inputs(IHasInputSubs estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Inputs(IHasCostSubs estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
         {
             /*
              * This is being called when "Build" is run. 
@@ -70,8 +70,8 @@ namespace CorrelationTest
 
                 //This is sending in too many IDs
                 object[] fields = estimate.SubEstimates.Select(x => x.Name).ToArray();
-                Data.CorrelationString_IM CorrelationString_IM = Data.CorrelationString_IM.ConstructString(estimate.uID.ID, subIDs, fields, this.xlSheet.Name, inputTemp);
-                CorrelationString_IM.PrintToSheet(estimate.xlCorrelCell_Inputs);
+                Data.CorrelationString_CM CorrelationString_CM = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, subIDs, fields, this.xlSheet.Name, inputTemp);
+                CorrelationString_CM.PrintToSheet(estimate.xlCorrelCell_Cost);
             }
         }
 
@@ -86,8 +86,8 @@ namespace CorrelationTest
              */
             //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
             //Data.CorrelationString_PM CorrelationString_PM = Data.CorrelationString_PM.ConstructString(periodIDs, this.xlSheet.Name);
-            Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromExisting(estimate.xlCorrelCell_Periods.Value);
-            correlationString.PrintToSheet(estimate.xlCorrelCell_Periods);
+            Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromExisting(estimate.xlCorrelCell_Phasing.Value);
+            correlationString.PrintToSheet(estimate.xlCorrelCell_Phasing);
         }
 
         public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItems costType) { throw new Exception("Failed override"); }

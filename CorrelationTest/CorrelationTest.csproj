@@ -191,9 +191,9 @@
     <Compile Include="CorrelationSheet_Phasing.cs" />
     <Compile Include="CorrelationString_DM.cs" />
     <Compile Include="CorrelationString_DT.cs" />
-    <Compile Include="CorrelationString_IM.cs" />
+    <Compile Include="CorrelationString_CM.cs" />
     <Compile Include="CorrelationString.cs" />
-    <Compile Include="CorrelationString_IT.cs" />
+    <Compile Include="CorrelationString_CT.cs" />
     <Compile Include="CorrelationString_PM.cs" />
     <Compile Include="CorrelationString_PT.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />

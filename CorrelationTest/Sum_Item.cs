@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class Sum_Item : Item, IHasInputSubs, IHasPhasingSubs, IHasDurationSubs
+    public class Sum_Item : Item, IHasCostSubs, IHasPhasingSubs, IHasDurationSubs
     {
         public Excel.Range xlDollarCell { get; set; }
         public Period[] Periods { get; set; }
@@ -97,13 +97,13 @@ namespace CorrelationTest
         {
             Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.InputsTriple);
             if (inString != null)
-                inString.PrintToSheet(xlCorrelCell_Inputs);
+                inString.PrintToSheet(xlCorrelCell_Cost);
         }
         public void PrintPhasingCorrelString()
         {
             Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
             if (phString != null)
-                phString.PrintToSheet(xlCorrelCell_Periods);
+                phString.PrintToSheet(xlCorrelCell_Phasing);
         }
         public void PrintDurationCorrelString() { }
     }

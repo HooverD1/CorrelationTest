@@ -29,8 +29,8 @@ namespace CorrelationTest
                 //Input correlation
                 var correlTemp = BuildCorrelTemp(this.Items);
                 if (Items.Any())
-                    Items[0].xlCorrelCell_Inputs.EntireColumn.Clear();
-                foreach (IHasInputSubs est in this.Items)
+                    Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
+                foreach (IHasCostSubs est in this.Items)
                 {
                     est.ContainingSheetObject.GetSubEstimates(est.xlRow); 
                     PrintCorrel_Inputs(est, correlTemp);  //recursively build out children
@@ -57,11 +57,11 @@ namespace CorrelationTest
                     {
                         if (estimate.SubEstimates.Count == 0)
                             continue;
-                        Data.CorrelationString_IM correlString;
-                        if (estimate.xlCorrelCell_Inputs.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString_IM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
+                        Data.CorrelationString_CM correlString;
+                        if (estimate.xlCorrelCell_Cost.Value == null)        //No correlation string exists
+                            correlString = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
                         else
-                            correlString = new Data.CorrelationString_IM(estimate.xlCorrelCell_Inputs.Value);       //construct from string
+                            correlString = new Data.CorrelationString_CM(estimate.xlCorrelCell_Cost.Value);       //construct from string
                         var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
                         string[] ids = Estimates.Select(x => x.uID.ID).ToArray();
                         foreach (string id1 in ids)
@@ -106,7 +106,7 @@ namespace CorrelationTest
                 {
                     if (Items[index].xlTypeCell.Value == "CE")
                     {
-                        IHasInputSubs parentItem = (IHasInputSubs)Items[index];
+                        IHasCostSubs parentItem = (IHasCostSubs)Items[index];
                         int input_index = index;
                         while (input_index < Items.Count - 1)
                         {
@@ -147,8 +147,8 @@ namespace CorrelationTest
             {
                 foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
                 {
-                    if (item is IHasInputSubs)
-                        ((IHasInputSubs)item).PrintInputCorrelString();
+                    if (item is IHasCostSubs)
+                        ((IHasCostSubs)item).PrintInputCorrelString();
                     if (item is IHasPhasingSubs)
                         ((IHasPhasingSubs)item).PrintPhasingCorrelString();
                     if (item is IHasDurationSubs)

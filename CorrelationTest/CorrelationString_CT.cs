@@ -9,21 +9,21 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_IT : CorrelationString
+        public class CorrelationString_CT : CorrelationString
         {
             public Triple InputTriple { get; set; }
-            public CorrelationString_IT(string correlString)
+            public CorrelationString_CT(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
                 string triple = this.Value.Split('&')[2];
                 this.InputTriple = new Triple(this.GetParentID().ID, triple);
             }
 
-            public CorrelationString_IT(string[] fields, Triple it, string parent_id, string[] sub_ids)        //build a triple string out of a triple
+            public CorrelationString_CT(string[] fields, Triple it, string parent_id, string[] sub_ids)        //build a triple string out of a triple
             {
                 this.InputTriple = it;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{fields.Length},IT,{parent_id}");
+                sb.Append($"{fields.Length},CT,{parent_id}");
                 for (int j = 0; j < sub_ids.Length; j++)
                 {
                     sb.Append(",");
@@ -60,7 +60,7 @@ namespace CorrelationTest
 
             public override object[,] GetMatrix()
             {
-                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_IT).Matrix;
+                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_CT).Matrix;
             }
 
             public override string[] GetIDs()
@@ -96,7 +96,7 @@ namespace CorrelationTest
             public override void Expand(Excel.Range xlSource)
             {
                 //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_IT));
+                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_CT));
                 //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
                 correlSheet.PrintToSheet();
             }

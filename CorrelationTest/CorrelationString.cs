@@ -179,9 +179,9 @@ namespace CorrelationTest
                 string correlTypeStr = splitValues[1];
                 switch (correlTypeStr)
                 {
-                    case "IM":
+                    case "CM":
                         return CorrelStringType.InputsMatrix;
-                    case "IT":
+                    case "CT":
                         return CorrelStringType.InputsTriple;
                     case "PM":
                         return CorrelStringType.PhasingMatrix;
@@ -299,10 +299,10 @@ namespace CorrelationTest
                 string[] header = lines[0].Split(',');
                 switch (header[1])
                 {
-                    case "IT":
-                        return new CorrelationString_IT(correlStringValue);
-                    case "IM":
-                        return new CorrelationString_IM(correlStringValue);
+                    case "CT":
+                        return new CorrelationString_CT(correlStringValue);
+                    case "CM":
+                        return new CorrelationString_CM(correlStringValue);
                     case "PT":
                         return new CorrelationString_PT(correlStringValue);
                     case "PM":
@@ -321,7 +321,7 @@ namespace CorrelationTest
                 switch (csType)
                 {
                     case CorrelStringType.PhasingTriple:
-                        if(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value == null)
+                        if(((IHasPhasingSubs)item).xlCorrelCell_Phasing.Value == null)
                         {
                             Triple pt = new Triple(item.uID.ID, "0,0,0");
                             string[] start_dates = ((IHasPhasingSubs)item).Periods.Select(x => x.Start_Date).ToArray();
@@ -329,47 +329,47 @@ namespace CorrelationTest
                         }
                         else
                         {
-                            return ConstructFromExisting(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
+                            return ConstructFromExisting(((IHasPhasingSubs)item).xlCorrelCell_Phasing.Value);
                         }                        
                     case CorrelStringType.PhasingMatrix:
-                        if(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value == null)
+                        if(((IHasPhasingSubs)item).xlCorrelCell_Phasing.Value == null)
                         {
                             IEnumerable<string> start_dates = from Period prd in ((IHasPhasingSubs)item).Periods select prd.pID.PeriodTag.ToString();
                             return CorrelationString_PM.ConstructZeroString(start_dates.ToArray());
                         }
                         else
                         {
-                            return ConstructFromExisting(((IHasPhasingSubs)item).xlCorrelCell_Periods.Value);
+                            return ConstructFromExisting(((IHasPhasingSubs)item).xlCorrelCell_Phasing.Value);
                         }
                     case CorrelStringType.InputsTriple:
-                        if (((IHasInputSubs)item).xlCorrelCell_Inputs.Value == null)
+                        if (((IHasCostSubs)item).xlCorrelCell_Cost.Value == null)
                         {
-                            if (((IHasInputSubs)item).SubEstimates.Count < 2)
+                            if (((IHasCostSubs)item).SubEstimates.Count < 2)
                                 return null;
                             Triple it = new Triple(item.uID.ID, "0,0,0");
-                            IEnumerable<string> fields = from ISub sub in ((IHasInputSubs)item).SubEstimates select sub.Name;        //need to print names, but get them from IDs?
-                            return new Data.CorrelationString_IT(fields.ToArray(), it, item.uID.ID, ((IHasInputSubs)item).SubEstimates.Select(x=>x.uID.ID).ToArray());
+                            IEnumerable<string> fields = from ISub sub in ((IHasCostSubs)item).SubEstimates select sub.Name;        //need to print names, but get them from IDs?
+                            return new Data.CorrelationString_CT(fields.ToArray(), it, item.uID.ID, ((IHasCostSubs)item).SubEstimates.Select(x=>x.uID.ID).ToArray());
                         }
                         else
                         {
-                            return ConstructFromExisting(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
+                            return ConstructFromExisting(((IHasCostSubs)item).xlCorrelCell_Cost.Value);
                         }
                     case CorrelStringType.InputsMatrix:
-                        if(((IHasInputSubs)item).xlCorrelCell_Inputs.Value == null)
+                        if(((IHasCostSubs)item).xlCorrelCell_Cost.Value == null)
                         {
-                            if (((IHasInputSubs)item).SubEstimates.Count < 2)
+                            if (((IHasCostSubs)item).SubEstimates.Count < 2)
                                 return null;
                             IEnumerable<string> fields = from Estimate_Item sub in item.ContainingSheetObject.GetSubEstimates(item.xlRow) select sub.Name;
-                            return CorrelationString_IM.ConstructZeroString(fields.ToArray());
+                            return CorrelationString_CM.ConstructZeroString(fields.ToArray());
                         }
                         else
                         {
-                            return ConstructFromExisting(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
+                            return ConstructFromExisting(((IHasCostSubs)item).xlCorrelCell_Cost.Value);
                         }                        
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();
                     case CorrelStringType.DurationTriple:
-                        if (((IHasDurationSubs)item).xlCorrelCell_Inputs.Value == null)
+                        if (((IHasDurationSubs)item).xlCorrelCell_Duration.Value == null)
                         {
                             if (((IHasDurationSubs)item).SubEstimates.Count < 2)
                                 return null;
@@ -379,7 +379,7 @@ namespace CorrelationTest
                         }
                         else
                         {
-                            return ConstructFromExisting(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
+                            return ConstructFromExisting(((IHasCostSubs)item).xlCorrelCell_Cost.Value);
                         }
                     default:
                         throw new Exception("Cannot construct CorrelationString");

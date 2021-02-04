@@ -34,7 +34,7 @@ namespace CorrelationTest
             public Excel.Range xlSubIdCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
 
-            //public CorrelationSheet(Data.CorrelationString_IM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
+            //public CorrelationSheet(Data.CorrelationString_CM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
 
 
             protected virtual Excel.Worksheet CreateXLCorrelSheet(string postfix) { throw new Exception("Failed override"); }
@@ -163,8 +163,8 @@ namespace CorrelationTest
                     SheetType sht_type = ExtensionMethods.GetSheetType(sht);
                     if(sht_type == SheetType.Correlation_DM ||
                         sht_type == SheetType.Correlation_DT ||
-                        sht_type == SheetType.Correlation_IT ||
-                        sht_type == SheetType.Correlation_IM ||
+                        sht_type == SheetType.Correlation_CT ||
+                        sht_type == SheetType.Correlation_CM ||
                         sht_type == SheetType.Correlation_PM || 
                         sht_type == SheetType.Correlation_PT)
                     {
@@ -197,10 +197,10 @@ namespace CorrelationTest
                     case SheetType.Correlation_DM:
                         newSheet = new CorrelationSheet_Duration(csSpecs);
                         break;
-                    case SheetType.Correlation_IT:
+                    case SheetType.Correlation_CT:
                         newSheet = new CorrelationSheet_Inputs(csSpecs);
                         break;
-                    case SheetType.Correlation_IM:
+                    case SheetType.Correlation_CM:
                         newSheet = new CorrelationSheet_Inputs(csSpecs);
                         break;
                     case SheetType.Correlation_PM:
@@ -233,9 +233,9 @@ namespace CorrelationTest
             {
                 switch (correlStringValue)
                 {
-                    case "IT":
+                    case "CT":
                         return Data.CorrelStringType.InputsTriple;
-                    case "IM":
+                    case "CM":
                         return Data.CorrelStringType.InputsMatrix;
                     case "PM":
                         return Data.CorrelStringType.PhasingMatrix;
@@ -317,10 +317,10 @@ namespace CorrelationTest
             {
                 switch (correlString)       //Switch on type
                 {
-                    case Data.CorrelationString_IM t1:
-                        return new CorrelationSheet_Inputs((Data.CorrelationString_IM)correlString, source, specs);
-                    case Data.CorrelationString_IT t2:
-                        return new CorrelationSheet_Inputs((Data.CorrelationString_IT)correlString, source, specs);
+                    case Data.CorrelationString_CM t1:
+                        return new CorrelationSheet_Inputs((Data.CorrelationString_CM)correlString, source, specs);
+                    case Data.CorrelationString_CT t2:
+                        return new CorrelationSheet_Inputs((Data.CorrelationString_CT)correlString, source, specs);
                     case Data.CorrelationString_PM t3:
                         return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
                     case Data.CorrelationString_PT t4:

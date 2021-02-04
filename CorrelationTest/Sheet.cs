@@ -12,8 +12,8 @@ namespace CorrelationTest
     {
         WBS,
         Estimate,
-        Correlation_IT,
-        Correlation_IM,
+        Correlation_CT,
+        Correlation_CM,
         Correlation_PT,
         Correlation_PM,
         Correlation_DT,
