@@ -111,10 +111,10 @@ namespace CorrelationTest
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] fieldString1 = myValue.Split('&');          //broken by line
                 string[] fieldString = new string[fieldString1.Length - 2];
-                for(int i = 2; i < fieldString1.Length; i++) { fieldString[i - 2] = fieldString1[i]; }  //dump the header and fields
-                object[,] matrix = new object[fieldString.Length+1, fieldString.Length+1];
+                for (int i = 2; i < fieldString1.Length; i++) { fieldString[i - 2] = fieldString1[i]; }  //dump the header and fields
+                object[,] matrix = new object[fieldString.Length + 1, fieldString.Length + 1];
 
-                for (int row = 0; row < fieldString.Length+1; row++)
+                for (int row = 0; row < fieldString.Length + 1; row++)
                 {
                     string[] values;
                     if (row < fieldString.Length)
@@ -128,18 +128,19 @@ namespace CorrelationTest
                             matrix[row, col] = 1;
                         else if (col > row)
                         {
-                            if(Double.TryParse(values[(col - row) - 1], out double conversion))
+                            if (Double.TryParse(values[(col - row) - 1], out double conversion))
                             {
                                 matrix[row, col] = conversion;
                             }
                         }
-                            
+
 
                         else  //col < row
                             matrix[row, col] = null;
                     }
                 }
                 return matrix;
+                throw new Exception("Failed override");
             }
 
             public virtual string GetCorrelType()
@@ -372,15 +373,14 @@ namespace CorrelationTest
                         {
                             if (((IHasDurationSubs)item).SubEstimates.Count < 2)
                                 return null;
-                            var fields = from ISub sub in item.ContainingSheetObject.GetSubEstimates(item.xlRow)
-                                         select sub.Name;
-                            return CorrelationString_DM.ConstructZeroString(fields.ToArray());
+                            Triple it = new Triple(item.uID.ID, "0,0,0");
+                            IEnumerable<string> fields = from ISub sub in ((IHasDurationSubs)item).SubEstimates select sub.Name;
+                            return new Data.CorrelationString_DT(fields.ToArray(), it, item.uID.ID, ((IHasDurationSubs)item).SubEstimates.Select(x => x.uID.ID).ToArray());
                         }
                         else
                         {
-                            return ConstructFromExisting(((IHasDurationSubs)item).xlCorrelCell_Inputs.Value);
+                            return ConstructFromExisting(((IHasInputSubs)item).xlCorrelCell_Inputs.Value);
                         }
-                        throw new NotImplementedException();
                     default:
                         throw new Exception("Cannot construct CorrelationString");
                 }

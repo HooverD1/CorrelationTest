@@ -9,14 +9,14 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_Inputs : CorrelationSheet
-        {            
-            public CorrelationSheet_Inputs(Data.CorrelationString_IM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+        public class CorrelationSheet_Duration : CorrelationSheet
+        {
+            public CorrelationSheet_Duration(Data.CorrelationString_DM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet();
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IM)CorrelString);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_DM)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -31,12 +31,12 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
-            public CorrelationSheet_Inputs(Data.CorrelationString_IT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Duration(Data.CorrelationString_DT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = correlString;
                 this.Specs = specs;
-                this.xlSheet = GetXlSheet(SheetType.Correlation_IT);
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_IT)CorrelString);
+                this.xlSheet = GetXlSheet(SheetType.Correlation_DT);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_DT)CorrelString);
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -51,7 +51,7 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
-            public CorrelationSheet_Inputs(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
+            public CorrelationSheet_Duration(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
             {
                 this.xlSheet = GetXlSheet();
                 this.Specs = specs;
@@ -75,11 +75,11 @@ namespace CorrelationTest
                 //Get these from the Header.
                 string parent_id = Convert.ToString(xlIDCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-                if(sheetType == SheetType.Correlation_IT)
+                if (sheetType == SheetType.Correlation_DT)
                 {
                     //Build the triple from the string
                     string correlStringVal = this.xlCorrelStringCell.Value;
-                    Data.CorrelationString_IT existing_cst = new Data.CorrelationString_IT(correlStringVal);
+                    Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
                     Triple pt = existing_cst.GetTriple();
                     //Check if the matrix still matches the triple.
                     if (this.CorrelMatrix.ValidateAgainstTriple(pt))
@@ -88,30 +88,30 @@ namespace CorrelationTest
                     }
                     else
                     {       //If NO - create cs_periods object
-                        this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, CorrelMatrix);
+                        this.CorrelString = new Data.CorrelationString_DM(parent_id, ids, fields, CorrelMatrix);
                     }
                 }
-                else if(sheetType == SheetType.Correlation_IM)
+                else if (sheetType == SheetType.Correlation_DM)
                 {
-                    this.CorrelString = new Data.CorrelationString_IM(parent_id, ids, fields, this.CorrelMatrix);
+                    this.CorrelString = new Data.CorrelationString_DM(parent_id, ids, fields, this.CorrelMatrix);
                 }
-                
+
             }
 
-            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
+            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)        //Is this method being used?
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_IM" || sheet.Cells[1,1].value == "$CORRELATION_IT"
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_DM" || sheet.Cells[1, 1].value == "$CORRELATION_DT"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
                 else if (CreateNew)
-                    xlSheet = CreateXLCorrelSheet("_IM");
+                    xlSheet = CreateXLCorrelSheet("_DM");
                 else
                     throw new Exception("No input matrix correlation sheet found.");
                 return xlSheet;
             }
-                       
+
             protected override Excel.Worksheet CreateXLCorrelSheet(string postfix)
             {
                 Excel.Worksheet xlCorrelSheet = ThisAddIn.MyApp.Worksheets.Add(After: ThisAddIn.MyApp.ActiveWorkbook.Sheets[ThisAddIn.MyApp.ActiveWorkbook.Sheets.Count]);
@@ -124,7 +124,7 @@ namespace CorrelationTest
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_IM" || sheet.Cells[1, 1].value == "$CORRELATION_IT"
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_DM" || sheet.Cells[1, 1].value == "$CORRELATION_DT"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
@@ -132,11 +132,11 @@ namespace CorrelationTest
                 {
                     switch (sheetType)
                     {
-                        case SheetType.Correlation_IM:
-                            xlSheet = CreateXLCorrelSheet("_IM");
+                        case SheetType.Correlation_DM:
+                            xlSheet = CreateXLCorrelSheet("_DM");
                             break;
-                        case SheetType.Correlation_IT:
-                            xlSheet = CreateXLCorrelSheet("_IT");
+                        case SheetType.Correlation_DT:
+                            xlSheet = CreateXLCorrelSheet("_DT");
                             break;
                         default:
                             throw new Exception("Bad sheet type");
@@ -152,7 +152,7 @@ namespace CorrelationTest
                 //What is the purpose of this method? To update the matrix values?
                 //Update the string on the sheet to match the altered matrix
                 UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
-                object[,] matrix = this.xlMatrixCell.Offset[1,0].Resize[ids.Length, ids.Length].Value;
+                object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
                 this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
                 this.CorrelString = new Data.CorrelationString_IM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
                 this.xlCorrelStringCell.Value = this.CorrelString.Value;
@@ -161,19 +161,19 @@ namespace CorrelationTest
             protected override string GetDistributionString(IHasSubs est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasInputSubs)est).SubEstimates[subIndex].ValueDistribution.Name}");
-                for (int i = 1; i < ((IHasInputSubs)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
+                sb.Append($"{((IHasDurationSubs)est).SubEstimates[subIndex].ValueDistribution.Name}");
+                for (int i = 1; i < ((IHasDurationSubs)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";
-                    if (((IHasInputSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param] != null)
-                        sb.Append($",{((IHasInputSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param]}");
+                    if (((IHasDurationSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param] != null)
+                        sb.Append($",{((IHasDurationSubs)est).SubEstimates[subIndex].ValueDistributionParameters[param]}");
                 }
                 return sb.ToString();
             }
 
             protected string GetSubIdString(IHasSubs est, int subIndex)
             {
-                return ((IHasInputSubs)est).SubEstimates[subIndex].uID.ID;
+                return ((IHasDurationSubs)est).SubEstimates[subIndex].uID.ID;
             }
 
             public override void PrintToSheet()  //expanding from string
@@ -181,7 +181,7 @@ namespace CorrelationTest
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
                 //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                IHasInputSubs tempEst = (IHasInputSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
+                IHasDurationSubs tempEst = (IHasDurationSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
                 tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link

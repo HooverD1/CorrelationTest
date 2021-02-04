@@ -105,13 +105,21 @@ namespace CorrelationTest
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     case SheetType.Correlation_DM:
-                        matrix_obj = new CorrelationMatrix_Phasing();
+                        matrix_obj = new CorrelationMatrix_Duration();
                         matrix_obj.Parent_ID = parent_ID;
-                        throw new NotImplementedException();
+                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
                     case SheetType.Correlation_DT:
-                        matrix_obj = new CorrelationMatrix_Phasing();
+                        matrix_obj = new CorrelationMatrix_Duration();
                         matrix_obj.Parent_ID = parent_ID;
-                        throw new NotImplementedException();
+                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
                     default:
                         throw new Exception("Unknown correlation type");
                 }
@@ -167,10 +175,22 @@ namespace CorrelationTest
                         break;
                     case SheetType.Correlation_DM:
                         matrix_obj = new CorrelationMatrix_Duration();
-                        throw new NotImplementedException();
+                        matrix_obj.IDs = sub_ids;
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.Matrix = ExtensionMethods.ReIndexArray(matrix);
+                        matrix_obj.FieldCount = matrix_obj.Fields.Count();
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
                     case SheetType.Correlation_DT:
                         matrix_obj = new CorrelationMatrix_Duration();
-                        throw new NotImplementedException();
+                        matrix_obj.IDs = sub_ids;
+                        matrix_obj.Fields = sub_fields;
+                        matrix_obj.Matrix = matrix;
+                        matrix_obj.Matrix = ExtensionMethods.ReIndexArray(matrix);
+                        matrix_obj.FieldCount = matrix_obj.Fields.Count();
+                        matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
+                        break;
                     default:
                         throw new Exception("Unknown correlation type");
                 }
@@ -468,6 +488,8 @@ namespace CorrelationTest
                     sheet_type = SheetType.Correlation_IT;
                 else if (this is CorrelationMatrix_Phasing)
                     sheet_type = SheetType.Correlation_PT;
+                else if (this is CorrelationMatrix_Duration)
+                    sheet_type = SheetType.Correlation_DT;
                 else
                 {
                     throw new Exception("Unknown matrix type");

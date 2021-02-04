@@ -145,7 +145,7 @@ namespace CorrelationTest
 
             public override void PrintDefaultCorrelStrings()
             {
-                foreach (IHasSubs item in Items)
+                foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
                 {
                     if (item is IHasInputSubs)
                         ((IHasInputSubs)item).PrintInputCorrelString();

@@ -186,6 +186,7 @@
     <Compile Include="CorrelationMatrix_Inputs.cs" />
     <Compile Include="CorrelationMatrix_Phasing.cs" />
     <Compile Include="CorrelationSheet.cs" />
+    <Compile Include="CorrelationSheet_Duration.cs" />
     <Compile Include="CorrelationSheet_Inputs.cs" />
     <Compile Include="CorrelationSheet_Phasing.cs" />
     <Compile Include="CorrelationString_DM.cs" />

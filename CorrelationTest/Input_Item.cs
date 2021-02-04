@@ -7,18 +7,17 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class Input_Item : Item, ISub, IHasPhasingSubs
+    public class Input_Item : Item, ISub
     {
         public Excel.Range xlDollarCell { get; set; }
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
         public Distribution ValueDistribution { get; set; }
-        public Distribution PhasingDistribution { get; set; }
+        public Distribution PhasingDistribution { get; set; }       //Do I need this?
         public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString DurationCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
-        public Dictionary<string, object> CostDistributionParameters { get; set; }
-        public Dictionary<string, object> DurationDistributionParameters { get; set; }
+        public Dictionary<string, object> ValueDistributionParameters { get; set; }
         public Dictionary<string, object> PhasingDistributionParameters { get; set; }
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
 
@@ -26,14 +25,14 @@ namespace CorrelationTest
         {
             var specs = this.ContainingSheetObject.Specs;
             var xlDistributionCell = xlRow.Cells[1, specs.Distribution_Offset];
-            var costDistributionParameters = new Dictionary<string, object>() {
+            this.ValueDistributionParameters = new Dictionary<string, object>() {
                 { "Type", xlDistributionCell.Offset[0,0].Value },
                 { "Param1", xlDistributionCell.Offset[0,1].Value },
                 { "Param2", xlDistributionCell.Offset[0,2].Value },
                 { "Param3", xlDistributionCell.Offset[0,3].Value },
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.ValueDistribution = new Distribution(costDistributionParameters);       //Is this useless?
+            this.ValueDistribution = new Distribution(ValueDistributionParameters);       //Is this useless?
             var phasingDistributionParameters = new Dictionary<string, object>() {
                 { "Type", "Normal" },
                 { "Param1", 1 },
@@ -64,13 +63,6 @@ namespace CorrelationTest
         private UniqueID GetUID()
         {
             throw new NotImplementedException();
-        }
-
-        public void PrintPhasingCorrelString()
-        {
-            Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
-            if (phString != null)
-                phString.PrintToSheet(xlCorrelCell_Periods);
         }
     }
 }

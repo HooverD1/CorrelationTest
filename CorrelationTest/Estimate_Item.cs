@@ -16,9 +16,8 @@ namespace CorrelationTest
         public Distribution ValueDistribution { get; set; } //Cost or Schedule
         public Data.CorrelationString ValueCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
-        public Dictionary<string, object> CostDistributionParameters { get; set; }
+        public Dictionary<string, object> ValueDistributionParameters { get; set; }
         public Dictionary<string, object> PhasingDistributionParameters { get; set; }
-        public Dictionary<string, object> DurationDistributionParameters { get; set; }
         public string Type { get; set; }
         public Estimate_Item ParentEstimate { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
@@ -95,9 +94,9 @@ namespace CorrelationTest
         {
             double[] dollars = LoadDollars();
             Period[] periods = new Period[5];
-            for (int i = 0; i < periods.Length; i++)
+            for (int i = 1; i <= periods.Length; i++)
             {
-                periods[i] = new Period(this.uID, $"P{i}", dollars[i]);     //Need to be able to pull the dates off the sheet here.
+                periods[i-1] = new Period(this.uID, $"P{i}", dollars[i-1]);     //Need to be able to pull the dates off the sheet here.
             }
             return periods;
         }

@@ -191,8 +191,12 @@ namespace CorrelationTest
                 CorrelationSheet newSheet;
                 switch (sheet_type)
                 {
+                    case SheetType.Correlation_DT:
+                        newSheet = new CorrelationSheet_Duration(csSpecs);
+                        break;
                     case SheetType.Correlation_DM:
-                        throw new NotImplementedException();
+                        newSheet = new CorrelationSheet_Duration(csSpecs);
+                        break;
                     case SheetType.Correlation_IT:
                         newSheet = new CorrelationSheet_Inputs(csSpecs);
                         break;
@@ -311,25 +315,22 @@ namespace CorrelationTest
 
             public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
             {
-                if(correlString is Data.CorrelationString_IM)
+                switch (correlString)       //Switch on type
                 {
-                    return new CorrelationSheet_Inputs((Data.CorrelationString_IM)correlString, source, specs);
-                }
-                else if(correlString is Data.CorrelationString_IT)
-                {
-                    return new CorrelationSheet_Inputs((Data.CorrelationString_IT)correlString, source, specs);
-                }
-                else if(correlString is Data.CorrelationString_PM)
-                {
-                    return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
-                }
-                else if (correlString is Data.CorrelationString_PT)
-                {
-                    return new CorrelationSheet_Phasing((Data.CorrelationString_PT)correlString, source, specs);
-                }
-                else
-                {
-                    throw new Exception("Unknown correlation string type.");
+                    case Data.CorrelationString_IM t1:
+                        return new CorrelationSheet_Inputs((Data.CorrelationString_IM)correlString, source, specs);
+                    case Data.CorrelationString_IT t2:
+                        return new CorrelationSheet_Inputs((Data.CorrelationString_IT)correlString, source, specs);
+                    case Data.CorrelationString_PM t3:
+                        return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
+                    case Data.CorrelationString_PT t4:
+                        return new CorrelationSheet_Phasing((Data.CorrelationString_PT)correlString, source, specs);
+                    case Data.CorrelationString_DM t5:
+                        return new CorrelationSheet_Duration((Data.CorrelationString_DM)correlString, source, specs);
+                    case Data.CorrelationString_DT t6:
+                        return new CorrelationSheet_Duration((Data.CorrelationString_DT)correlString, source, specs);
+                    default:
+                        throw new Exception("Unknown Correlation String type");
                 }
             }
 
