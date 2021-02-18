@@ -24,6 +24,7 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -44,6 +45,7 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -53,6 +55,7 @@ namespace CorrelationTest
 
             public CorrelationSheet_Duration(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
             {
+                //Need a link
                 this.xlSheet = GetXlSheet();
                 this.Specs = specs;
                 //Set up the xlCells
@@ -62,7 +65,11 @@ namespace CorrelationTest
                 this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                //
+                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
+                
+                //LINK
+                this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
+                
                 //Build the CorrelMatrix
                 object[] ids = Data.CorrelationString.GetIDsFromString(xlCorrelStringCell.Value);
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
@@ -78,13 +85,16 @@ namespace CorrelationTest
                 if (sheetType == SheetType.Correlation_DT)
                 {
                     //Build the triple from the string
-                    string correlStringVal = this.xlCorrelStringCell.Value;
-                    Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
-                    Triple pt = existing_cst.GetTriple();
+                    //string correlStringVal = this.xlCorrelStringCell.Value;
+
+                    //NEED TO BUILD OFF THE SHEET WITHOUT LEVERAGING A CORREL STRING CELL
+                    //Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
+                    Triple triple = new Triple(Convert.ToString(xlTripleCell.Value));
+
                     //Check if the matrix still matches the triple.
-                    if (this.CorrelMatrix.ValidateAgainstTriple(pt))
+                    if (this.CorrelMatrix.ValidateAgainstTriple(triple))
                     {       //If YES - create cs_triple object
-                        this.CorrelString = existing_cst;
+                        this.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(this);
                     }
                     else
                     {       //If NO - create cs_periods object
@@ -161,7 +171,7 @@ namespace CorrelationTest
             protected override string GetDistributionString(IHasSubs est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasDurationSubs)est).SubEstimates[subIndex].ValueDistribution.Name}");
+                sb.Append($"{((IHasDurationSubs)est).SubEstimates[subIndex].DurationDistribution.Name}");
                 for (int i = 1; i < ((IHasDurationSubs)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";
@@ -191,10 +201,15 @@ namespace CorrelationTest
                 for (int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
                     //Distributions
-                    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
+                    if(tempEst.SubEstimates[subIndex] is IHasDurationSubs)
+                        this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
                     //IDs
                     this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(tempEst, subIndex);
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
+                }
+                if (CorrelString is Data.CorrelationString_DT)       //Need to replicate this in PT and DT.
+                {
+                    this.xlTripleCell.Value = ((Data.CorrelationString_DT)CorrelString).GetTriple().GetValuesString();
                 }
             }
         }

@@ -30,6 +30,7 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -55,6 +56,7 @@ namespace CorrelationTest
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -72,6 +74,7 @@ namespace CorrelationTest
                 this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
                 //
                 //Build the CorrelMatrix
                 int fields = Convert.ToInt32(Convert.ToString(xlCorrelStringCell.Value).Split(',')[0]);
@@ -197,6 +200,11 @@ namespace CorrelationTest
                 this.xlIDCell.ColumnWidth = 40;
                 CorrelString.PrintToSheet(xlCorrelStringCell);
                 this.xlDistCell.Value = GetDistributionString(tempEst);
+
+                if (CorrelString is Data.CorrelationString_PT)       //Need to replicate this in PT and DT.
+                {
+                    this.xlTripleCell.Value = ((Data.CorrelationString_PT)CorrelString).GetTriple().GetValuesString();
+                }
                 //this.xlDistCell.Value = tempEst.ItemDistribution.Name;
             }
         }

@@ -24,6 +24,8 @@ namespace CorrelationTest
             private int distCol { get; }
             private int stringRow { get; }
             private int stringCol { get; }
+            private int tripleRow { get; }
+            private int tripleCol { get; }
 
             public Tuple<int, int> MatrixCoords { get; }
             public Tuple<int, int> MatrixCoords_End { get; set; }
@@ -32,6 +34,7 @@ namespace CorrelationTest
             public Tuple<int, int> SubIdCoords { get; }
             public Tuple<int, int> DistributionCoords { get; }
             public Tuple<int, int> StringCoords { get; }
+            public Tuple<int, int> TripleCoords { get; }
             public string LinkFormat { get; }
 
             public CorrelSheetSpecs(SheetType correlSheetType)
@@ -67,6 +70,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
+                        tripleRow = 2;
+                        tripleCol = 2;
                         break;
                     case SheetType.Correlation_PM:
                         matrixRow = 4;
@@ -97,6 +102,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
+                        tripleRow = 2;
+                        tripleCol = 2;
                         break;
                     case SheetType.Correlation_DM:
                         matrixRow = 4;
@@ -127,6 +134,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
+                        tripleRow = 2;
+                        tripleCol = 2;
                         break;
                     default:
                         throw new Exception("Unknown correl sheet type");
@@ -138,6 +147,7 @@ namespace CorrelationTest
                 this.SubIdCoords = new Tuple<int, int>(subIdRow, subIdCol);
                 this.DistributionCoords = new Tuple<int, int>(distRow, distCol);
                 this.StringCoords = new Tuple<int, int>(stringRow, stringCol);
+                this.TripleCoords = new Tuple<int, int>(tripleRow, tripleCol);
             }
 
             public void PrintLinkCoords(Excel.Worksheet xlSheet)

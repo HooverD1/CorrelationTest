@@ -9,20 +9,28 @@ namespace CorrelationTest
 {
     public class Sum_Item : Item, IHasCostSubs, IHasPhasingSubs, IHasDurationSubs
     {
+        public DisplayCoords dispCoords { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution ValueDistribution { get; set; }
+        public Distribution CostDistribution { get; set; }
         public Distribution PhasingDistribution { get; set; }
-        public Data.CorrelationString ValueCorrelationString { get; set; }
+        public Distribution DurationDistribution { get; set; }
+        public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
+        public Data.CorrelationString DurationCorrelationString { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
 
-        public Sum_Item(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)
+        public Sum_Item(Excel.Range xlItemRow, CostSheet ContainingSheetObject) : base(xlItemRow, ContainingSheetObject)
         {
             LoadUID();
-            this.xlDollarCell = xlRow.Cells[1, ContainingSheetObject.Specs.Dollar_Offset];
-            LoadPhasing(xlRow);
+            this.xlDollarCell = xlItemRow.Cells[1, ContainingSheetObject.Specs.Dollar_Offset];
+            LoadPhasing(xlItemRow);
+
+            this.dispCoords = DisplayCoords.ConstructDisplayCoords(SheetType.WBS);
+            this.xlCorrelCell_Cost = xlItemRow.Cells[1, dispCoords.CostCorrel_Offset];
+            this.xlCorrelCell_Phasing = xlItemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
+            this.xlCorrelCell_Duration = xlItemRow.Cells[1, dispCoords.DurationCorrel_Offset];
         }
 
         public void LoadUID()
@@ -93,18 +101,27 @@ namespace CorrelationTest
             return subEstimates;
         }
 
-        public void PrintInputCorrelString()
+        public void PrintCostCorrelString()
         {
-            Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.InputsTriple);
+            Data.CorrelationString inString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostTriple);
+            IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
+                                                   select sub.xlCorrelCell_Cost;
             if (inString != null)
-                inString.PrintToSheet(xlCorrelCell_Cost);
+                inString.PrintToSheet(xlFragments.ToArray());
         }
         public void PrintPhasingCorrelString()
         {
-            Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
+            Data.CorrelationString phString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingTriple);
             if (phString != null)
-                phString.PrintToSheet(xlCorrelCell_Phasing);
+                phString.PrintToSheet(xlCorrelCell_Phasing.Resize[1,this.Periods.Count()]);
         }
-        public void PrintDurationCorrelString() { }
+        public void PrintDurationCorrelString()
+        {
+            Data.CorrelationString phString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationTriple);
+            IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
+                                                   select sub.xlCorrelCell_Duration;
+            if (phString != null)
+                phString.PrintToSheet(xlFragments.ToArray());
+        }
     }
 }

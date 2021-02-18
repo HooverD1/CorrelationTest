@@ -13,17 +13,20 @@ namespace CorrelationTest
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
         public Distribution PhasingDistribution { get; set; }
-        public Distribution ValueDistribution { get; set; } //Cost or Schedule
-        public Data.CorrelationString ValueCorrelationString { get; set; }
+        public Distribution CostDistribution { get; set; } //Cost or Schedule
+        public Distribution DurationDistribution { get; set; }
+        public Data.CorrelationString CostCorrelationString { get; set; }
+        public Data.CorrelationString DurationCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
         public Dictionary<string, object> ValueDistributionParameters { get; set; }
         public Dictionary<string, object> PhasingDistributionParameters { get; set; }
         public string Type { get; set; }
-        public Estimate_Item ParentEstimate { get; set; }
+        public List<IHasSubs> Parents { get; set; } = new List<IHasSubs>();
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public List<Estimate_Item> Siblings { get; set; }
-        public Data.CorrelationString TemporalCorrelStringObj { get; set; }
-        public Data.CorrelationString_CM InputCorrelStringObj { get; set; }
+        public Data.CorrelationString_CM CorrelStringObj_Cost { get; set; }
+        public Data.CorrelationString_PM CorrelStringObj_Phasing { get; set; }
+        public Data.CorrelationString_DM CorrelStringObj_Duration { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
@@ -121,11 +124,12 @@ namespace CorrelationTest
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
             this.Siblings = new List<Estimate_Item>();
-            Estimate_Item parentEstimate = this.ParentEstimate;
-            if (parentEstimate == null) { return; }
-            if (parentEstimate.ParentEstimate == null) { return; }
-            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructNew(parentEstimate.ParentEstimate.InputCorrelStringObj);     //How to build the matrix?
-            foreach (Estimate_Item sibling in ParentEstimate.SubEstimates)
+            Estimate_Item parent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostSubs select est_item).First();
+            Estimate_Item grandparent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostSubs select est_item).First();
+            if (parent == null) { return; }
+            if (parent.Parents.Count() == 0) { return; }
+            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructNew(grandparent.CorrelStringObj_Cost);     //How to build the matrix?
+            foreach (Estimate_Item sibling in parent.SubEstimates)
             {
                 if (sibling == this)
                     continue;
@@ -133,6 +137,7 @@ namespace CorrelationTest
                 //create the string >> create the matrix >> retrieve values & store
                 this.CorrelPairs.Add(sibling, parentMatrix.AccessArray(this.uID.ID, sibling.uID.ID));
             }
+
         }
 
         public void LoadExistingCorrelations()      //useful?
@@ -140,13 +145,19 @@ namespace CorrelationTest
             if (this.xlCorrelCell_Cost != null)
             {
                 Data.CorrelationString_CM csi = new Data.CorrelationString_CM(xlCorrelCell_Cost.Value);
-                this.InputCorrelStringObj = csi;
+                this.CorrelStringObj_Cost = csi;
 
             }
             if (this.xlCorrelCell_Phasing != null)
             {
                 Data.CorrelationString_PM csp = new Data.CorrelationString_PM(xlCorrelCell_Phasing.Value);
-                this.TemporalCorrelStringObj = csp;
+                this.CorrelStringObj_Phasing = csp;
+            }
+            if (this.xlCorrelCell_Duration != null)
+            {
+                Data.CorrelationString_DM csd = new Data.CorrelationString_DM(xlCorrelCell_Duration.Value);
+                this.CorrelStringObj_Duration = csd;
+
             }
         }
 
@@ -191,23 +202,39 @@ namespace CorrelationTest
             this.xlNameCell.Value = this.Name;
         }
 
-        public void PrintInputCorrelString()
+        public virtual void PrintCostCorrelString()
         {
-            Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.InputsTriple);
-            if (inString != null)
-                inString.PrintToSheet(xlCorrelCell_Cost);
+            Data.CorrelationString costString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostTriple);
+            IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
+                                                   select sub.xlCorrelCell_Cost;
+            if (costString != null)
+                costString.PrintToSheet(xlFragments.ToArray());
+
         }
-        public void PrintPhasingCorrelString()
+        public virtual void PrintPhasingCorrelString()
         {
-            Data.CorrelationString phString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.PhasingTriple);
+            Data.CorrelationString phString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingTriple);
             if (phString != null)
-                phString.PrintToSheet(xlCorrelCell_Phasing);
+                phString.PrintToSheet(xlCorrelCell_Phasing);        //Phasing goes on the parent. Cost and Dura go on the children
         }
-        public void PrintDurationCorrelString()
+        public virtual void PrintDurationCorrelString()
         {
-            Data.CorrelationString inString = Data.CorrelationString.ConstructNew(this, Data.CorrelStringType.DurationTriple);
+            Data.CorrelationString inString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationTriple);
+            IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
+                                                   select sub.xlCorrelCell_Duration;
             if (inString != null)
-                inString.PrintToSheet(xlCorrelCell_Cost);
+                inString.PrintToSheet(xlFragments.ToArray());
+        }
+
+        public Data.CorrelationString GetCorrelationString(Data.CorrelStringType cst)
+        {       //Build the CorrelationString from the existing fragments on the sheet
+            IEnumerable<Excel.Range> fragments = from ISub sub in this.SubEstimates select sub.xlCorrelCell_Cost;
+            string csValue = Data.CorrelationString.ConstructStringFromRange(fragments);
+            return Data.CorrelationString.ConstructFromStringValue(csValue);
+            //Get the fragment ranges
+            //Feed them to CorrelationString
+            //Return the CorrelString string
+            //Build the CorrelationString object
         }
     }
 

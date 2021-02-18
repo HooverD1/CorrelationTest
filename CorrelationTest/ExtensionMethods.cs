@@ -93,9 +93,9 @@ namespace CorrelationTest
             string sheetIdent = xlSheet.Cells[1, 1].Value;
             switch (sheetIdent)
             {
-                case "$CORRELATION_IT":
+                case "$CORRELATION_CT":
                     return SheetType.Correlation_CT;
-                case "$CORRELATION_IM":
+                case "$CORRELATION_CM":
                     return SheetType.Correlation_CM;
                 case "$CORRELATION_PM":
                     return SheetType.Correlation_PM;
@@ -169,6 +169,29 @@ namespace CorrelationTest
             my_string = my_string.Replace("\r\n", "&");  //simplify delimiter
             my_string = my_string.Replace("\n", "&");  //simplify delimiter
             return my_string;
+        }
+
+        public static CorrelationType GetCorrelationTypeFromLink(Excel.Range linkSource)
+        {
+            SheetType sheetType = ExtensionMethods.GetSheetType(linkSource.Worksheet);
+            DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sheetType);
+
+            if(dc.CostCorrel_Offset == linkSource.Column)
+            {
+                return CorrelationType.Cost;
+            }
+            else if(dc.PhasingCorrel_Offset == linkSource.Column)
+            {
+                return CorrelationType.Phasing;
+            }
+            else if(dc.DurationCorrel_Offset == linkSource.Column)
+            {
+                return CorrelationType.Duration;
+            }
+            else
+            {
+                return CorrelationType.Null;    
+            }
         }
     }
 }

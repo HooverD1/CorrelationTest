@@ -22,11 +22,75 @@ namespace CorrelationTest
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
-                SendKeys.Send("{ESC}");
-                //Need correlation string to expand depending on the value in Selection
-                Excel.Range selection = ThisAddIn.MyApp.Selection;
-                Data.CorrelationString cs = Data.CorrelationString.ConstructFromExisting(Convert.ToString(selection.Value));
-                cs.Expand(selection);
+            SendKeys.Send("{ESC}");
+            //Need correlation string to expand depending on the value in Selection
+            Excel.Range selection = ThisAddIn.MyApp.Selection;
+
+            /* PROBLEM:
+             * Instead of just selection, this needs to identify the range it's in and grab the whole thing, then recombine it into..
+             * ..a full CorrelString Value.
+             * 
+             * SOLUTION STEPS:
+             * Take the selection and find its sheet type.
+             * Build a DisplayCoords off the sheet type.
+             * Look in the level offset column to find the parent, or if this is the parent.
+             * Create the parent + sub items off the parent row?
+             * Identify which type of Correlation is being selected via comparing the selection column to the Offset values.
+             * .Expand() the correct string of the parent.
+             */
+
+            Excel.Range expand;
+            Excel.Range[] correlRanges = null;
+            SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
+            DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(sheetType);
+            CostSheet sheetObj = CostSheet.Construct(selection.Worksheet);
+            Item selectedItem = (from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item).First();
+            IHasSubs parent;
+            CorrelationType correlType;
+            if(selection.Column == dispCoords.CostCorrel_Offset)
+            {
+                correlType = CorrelationType.Cost;
+            }
+            else if(selection.Column == dispCoords.PhasingCorrel_Offset)
+            {
+                correlType = CorrelationType.Phasing;
+            }
+            else if(selection.Column == dispCoords.DurationCorrel_Offset)
+            {
+                correlType = CorrelationType.Duration;
+            }
+            else
+            {
+                correlType = CorrelationType.Null;
+            }
+                
+            switch (correlType)
+            {
+                case CorrelationType.Cost:
+                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasCostSubs select p).First();
+                    correlRanges = (from Item correlRange in ((IHasCostSubs)parent).SubEstimates select correlRange.xlCorrelCell_Cost).ToArray();
+                    expand = ((IHasCostSubs)parent).xlCorrelCell_Cost;
+                    break;
+                case CorrelationType.Duration:
+                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasDurationSubs select p).First();
+                    correlRanges = (from Item correlRange in ((IHasDurationSubs)parent).SubEstimates select correlRange.xlCorrelCell_Duration).ToArray();
+                    expand = ((IHasDurationSubs)parent).xlCorrelCell_Duration;
+                    break;
+                case CorrelationType.Phasing:
+                    parent = (IHasPhasingSubs)selectedItem;
+                    correlRanges = new Excel.Range[1] { ((IHasPhasingSubs)selectedItem).xlCorrelCell_Phasing };
+                    expand = ((IHasPhasingSubs)selectedItem).xlCorrelCell_Phasing;
+                    break;
+                case CorrelationType.Null:      //Not selecting a correlation column
+                    return;     
+                default:
+                    throw new Exception("Unknown correlation sheet");
+            }
+
+            string correlStringValue = Data.CorrelationString.ConstructStringFromRange(correlRanges);
+            Data.CorrelationString cs = Data.CorrelationString.ConstructFromStringValue(correlStringValue);
+            cs.Expand(expand);       //SELECTION NEEDS CHANGED HERE -- IT'S FORMING THE LINK
+                                        //Change it to the parent cell? First child cell?
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -39,235 +103,241 @@ namespace CorrelationTest
         {
             //Search for existing EST_1 sheet
             Excel.Worksheet est_1 = ExtensionMethods.GetWorksheet("EST_1", SheetType.Estimate);
+            DisplayCoords edc = DisplayCoords.ConstructDisplayCoords(SheetType.Estimate);
             Excel.Worksheet wbs_1 = ExtensionMethods.GetWorksheet("WBS_1", SheetType.WBS);
+            DisplayCoords wdc = DisplayCoords.ConstructDisplayCoords(SheetType.WBS);
+            
+            est_1.Cells[4, edc.ID_Offset] = "ID";
+            est_1.Cells[4, edc.Name_Offset] = "Name";
+            est_1.Cells[4, edc.Distribution_Offset] = "Distribution";
+            est_1.Cells[4, edc.Distribution_Offset+1] = "Param1";
+            est_1.Cells[4, edc.Distribution_Offset+2] = "Param2";
+            est_1.Cells[4, edc.Distribution_Offset+3] = "Param3";
 
-            est_1.Cells[4, 1] = "ID";
-            est_1.Cells[4, 4] = "Name";
-            est_1.Cells[4, 7] = "Distribution";
-            est_1.Cells[4, 8] = "Param1";
-            est_1.Cells[4, 9] = "Param2";
-            est_1.Cells[4, 10] = "Param3";
+            est_1.Cells[5, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[5, edc.Type_Offset] = "SACE";
+            est_1.Cells[5, edc.Name_Offset] = "Est1";
+            est_1.Cells[5, edc.Level_Offset] = 4;
+            est_1.Cells[5, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[5, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[5, edc.Distribution_Offset + 2] = 1;
 
-            est_1.Cells[5, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[5, 3] = "CASE";
-            est_1.Cells[5, 4] = "Est1";
-            est_1.Cells[5, 7] = "Normal";
-            est_1.Cells[5, 8] = 0;
-            est_1.Cells[5, 9] = 1;
-
-            est_1.Cells[6, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[6, 2] = 3;  //# of inputs
-            est_1.Cells[6, 3] = "CE";
-            est_1.Cells[6, 4] = "Est1";
-            est_1.Cells[6, 7] = "Normal";
-            est_1.Cells[6, 8] = 0;
-            est_1.Cells[6, 9] = 1;
-
-            System.Threading.Thread.Sleep(1);
-            est_1.Cells[7, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[7, 3] = "I";
-            est_1.Cells[7, 4] = "Est3";
-            est_1.Cells[7, 7] = "Triangular";
-            est_1.Cells[7, 8] = 10;
-            est_1.Cells[7, 9] = 30;
-            est_1.Cells[7, 10] = 20;
+            est_1.Cells[6, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[6, edc.Level_Offset] = 3;  //# of inputs
+            est_1.Cells[6, edc.Type_Offset] = "CE";
+            est_1.Cells[6, edc.Name_Offset] = "Est1";
+            est_1.Cells[6, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[6, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[6, edc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[8, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[8, 3] = "I";
-            est_1.Cells[8, 4] = "Est4";
-            est_1.Cells[8, 7] = "Triangular";
-            est_1.Cells[8, 8] = 10;
-            est_1.Cells[8, 9] = 30;
-            est_1.Cells[8, 10] = 20;
+            est_1.Cells[7, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[7, edc.Type_Offset] = "I";
+            est_1.Cells[7, edc.Name_Offset] = "Est3";
+            est_1.Cells[7, edc.Distribution_Offset] = "Triangular";
+            est_1.Cells[7, edc.Distribution_Offset + 1] = 10;
+            est_1.Cells[7, edc.Distribution_Offset + 2] = 30;
+            est_1.Cells[7, edc.Distribution_Offset + 3] = 20;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[9, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[9, 3] = "I";
-            est_1.Cells[9, 4] = "Est5";
-            est_1.Cells[9, 7] = "Normal";
-            est_1.Cells[9, 8] = 0;
-            est_1.Cells[9, 9] = 1;
+            est_1.Cells[8, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[8, edc.Type_Offset] = "I";
+            est_1.Cells[8, edc.Name_Offset] = "Est4";
+            est_1.Cells[8, edc.Distribution_Offset] = "Triangular";
+            est_1.Cells[8, edc.Distribution_Offset + 1] = 10;
+            est_1.Cells[8, edc.Distribution_Offset + 2] = 30;
+            est_1.Cells[8, edc.Distribution_Offset + 3] = 20;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[10, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[10, 2] = 4;
-            est_1.Cells[10, 3] = "SE";
-            est_1.Cells[10, 4] = "Est5.2";
-            est_1.Cells[10, 7] = "Normal";
-            est_1.Cells[10, 8] = 0;
-            est_1.Cells[10, 9] = 1;
+            est_1.Cells[9, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[9, edc.Type_Offset] = "I";
+            est_1.Cells[9, edc.Name_Offset] = "Est5";
+            est_1.Cells[9, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[9, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[9, edc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[11, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[11, 3] = "I";
-            est_1.Cells[11, 4] = "Est6";
-            est_1.Cells[11, 7] = "Normal";
-            est_1.Cells[11, 8] = 0;
-            est_1.Cells[11, 9] = 1;
+            est_1.Cells[10, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[10, edc.Level_Offset] = 4;
+            est_1.Cells[10, edc.Type_Offset] = "SE";
+            est_1.Cells[10, edc.Name_Offset] = "Est5.2";
+            est_1.Cells[10, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[10, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[10, edc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[12, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[12, 3] = "I";
-            est_1.Cells[12, 4] = "Est7";
-            est_1.Cells[12, 7] = "Normal";
-            est_1.Cells[12, 8] = 0;
-            est_1.Cells[12, 9] = 1;
+            est_1.Cells[11, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[11, edc.Type_Offset] = "I";
+            est_1.Cells[11, edc.Name_Offset] = "Est6";
+            est_1.Cells[11, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[11, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[11, edc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[13, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[13, 3] = "I";
-            est_1.Cells[13, 4] = "Est8";
-            est_1.Cells[13, 7] = "Normal";
-            est_1.Cells[13, 8] = 0;
-            est_1.Cells[13, 9] = 1;
+            est_1.Cells[12, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[12, edc.Type_Offset] = "I";
+            est_1.Cells[12, edc.Name_Offset] = "Est7";
+            est_1.Cells[12, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[12, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[12, edc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[14, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[14, 3] = "I";
-            est_1.Cells[14, 4] = "Est9";
-            est_1.Cells[14, 7] = "Lognormal";
-            est_1.Cells[14, 8] = 0;
-            est_1.Cells[14, 9] = 1;
+            est_1.Cells[13, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[13, edc.Type_Offset] = "I";
+            est_1.Cells[13, edc.Name_Offset] = "Est8";
+            est_1.Cells[13, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[13, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[13, edc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            est_1.Cells[15, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[15, 2] = 1;
-            est_1.Cells[15, 3] = "CE";
-            est_1.Cells[15, 4] = "Est10";
-            est_1.Cells[15, 7] = "Normal";
-            est_1.Cells[15, 8] = 0;
-            est_1.Cells[15, 9] = 1;
+            est_1.Cells[14, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[14, edc.Type_Offset] = "I";
+            est_1.Cells[14, edc.Name_Offset] = "Est9";
+            est_1.Cells[14, edc.Distribution_Offset] = "Lognormal";
+            est_1.Cells[14, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[14, edc.Distribution_Offset + 2] = 1;
+
+            System.Threading.Thread.Sleep(1);
+            est_1.Cells[15, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[15, edc.Level_Offset] = 1;
+            est_1.Cells[15, edc.Type_Offset] = "CE";
+            est_1.Cells[15, edc.Name_Offset] = "Est10";
+            est_1.Cells[15, edc.Distribution_Offset] = "Normal";
+            est_1.Cells[15, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[15, edc.Distribution_Offset + 2] = 1;
 
 
             for (int i = 0; i < 50; i++)
             {
                 System.Threading.Thread.Sleep(1);
-                est_1.Cells[16 + i, 1] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-                est_1.Cells[16 + i, 3] = "I";
-                est_1.Cells[16 + i, 4] = $"Est{11+i}";
-                est_1.Cells[16 + i, 7] = "Normal";
-                est_1.Cells[16 + i, 8] = 0;
-                est_1.Cells[16 + i, 9] = 1;
+                est_1.Cells[16 + i, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+                est_1.Cells[16 + i, edc.Type_Offset] = "I";
+                est_1.Cells[16 + i, edc.Name_Offset] = $"Est{11+i}";
+                est_1.Cells[16 + i, edc.Distribution_Offset] = "Normal";
+                est_1.Cells[16 + i, edc.Distribution_Offset + 1] = 0;
+                est_1.Cells[16 + i, edc.Distribution_Offset + 2] = 1;
             }
 
             est_1.Activate();
 
-            wbs_1.Cells[4, 1] = "ID";
-            wbs_1.Cells[4, 2] = "Level";
-            wbs_1.Cells[4, 4] = "Name";
-            wbs_1.Cells[4, 7] = "Distribution";
-            wbs_1.Cells[4, 8] = "Param1";
-            wbs_1.Cells[4, 9] = "Param2";
-            wbs_1.Cells[4, 10] = "Param3";
+            wbs_1.Cells[4, wdc.ID_Offset] = "ID";
+            wbs_1.Cells[4, wdc.Level_Offset] = "Level";
+            wbs_1.Cells[4, wdc.Name_Offset] = "Name";
+            wbs_1.Cells[4, wdc.Distribution_Offset] = "Distribution";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 1] = "Param1";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 2] = "Param2";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 3] = "Param3";
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[5, 1] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[5, 2] = 1;
-            wbs_1.Cells[5, 3] = "S";
+            wbs_1.Cells[5, wdc.ID_Offset] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[5, wdc.Level_Offset] = 1;
+            wbs_1.Cells[5, wdc.Type_Offset] = "S";
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[6, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[6, 2] = 2;
-            wbs_1.Cells[6, 3] = "CE";
-            wbs_1.Cells[6, 4] = "Est2";
-            wbs_1.Cells[6, 7] = "Triangular";
-            wbs_1.Cells[6, 8] = 10;
-            wbs_1.Cells[6, 9] = 30;
-            wbs_1.Cells[6, 10] = 20;
+            wbs_1.Cells[6, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[6, wdc.Level_Offset] = 2;
+            wbs_1.Cells[6, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[6, wdc.Name_Offset] = "Est2";
+            wbs_1.Cells[6, wdc.Distribution_Offset] = "Triangular";
+            wbs_1.Cells[6, wdc.Distribution_Offset + 1] = 10;
+            wbs_1.Cells[6, wdc.Distribution_Offset + 2] = 30;
+            wbs_1.Cells[6, wdc.Distribution_Offset + 3] = 20;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[7, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[7, 2] = 2;
-            wbs_1.Cells[7, 3] = "CE";
-            wbs_1.Cells[7, 4] = "Est3";
-            wbs_1.Cells[7, 7] = "Triangular";
-            wbs_1.Cells[7, 8] = 10;
-            wbs_1.Cells[7, 9] = 30;
-            wbs_1.Cells[7, 10] = 20;
+            wbs_1.Cells[7, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[7, wdc.Level_Offset] = 2;
+            wbs_1.Cells[7, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[7, wdc.Name_Offset] = "Est3";
+            wbs_1.Cells[7, wdc.Distribution_Offset] = "Triangular";
+            wbs_1.Cells[7, wdc.Distribution_Offset + 1] = 10;
+            wbs_1.Cells[7, wdc.Distribution_Offset + 2] = 30;
+            wbs_1.Cells[7, wdc.Distribution_Offset + 3] = 20;
  
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[8, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[8, 2] = 2;
-            wbs_1.Cells[8, 3] = "CE";
-            wbs_1.Cells[8, 4] = "Est4";
-            wbs_1.Cells[8, 7] = "Triangular";
-            wbs_1.Cells[8, 8] = 10;
-            wbs_1.Cells[8, 9] = 30;
-            wbs_1.Cells[8, 10] = 20;
+            wbs_1.Cells[8, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[8, wdc.Level_Offset] = 2;
+            wbs_1.Cells[8, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[8, wdc.Name_Offset] = "Est4";
+            wbs_1.Cells[8, wdc.Distribution_Offset] = "Triangular";
+            wbs_1.Cells[8, wdc.Distribution_Offset + 1] = 10;
+            wbs_1.Cells[8, wdc.Distribution_Offset + 2] = 30;
+            wbs_1.Cells[8, wdc.Distribution_Offset + 3] = 20;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[9, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[9, 2] = 2;
-            wbs_1.Cells[9, 3] = "CE";
-            wbs_1.Cells[9, 4] = "Est5";
-            wbs_1.Cells[9, 7] = "Normal";
-            wbs_1.Cells[9, 8] = 0;
-            wbs_1.Cells[9, 9] = 1;
+            wbs_1.Cells[9, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[9, wdc.Level_Offset] = 2;
+            wbs_1.Cells[9, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[9, wdc.Name_Offset] = "Est5";
+            wbs_1.Cells[9, wdc.Distribution_Offset] = "Normal";
+            wbs_1.Cells[9, wdc.Distribution_Offset + 1] = 0;
+            wbs_1.Cells[9, wdc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[10, 1] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[10, 2] = 1;
-            wbs_1.Cells[10, 3] = "S";
+            wbs_1.Cells[10, wdc.ID_Offset] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[10, wdc.Level_Offset] = 1;
+            wbs_1.Cells[10, wdc.Type_Offset] = "S";
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[11, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[11, 2] = 2;
-            wbs_1.Cells[11, 3] = "CE";
-            wbs_1.Cells[11, 4] = "Est6";
-            wbs_1.Cells[11, 7] = "Normal";
-            wbs_1.Cells[11, 8] = 0;
-            wbs_1.Cells[11, 9] = 1;
+            wbs_1.Cells[11, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[11, wdc.Level_Offset] = 2;
+            wbs_1.Cells[11, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[11, wdc.Name_Offset] = "Est6";
+            wbs_1.Cells[11, wdc.Distribution_Offset] = "Normal";
+            wbs_1.Cells[11, wdc.Distribution_Offset + 1] = 0;
+            wbs_1.Cells[11, wdc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[12, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[12, 2] = 2;
-            wbs_1.Cells[12, 3] = "CE";
-            wbs_1.Cells[12, 4] = "Est7";
-            wbs_1.Cells[12, 7] = "Normal";
-            wbs_1.Cells[12, 8] = 0;
-            wbs_1.Cells[12, 9] = 1;
+            wbs_1.Cells[12, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[12, wdc.Level_Offset] = 3;
+            wbs_1.Cells[12, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[12, wdc.Name_Offset] = "Est7";
+            wbs_1.Cells[12, wdc.Distribution_Offset] = "Normal";
+            wbs_1.Cells[12, wdc.Distribution_Offset + 1] = 0;
+            wbs_1.Cells[12, wdc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[13, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[13, 2] = 2;
-            wbs_1.Cells[13, 3] = "CE";
-            wbs_1.Cells[13, 4] = "Est8";
-            wbs_1.Cells[13, 7] = "Normal";
-            wbs_1.Cells[13, 8] = 0;
-            wbs_1.Cells[13, 9] = 1;
+            wbs_1.Cells[13, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[13, wdc.Level_Offset] = 3;
+            wbs_1.Cells[13, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[13, wdc.Name_Offset] = "Est8";
+            wbs_1.Cells[13, wdc.Distribution_Offset] = "Normal";
+            wbs_1.Cells[13, wdc.Distribution_Offset + 1] = 0;
+            wbs_1.Cells[13, wdc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[14, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[14, 2] = 2;
-            wbs_1.Cells[14, 3] = "CE";
-            wbs_1.Cells[14, 4] = "Est9";
-            wbs_1.Cells[14, 7] = "Lognormal";
-            wbs_1.Cells[14, 8] = 0;
-            wbs_1.Cells[14, 9] = 1;
+            wbs_1.Cells[14, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[14, wdc.Level_Offset] = 2;
+            wbs_1.Cells[14, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[14, wdc.Name_Offset] = "Est9";
+            wbs_1.Cells[14, wdc.Distribution_Offset] = "Lognormal";
+            wbs_1.Cells[14, wdc.Distribution_Offset + 1] = 0;
+            wbs_1.Cells[14, wdc.Distribution_Offset + 2] = 1;
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[15, 1] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[15, 2] = 1;
-            wbs_1.Cells[15, 3] = "S";
+            wbs_1.Cells[15, wdc.ID_Offset] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[15, wdc.Level_Offset] = 1;
+            wbs_1.Cells[15, wdc.Type_Offset] = "S";
 
             System.Threading.Thread.Sleep(1);
-            wbs_1.Cells[16, 1] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[16, 2] = 2;
-            wbs_1.Cells[16, 3] = "CE";
-            wbs_1.Cells[16, 4] = "Est11";
-            wbs_1.Cells[16, 7] = "Normal";
-            wbs_1.Cells[16, 8] = 0;
-            wbs_1.Cells[16, 9] = 1;
+            wbs_1.Cells[16, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
+            wbs_1.Cells[16, wdc.Level_Offset] = 2;
+            wbs_1.Cells[16, wdc.Type_Offset] = "CE";
+            wbs_1.Cells[16, wdc.Name_Offset] = "Est11";
+            wbs_1.Cells[16, wdc.Distribution_Offset] = "Normal";
+            wbs_1.Cells[16, wdc.Distribution_Offset + 1] = 0;
+            wbs_1.Cells[16, wdc.Distribution_Offset + 2] = 1;
 
             //Goal: Build the correlation strings on each example sheet
             //Steps
             //1 -- Build the sheet object -- est_1 is the xlSheet; construct the sheet object from it
+            
             CostSheet estimateSheet_example = CostSheet.Construct(est_1);
+            
             //2 -- Manually load the estimate objects to the sheet object, including their SubEstimates
+            
             estimateSheet_example.PrintDefaultCorrelStrings();
+            
             //3 -- Build default CorrelStrings for estimates attached to the sheet object
-
 
             //Repeat for wbs_1
             CostSheet wbsSheet_example = CostSheet.Construct(wbs_1);

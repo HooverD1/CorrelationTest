@@ -27,9 +27,9 @@ namespace CorrelationTest
             this.ContainingSheetObject = ContainingSheetObject;
             this.xlTypeCell = xlRow.Cells[1, ContainingSheetObject.Specs.Type_Offset];
             this.xlNameCell = xlRow.Cells[1, ContainingSheetObject.Specs.Name_Offset];
-            this.xlCorrelCell_Cost = xlRow.Cells[1, ContainingSheetObject.Specs.CostCorrel_Offset];
-
-            this.xlCorrelCell_Phasing = xlRow.Cells[1, ContainingSheetObject.Specs.PhasingCorrel_Offset];
+            //this.xlCorrelCell_Cost = xlRow.Cells[1, ContainingSheetObject.Specs.CostCorrel_Offset];
+            //this.xlCorrelCell_Phasing = xlRow.Cells[1, ContainingSheetObject.Specs.PhasingCorrel_Offset];
+            //this.xlCorrelCell_Duration = xlRow.Cells[1, ContainingSheetObject.Specs.DurationCorrel_Offset];
             LoadUniqueID();
             if(ContainingSheetObject is Sheets.WBSSheet)
             {
@@ -38,6 +38,7 @@ namespace CorrelationTest
                     this.Level = level;
             }
             this.Name = Convert.ToString(xlNameCell.Value);
+
         }
 
         protected Item() { }
@@ -109,5 +110,7 @@ namespace CorrelationTest
 
             throw new NotImplementedException();
         }
+
+
     }
 }

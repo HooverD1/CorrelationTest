@@ -9,10 +9,11 @@ namespace CorrelationTest
 {
     public interface IJointEstimate : IHasSubs
     {
-        CostEstimate costEstimate { get; set; }
-        ScheduleEstimate scheduleEstimate { get; set; }
 
         CostEstimate ConstructCostSubEstimate(Excel.Range xlRow, CostSheet ContainingSheetObject);
         ScheduleEstimate ConstructScheduleSubEstimate(Excel.Range xlRow, CostSheet ContainingSheetObject);
+        void PrintCostCorrelString();
+        void PrintPhasingCorrelString();
+        void PrintDurationCorrelString();
     }
 }

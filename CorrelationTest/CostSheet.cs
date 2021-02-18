@@ -86,7 +86,7 @@ namespace CorrelationTest
              */
             //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
             //Data.CorrelationString_PM CorrelationString_PM = Data.CorrelationString_PM.ConstructString(periodIDs, this.xlSheet.Name);
-            Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromExisting(estimate.xlCorrelCell_Phasing.Value);
+            Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromStringValue(estimate.xlCorrelCell_Phasing.Value);
             correlationString.PrintToSheet(estimate.xlCorrelCell_Phasing);
         }
 

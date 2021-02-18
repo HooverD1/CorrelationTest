@@ -49,31 +49,32 @@ namespace CorrelationTest
                 FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
-            public static CorrelationMatrix ConstructFromExisting(Sheets.CorrelationSheet containing_sheet)
+            public static CorrelationMatrix ConstructFromExisting(Sheets.CorrelationSheet containing_sheet)     //This whole thing may need refactored...
             {
-                object old_correl = containing_sheet.xlCorrelStringCell.Value;
-                CorrelationMatrix matrix_obj;
-                
-                //=========================================================
-                //These values should not be changed on a Correlation Sheet:
-                string parent_ID = Data.CorrelationString.GetParentIDFromString(old_correl);
-                string[] sub_fields = Data.CorrelationString.GetFieldsFromString(old_correl);
-                //=========================================================
+                //Rebuilding the matrix object from the matrix on the xl sheet
+                //Need to do this without building it into a string object
+                string parent_ID = Convert.ToString(containing_sheet.xlIDCell.Value);
+                string[] sub_fields = (string[])containing_sheet.Get_xlFields();
+                string[] sub_IDs = containing_sheet.GetIDs();
 
                 //=======================
                 //Pull the matrix from the xlSheet to get updates
                 Excel.Range first_cell = containing_sheet.xlSheet.Cells[containing_sheet.Specs.MatrixCoords.Item1, containing_sheet.Specs.MatrixCoords.Item2];
                 Excel.Range last_cell = first_cell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown];
-                object[,] matrix = containing_sheet.xlSheet.Range[first_cell.Offset[1,0], last_cell].Value;
+                Excel.Range last_cell_fields = first_cell.End[Excel.XlDirection.xlToRight];
+                object[,] matrix = containing_sheet.xlSheet.Range[first_cell.Offset[1, 0], last_cell].Value;
                 //=======================
 
+                CorrelationMatrix matrix_obj;
+
                 SheetType containing_sheet_type = ExtensionMethods.GetSheetType(containing_sheet.xlSheet);
+                
                 switch (containing_sheet_type)
                 {
                     case SheetType.Correlation_CM:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.Parent_ID = parent_ID;
-                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
@@ -81,7 +82,7 @@ namespace CorrelationTest
                     case SheetType.Correlation_CT:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.Parent_ID = parent_ID;
-                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
@@ -107,7 +108,7 @@ namespace CorrelationTest
                     case SheetType.Correlation_DM:
                         matrix_obj = new CorrelationMatrix_Duration();
                         matrix_obj.Parent_ID = parent_ID;
-                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
@@ -115,7 +116,7 @@ namespace CorrelationTest
                     case SheetType.Correlation_DT:
                         matrix_obj = new CorrelationMatrix_Duration();
                         matrix_obj.Parent_ID = parent_ID;
-                        matrix_obj.IDs = Data.CorrelationString.GetIDsFromString(old_correl);
+                        matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);

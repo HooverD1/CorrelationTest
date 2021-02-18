@@ -32,6 +32,7 @@ namespace CorrelationTest
             public Excel.Range xlCorrelStringCell { get; set; }
             public Excel.Range xlDistCell { get; set; }
             public Excel.Range xlSubIdCell { get; set; }
+            public Excel.Range xlTripleCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
 
             //public CorrelationSheet(Data.CorrelationString_CM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
@@ -57,20 +58,24 @@ namespace CorrelationTest
             {
                 throw new NotImplementedException();
             }
-            public double[,] GetCorrelArray(Excel.Range xlRange)
-            {
-                throw new NotImplementedException();
-            }
+
 
             public double[,] SetCorrelArray(Data.CorrelationMatrix correlMatrix)
             {
                 throw new NotImplementedException();
             }
-            public object[] Get_xlFields()      //error
+            public string[] Get_xlFields()
             {
-                int colNum = Convert.ToInt32(xlSheet.Cells[1, 9].Value);
-                Excel.Range fieldRange = this.xlMatrixCell.Resize[1, Convert.ToInt32(colNum)];
-                return fieldRange.Value;
+                Excel.Range endCell = this.xlMatrixCell.End[Excel.XlDirection.xlToRight];
+                Excel.Range fieldRange = this.xlSheet.Range[this.xlMatrixCell, endCell];
+                object[,] fieldRangeValues = ExtensionMethods.ReIndexArray(fieldRange.Value);
+                object[][] jaggedRange = ExtensionMethods.ToJaggedArray(fieldRangeValues);
+                string[] returnString = new string[jaggedRange[0].Length];
+                for(int i = 0; i < jaggedRange[0].Length; i++)
+                {
+                    returnString[i] = Convert.ToString(jaggedRange[0][i]);
+                }
+                return returnString;
             }
             public override bool Validate()
             {
@@ -198,10 +203,10 @@ namespace CorrelationTest
                         newSheet = new CorrelationSheet_Duration(csSpecs);
                         break;
                     case SheetType.Correlation_CT:
-                        newSheet = new CorrelationSheet_Inputs(csSpecs);
+                        newSheet = new CorrelationSheet_Cost(csSpecs);
                         break;
                     case SheetType.Correlation_CM:
-                        newSheet = new CorrelationSheet_Inputs(csSpecs);
+                        newSheet = new CorrelationSheet_Cost(csSpecs);
                         break;
                     case SheetType.Correlation_PM:
                         newSheet = new CorrelationSheet_Phasing(csSpecs);
@@ -234,9 +239,9 @@ namespace CorrelationTest
                 switch (correlStringValue)
                 {
                     case "CT":
-                        return Data.CorrelStringType.InputsTriple;
+                        return Data.CorrelStringType.CostTriple;
                     case "CM":
-                        return Data.CorrelStringType.InputsMatrix;
+                        return Data.CorrelStringType.CostMatrix;
                     case "PM":
                         return Data.CorrelStringType.PhasingMatrix;
                     case "PT":
@@ -255,8 +260,11 @@ namespace CorrelationTest
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
                 CorrelationSheet correlSheet = Construct();
+                CorrelationType cType = ExtensionMethods.GetCorrelationTypeFromLink(correlSheet.LinkToOrigin.LinkSource);
                 if (correlSheet == null)
                     return;
+                Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet);
+                correlSheet.CorrelString = correlationString;
 
                 //Validate matrix checks
                 //Validate link source ID
@@ -267,7 +275,16 @@ namespace CorrelationTest
                 
                 if (id_followLink.ToString() == id_correlSheet.ToString())
                 {
-                    correlSheet.CorrelString.PrintToSheet(correlSheet.LinkToOrigin.LinkSource);
+                    Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
+                    if (cType == CorrelationType.Cost)
+                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasCostSubs)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    else if (cType == CorrelationType.Duration)
+                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasDurationSubs)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    else if (cType == CorrelationType.Phasing)
+                        correlSheet.CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
+                    else
+                        throw new Exception("Unknown parent type");
+                    
                     if (!correlSheet.CorrelMatrix.CheckForPSD())
                         MessageBox.Show("Not PSD");
                     bool errors = correlSheet.PaintMatrixErrors(correlSheet.CorrelMatrix.CheckMatrixForTransitivity());
@@ -318,9 +335,9 @@ namespace CorrelationTest
                 switch (correlString)       //Switch on type
                 {
                     case Data.CorrelationString_CM t1:
-                        return new CorrelationSheet_Inputs((Data.CorrelationString_CM)correlString, source, specs);
+                        return new CorrelationSheet_Cost((Data.CorrelationString_CM)correlString, source, specs);
                     case Data.CorrelationString_CT t2:
-                        return new CorrelationSheet_Inputs((Data.CorrelationString_CT)correlString, source, specs);
+                        return new CorrelationSheet_Cost((Data.CorrelationString_CT)correlString, source, specs);
                     case Data.CorrelationString_PM t3:
                         return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
                     case Data.CorrelationString_PT t4:

@@ -187,7 +187,7 @@
     <Compile Include="CorrelationMatrix_Phasing.cs" />
     <Compile Include="CorrelationSheet.cs" />
     <Compile Include="CorrelationSheet_Duration.cs" />
-    <Compile Include="CorrelationSheet_Inputs.cs" />
+    <Compile Include="CorrelationSheet_Cost.cs" />
     <Compile Include="CorrelationSheet_Phasing.cs" />
     <Compile Include="CorrelationString_DM.cs" />
     <Compile Include="CorrelationString_DT.cs" />
@@ -199,6 +199,7 @@
     <Compile Include="CorrelSheetSpecs.cs" />
     <Compile Include="CostEstimate.cs" />
     <Compile Include="CostScheduleEstimate.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="IJointEstimate.cs" />
     <Compile Include="ISub.cs" />
     <Compile Include="Item.cs" />

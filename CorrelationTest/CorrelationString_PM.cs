@@ -27,6 +27,12 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
 
+            public CorrelationString_PM(Sheets.CorrelationSheet_Phasing correlSheet)
+            {
+
+            }
+
+
             private CorrelationString_PM(string[] start_dates)     //Zero string constructor
             {
                 StringBuilder sb = new StringBuilder();
@@ -126,11 +132,26 @@ namespace CorrelationTest
                 correlSheet.PrintToSheet();
             }
 
-            public override void PrintToSheet(Excel.Range xlCell)
+            public override void PrintToSheet(Excel.Range[] xlCells)
             {
-                xlCell.Value = this.Value;
-                xlCell.NumberFormat = "\"Ph Correl\";;;\"PH_CORREL\"";
-                xlCell.EntireColumn.ColumnWidth = 10;
+                //Clean the string
+                //Split the string by lines
+                //Print it to the xlCells
+
+                this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
+                List<Excel.Range> xlFragments = xlCells.ToList();
+                string[] lines = this.Value.Split('&');
+                int min;
+                if (lines.Count() <= xlCells.Count())
+                    min = lines.Count();
+                else
+                    min = xlCells.Count();
+                for (int i = 0; i < min; i++)
+                {
+                    xlFragments[i].Value = lines[i];
+                    xlFragments[i].NumberFormat = "\"Ph Correl\";;;\"PH_CORREL\"";
+                }
+                xlFragments[0].EntireColumn.ColumnWidth = 10;
             }
 
             protected override string CreateValue(string parentID, object[] fields, object[,] correlArray)
@@ -139,14 +160,14 @@ namespace CorrelationTest
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"{fields.Length},PM,{parentID}");
                 sb.AppendLine();
-                for (int field = 0; field < correlArray.GetLength(1); field++)
-                {
-                    //Add fields
-                    sb.Append(fields[field]);
-                    if (field < correlArray.GetLength(1) - 1)
-                        sb.Append(",");
-                }
-                sb.AppendLine();
+                //for (int field = 0; field < correlArray.GetLength(1); field++)
+                //{
+                //    //Add fields
+                //    sb.Append(fields[field]);
+                //    if (field < correlArray.GetLength(1) - 1)
+                //        sb.Append(",");
+                //}
+                //sb.AppendLine();
                 for (int row = 0; row < correlArray.GetLength(0); row++)
                 {
                     for (int col = row + 1; col < correlArray.GetLength(1); col++)

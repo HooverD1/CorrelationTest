@@ -17,6 +17,12 @@ namespace CorrelationTest
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
+
+            public CorrelationString_CM(Sheets.CorrelationSheet_Cost correlSheet)
+            {
+
+            }
+
             public CorrelationString_CM(string parent_id, object[] ids, object[] fields, object[,] correlArray)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, ids, fields, correlArray));               
@@ -89,14 +95,14 @@ namespace CorrelationTest
                     sb.Append(parentEstimate.SubEstimates[j].uID.ID);
                 }
                 sb.AppendLine();
-                //FIELDS
-                for(int sub = 0; sub < fields; sub++)
-                {
-                    sb.Append(parentEstimate.SubEstimates[sub].uID);
-                    if (sub < fields - 1)
-                        sb.Append(",");
-                }
-                sb.AppendLine();
+                ////FIELDS
+                //for(int sub = 0; sub < fields; sub++)
+                //{
+                //    sb.Append(parentEstimate.SubEstimates[sub].uID);
+                //    if (sub < fields - 1)
+                //        sb.Append(",");
+                //}
+                //sb.AppendLine();
                 //VALUES
                 for (int sub = 0; sub < fields; sub++)  //vertical
                 {
@@ -125,14 +131,14 @@ namespace CorrelationTest
                     sb.Append(ids[i]);
                 }
                 sb.AppendLine();
-                for (int field = 0; field < fields.Length; field++)
-                {
-                    //Add fields
-                    if(field > 0)
-                        sb.Append(",");
-                    sb.Append(fields[field]);
-                }
-                sb.AppendLine();
+                //for (int field = 0; field < fields.Length; field++)
+                //{
+                //    //Add fields
+                //    if(field > 0)
+                //        sb.Append(",");
+                //    sb.Append(fields[field]);
+                //}
+                //sb.AppendLine();
                 for (int row = 0; row < correlArray.GetLength(0); row++)
                 {
                     for (int col = row + 1; col < correlArray.GetLength(1); col++)
@@ -265,11 +271,26 @@ namespace CorrelationTest
             }
 
 
-            public override void PrintToSheet(Excel.Range xlCell)
+            public override void PrintToSheet(Excel.Range[] xlCells)
             {
-                xlCell.Value = this.Value;
-                xlCell.NumberFormat = "\"In Correl\";;;\"COST_CORREL\"";
-                xlCell.EntireColumn.ColumnWidth = 10;
+                //Clean the string
+                //Split the string by lines
+                //Print it to the xlCells
+
+                this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
+                List<Excel.Range> xlFragments = xlCells.ToList();
+                string[] lines = this.Value.Split('&');
+                int min;
+                if (lines.Count() <= xlCells.Count())
+                    min = lines.Count();
+                else
+                    min = xlCells.Count();
+                for (int i= 0; i < min; i++)
+                {
+                    xlFragments[i].Value = lines[i];
+                    xlFragments[i].NumberFormat = "\"In Correl\";;;\"COST_CORREL\"";
+                }
+                xlFragments[0].EntireColumn.ColumnWidth = 10;
             }
         }
     }

@@ -23,6 +23,12 @@ namespace CorrelationTest
                 return new CorrelationString_DM(csi.Value);
             }
 
+            public CorrelationString_DM(Sheets.CorrelationSheet_Duration correlSheet)
+            {
+
+            }
+
+
             public CorrelationString_DM(string parent_id, object[] sub_ids, object[] sub_fields, Data.CorrelationMatrix matrix)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, matrix.GetMatrix()));
@@ -69,14 +75,14 @@ namespace CorrelationTest
                     sb.Append(ids[i]);
                 }
                 sb.AppendLine();
-                for (int field = 0; field < fields.Length; field++)
-                {
-                    //Add fields
-                    if (field > 0)
-                        sb.Append(",");
-                    sb.Append(fields[field]);
-                }
-                sb.AppendLine();
+                //for (int field = 0; field < fields.Length; field++)
+                //{
+                //    //Add fields
+                //    if (field > 0)
+                //        sb.Append(",");
+                //    sb.Append(fields[field]);
+                //}
+                //sb.AppendLine();
                 for (int row = 0; row < correlArray.GetLength(0); row++)
                 {
                     for (int col = row + 1; col < correlArray.GetLength(1); col++)
@@ -91,11 +97,26 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            public override void PrintToSheet(Excel.Range xlCell)
+            public override void PrintToSheet(Excel.Range[] xlCells)
             {
-                xlCell.Value = this.Value;
-                xlCell.NumberFormat = "\"In Correl\";;;\"SCH_CORREL\"";
-                xlCell.EntireColumn.ColumnWidth = 10;
+                //Clean the string
+                //Split the string by lines
+                //Print it to the xlCells
+
+                this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
+                List<Excel.Range> xlFragments = xlCells.ToList();
+                string[] lines = this.Value.Split('&');
+                int min;
+                if (lines.Count() <= xlCells.Count())
+                    min = lines.Count();
+                else
+                    min = xlCells.Count();
+                for (int i = 0; i < min; i++)
+                {
+                    xlFragments[i].Value = lines[i];
+                    xlFragments[i].NumberFormat = "\"Sch Correl\";;;\"SCH_CORREL\"";
+                }
+                xlFragments[0].EntireColumn.ColumnWidth = 10;
             }
         }
     }

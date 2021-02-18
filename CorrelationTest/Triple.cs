@@ -15,6 +15,19 @@ namespace CorrelationTest
         public double VerticalMultiplier { get; set; }
         private Data.CorrelationMatrix CorrelMatrix { get; set; }
 
+        public Triple(string tripleString)
+        {
+            object[,] tripleValues = SplitTriple(tripleString);
+            if (!ValidateTriple(tripleValues))
+                throw new Exception("Invalid correlation triple.");
+            else
+            {
+                this.TopLeft = Convert.ToDouble(tripleValues[0, 0]);
+                this.DiagonalMultiplier = Convert.ToDouble(tripleValues[0, 1]);
+                this.VerticalMultiplier = Convert.ToDouble(tripleValues[0, 2]);
+            }
+        }
+
         public Triple(Excel.Range xlUIdCell, Excel.Range tripleRange) : this((string)xlUIdCell.Value, (string)tripleRange.Value) { }
         
         public Triple(string uidString, string triple)
@@ -40,6 +53,11 @@ namespace CorrelationTest
                 tripleValues[0, i] = splitValues[i];
             }
             return tripleValues;
+        }
+
+        public string GetValuesString()
+        {
+            return $"{TopLeft},{DiagonalMultiplier},{VerticalMultiplier}";
         }
 
         private bool ValidateTriple(object[,] tripleValues)

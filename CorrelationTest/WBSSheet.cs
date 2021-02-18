@@ -62,11 +62,20 @@ namespace CorrelationTest
                 foreach (IHasSubs item in Items)
                 {
                     if (item is IHasCostSubs)
-                        ((IHasCostSubs)item).PrintInputCorrelString();
+                        ((IHasCostSubs)item).PrintCostCorrelString();
                     if (item is IHasPhasingSubs)
                         ((IHasPhasingSubs)item).PrintPhasingCorrelString();
                     if (item is IHasDurationSubs)
                         ((IHasDurationSubs)item).PrintDurationCorrelString();
+                    if (item is IJointEstimate)
+                    {
+                        if (item is CostScheduleEstimate)
+                            ((CostScheduleEstimate)item).scheduleEstimate.PrintDurationCorrelString();
+                        else if (item is ScheduleCostEstimate)
+                            ((ScheduleCostEstimate)item).scheduleEstimate.PrintCostCorrelString();
+                        else
+                            throw new Exception("Unknown joint estimate type");
+                    }
                 }
             }
 
@@ -202,7 +211,7 @@ namespace CorrelationTest
                 {
                     string[] subIDs = (from Estimate_Item est in item.SubEstimates select est.uID.ID).ToArray();
                     //check if any of the subestimates have NonZeroCorrel entries
-                    Data.CorrelationString_CM CorrelationString_CM = (Data.CorrelationString_CM)Data.CorrelationString.ConstructNew(item, Data.CorrelStringType.InputsMatrix);
+                    Data.CorrelationString_CM CorrelationString_CM = (Data.CorrelationString_CM)Data.CorrelationString.ConstructDefaultFromCostSheet(item, Data.CorrelStringType.CostMatrix);
                     CorrelationString_CM.PrintToSheet(item.xlCorrelCell_Cost);
                 }
             }

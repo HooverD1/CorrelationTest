@@ -100,18 +100,18 @@ namespace CorrelationTest
                 return returnList;
             }
 
-            public override void LinkItemRows()     //There are no levels on an estimate sheet!
+            public override void LinkItemRows()
             {
                 for (int index = 0; index < Items.Count; index++)
                 {
                     if (Items[index].xlTypeCell.Value == "CE")
                     {
-                        IHasCostSubs parentItem = (IHasCostSubs)Items[index];
                         int input_index = index;
+                        IHasCostSubs parentItem = (IHasCostSubs)Items[input_index];
                         while (input_index < Items.Count - 1)
                         {
                             ISub thisItem = (ISub)Items[++input_index];
-                            if (thisItem.xlTypeCell.Value != "I")
+                            if (thisItem.xlTypeCell.Value != "I")           //This needs to pick up the subestimate level for joint estimates, not just inputs..
                             {
                                 index = input_index-1;
                                 break;
@@ -119,13 +119,42 @@ namespace CorrelationTest
                             else
                             {
                                 parentItem.SubEstimates.Add(thisItem);
+                                thisItem.Parents.Add(parentItem);
+                            }
+                        }
+                    }
+                    else if (Items[index].xlTypeCell.Value == "CASE")
+                    {
+                        int input_index = index;
+                        IHasCostSubs parentItem = (IHasCostSubs)Items[input_index];
+                        if (Items[input_index + 1] is ScheduleEstimate)
+                        {
+                            ISub thisItem = (ISub)Items[++input_index];
+                            parentItem.SubEstimates.Add(thisItem);
+                            thisItem.Parents.Add(parentItem);
+                        }
+                        else
+                            throw new Exception("Malformed CASE estimate");
+                        
+                        while (input_index < Items.Count - 1)
+                        {
+                            ISub thisItem = (ISub)Items[++input_index];
+                            if (thisItem.xlTypeCell.Value != "I")
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                parentItem.SubEstimates.Add(thisItem);
+                                thisItem.Parents.Add(parentItem);
                             }
                         }
                     }
                     else if (Items[index].xlTypeCell.Value == "SE")
                     {
-                        IHasDurationSubs parentItem = (IHasDurationSubs)Items[index];
                         int input_index = index;
+                        IHasDurationSubs parentItem = (IHasDurationSubs)Items[input_index];
+                        
                         while (true)
                         {
                             ISub thisItem = (ISub)Items[++input_index];
@@ -137,6 +166,36 @@ namespace CorrelationTest
                             else
                             {
                                 parentItem.SubEstimates.Add(thisItem);
+                                thisItem.Parents.Add(parentItem);
+                            }
+                        }
+                    }
+                    else if(Items[index].xlTypeCell.Value == "SACE")
+                    {
+                        int input_index = index;
+                        IHasDurationSubs parentItem = (IHasDurationSubs)Items[input_index];
+                        //GRAB THE COST ESTIMATE
+                        if (Items[input_index + 1] is CostEstimate)
+                        {
+                            ISub thisItem = (ISub)Items[++input_index];
+                            parentItem.SubEstimates.Add(thisItem);
+                            thisItem.Parents.Add(parentItem);
+                        }
+                        else
+                            throw new Exception("Malformed SACE estimate");
+                        //GRAB THE REST OF THE INPUTS
+                        while (true)
+                        {
+                            ISub thisItem = (ISub)Items[++input_index];
+                            if (thisItem.xlTypeCell.Value != "I")
+                            {
+
+                                break;
+                            }
+                            else
+                            {
+                                parentItem.SubEstimates.Add(thisItem);
+                                thisItem.Parents.Add(parentItem);
                             }
                         }
                     }
@@ -148,11 +207,20 @@ namespace CorrelationTest
                 foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
                 {
                     if (item is IHasCostSubs)
-                        ((IHasCostSubs)item).PrintInputCorrelString();
+                        ((IHasCostSubs)item).PrintCostCorrelString();
                     if (item is IHasPhasingSubs)
                         ((IHasPhasingSubs)item).PrintPhasingCorrelString();
                     if (item is IHasDurationSubs)
                         ((IHasDurationSubs)item).PrintDurationCorrelString();
+                    if (item is IJointEstimate)
+                    {
+                        if (item is CostScheduleEstimate)
+                            ((CostScheduleEstimate)item).scheduleEstimate.PrintDurationCorrelString();
+                        else if (item is ScheduleCostEstimate)
+                            ((ScheduleCostEstimate)item).costEstimate.PrintCostCorrelString();
+                        else
+                            throw new Exception("Unknown joint estimate type");
+                    }
                 }
             }
 
