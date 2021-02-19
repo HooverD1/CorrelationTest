@@ -158,12 +158,6 @@ namespace CorrelationTest
                 throw new NotImplementedException();
             }
 
-            public override string[] GetFields()
-            {
-                string[] splitString = DelimitString(this.Value);
-                return splitString[1].Split(',');
-            }
-
             public static bool Validate(Excel.Range correlCell)      //validate that it is in fact a correlString
             {
                 if (correlCell.NumberFormat == "\"Correl\";;;\"CORREL\"")

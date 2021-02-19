@@ -35,6 +35,12 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
+        public string[] GetFields()
+        {
+            IEnumerable<string> fields = from ISub sub in SubEstimates select sub.Name;
+            return fields.ToArray();
+        }
+
         public void LoadUID()
         {
             this.uID = GetUID();

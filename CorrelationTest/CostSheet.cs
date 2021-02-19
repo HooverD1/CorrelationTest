@@ -110,5 +110,13 @@ namespace CorrelationTest
             return sheetObj;
         }
 
+        protected string[] GetFields(Excel.Range selection)
+        {
+            string selection_id = selection.EntireRow.Cells[1, this.Specs.ID_Offset].value;
+            CorrelationType ctype = ExtensionMethods.GetCorrelationTypeFromLink(selection);
+            Item selectedItem = (from Item item in this.Items where item.uID.ID == selection_id select item).First();
+            return (from ISub sub in ((IHasSubs)selectedItem).SubEstimates select sub.Name).ToArray();
+        }
+
     }
 }

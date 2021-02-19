@@ -78,6 +78,12 @@ namespace CorrelationTest
             this.SubEstimates = GetSubs();
         }
 
+        public string[] GetFields()
+        {
+            IEnumerable<string> fields = from ISub sub in SubEstimates select sub.Name;
+            return fields.ToArray();
+        }
+
         private List<ISub> GetSubs()        //This only works for the estimate sheet because it tells you the number of subs and they're all contiguous
         {
             List<ISub> subEstimates = new List<ISub>();
@@ -128,7 +134,7 @@ namespace CorrelationTest
             Estimate_Item grandparent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostSubs select est_item).First();
             if (parent == null) { return; }
             if (parent.Parents.Count() == 0) { return; }
-            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructNew(grandparent.CorrelStringObj_Cost);     //How to build the matrix?
+            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructFromParentItem(grandparent);     //How to build the matrix?
             foreach (Estimate_Item sibling in parent.SubEstimates)
             {
                 if (sibling == this)

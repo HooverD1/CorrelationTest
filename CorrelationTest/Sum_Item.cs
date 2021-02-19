@@ -52,6 +52,12 @@ namespace CorrelationTest
             }
         }
 
+        public string[] GetFields()
+        {
+            IEnumerable<string> fields = from ISub sub in SubEstimates select sub.Name;
+            return fields.ToArray();
+        }
+
         public void LoadPhasing(Excel.Range xlRow)
         {
             var phasingDistributionParameters = new Dictionary<string, object>() {

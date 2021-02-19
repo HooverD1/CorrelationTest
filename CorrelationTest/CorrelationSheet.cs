@@ -112,6 +112,18 @@ namespace CorrelationTest
                 //}                
             }
 
+            protected string[] GetFieldsFromXlCorrelSheet()
+            {
+                Excel.Range fieldEndCell = this.xlMatrixCell.End[Excel.XlDirection.xlToRight];
+                Excel.Range fieldRange = this.xlSheet.Range[xlMatrixCell, fieldEndCell];
+                string[] fieldStrings = new string[fieldRange.Cells.Count];
+                for (int i = 1; i < fieldRange.Cells.Count; i++)
+                {
+                    fieldStrings[i - 1] = Convert.ToString(fieldRange.Cells[1, i].value);
+                }
+                return fieldStrings;
+            }
+
             protected virtual string GetDistributionString(IHasSubs est, int subIndex) { throw new Exception("Failed override"); }
             protected virtual string GetDistributionString(IHasSubs est) { throw new Exception("Failed override"); }
 

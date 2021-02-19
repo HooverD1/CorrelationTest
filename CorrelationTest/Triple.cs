@@ -109,7 +109,7 @@ namespace CorrelationTest
                             matrix[row, col] = TopLeft * Math.Pow(DiagonalMultiplier, col - 1) * Math.Pow(VerticalMultiplier, col - row - 1);
                     }
                 }
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(parent_ID, ids, fields, matrix, sheet_type);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(parent_ID, ids, fields, matrix, sheet_type);
             }
             return CorrelMatrix;
         }

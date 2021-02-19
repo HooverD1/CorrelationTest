@@ -100,13 +100,6 @@ namespace CorrelationTest
                 return true;
             }
 
-            public override string[] GetFields()
-            {
-                string[] splitString = DelimitString(this.Value);
-                return splitString[1].Split(',');
-                //This is getting the IDs, not the fields... how to get the fields?
-            }
-
             public override string[] GetIDs()
             {
                 //HEADER: # INPUTS, TYPE, PARENT_ID, SUB_ID1 ... SUB_IDn
@@ -127,9 +120,9 @@ namespace CorrelationTest
                 correlSheet.PrintToSheet();
             }
 
-            public override object[,] GetMatrix()
+            public override object[,] GetMatrix(string[] fields)
             {
-                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_DT).Matrix;
+                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), fields, SheetType.Correlation_DT).Matrix;
             }
 
 

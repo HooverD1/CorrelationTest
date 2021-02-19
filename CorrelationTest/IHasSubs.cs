@@ -9,24 +9,25 @@ namespace CorrelationTest
 {
     public interface IHasSubs
     {
-        
+        List<ISub> SubEstimates { get; set; }
+        void LoadSubEstimates();
         Excel.Range xlRow { get; set; }
         CostSheet ContainingSheetObject { get; set; }
         UniqueID uID { get; set; }
         void LoadUID();
+        string[] GetFields();
     }
 
     public interface IHasCostSubs : IHasSubs
     {
-        List<ISub> SubEstimates { get; set; }
         Data.CorrelationString CostCorrelationString { get; set; }
-        void LoadSubEstimates();
         Excel.Range xlCorrelCell_Cost { get; set; }
         Distribution CostDistribution { get; set; }
         void PrintCostCorrelString();
     }
     public interface IHasPhasingSubs : IHasSubs
     {
+        
         Data.CorrelationString PhasingCorrelationString { get; set; }
         Excel.Range xlCorrelCell_Phasing { get; set; }
         Excel.Range xlDollarCell { get; set; }
@@ -37,7 +38,6 @@ namespace CorrelationTest
     }
     public interface IHasDurationSubs : IHasSubs
     {
-        List<ISub> SubEstimates { get; set; }
         Data.CorrelationString DurationCorrelationString { get; set; }
         Distribution DurationDistribution { get; set; }
         Excel.Range xlCorrelCell_Duration { get; set; }

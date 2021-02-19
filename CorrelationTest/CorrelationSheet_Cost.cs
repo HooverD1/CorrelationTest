@@ -38,7 +38,7 @@ namespace CorrelationTest
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet(SheetType.Correlation_CT);
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_CT)CorrelString);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_CT)CorrelString, GetFields());
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
@@ -75,7 +75,7 @@ namespace CorrelationTest
                 object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[0];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
                 object[,] matrix = matrixRange.Value;
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
                 //Build the CorrelString, which can print itself during collapse
                 //Get these from the Header.
                 string parent_id = Convert.ToString(xlIDCell.Value);
@@ -108,7 +108,7 @@ namespace CorrelationTest
                 }
                 
             }
-
+            
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
@@ -164,7 +164,7 @@ namespace CorrelationTest
                 //Update the string on the sheet to match the altered matrix
                 UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
                 object[,] matrix = this.xlMatrixCell.Offset[1,0].Resize[ids.Length, ids.Length].Value;
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
                 this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
                 this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }

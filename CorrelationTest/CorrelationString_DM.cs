@@ -44,13 +44,7 @@ namespace CorrelationTest
                 Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_DM));
                 correlSheet.PrintToSheet();
             }
-
-            public override string[] GetFields()
-            {
-                string[] splitString = DelimitString(this.Value);
-                return splitString[1].Split(',');
-            }
-
+            
             public override string[] GetIDs()
             {
                 //HEADER: # INPUTS, TYPE, PARENT_ID, SUB_ID1 ... SUB_IDn

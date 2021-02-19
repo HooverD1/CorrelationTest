@@ -81,7 +81,7 @@ namespace CorrelationTest
                 Excel.Range fieldRange = xlMatrixCell.Resize[1, fields];
                 Excel.Range matrixRange = xlMatrixCell.Offset[1, 0].Resize[fields, fields];
                 //this.CorrelMatrix = new Data.CorrelationMatrix(this, fieldRange, matrixRange);
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
                 //Build the CorrelString, which can print itself during collapse
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 if (sheetType == SheetType.Correlation_PM)
@@ -166,7 +166,7 @@ namespace CorrelationTest
             {
                 UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
                 object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromExisting(this);
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
                 this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
                 this.xlCorrelStringCell.Value = this.CorrelString.Value;
             }

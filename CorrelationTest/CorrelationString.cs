@@ -23,7 +23,6 @@ namespace CorrelationTest
         public class CorrelationString
         {
             public string Value { get; set; }
-            public virtual string[] GetFields() { throw new Exception("Failed override"); }
             public virtual string[] GetIDs() { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] ids, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
@@ -107,23 +106,23 @@ namespace CorrelationTest
                 return correlLines;
             }
 
-            public virtual object[,] GetMatrix()
-            {       //returning 2,2 instead of 3,3
+            public virtual object[,] GetMatrix(string[] fields)
+            {   //returning 2,2 instead of 3,3
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
-                string[] fieldString1 = myValue.Split('&');          //broken by line
-                string[] fieldString = new string[fieldString1.Length - 2];
-                for (int i = 2; i < fieldString1.Length; i++) { fieldString[i - 2] = fieldString1[i]; }  //dump the header and fields
-                object[,] matrix = new object[fieldString.Length + 1, fieldString.Length + 1];
+                string[] lines = DelimitString(myValue);
+                string[] header = lines[0].Split(',');
+                int length = Convert.ToInt32(header[0]);
+                object[,] matrix = new object[length, length];
 
-                for (int row = 0; row < fieldString.Length + 1; row++)
+                for (int row = 1; row < length + 1; row++)
                 {
                     string[] values;
-                    if (row < fieldString.Length)
-                        values = fieldString[row].Split(',');       //broken by entry
+                    if (row < length)
+                        values = lines[row].Split(',');       //broken by entry
                     else
                         values = null;
 
-                    for (int col = fieldString.Length; col >= 0; col--)
+                    for (int col = length; col >= 0; col--)
                     {
                         if (col == row)
                             matrix[row, col] = 1;
@@ -150,16 +149,16 @@ namespace CorrelationTest
                 return lines[0].Split(',')[1];
             }
 
-            public virtual bool ValidateAgainstMatrix(object[] outsideFields)
+            public virtual bool ValidateAgainstMatrix(object[] outsideIDs)
             {
-                var localFields = this.GetFields();
-                if (localFields.Count() != outsideFields.Count())
+                var localIDs = this.GetIDs();
+                if (localIDs.Count() != outsideIDs.Count())
                 {
                     return false;
                 }
-                foreach (object field in localFields)
+                foreach (object field in localIDs)
                 {
-                    if (!outsideFields.Contains<object>(field))
+                    if (!outsideIDs.Contains<object>(field))
                         return false;
                 }
                 return true;
@@ -172,6 +171,11 @@ namespace CorrelationTest
             }
 
             #region CorrelString Factory
+            public static CorrelationString ConstructFromParentItem(IHasSubs ParentItem)
+            {
+                throw new NotImplementedException();
+            }
+
             private static CorrelStringType ParseCorrelType(string correlStringValue)
             {
                 correlStringValue = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
@@ -296,6 +300,7 @@ namespace CorrelationTest
 
             public static CorrelationString ConstructFromCorrelationSheet(Sheets.CorrelationSheet correlSheet)
             {
+                //Need to pick up sub IDs
                 string sheetTag = Convert.ToString(correlSheet.xlSheet.Cells[1, 1].value);
                 switch(sheetTag)
                 {

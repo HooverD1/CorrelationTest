@@ -85,7 +85,7 @@ namespace CorrelationTest
             public CorrelationString_PT(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
-                string triple = this.Value.Split('&')[2];
+                string triple = this.Value.Split('&')[1];
                 this.Triple = new Triple(this.GetParentID().ID, triple);
             }
 
@@ -97,9 +97,9 @@ namespace CorrelationTest
                 correlSheet.PrintToSheet();
             }
 
-            public override object[,] GetMatrix()
+            public override object[,] GetMatrix(string[] fields)
             {
-                return this.Triple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_PT).Matrix;
+                return this.Triple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), fields, SheetType.Correlation_PT).Matrix;
             }
             
             public override void PrintToSheet(Excel.Range xlPhasingCorrelCell)
@@ -136,19 +136,6 @@ namespace CorrelationTest
                 //}
             }
 
-            public override string[] GetFields()
-            {
-                //HEADER [Array size,Correl type,ParentID]
-                //FIELDS [Field1,Field2, ... ,Field n]      //Store start dates as fields for PT
-                //VALUES [0,0,0]
-                string[] lines = DelimitString(this.Value);
-                string[] header = lines[0].Split(',');                
-                string[] fields = lines[1].Split(',');
-                if (!int.TryParse(Convert.ToString(header[0]), out int size)) { throw new Exception("Malformed Correlation String"); }
-                if (size != fields.Length) { throw new Exception("Malformed Correlation String"); }
-                return fields;
-            }
-
             public override UniqueID GetParentID()
             {
                 string[] lines = CorrelationString.DelimitString(this.Value);
@@ -159,10 +146,10 @@ namespace CorrelationTest
             public Triple GetTriple()
             {
                 string[] correlLines = DelimitString(this.Value);
-                if (correlLines.Length != 3)
+                if (correlLines.Length != 2)
                     throw new Exception("Malformed triple string.");
                 string uidString = correlLines[0].Split(',')[2];
-                string tripleString = correlLines[2];
+                string tripleString = correlLines[1];
                 return new Triple(uidString, tripleString);
             }
 

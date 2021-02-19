@@ -32,7 +32,6 @@ namespace CorrelationTest
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
                 string tripleString = Convert.ToString(correlSheet.xlTripleCell.Value);
                 Triple triple = new Triple(tripleString);
-                StringBuilder subIDs = new StringBuilder();
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
                 Excel.Range fieldEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
@@ -42,11 +41,21 @@ namespace CorrelationTest
                 object[] fieldVals = ExtensionMethods.ToJaggedArray(fieldVals2D)[0];
                 int numberOfInputs = matrixVals.GetLength(0);
 
+                CostSheet costSheet = CostSheet.Construct(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+                IHasCostSubs parentItem = (IHasCostSubs)(from Item parent in costSheet.Items where parent.uID.ID == parentID select parent).First();
+                IEnumerable<string> subStrings = from ISub sub in parentItem.SubEstimates select sub.uID.ID;
+
                 header.Append(numberOfInputs);
                 header.Append(",");
                 header.Append("CT");
                 header.Append(",");
                 header.Append(parentID);
+
+                foreach(string subString in subStrings)
+                {
+                    header.Append(",");
+                    header.Append(subString);
+                }
 
                 foreach (object field in fieldVals)
                 {
@@ -105,16 +114,9 @@ namespace CorrelationTest
                 return new Triple(uidString, tripleString);
             }
 
-            public override string[] GetFields()
+            public override object[,] GetMatrix(string[] fields)
             {
-                string[] splitString = DelimitString(this.Value);
-                return splitString[1].Split(',');
-                //This is getting the IDs, not the fields... how to get the fields?
-            }
-
-            public override object[,] GetMatrix()
-            {
-                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), this.GetFields(), SheetType.Correlation_CT).Matrix;
+                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), fields, SheetType.Correlation_CT).Matrix;
             }
 
             public override string[] GetIDs()
