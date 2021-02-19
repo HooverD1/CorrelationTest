@@ -171,79 +171,87 @@ namespace CorrelationTest
                 }
             }
 
-            public static CorrelationSheet Construct()      //Overload for Building object from EXISTING correlation xlsheet -- used for correl collapse
+            private static Excel.Worksheet GetCorrelationSheet()
             {
-                Excel.Worksheet xlCorrelSheet;
                 List<Excel.Worksheet> xlCorrelSheets = new List<Excel.Worksheet>();
-                foreach(Excel.Worksheet sht in ThisAddIn.MyApp.Worksheets)
+                foreach (Excel.Worksheet sht in ThisAddIn.MyApp.Worksheets)
                 {
                     SheetType sht_type = ExtensionMethods.GetSheetType(sht);
-                    if(sht_type == SheetType.Correlation_DM ||
+                    if (sht_type == SheetType.Correlation_DM ||
                         sht_type == SheetType.Correlation_DT ||
                         sht_type == SheetType.Correlation_CT ||
                         sht_type == SheetType.Correlation_CM ||
-                        sht_type == SheetType.Correlation_PM || 
+                        sht_type == SheetType.Correlation_PM ||
                         sht_type == SheetType.Correlation_PT)
                     {
                         xlCorrelSheets.Add(sht);
-                    }                    
+                    }
                 }
                 if (xlCorrelSheets.Count() == 1)
-                    xlCorrelSheet = xlCorrelSheets.First();
+                    return xlCorrelSheets.First();
                 else if (xlCorrelSheets.Count() > 1)
                     throw new Exception("Multiple correlation sheets");
                 else if (!xlCorrelSheets.Any())
                     throw new Exception("No correlation sheets");
                 else
                     throw new Exception("Unknown error finding correlation sheet");
+            }
 
-                //Need to build the components from the xlSheet here instead of in the constructor, then build the sheet using .Construct()
-                //CorrelString, Excel.Range source, new CorrelSheetSpecs()
-                
-                SheetType sheet_type = ExtensionMethods.GetSheetType(xlCorrelSheet);
-                Data.CorrelSheetSpecs csSpecs = new Data.CorrelSheetSpecs(sheet_type);
-                //Data.CorrelationString cs = Data.CorrelationString.Construct(xlCorrelSheet.Cells[csSpecs.StringCoords.Item1, csSpecs.StringCoords.Item2].value);
-                Excel.Range source = ThisAddIn.MyApp.get_Range((object)xlCorrelSheet.Cells[csSpecs.LinkCoords.Item1, csSpecs.LinkCoords.Item2].value);
+            public static CorrelationSheet ConstructFromXlCorrelationSheet()
+            {
+                Excel.Worksheet xlCorrelationSheet = GetCorrelationSheet();
+                SheetType sheet_type = ExtensionMethods.GetSheetType(xlCorrelationSheet);
                 //Make the sheetid cell in 1,1 list the type of correlation
                 CorrelationSheet newSheet;
                 switch (sheet_type)
                 {
                     case SheetType.Correlation_DT:
-                        newSheet = new CorrelationSheet_Duration(csSpecs);
+                        newSheet = new CorrelationSheet_Duration(sheet_type);
                         break;
                     case SheetType.Correlation_DM:
-                        newSheet = new CorrelationSheet_Duration(csSpecs);
+                        newSheet = new CorrelationSheet_Duration(sheet_type);
                         break;
                     case SheetType.Correlation_CT:
-                        newSheet = new CorrelationSheet_Cost(csSpecs);
+                        newSheet = new CorrelationSheet_Cost(sheet_type);
                         break;
                     case SheetType.Correlation_CM:
-                        newSheet = new CorrelationSheet_Cost(csSpecs);
+                        newSheet = new CorrelationSheet_Cost(sheet_type);
                         break;
                     case SheetType.Correlation_PM:
-                        newSheet = new CorrelationSheet_Phasing(csSpecs);
+                        newSheet = new CorrelationSheet_Phasing(sheet_type);
                         break;
                     case SheetType.Correlation_PT:
-                        newSheet = new CorrelationSheet_Phasing(csSpecs);
+                        newSheet = new CorrelationSheet_Phasing(sheet_type);
                         break;
                     default:
                         throw new Exception("Not a valid Correlation Sheet type");
                 }
 
-                newSheet.xlSheet = xlCorrelSheet;
-                newSheet.xlLinkCell = newSheet.xlSheet.Cells[csSpecs.LinkCoords.Item1, csSpecs.LinkCoords.Item2];
-                newSheet.xlCorrelStringCell = newSheet.xlSheet.Cells[csSpecs.StringCoords.Item1, csSpecs.StringCoords.Item2];
-                newSheet.xlIDCell = newSheet.xlSheet.Cells[csSpecs.IdCoords.Item1, csSpecs.IdCoords.Item2];
-                newSheet.xlDistCell = newSheet.xlSheet.Cells[csSpecs.DistributionCoords.Item1, csSpecs.DistributionCoords.Item2];
-                //need to be able to parse a link into sheetname and address to reconstruct the linkSource sheet
-                newSheet.LinkToOrigin = new Data.Link(newSheet.xlLinkCell.Value);     //bootstrap the Link from the address
-                newSheet.xlMatrixCell = newSheet.xlSheet.Cells[csSpecs.MatrixCoords.Item1, csSpecs.MatrixCoords.Item2];
-                //Excel.Range matrix_end = newSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown];
-                //Excel.Range matrixRange = newSheet.xlSheet.Range[newSheet.xlMatrixCell.Offset[1,0], matrix_end];
-                //newSheet.CorrelMatrix = new Data.CorrelationMatrix(newSheet, newSheet.xlMatrixCell.Resize[1,matrixRange.Columns.Count], matrixRange.Offset[1,0].Resize[matrixRange.Columns.Count, matrixRange.Columns.Count]);
-                //newSheet.UpdateCorrelationString(newSheet.GetIDs());     //Updates the string off the matrix
-
+                //Why aren't these being done in the constructors...?
+                newSheet.xlSheet = xlCorrelationSheet;
                 return newSheet;
+            }
+
+            public static CorrelationSheet ConstructFromParentItem(IHasSubs ParentItem, SheetType CorrelType)
+            {
+                switch (CorrelType)
+                {
+                    case SheetType.Correlation_CM:
+                        return new CorrelationSheet_Cost(CorrelType);       
+                    case SheetType.Correlation_CT:
+                        return new CorrelationSheet_Cost(CorrelType);
+                    case SheetType.Correlation_PM:
+                        return new CorrelationSheet_Phasing(CorrelType);
+                    case SheetType.Correlation_PT:
+                        return new CorrelationSheet_Phasing(CorrelType);
+                    case SheetType.Correlation_DM:
+                        return new CorrelationSheet_Duration(CorrelType);
+                    case SheetType.Correlation_DT:
+                        return new CorrelationSheet_Duration(CorrelType);
+                    default:
+                        throw new Exception("Unknown correlation type");
+                }
+                throw new NotImplementedException();
             }
 
             private Data.CorrelStringType GetCorrelType(string correlStringValue)
@@ -271,7 +279,7 @@ namespace CorrelationTest
 
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
-                CorrelationSheet correlSheet = Construct();
+                CorrelationSheet correlSheet = CorrelationSheet.ConstructFromXlCorrelationSheet();
                 CorrelationType cType = ExtensionMethods.GetCorrelationTypeFromLink(correlSheet.LinkToOrigin.LinkSource);
                 if (correlSheet == null)
                     return;

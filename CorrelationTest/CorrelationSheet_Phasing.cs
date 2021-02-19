@@ -64,17 +64,17 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
-            public CorrelationSheet_Phasing(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
+            public CorrelationSheet_Phasing(SheetType shtType) //build from the xlsheet to get the string
             {
                 this.xlSheet = GetXlSheet();
-                this.Specs = specs;
+                this.Specs = new Data.CorrelSheetSpecs(shtType);
                 //Set up the xlCells
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
+                this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
+                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.IdCoords.Item2];
+                this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
                 //
                 //Build the CorrelMatrix
                 int fields = Convert.ToInt32(Convert.ToString(xlCorrelStringCell.Value).Split(',')[0]);

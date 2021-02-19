@@ -38,6 +38,7 @@ namespace CorrelationTest
                 this.CorrelString = correlString;
                 this.Specs = specs;
                 this.xlSheet = GetXlSheet(SheetType.Correlation_CT);
+                //This needs constructed from the parent item. The parent item needs to contain the string.
                 CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_CT)CorrelString, GetFields());
                 this.LinkToOrigin = new Data.Link(launchedFrom);
                 this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
@@ -54,18 +55,18 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
             }
 
-            public CorrelationSheet_Cost(Data.CorrelSheetSpecs specs) //build from the xlsheet to get the string
+            public CorrelationSheet_Cost(SheetType shtType) //build from the xlsheet to get the string
             {
                 this.xlSheet = GetXlSheet();
-                this.Specs = specs;
+                this.Specs = new Data.CorrelSheetSpecs(shtType);
                 //Set up the xlCells
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
-                this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
+                this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
+                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
+                this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
+                this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
                 this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
                 //
                 //Build the CorrelMatrix
