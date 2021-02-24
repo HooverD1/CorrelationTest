@@ -11,52 +11,21 @@ namespace CorrelationTest
     {
         public class CorrelationSheet_Phasing : CorrelationSheet
         {
-            public CorrelationSheet_Phasing(Data.CorrelationString_PM correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
-            {
-                this.CorrelString = correlString;
-                this.Specs = specs;
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_PM"
-                                     select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
-                else
-                    xlSheet = CreateXLCorrelSheet("_PM");
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_PM)CorrelString);
-                this.LinkToOrigin = new Data.Link(launchedFrom);
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlSubIdCell = xlSheet.Cells[specs.SubIdCoords.Item1, specs.SubIdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.DistributionCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
-                this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
-                this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
-                this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
-                this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-            }
-
-            public CorrelationSheet_Phasing(Data.CorrelationString_PT correlString, Excel.Range launchedFrom, Data.CorrelSheetSpecs specs)        //bring in the coordinates and set up the ranges once they exist
-            {
-                this.CorrelString = correlString;
-                this.Specs = specs;
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_PT"
-                                     select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
-                else
-                    xlSheet = CreateXLCorrelSheet("_PT");
-                CorrelMatrix = Data.CorrelationMatrix.ConstructNew((Data.CorrelationString_PT)CorrelString);
-                this.LinkToOrigin = new Data.Link(launchedFrom);
-                this.xlLinkCell = xlSheet.Cells[specs.LinkCoords.Item1, specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[specs.StringCoords.Item1, specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[specs.IdCoords.Item1, specs.IdCoords.Item2];
-                this.xlDistCell = xlSheet.Cells[specs.DistributionCoords.Item1, specs.IdCoords.Item2];
-                this.xlMatrixCell = xlSheet.Cells[specs.MatrixCoords.Item1, specs.MatrixCoords.Item2];
-                this.xlTripleCell = xlSheet.Cells[specs.TripleCoords.Item1, specs.TripleCoords.Item2];
+            public CorrelationSheet_Phasing(IHasPhasingSubs ParentItem)        //bring in the coordinates and set up the ranges once they exist
+            {   //Build from the correlString to get the xlSheet
+                this.CorrelString = ParentItem.PhasingCorrelationString;
+                SheetType correlType = CorrelString.GetCorrelType();
+                this.Specs = new Data.CorrelSheetSpecs(correlType);
+                this.xlSheet = GetXlSheet();
+                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType);
+                this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Phasing);
+                this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
+                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
+                this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
+                this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
+                this.xlTripleCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -190,7 +159,7 @@ namespace CorrelationTest
             public override void PrintToSheet()  //expanding from string
             {
                 //build a sheet object off the linksource
-                CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
+                CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 IHasPhasingSubs tempEst = (IHasPhasingSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 //tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
                 //tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate

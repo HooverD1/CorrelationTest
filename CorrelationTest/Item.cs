@@ -71,7 +71,7 @@ namespace CorrelationTest
                 return UniqueID.ConstructFromExisting(Convert.ToString(idCellValue));
             }
         }
-
+        
         public static Item ConstructFromRow(Excel.Range xlRow, CostSheet containing_sheet_object)
         {
             //What kind of sheet object is constructing it?

@@ -27,7 +27,6 @@ namespace CorrelationTest
             protected virtual string CreateValue(string parentID, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
             protected virtual string CreateValue(string parentID, object[] ids, object[] fields, object[,] correlArray) { throw new Exception("Failed override"); }
             public virtual UniqueID GetParentID() { throw new Exception("Failed override"); }
-            public virtual void Expand(Excel.Range xlSource) { throw new Exception("Failed override"); }
             public virtual void PrintToSheet(Excel.Range[] xlCells) { throw new Exception("Failed override"); }
             public virtual void PrintToSheet(Excel.Range xlCell) { PrintToSheet(new Excel.Range[] { xlCell }); }
 
@@ -143,10 +142,26 @@ namespace CorrelationTest
                 throw new Exception("Failed override");
             }
 
-            public virtual string GetCorrelType()
+            public SheetType GetCorrelType()
             {
                 string[] lines = DelimitString(this.Value);
-                return lines[0].Split(',')[1];
+                switch (lines[0].Split(',')[1])
+                {
+                    case "CM":
+                        return SheetType.Correlation_CM;
+                    case "CT":
+                        return SheetType.Correlation_CT;
+                    case "PM":
+                        return SheetType.Correlation_PM;
+                    case "PT":
+                        return SheetType.Correlation_PT;
+                    case "DM":
+                        return SheetType.Correlation_DM;
+                    case "DT":
+                        return SheetType.Correlation_DT;
+                    default:
+                        throw new Exception("Unknown correl type");
+                }
             }
 
             public virtual bool ValidateAgainstMatrix(object[] outsideIDs)
@@ -171,9 +186,71 @@ namespace CorrelationTest
             }
 
             #region CorrelString Factory
-            public static CorrelationString ConstructFromParentItem(IHasSubs ParentItem)
+
+            public static CorrelationString_CT ConstructFromParentItem_Cost(IHasCostSubs ParentItem)
             {
-                throw new NotImplementedException();
+                StringBuilder header = new StringBuilder();
+                StringBuilder values = new StringBuilder();
+
+                header.Append(ParentItem.SubEstimates.Count);
+                header.Append(",");
+
+                header.Append("CT");
+                header.Append(",");
+
+                header.Append(ParentItem.uID.ID);
+                for(int i = 0; i < ParentItem.SubEstimates.Count; i++)
+                {
+                    header.Append(",");
+                    header.Append(ParentItem.SubEstimates[i].uID.ID);
+                }
+
+                values.Append("0,0,0");
+                return new CorrelationString_CT($"{header}&{values}");
+            }
+
+            public static CorrelationString_PT ConstructFromParentItem_Phasing(IHasPhasingSubs ParentItem)
+            {
+                StringBuilder header = new StringBuilder();
+                StringBuilder values = new StringBuilder();
+
+                header.Append(ParentItem.SubEstimates.Count);
+                header.Append(",");
+
+                header.Append("PT");
+                header.Append(",");
+
+                header.Append(ParentItem.uID.ID);
+                for (int i = 0; i < ParentItem.SubEstimates.Count; i++)
+                {
+                    header.Append(",");
+                    header.Append(ParentItem.SubEstimates[i].uID.ID);
+                }
+
+                values.Append("0,0,0");
+                return new CorrelationString_PT($"{header}&{values}");
+            }
+
+            public static CorrelationString_DT ConstructFromParentItem_Duration(IHasDurationSubs ParentItem)
+            {
+                StringBuilder header = new StringBuilder();
+                StringBuilder values = new StringBuilder();
+
+                header.Append(ParentItem.SubEstimates.Count);
+                header.Append(",");
+
+                header.Append("DT");
+                header.Append(",");
+
+                header.Append(ParentItem.uID.ID);
+                for (int i = 0; i < ParentItem.SubEstimates.Count; i++)
+                {
+                    header.Append(",");
+                    header.Append(ParentItem.SubEstimates[i].uID.ID);
+                }
+
+                values.Append("0,0,0");
+                return new CorrelationString_DT($"{header}&{values}");
             }
 
             private static CorrelStringType ParseCorrelType(string correlStringValue)
@@ -284,18 +361,6 @@ namespace CorrelationTest
             {
                 //act as a switch for sending a string to its proper subclass validation
                 return true;
-            }
-
-            public static CorrelationString ConstructFromCorrelSheet()
-            {
-                //Need to get the values from the matrix
-                //Need to get the string type from the header
-                //Need to get the parentID from the header
-
-                //Get the type of correlation sheet
-                Sheets.CorrelationSheet cSheet = Sheets.CorrelationSheet.Construct();
-                return cSheet.CorrelString;                
-                //CREATE VALUE: string parentID, object[] fields, object[,] correlArray
             }
 
             public static CorrelationString ConstructFromCorrelationSheet(Sheets.CorrelationSheet correlSheet)

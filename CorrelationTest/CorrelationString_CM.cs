@@ -190,57 +190,47 @@ namespace CorrelationTest
                 return new CorrelationString_CM(csi.Value);
             }
 
-            public static Data.CorrelationString_CM ConstructString(string parentID, string[] ids, object[] fields, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
-            {
-                Data.CorrelationString_CM correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
-                if (correls == null)
-                    return correlationString;       //return zero string
-                else
-                {
-                    Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
-                    foreach (string id1 in ids)
-                    {
-                        foreach (string id2 in ids)
-                        {
-                            if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
-                            {
-                                matrix.SetCorrelation(id1, id2, correls[new Tuple<string, string>(id1, id2)]);
-                            }
-                            if(correls.ContainsKey(new Tuple<string, string>(id2, id1)))
-                            {
-                                matrix.SetCorrelation(id2, id1, correls[new Tuple<string, string>(id2, id1)]);
-                            }
-                        }
-                    }
-                    //convert to a string
-                    return new Data.CorrelationString_CM(parentID, ids, fields, matrix);      //return modified zero matrix as correl string
-                }
-            }
+            //public static Data.CorrelationString_CM ConstructString(string parentID, string[] ids, object[] fields, string sheet, Dictionary<Tuple<string, string>, double> correls = null)
+            //{
+            //    Data.CorrelationString_CM correlationString = ConstructZeroString((from UniqueID id in ids select id.ID).ToArray());       //build zero string
+            //    if (correls == null)
+            //        return correlationString;       //return zero string
+            //    else
+            //    {
+            //        Data.CorrelationMatrix matrix = Data.CorrelationMatrix.ConstructNew(correlationString);      //convert to zero matrix for modification
+            //        foreach (string id1 in ids)
+            //        {
+            //            foreach (string id2 in ids)
+            //            {
+            //                if (correls.ContainsKey(new Tuple<string, string>(id1, id2)))
+            //                {
+            //                    matrix.SetCorrelation(id1, id2, correls[new Tuple<string, string>(id1, id2)]);
+            //                }
+            //                if(correls.ContainsKey(new Tuple<string, string>(id2, id1)))
+            //                {
+            //                    matrix.SetCorrelation(id2, id1, correls[new Tuple<string, string>(id2, id1)]);
+            //                }
+            //            }
+            //        }
+            //        //convert to a string
+            //        return new Data.CorrelationString_CM(parentID, ids, fields, matrix);      //return modified zero matrix as correl string
+            //    }
+            //}
 
-            public override void Expand(Excel.Range xlSource)
-            {
-                //Data.CorrelationString_CM correlStringObj = new Data.CorrelationString_CM(this.Value);
-                //var id = this.GetIDs()[0];
-                //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_CM));
-                //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
-                correlSheet.PrintToSheet();
-            }
-
-            public static void ExpandCorrel(Excel.Range selection)
-            {
-                //Verify that it's a correl string
-                bool valid = CorrelationString_CM.Validate(selection);
-                if (valid)
-                {
-                    //construct the correlString
-                    Data.CorrelationString_CM correlStringObj = new Data.CorrelationString_CM(Convert.ToString(selection.Value));
-                    //construct the correlSheet
-                    Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, selection, new Data.CorrelSheetSpecs(SheetType.Correlation_CM));
-                    //print the correlSheet
-                    correlSheet.PrintToSheet();
-                }
-            }
+            //public static void ExpandCorrel(Excel.Range selection)
+            //{
+            //    //Verify that it's a correl string
+            //    bool valid = CorrelationString_CM.Validate(selection);
+            //    if (valid)
+            //    {
+            //        //construct the correlString
+            //        Data.CorrelationString_CM correlStringObj = new Data.CorrelationString_CM(Convert.ToString(selection.Value));
+            //        //construct the correlSheet
+            //        Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(correlStringObj, selection, new Data.CorrelSheetSpecs(SheetType.Correlation_CM));
+            //        //print the correlSheet
+            //        correlSheet.PrintToSheet();
+            //    }
+            //}
 
             public void OverwriteIDs(UniqueID[] newIDs)
             {

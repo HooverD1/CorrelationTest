@@ -107,27 +107,78 @@ namespace CorrelationTest
             return subEstimates;
         }
 
+        public void LoadCostCorrelString()
+        {
+            this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostTriple);
+        }
+
         public void PrintCostCorrelString()
         {
-            Data.CorrelationString inString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostTriple);
             IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
                                                    select sub.xlCorrelCell_Cost;
-            if (inString != null)
-                inString.PrintToSheet(xlFragments.ToArray());
+            if (this.CostCorrelationString != null)
+                this.CostCorrelationString.PrintToSheet(xlFragments.ToArray());
         }
+
+        public void LoadPhasingCorrelString()
+        {
+            this.PhasingCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingTriple);
+        }
+
         public void PrintPhasingCorrelString()
         {
-            Data.CorrelationString phString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingTriple);
-            if (phString != null)
-                phString.PrintToSheet(xlCorrelCell_Phasing.Resize[1,this.Periods.Count()]);
+            if (this.PhasingCorrelationString != null)
+                this.PhasingCorrelationString.PrintToSheet(xlCorrelCell_Phasing.Resize[1,this.Periods.Count()]);
         }
+
+        public void LoadDurationCorrelString()
+        {
+            this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationTriple);
+        }
+
         public void PrintDurationCorrelString()
         {
-            Data.CorrelationString phString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationTriple);
             IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
                                                    select sub.xlCorrelCell_Duration;
-            if (phString != null)
-                phString.PrintToSheet(xlFragments.ToArray());
+            if (this.DurationCorrelationString != null)
+                this.DurationCorrelationString.PrintToSheet(xlFragments.ToArray());
+        }
+
+        public void Expand(CorrelationType correlType)
+        {
+            switch (correlType)
+            {
+                case CorrelationType.Cost:
+                    Expand_Cost();
+                    break;
+                case CorrelationType.Phasing:
+                    Expand_Phasing();
+                    break;
+                case CorrelationType.Duration:
+                    Expand_Duration();
+                    break;
+            }
+        }
+
+        private void Expand_Cost()
+        {
+            SheetType typeOfCost = this.CostCorrelationString.GetCorrelType();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            correlSheet.PrintToSheet();
+        }
+
+        private void Expand_Phasing()
+        {
+            SheetType typeOfCost = this.PhasingCorrelationString.GetCorrelType();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            correlSheet.PrintToSheet();
+        }
+
+        private void Expand_Duration()
+        {
+            SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            correlSheet.PrintToSheet();
         }
     }
 }

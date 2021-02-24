@@ -84,8 +84,48 @@ namespace CorrelationTest
             return dollars;
         }
 
+        public void LoadCostCorrelString() { }
         public void PrintCostCorrelString() { }
+        public void LoadPhasingCorrelString() { }
         public void PrintPhasingCorrelString() { }
+        public void LoadDurationCorrelString() { }
         public void PrintDurationCorrelString() { }
+
+        public void Expand(CorrelationType correlType)
+        {
+            switch (correlType)
+            {
+                case CorrelationType.Cost:
+                    Expand_Cost();
+                    break;
+                case CorrelationType.Phasing:
+                    Expand_Phasing();
+                    break;
+                case CorrelationType.Duration:
+                    Expand_Duration();
+                    break;
+            }
+        }
+
+        private void Expand_Cost()
+        {
+            SheetType typeOfCost = this.CostCorrelationString.GetCorrelType();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            correlSheet.PrintToSheet();
+        }
+
+        private void Expand_Phasing()
+        {
+            SheetType typeOfCost = this.PhasingCorrelationString.GetCorrelType();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            correlSheet.PrintToSheet();
+        }
+
+        private void Expand_Duration()
+        {
+            SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            correlSheet.PrintToSheet();
+        }
     }
 }

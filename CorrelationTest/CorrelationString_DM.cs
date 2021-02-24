@@ -39,12 +39,7 @@ namespace CorrelationTest
                 return true;
             }
 
-            public override void Expand(Excel.Range xlSource)
-            {
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_DM));
-                correlSheet.PrintToSheet();
-            }
-            
+          
             public override string[] GetIDs()
             {
                 //HEADER: # INPUTS, TYPE, PARENT_ID, SUB_ID1 ... SUB_IDn

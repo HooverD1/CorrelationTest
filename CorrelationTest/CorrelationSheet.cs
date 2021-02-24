@@ -98,7 +98,7 @@ namespace CorrelationTest
             {
                 throw new Exception("Failed override");
                 ////build a sheet object off the linksource
-                //CostSheet costSheet = CostSheet.Construct(this.LinkToOrigin.LinkSource.Worksheet);
+                //CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 ////tempEst.LoadSubEstimates();
                 //tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
@@ -232,22 +232,29 @@ namespace CorrelationTest
                 return newSheet;
             }
 
+            //EXPAND
             public static CorrelationSheet ConstructFromParentItem(IHasSubs ParentItem, SheetType CorrelType)
             {
+                //find if it's cost, phasing, duration -- pass the selection?
+                //Cast the parent item
+                //Pick up its sheet type off the correlstring on the parent item
+                //Remove correltype parameter
+
                 switch (CorrelType)
                 {
+                    //These need to be sending the parent and the correltype, no?
                     case SheetType.Correlation_CM:
-                        return new CorrelationSheet_Cost(CorrelType);       
+                        return new CorrelationSheet_Cost((IHasCostSubs)ParentItem);       
                     case SheetType.Correlation_CT:
-                        return new CorrelationSheet_Cost(CorrelType);
+                        return new CorrelationSheet_Cost((IHasCostSubs)ParentItem);
                     case SheetType.Correlation_PM:
-                        return new CorrelationSheet_Phasing(CorrelType);
+                        return new CorrelationSheet_Phasing((IHasPhasingSubs)ParentItem);
                     case SheetType.Correlation_PT:
-                        return new CorrelationSheet_Phasing(CorrelType);
+                        return new CorrelationSheet_Phasing((IHasPhasingSubs)ParentItem);
                     case SheetType.Correlation_DM:
-                        return new CorrelationSheet_Duration(CorrelType);
+                        return new CorrelationSheet_Duration((IHasDurationSubs)ParentItem);
                     case SheetType.Correlation_DT:
-                        return new CorrelationSheet_Duration(CorrelType);
+                        return new CorrelationSheet_Duration((IHasDurationSubs)ParentItem);
                     default:
                         throw new Exception("Unknown correlation type");
                 }
@@ -289,7 +296,7 @@ namespace CorrelationTest
                 //Validate matrix checks
                 //Validate link source ID
                 //Validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
-                CostSheet originSheet = CostSheet.Construct(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+                CostSheet originSheet = CostSheet.ConstructFromXlCostSheet(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 object id_followLink = correlSheet.LinkToOrigin.LinkSource.EntireRow.Cells[1, originSheet.Specs.ID_Offset].value;
                 object id_correlSheet = correlSheet.xlIDCell.Value;
                 
@@ -350,26 +357,26 @@ namespace CorrelationTest
                 CorrelVisual.Show();
             }
 
-            public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
-            {
-                switch (correlString)       //Switch on type
-                {
-                    case Data.CorrelationString_CM t1:
-                        return new CorrelationSheet_Cost((Data.CorrelationString_CM)correlString, source, specs);
-                    case Data.CorrelationString_CT t2:
-                        return new CorrelationSheet_Cost((Data.CorrelationString_CT)correlString, source, specs);
-                    case Data.CorrelationString_PM t3:
-                        return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
-                    case Data.CorrelationString_PT t4:
-                        return new CorrelationSheet_Phasing((Data.CorrelationString_PT)correlString, source, specs);
-                    case Data.CorrelationString_DM t5:
-                        return new CorrelationSheet_Duration((Data.CorrelationString_DM)correlString, source, specs);
-                    case Data.CorrelationString_DT t6:
-                        return new CorrelationSheet_Duration((Data.CorrelationString_DT)correlString, source, specs);
-                    default:
-                        throw new Exception("Unknown Correlation String type");
-                }
-            }
+            //public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
+            //{
+            //    switch (correlString)       //Switch on type
+            //    {
+            //        case Data.CorrelationString_CM t1:
+            //            return new CorrelationSheet_Cost((Data.CorrelationString_CM)correlString, source, specs);
+            //        case Data.CorrelationString_CT t2:
+            //            return new CorrelationSheet_Cost((Data.CorrelationString_CT)correlString, source, specs);
+            //        case Data.CorrelationString_PM t3:
+            //            return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
+            //        case Data.CorrelationString_PT t4:
+            //            return new CorrelationSheet_Phasing((Data.CorrelationString_PT)correlString, source, specs);
+            //        case Data.CorrelationString_DM t5:
+            //            return new CorrelationSheet_Duration((Data.CorrelationString_DM)correlString, source, specs);
+            //        case Data.CorrelationString_DT t6:
+            //            return new CorrelationSheet_Duration((Data.CorrelationString_DT)correlString, source, specs);
+            //        default:
+            //            throw new Exception("Unknown Correlation String type");
+            //    }
+            //}
 
         }
     }

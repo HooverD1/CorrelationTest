@@ -20,6 +20,9 @@ namespace CorrelationTest
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
             this.CostDistribution = new Distribution(ValueDistributionParameters);       //Is this useless?
+
+            this.CorrelStringObj_Cost = Data.CorrelationString.ConstructFromParentItem_Cost(this);
+            this.CorrelStringObj_Phasing = Data.CorrelationString.ConstructFromParentItem_Phasing(this);
         }
     }
 }

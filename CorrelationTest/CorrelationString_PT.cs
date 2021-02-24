@@ -89,17 +89,9 @@ namespace CorrelationTest
                 this.Triple = new Triple(this.GetParentID().ID, triple);
             }
 
-            public override void Expand(Excel.Range xlSource)
-            {
-                //construct the correlSheet
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, new Data.CorrelSheetSpecs(SheetType.Correlation_PT));
-                //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
-                correlSheet.PrintToSheet();
-            }
-
             public override object[,] GetMatrix(string[] fields)
             {
-                return this.Triple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), fields, SheetType.Correlation_PT).Matrix;
+                return this.Triple.GetCorrelationMatrix(fields);
             }
             
             public override void PrintToSheet(Excel.Range xlPhasingCorrelCell)

@@ -23,27 +23,12 @@ namespace CorrelationTest
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
             SendKeys.Send("{ESC}");
-            //Need correlation string to expand depending on the value in Selection
+            
             Excel.Range selection = ThisAddIn.MyApp.Selection;
-
-            /* PROBLEM:
-             * Instead of just selection, this needs to identify the range it's in and grab the whole thing, then recombine it into..
-             * ..a full CorrelString Value.
-             * 
-             * SOLUTION STEPS:
-             * Take the selection and find its sheet type.
-             * Build a DisplayCoords off the sheet type.
-             * Look in the level offset column to find the parent, or if this is the parent.
-             * Create the parent + sub items off the parent row?
-             * Identify which type of Correlation is being selected via comparing the selection column to the Offset values.
-             * .Expand() the correct string of the parent.
-             */
-
-            Excel.Range expand;
-            Excel.Range[] correlRanges = null;
             SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
             DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(sheetType);
-            CostSheet sheetObj = CostSheet.Construct(selection.Worksheet);
+            CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
+            
             Item selectedItem = (from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item).First();
             IHasSubs parent;
             CorrelationType correlType;
@@ -68,29 +53,21 @@ namespace CorrelationTest
             {
                 case CorrelationType.Cost:
                     parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasCostSubs select p).First();
-                    correlRanges = (from Item correlRange in ((IHasCostSubs)parent).SubEstimates select correlRange.xlCorrelCell_Cost).ToArray();
-                    expand = ((IHasCostSubs)parent).xlCorrelCell_Cost;
+                    parent.Expand(correlType);
                     break;
                 case CorrelationType.Duration:
                     parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasDurationSubs select p).First();
-                    correlRanges = (from Item correlRange in ((IHasDurationSubs)parent).SubEstimates select correlRange.xlCorrelCell_Duration).ToArray();
-                    expand = ((IHasDurationSubs)parent).xlCorrelCell_Duration;
+                    parent.Expand(correlType);
                     break;
                 case CorrelationType.Phasing:
                     parent = (IHasPhasingSubs)selectedItem;
-                    correlRanges = new Excel.Range[1] { ((IHasPhasingSubs)selectedItem).xlCorrelCell_Phasing };
-                    expand = ((IHasPhasingSubs)selectedItem).xlCorrelCell_Phasing;
+                    parent.Expand(correlType);
                     break;
                 case CorrelationType.Null:      //Not selecting a correlation column
                     return;     
                 default:
-                    throw new Exception("Unknown correlation sheet");
+                    throw new Exception("Unknown correlation expand issue");
             }
-
-            string correlStringValue = Data.CorrelationString.ConstructStringFromRange(correlRanges);
-            Data.CorrelationString cs = Data.CorrelationString.ConstructFromStringValue(correlStringValue);
-            cs.Expand(expand);       //SELECTION NEEDS CHANGED HERE -- IT'S FORMING THE LINK
-                                        //Change it to the parent cell? First child cell?
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -122,6 +99,7 @@ namespace CorrelationTest
             est_1.Cells[5, edc.Distribution_Offset + 1] = 0;
             est_1.Cells[5, edc.Distribution_Offset + 2] = 1;
 
+            System.Threading.Thread.Sleep(1);
             est_1.Cells[6, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[6, edc.Level_Offset] = 3;  //# of inputs
             est_1.Cells[6, edc.Type_Offset] = "CE";
@@ -331,23 +309,23 @@ namespace CorrelationTest
             //Steps
             //1 -- Build the sheet object -- est_1 is the xlSheet; construct the sheet object from it
             
-            CostSheet estimateSheet_example = CostSheet.Construct(est_1);
-            
+            CostSheet estimateSheet_example = CostSheet.ConstructFromXlCostSheet(est_1);
+
             //2 -- Manually load the estimate objects to the sheet object, including their SubEstimates
-            
+            estimateSheet_example.LoadCorrelStrings();
             estimateSheet_example.PrintDefaultCorrelStrings();
             
             //3 -- Build default CorrelStrings for estimates attached to the sheet object
 
             //Repeat for wbs_1
-            CostSheet wbsSheet_example = CostSheet.Construct(wbs_1);
+            CostSheet wbsSheet_example = CostSheet.ConstructFromXlCostSheet(wbs_1);
             wbsSheet_example.PrintDefaultCorrelStrings();
 
         }
 
         private void btnVisualize_Click(object sender, RibbonControlEventArgs e)
         {
-            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct();
+            Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
             if (correlSheet == null)
                 return;
 

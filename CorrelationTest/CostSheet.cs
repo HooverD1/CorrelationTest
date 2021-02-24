@@ -28,11 +28,13 @@ namespace CorrelationTest
         public List<Item> Items { get; set; }
         protected SheetType sheetType{get;set;}
 
+        //EXPAND
         public CostSheet(Excel.Worksheet xlSheet)
         {
             this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
             this.xlSheet = xlSheet;
             LoadItems();
+
         }
 
         public virtual List<Item> GetItemRows() { throw new Exception("Failed override"); }
@@ -41,9 +43,35 @@ namespace CorrelationTest
         {
             this.Items = GetItemRows();
             LinkItemRows();
+            this.LoadCorrelStrings();
+            //Create CorrelationStrings
         }
         public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }    //Is this junk?
         public virtual void PrintDefaultCorrelStrings() { throw new Exception("Failed override"); }
+
+        public void LoadCorrelStrings()
+        {
+            //Load Defaults if there is nothing saved
+            //Load off the sub cells if there is
+            foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
+            {
+                if (item is IHasCostSubs)
+                    ((IHasCostSubs)item).LoadCostCorrelString();
+                if (item is IHasPhasingSubs)
+                    ((IHasPhasingSubs)item).LoadPhasingCorrelString();
+                if (item is IHasDurationSubs)
+                    ((IHasDurationSubs)item).LoadDurationCorrelString();
+                if (item is IJointEstimate)
+                {
+                    if (item is CostScheduleEstimate)
+                        ((CostScheduleEstimate)item).scheduleEstimate.LoadDurationCorrelString();
+                    else if (item is ScheduleCostEstimate)
+                        ((ScheduleCostEstimate)item).costEstimate.LoadCostCorrelString();
+                    else
+                        throw new Exception("Unknown joint estimate type");
+                }
+            }
+        }
 
         public virtual object[] Get_xlFields()
         {
@@ -55,7 +83,7 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
-        protected virtual void PrintCorrel_Inputs(IHasCostSubs estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Cost(IHasCostSubs estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
         {
             /*
              * This is being called when "Build" is run. 
@@ -70,12 +98,11 @@ namespace CorrelationTest
 
                 //This is sending in too many IDs
                 object[] fields = estimate.SubEstimates.Select(x => x.Name).ToArray();
-                Data.CorrelationString_CM CorrelationString_CM = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, subIDs, fields, this.xlSheet.Name, inputTemp);
-                CorrelationString_CM.PrintToSheet(estimate.xlCorrelCell_Cost);
+                estimate.CostCorrelationString.PrintToSheet(estimate.xlCorrelCell_Cost);
             }
         }
 
-        protected virtual void PrintCorrel_Periods(IHasPhasingSubs estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Phasing(IHasPhasingSubs estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
         {
             /*
              * The print methods on the sheet object are there to compile a list of estimates
@@ -87,13 +114,14 @@ namespace CorrelationTest
             //PeriodID[] periodIDs = (from Period prd in estimate.Periods select prd.pID).ToArray();
             //Data.CorrelationString_PM CorrelationString_PM = Data.CorrelationString_PM.ConstructString(periodIDs, this.xlSheet.Name);
             Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromStringValue(estimate.xlCorrelCell_Phasing.Value);
-            correlationString.PrintToSheet(estimate.xlCorrelCell_Phasing);
+            estimate.PhasingCorrelationString.PrintToSheet(estimate.xlCorrelCell_Phasing);
         }
 
         public virtual Excel.Range[] PullEstimates(Excel.Range pullRange, CostItems costType) { throw new Exception("Failed override"); }
         public virtual Excel.Range[] PullEstimates(Excel.Range pullRange) { throw new Exception("Failed override"); }
 
-        public static CostSheet Construct(Excel.Worksheet xlSheet)
+        //EXPAND
+        public static CostSheet ConstructFromXlCostSheet(Excel.Worksheet xlSheet)
         {
             CostSheet sheetObj;
             switch(ExtensionMethods.GetSheetType(xlSheet))
@@ -116,6 +144,11 @@ namespace CorrelationTest
             CorrelationType ctype = ExtensionMethods.GetCorrelationTypeFromLink(selection);
             Item selectedItem = (from Item item in this.Items where item.uID.ID == selection_id select item).First();
             return (from ISub sub in ((IHasSubs)selectedItem).SubEstimates select sub.Name).ToArray();
+        }
+
+        protected void CreateCorrelStrings()
+        {
+            //Take the linked items and build their correlation strings
         }
 
     }

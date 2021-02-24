@@ -119,6 +119,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
+                        tripleRow = 2;
+                        tripleCol = 2;
                         break;
                     case SheetType.Correlation_DT:
                         matrixRow = 4;

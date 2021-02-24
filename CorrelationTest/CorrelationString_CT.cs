@@ -41,7 +41,7 @@ namespace CorrelationTest
                 object[] fieldVals = ExtensionMethods.ToJaggedArray(fieldVals2D)[0];
                 int numberOfInputs = matrixVals.GetLength(0);
 
-                CostSheet costSheet = CostSheet.Construct(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+                CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 IHasCostSubs parentItem = (IHasCostSubs)(from Item parent in costSheet.Items where parent.uID.ID == parentID select parent).First();
                 IEnumerable<string> subStrings = from ISub sub in parentItem.SubEstimates select sub.uID.ID;
 
@@ -116,7 +116,7 @@ namespace CorrelationTest
 
             public override object[,] GetMatrix(string[] fields)
             {
-                return this.InputTriple.GetCorrelationMatrix(this.GetParentID().ID, this.GetIDs(), fields, SheetType.Correlation_CT).Matrix;
+                return this.InputTriple.GetCorrelationMatrix(fields);
             }
 
             public override string[] GetIDs()
@@ -164,15 +164,6 @@ namespace CorrelationTest
                 xlFragments[0].EntireColumn.ColumnWidth = 10;
             }
 
-            public override void Expand(Excel.Range xlSource)
-            {
-                //construct the correlSheet
-                Data.CorrelSheetSpecs specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CT);
-                DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(xlSource.Worksheet));
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.Construct(this, xlSource, specs);
-                //print the correlSheet                         //CorrelationSheet NEEDS NEW CONSTRUCTORS BUILT FOR NON-INPUTS
-                correlSheet.PrintToSheet();
-            }
         }
     }
 }

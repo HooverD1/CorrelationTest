@@ -93,25 +93,38 @@ namespace CorrelationTest
             return $"{TopLeft},{DiagonalMultiplier},{VerticalMultiplier}";
         }
 
-        public Data.CorrelationMatrix GetCorrelationMatrix(string parent_ID, string[] ids, string[] fields, SheetType sheet_type)
+        public object[,] GetCorrelationMatrix(string[] fields)
         {
             int size = fields.Length;
-            if (CorrelMatrix == null)
+            object[,] matrix = new object[size, size];
+            for (int row = 0; row < size; row++)
             {
-                object[,] matrix = new object[size, size];
-                for (int row = 0; row < size; row++)
+                for (int col = row; col < size; col++)
                 {
-                    for (int col = row; col < size; col++)
-                    {
-                        if (row == col)
-                            matrix[row, col] = 1;
-                        else
-                            matrix[row, col] = TopLeft * Math.Pow(DiagonalMultiplier, col - 1) * Math.Pow(VerticalMultiplier, col - row - 1);
-                    }
+                    if (row == col)
+                        matrix[row, col] = 1;
+                    else
+                        matrix[row, col] = TopLeft * Math.Pow(DiagonalMultiplier, col - 1) * Math.Pow(VerticalMultiplier, col - row - 1);
                 }
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(parent_ID, ids, fields, matrix, sheet_type);
             }
-            return CorrelMatrix;
+            return matrix;
+            //int size = fields.Length;
+            //if (CorrelMatrix == null)
+            //{
+            //    object[,] matrix = new object[size, size];
+            //    for (int row = 0; row < size; row++)
+            //    {
+            //        for (int col = row; col < size; col++)
+            //        {
+            //            if (row == col)
+            //                matrix[row, col] = 1;
+            //            else
+            //                matrix[row, col] = TopLeft * Math.Pow(DiagonalMultiplier, col - 1) * Math.Pow(VerticalMultiplier, col - row - 1);
+            //        }
+            //    }
+            //    this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(parent_ID, ids, fields, matrix, sheet_type);
+            //}
+            //return CorrelMatrix;
         }
 
         public void PrintToCell(Excel.Range xlCell)

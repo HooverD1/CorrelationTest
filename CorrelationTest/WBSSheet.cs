@@ -133,24 +133,24 @@ namespace CorrelationTest
             {
                 throw new NotImplementedException();
             }
-            public override void BuildCorrelations()
-            {
-                BuildCorrelations_Input();
-                BuildCorrelations_Periods();
-            }
+            //public override void BuildCorrelations()
+            //{
+            //    BuildCorrelations_Cost();
+            //    BuildCorrelations_Phasing();
+            //}
 
-            private void BuildCorrelations_Input()
-            {
-                //Input correlation
-                int maxDepth = (from Item item in Items select item.Level).Max();
-                var correlTemp = BuildCorrelTemp();
-                if (Items.Any())
-                    Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
-                foreach (IHasCostSubs item in Items)
-                {
-                    PrintCorrel_Inputs(item, correlTemp);  //recursively build out children
-                }
-            }
+            //private void BuildCorrelations_Input()
+            //{
+            //    //Input correlation
+            //    int maxDepth = (from Item item in Items select item.Level).Max();
+            //    var correlTemp = BuildCorrelTemp();
+            //    if (Items.Any())
+            //        Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
+            //    foreach (IHasCostSubs item in Items)
+            //    {
+            //        PrintCorrel_Inputs(item, correlTemp);  //recursively build out children
+            //    }
+            //}
 
             private void BuildCorrelations_Periods()
             {
@@ -163,45 +163,46 @@ namespace CorrelationTest
                         item.xlCorrelCell_Phasing.Clear();
                     }
                     
-                    PrintCorrel_Periods(item);
+                    PrintCorrel_Phasing(item);
                 }
             }
 
-            private Dictionary<Tuple<string, string>, double> BuildCorrelTemp()
-            {
-                var correlTemp = new Dictionary<Tuple<string, string>, double>();   //<ID, ID>, correl_value
-                if (this.Items.Any())
-                {
-                    //Save off existing correlations
-                    //Create a correl string from the column
-                    foreach (Estimate_Item estimate in this.Items)
-                    {
-                        if (estimate.SubEstimates.Count == 0)
-                            continue;
-                        Data.CorrelationString_CM correlString;
-                        if (estimate.xlCorrelCell_Cost.Value == null)        //No correlation string exists
-                            correlString = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
-                        else
-                            correlString = new Data.CorrelationString_CM(estimate.xlCorrelCell_Cost.Value);       //construct from string
-                        var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
-                        string[] ids = Items.Select(x => x.uID.ID).ToArray();
-                        foreach (string id1 in ids)
-                        {
-                            foreach (string id2 in ids)
-                            {
-                                var newKey = new Tuple<string, string>(id1, id2);
-                                if (!correlTemp.ContainsKey(newKey))
-                                    correlTemp.Add(newKey, correlMatrix.AccessArray(id1, id2));
-                            }
-                        }
-                    }
-                    if (OverwriteRepeatedIDs == DialogResult.Yes)       //rebuild correlations
-                        this.BuildCorrelations();
-                }
-                return correlTemp;
-            }
+            //private Dictionary<Tuple<string, string>, double> BuildCorrelTemp()
+            //{
+            //    var correlTemp = new Dictionary<Tuple<string, string>, double>();   //<ID, ID>, correl_value
+            //    if (this.Items.Any())
+            //    {
+            //        //Save off existing correlations
+            //        //Create a correl string from the column
+            //        foreach (Estimate_Item estimate in this.Items)
+            //        {
+            //            if (estimate.SubEstimates.Count == 0)
+            //                continue;
+            //            Data.CorrelationString_CM correlString;
+            //            if (estimate.xlCorrelCell_Cost.Value == null)        //No correlation string exists
+            //                correlString = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x => x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
+            //            else
+            //                correlString = new Data.CorrelationString_CM(estimate.xlCorrelCell_Cost.Value);       //construct from string
+            //            var correlMatrix = Sheets.CorrelationSheet.ConstructFromParentItem(estimate.Parents)
+            //            string[] ids = Items.Select(x => x.uID.ID).ToArray();
+            //            foreach (string id1 in ids)
+            //            {
+            //                foreach (string id2 in ids)
+            //                {
+            //                    var newKey = new Tuple<string, string>(id1, id2);
+            //                    if (!correlTemp.ContainsKey(newKey))
+            //                        correlTemp.Add(newKey, correlMatrix.AccessArray(id1, id2));
+            //                }
+            //            }
+            //        }
+            //        if (OverwriteRepeatedIDs == DialogResult.Yes)       //rebuild correlations
+            //            this.BuildCorrelations();
+            //    }
+            //    return correlTemp;
+            //}
 
-            protected override void PrintCorrel_Inputs(IHasCostSubs item, Dictionary<Tuple<string, string>, double> inputTemp = null)
+
+            protected override void PrintCorrel_Cost(IHasCostSubs item, Dictionary<Tuple<string, string>, double> inputTemp = null)
             {
                 /*
                  * This is being called when "Build" is run. 
@@ -216,7 +217,7 @@ namespace CorrelationTest
                 }
             }
 
-            protected override void PrintCorrel_Periods(IHasPhasingSubs item, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+            protected override void PrintCorrel_Phasing(IHasPhasingSubs item, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
             {
                 /*
                  * The print methods on the sheet object are there to compile a list of estimates
