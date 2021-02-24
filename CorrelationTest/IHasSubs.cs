@@ -7,10 +7,8 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public interface IHasSubs
+    public interface IHasCorrelations
     {
-        List<ISub> SubEstimates { get; set; }
-        void LoadSubEstimates();
         Excel.Range xlRow { get; set; }
         CostSheet ContainingSheetObject { get; set; }
         UniqueID uID { get; set; }
@@ -19,7 +17,13 @@ namespace CorrelationTest
         void Expand(CorrelationType correlType);
     }
 
-    public interface IHasCostSubs : IHasSubs
+    public interface IHasSubs : IHasCorrelations
+    {
+        List<ISub> SubEstimates { get; set; }
+        void LoadSubEstimates();
+    }
+
+    public interface IHasCostCorrelations : IHasSubs
     {
         Data.CorrelationString CostCorrelationString { get; set; }
         Excel.Range xlCorrelCell_Cost { get; set; }
@@ -27,9 +31,8 @@ namespace CorrelationTest
         void LoadCostCorrelString();
         void PrintCostCorrelString();
     }
-    public interface IHasPhasingSubs : IHasSubs
+    public interface IHasPhasingCorrelations : IHasCorrelations
     {
-        
         Data.CorrelationString PhasingCorrelationString { get; set; }
         Excel.Range xlCorrelCell_Phasing { get; set; }
         Excel.Range xlDollarCell { get; set; }
@@ -39,7 +42,7 @@ namespace CorrelationTest
         void LoadPhasingCorrelString();
         void PrintPhasingCorrelString();
     }
-    public interface IHasDurationSubs : IHasSubs
+    public interface IHasDurationCorrelations : IHasSubs
     {
         Data.CorrelationString DurationCorrelationString { get; set; }
         Distribution DurationDistribution { get; set; }

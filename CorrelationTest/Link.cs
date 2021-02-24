@@ -16,8 +16,8 @@ namespace CorrelationTest
 
             public Link(Excel.Range linkSource)
             {
-                this.LinkSource = linkSource;
-                this.Address = $"={linkSource.Address[External: true]}";
+                this.LinkSource = linkSource;       //the cell the link points to
+                this.Address = $"={LinkSource.Address[External: true]}";
             }
 
             public Link(string linkSourceAddress)

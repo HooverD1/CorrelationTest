@@ -39,7 +39,6 @@ namespace CorrelationTest
 
 
             protected virtual Excel.Worksheet CreateXLCorrelSheet(string postfix) { throw new Exception("Failed override"); }
-            protected virtual Excel.Worksheet GetXlSheet(bool CreateNew = true) { throw new Exception("Failed override"); }
             protected virtual Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true) { throw new Exception("Failed override"); }
             public virtual void UpdateCorrelationString(string[] ids) { throw new Exception("Failed override"); }
 
@@ -124,8 +123,8 @@ namespace CorrelationTest
                 return fieldStrings;
             }
 
-            protected virtual string GetDistributionString(IHasSubs est, int subIndex) { throw new Exception("Failed override"); }
-            protected virtual string GetDistributionString(IHasSubs est) { throw new Exception("Failed override"); }
+            protected virtual string GetDistributionString(IHasCorrelations est, int subIndex) { throw new Exception("Failed override"); }
+            protected virtual string GetDistributionString(IHasCorrelations est) { throw new Exception("Failed override"); }
 
             public bool PaintMatrixErrors(Data.MatrixErrors[,] matrixErrors)        //return false if no matrix errors found
             {
@@ -244,17 +243,17 @@ namespace CorrelationTest
                 {
                     //These need to be sending the parent and the correltype, no?
                     case SheetType.Correlation_CM:
-                        return new CorrelationSheet_Cost((IHasCostSubs)ParentItem);       
+                        return new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);       
                     case SheetType.Correlation_CT:
-                        return new CorrelationSheet_Cost((IHasCostSubs)ParentItem);
+                        return new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
                     case SheetType.Correlation_PM:
-                        return new CorrelationSheet_Phasing((IHasPhasingSubs)ParentItem);
+                        return new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
                     case SheetType.Correlation_PT:
-                        return new CorrelationSheet_Phasing((IHasPhasingSubs)ParentItem);
+                        return new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
                     case SheetType.Correlation_DM:
-                        return new CorrelationSheet_Duration((IHasDurationSubs)ParentItem);
+                        return new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
                     case SheetType.Correlation_DT:
-                        return new CorrelationSheet_Duration((IHasDurationSubs)ParentItem);
+                        return new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
                     default:
                         throw new Exception("Unknown correlation type");
                 }
@@ -282,8 +281,6 @@ namespace CorrelationTest
                 }
             }
 
-            //public virtual void UpdateCorrelationString() { throw new Exception("Failed override"); }
-
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
                 CorrelationSheet correlSheet = CorrelationSheet.ConstructFromXlCorrelationSheet();
@@ -304,9 +301,9 @@ namespace CorrelationTest
                 {
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
                     if (cType == CorrelationType.Cost)
-                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasCostSubs)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
                     else if (cType == CorrelationType.Duration)
-                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasDurationSubs)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
                     else if (cType == CorrelationType.Phasing)
                         correlSheet.CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
                     else

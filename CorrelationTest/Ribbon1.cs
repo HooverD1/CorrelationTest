@@ -30,7 +30,7 @@ namespace CorrelationTest
             CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
             
             Item selectedItem = (from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item).First();
-            IHasSubs parent;
+            IHasCorrelations parent;
             CorrelationType correlType;
             if(selection.Column == dispCoords.CostCorrel_Offset)
             {
@@ -52,15 +52,15 @@ namespace CorrelationTest
             switch (correlType)
             {
                 case CorrelationType.Cost:
-                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasCostSubs select p).First();
+                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasCostCorrelations select p).First();
                     parent.Expand(correlType);
                     break;
                 case CorrelationType.Duration:
-                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasDurationSubs select p).First();
+                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasDurationCorrelations select p).First();
                     parent.Expand(correlType);
                     break;
                 case CorrelationType.Phasing:
-                    parent = (IHasPhasingSubs)selectedItem;
+                    parent = (IHasPhasingCorrelations)selectedItem;
                     parent.Expand(correlType);
                     break;
                 case CorrelationType.Null:      //Not selecting a correlation column

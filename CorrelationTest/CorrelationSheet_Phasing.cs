@@ -11,12 +11,12 @@ namespace CorrelationTest
     {
         public class CorrelationSheet_Phasing : CorrelationSheet
         {
-            public CorrelationSheet_Phasing(IHasPhasingSubs ParentItem)        //bring in the coordinates and set up the ranges once they exist
+            public CorrelationSheet_Phasing(IHasPhasingCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = ParentItem.PhasingCorrelationString;
                 SheetType correlType = CorrelString.GetCorrelType();
                 this.Specs = new Data.CorrelSheetSpecs(correlType);
-                this.xlSheet = GetXlSheet();
+                this.xlSheet = GetXlSheet(correlType);
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType);
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Phasing);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
@@ -35,7 +35,7 @@ namespace CorrelationTest
 
             public CorrelationSheet_Phasing(SheetType shtType) //build from the xlsheet to get the string
             {
-                this.xlSheet = GetXlSheet();
+                this.xlSheet = GetXlSheet(shtType);
                 this.Specs = new Data.CorrelSheetSpecs(shtType);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
@@ -44,7 +44,10 @@ namespace CorrelationTest
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.IdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlTripleCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
-                //
+
+                //Set up the link
+                this.LinkToOrigin = new Data.Link(Convert.ToString(xlLinkCell.Value));
+
                 //Build the CorrelMatrix
                 int fields = Convert.ToInt32(Convert.ToString(xlCorrelStringCell.Value).Split(',')[0]);
                 Excel.Range fieldRange = xlMatrixCell.Resize[1, fields];
@@ -81,20 +84,6 @@ namespace CorrelationTest
             //{
             //    this.CorrelString = new Data.CorrelationString_PM(ids, this.CorrelMatrix);
             //}
-
-            protected Excel.Worksheet GetXlSheet() { return GetXlSheet(false); }
-
-            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
-            {
-                var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_PM" || sheet.Cells[1, 1].value == "$CORRELATION_PT"
-                                     select sheet;
-                if (xlCorrelSheets.Any())
-                    xlSheet = xlCorrelSheets.First();
-                else
-                    throw new Exception("No correlation sheet found.");
-                return xlSheet;
-            }
 
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
             {
@@ -143,15 +132,15 @@ namespace CorrelationTest
             //Bring in the coordinates - use an enum to build them for each sheet type
             //Parse CorrelString to get type for collapse
 
-            protected override string GetDistributionString(IHasSubs est)
+            protected override string GetDistributionString(IHasCorrelations est)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasPhasingSubs)est).PhasingDistribution.Name}");
-                for (int i = 1; i < ((IHasPhasingSubs)est).PhasingDistribution.DistributionParameters.Count(); i++)
+                sb.Append($"{((IHasPhasingCorrelations)est).PhasingDistribution.Name}");
+                for (int i = 1; i < ((IHasPhasingCorrelations)est).PhasingDistribution.DistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";
-                    if (((IHasPhasingSubs)est).PhasingDistribution.DistributionParameters[param] != null)
-                        sb.Append($",{((IHasPhasingSubs)est).PhasingDistribution.DistributionParameters[param]}");
+                    if (((IHasPhasingCorrelations)est).PhasingDistribution.DistributionParameters[param] != null)
+                        sb.Append($",{((IHasPhasingCorrelations)est).PhasingDistribution.DistributionParameters[param]}");
                 }
                 return sb.ToString();
             }
@@ -160,7 +149,7 @@ namespace CorrelationTest
             {
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
-                IHasPhasingSubs tempEst = (IHasPhasingSubs)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
+                IHasPhasingCorrelations tempEst = (IHasPhasingCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 //tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
                 //tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix

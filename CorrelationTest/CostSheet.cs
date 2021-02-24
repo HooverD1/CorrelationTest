@@ -55,12 +55,12 @@ namespace CorrelationTest
             //Load off the sub cells if there is
             foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
             {
-                if (item is IHasCostSubs)
-                    ((IHasCostSubs)item).LoadCostCorrelString();
-                if (item is IHasPhasingSubs)
-                    ((IHasPhasingSubs)item).LoadPhasingCorrelString();
-                if (item is IHasDurationSubs)
-                    ((IHasDurationSubs)item).LoadDurationCorrelString();
+                if (item is IHasCostCorrelations)
+                    ((IHasCostCorrelations)item).LoadCostCorrelString();
+                if (item is IHasPhasingCorrelations)
+                    ((IHasPhasingCorrelations)item).LoadPhasingCorrelString();
+                if (item is IHasDurationCorrelations)
+                    ((IHasDurationCorrelations)item).LoadDurationCorrelString();
                 if (item is IJointEstimate)
                 {
                     if (item is CostScheduleEstimate)
@@ -83,7 +83,7 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
-        protected virtual void PrintCorrel_Cost(IHasCostSubs estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Cost(IHasCostCorrelations estimate, Dictionary<Tuple<string, string>, double> inputTemp = null)
         {
             /*
              * This is being called when "Build" is run. 
@@ -102,7 +102,7 @@ namespace CorrelationTest
             }
         }
 
-        protected virtual void PrintCorrel_Phasing(IHasPhasingSubs estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+        protected virtual void PrintCorrel_Phasing(IHasPhasingCorrelations estimate, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
         {
             /*
              * The print methods on the sheet object are there to compile a list of estimates

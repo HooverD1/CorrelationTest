@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class Sum_Item : Item, IHasCostSubs, IHasPhasingSubs, IHasDurationSubs
+    public class Sum_Item : Item, IHasCostCorrelations, IHasPhasingCorrelations, IHasDurationCorrelations
     {
         public DisplayCoords dispCoords { get; set; }
         public Excel.Range xlDollarCell { get; set; }

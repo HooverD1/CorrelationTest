@@ -187,7 +187,7 @@ namespace CorrelationTest
 
             #region CorrelString Factory
 
-            public static CorrelationString_CT ConstructFromParentItem_Cost(IHasCostSubs ParentItem)
+            public static CorrelationString_CT ConstructFromParentItem_Cost(IHasCostCorrelations ParentItem)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder values = new StringBuilder();
@@ -209,29 +209,29 @@ namespace CorrelationTest
                 return new CorrelationString_CT($"{header}&{values}");
             }
 
-            public static CorrelationString_PT ConstructFromParentItem_Phasing(IHasPhasingSubs ParentItem)
+            public static CorrelationString_PT ConstructFromParentItem_Phasing(IHasPhasingCorrelations ParentItem)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder values = new StringBuilder();
 
-                header.Append(ParentItem.SubEstimates.Count);
+                header.Append(ParentItem.Periods.Count());
                 header.Append(",");
 
                 header.Append("PT");
                 header.Append(",");
 
                 header.Append(ParentItem.uID.ID);
-                for (int i = 0; i < ParentItem.SubEstimates.Count; i++)
+                for (int i = 0; i < ParentItem.Periods.Count(); i++)
                 {
                     header.Append(",");
-                    header.Append(ParentItem.SubEstimates[i].uID.ID);
+                    header.Append(ParentItem.Periods[i].pID.ID);
                 }
 
                 values.Append("0,0,0");
                 return new CorrelationString_PT($"{header}&{values}");
             }
 
-            public static CorrelationString_DT ConstructFromParentItem_Duration(IHasDurationSubs ParentItem)
+            public static CorrelationString_DT ConstructFromParentItem_Duration(IHasDurationCorrelations ParentItem)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder values = new StringBuilder();
@@ -415,30 +415,30 @@ namespace CorrelationTest
                 {
                     case CorrelStringType.PhasingTriple:
                         Triple pt = new Triple(item.uID.ID, "0,0,0");
-                        string[] start_dates = ((IHasPhasingSubs)item).Periods.Select(x => x.Start_Date).ToArray();
+                        string[] start_dates = ((IHasPhasingCorrelations)item).Periods.Select(x => x.Start_Date).ToArray();
                         return new Data.CorrelationString_PT(pt, start_dates, item.uID.ID);
                     case CorrelStringType.PhasingMatrix:
-                        IEnumerable<string> start_dates2 = from Period prd in ((IHasPhasingSubs)item).Periods select prd.pID.PeriodTag.ToString();
+                        IEnumerable<string> start_dates2 = from Period prd in ((IHasPhasingCorrelations)item).Periods select prd.pID.PeriodTag.ToString();
                         return CorrelationString_PM.ConstructZeroString(start_dates2.ToArray());
                     case CorrelStringType.CostTriple:
-                        if (((IHasCostSubs)item).SubEstimates.Count < 2)
+                        if (((IHasCostCorrelations)item).SubEstimates.Count < 2)
                             return null;
                         Triple it = new Triple(item.uID.ID, "0,0,0");
-                        IEnumerable<string> fields = from ISub sub in ((IHasCostSubs)item).SubEstimates select sub.Name;        //need to print names, but get them from IDs?
-                        return new Data.CorrelationString_CT(fields.ToArray(), it, item.uID.ID, ((IHasCostSubs)item).SubEstimates.Select(x => x.uID.ID).ToArray());
+                        IEnumerable<string> fields = from ISub sub in ((IHasCostCorrelations)item).SubEstimates select sub.Name;        //need to print names, but get them from IDs?
+                        return new Data.CorrelationString_CT(fields.ToArray(), it, item.uID.ID, ((IHasCostCorrelations)item).SubEstimates.Select(x => x.uID.ID).ToArray());
                     case CorrelStringType.CostMatrix:
-                        if (((IHasCostSubs)item).SubEstimates.Count < 2)
+                        if (((IHasCostCorrelations)item).SubEstimates.Count < 2)
                             return null;
                         IEnumerable<string> fields2 = from Estimate_Item sub in item.ContainingSheetObject.GetSubEstimates(item.xlRow) select sub.Name;
                         return CorrelationString_CM.ConstructZeroString(fields2.ToArray());
                     case CorrelStringType.DurationMatrix:
                         throw new NotImplementedException();
                     case CorrelStringType.DurationTriple:
-                        if (((IHasDurationSubs)item).SubEstimates.Count < 2)
+                        if (((IHasDurationCorrelations)item).SubEstimates.Count < 2)
                             return null;
                         Triple it2 = new Triple(item.uID.ID, "0,0,0");
-                        IEnumerable<string> fields3 = from ISub sub in ((IHasDurationSubs)item).SubEstimates select sub.Name;
-                        return new Data.CorrelationString_DT(fields3.ToArray(), it2, item.uID.ID, ((IHasDurationSubs)item).SubEstimates.Select(x => x.uID.ID).ToArray());
+                        IEnumerable<string> fields3 = from ISub sub in ((IHasDurationCorrelations)item).SubEstimates select sub.Name;
+                        return new Data.CorrelationString_DT(fields3.ToArray(), it2, item.uID.ID, ((IHasDurationCorrelations)item).SubEstimates.Select(x => x.uID.ID).ToArray());
                     default:
                         throw new Exception("Cannot construct CorrelationString");
                 }

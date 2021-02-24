@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class WBS_Item : Item, IHasCostSubs, IHasDurationSubs, IHasPhasingSubs
+    public class WBS_Item : Item, IHasCostCorrelations, IHasDurationCorrelations, IHasPhasingCorrelations
     {
         public Distribution CostDistribution { get; set; }
         public Distribution DurationDistribution { get; set; }

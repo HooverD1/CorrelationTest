@@ -55,6 +55,7 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
+
                         break;
                     case SheetType.Correlation_CT:
                         matrixRow = 4;
@@ -87,6 +88,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
+                        tripleRow = 2;
+                        tripleCol = 2;
                         break;
                     case SheetType.Correlation_PT:
                         matrixRow = 4;

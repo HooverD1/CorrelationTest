@@ -7,7 +7,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class ScheduleCostEstimate : Estimate_Item, IHasDurationSubs, IHasPhasingSubs, IJointEstimate
+    public class ScheduleCostEstimate : Estimate_Item, IHasDurationCorrelations, IHasPhasingCorrelations, IJointEstimate
     {
         public ScheduleCostEstimate(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)
         {

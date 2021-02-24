@@ -82,7 +82,7 @@ namespace CorrelationTest
                 return correlRange.Offset[1, 0].Resize[correlRange.Rows.Count - 1, correlRange.Columns.Count].Value;
             }
 
-            private string CreateValue(IHasCostSubs parentEstimate)
+            private string CreateValue(IHasCostCorrelations parentEstimate)
             {
                 //Convert all the sub-estimates to a correlation string
                 int fields = parentEstimate.SubEstimates.Count;

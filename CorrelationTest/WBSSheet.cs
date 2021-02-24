@@ -49,7 +49,7 @@ namespace CorrelationTest
                             if (theseSubs.Count() > 1)
                                 throw new Exception("Duplicated ID");
                             else if (theseSubs.Any())
-                                ((IHasCostSubs)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
+                                ((IHasCostCorrelations)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
                         }
                         subLevel = Items[++indexStart].Level;
                     }
@@ -61,12 +61,12 @@ namespace CorrelationTest
             {
                 foreach (IHasSubs item in Items)
                 {
-                    if (item is IHasCostSubs)
-                        ((IHasCostSubs)item).PrintCostCorrelString();
-                    if (item is IHasPhasingSubs)
-                        ((IHasPhasingSubs)item).PrintPhasingCorrelString();
-                    if (item is IHasDurationSubs)
-                        ((IHasDurationSubs)item).PrintDurationCorrelString();
+                    if (item is IHasCostCorrelations)
+                        ((IHasCostCorrelations)item).PrintCostCorrelString();
+                    if (item is IHasPhasingCorrelations)
+                        ((IHasPhasingCorrelations)item).PrintPhasingCorrelString();
+                    if (item is IHasDurationCorrelations)
+                        ((IHasDurationCorrelations)item).PrintDurationCorrelString();
                     if (item is IJointEstimate)
                     {
                         if (item is CostScheduleEstimate)
@@ -146,7 +146,7 @@ namespace CorrelationTest
             //    var correlTemp = BuildCorrelTemp();
             //    if (Items.Any())
             //        Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
-            //    foreach (IHasCostSubs item in Items)
+            //    foreach (IHasCostCorrelations item in Items)
             //    {
             //        PrintCorrel_Inputs(item, correlTemp);  //recursively build out children
             //    }
@@ -155,7 +155,7 @@ namespace CorrelationTest
             private void BuildCorrelations_Periods()
             {
                 //Period correlation
-                foreach (IHasPhasingSubs item in Items)
+                foreach (IHasPhasingCorrelations item in Items)
                 {
                     //Save the existing values
                     if (item.xlCorrelCell_Phasing != null)
@@ -202,7 +202,7 @@ namespace CorrelationTest
             //}
 
 
-            protected override void PrintCorrel_Cost(IHasCostSubs item, Dictionary<Tuple<string, string>, double> inputTemp = null)
+            protected override void PrintCorrel_Cost(IHasCostCorrelations item, Dictionary<Tuple<string, string>, double> inputTemp = null)
             {
                 /*
                  * This is being called when "Build" is run. 
@@ -217,7 +217,7 @@ namespace CorrelationTest
                 }
             }
 
-            protected override void PrintCorrel_Phasing(IHasPhasingSubs item, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
+            protected override void PrintCorrel_Phasing(IHasPhasingCorrelations item, Dictionary<Tuple<PeriodID, PeriodID>, double> inputTemp = null)
             {
                 /*
                  * The print methods on the sheet object are there to compile a list of estimates

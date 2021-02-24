@@ -20,14 +20,17 @@ namespace CorrelationTest
                 this.InputTriple = new Triple(this.GetParentID().ID, triple);
             }
 
+            //COLLAPSE
             public CorrelationString_CT(Sheets.CorrelationSheet_Cost correlSheet)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder fields = new StringBuilder();
                 StringBuilder values = new StringBuilder();
 
-                Excel.Range parentRow = correlSheet.LinkToOrigin.LinkSource.EntireRow;
-                SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+
+                Excel.Range linkedRange = correlSheet.LinkToOrigin.LinkSource;
+                Excel.Range parentRow = linkedRange.EntireRow;
+                SheetType sourceType = ExtensionMethods.GetSheetType(linkedRange.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
                 string tripleString = Convert.ToString(correlSheet.xlTripleCell.Value);
@@ -41,8 +44,8 @@ namespace CorrelationTest
                 object[] fieldVals = ExtensionMethods.ToJaggedArray(fieldVals2D)[0];
                 int numberOfInputs = matrixVals.GetLength(0);
 
-                CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(correlSheet.LinkToOrigin.LinkSource.Worksheet);
-                IHasCostSubs parentItem = (IHasCostSubs)(from Item parent in costSheet.Items where parent.uID.ID == parentID select parent).First();
+                CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(linkedRange.Worksheet);
+                IHasCostCorrelations parentItem = (IHasCostCorrelations)(from Item parent in costSheet.Items where parent.uID.ID == parentID select parent).First();
                 IEnumerable<string> subStrings = from ISub sub in parentItem.SubEstimates select sub.uID.ID;
 
                 header.Append(numberOfInputs);

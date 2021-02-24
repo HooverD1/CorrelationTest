@@ -16,7 +16,7 @@ namespace CorrelationTest
         Excel.Range xlCorrelCell_Cost { get; set; }
         Excel.Range xlCorrelCell_Duration { get; set; }
         Excel.Range xlCorrelCell_Phasing { get; set; }
-        Period[] Periods { get; set; }
+        //Period[] Periods { get; set; }
         UniqueID uID { get; set; }
         Distribution CostDistribution { get; set; }
         Distribution DurationDistribution { get; set; }

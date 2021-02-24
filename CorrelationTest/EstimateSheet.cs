@@ -30,7 +30,7 @@ namespace CorrelationTest
             //    //var correlTemp = BuildCorrelTemp(this.Items);
             //    if (Items.Any())
             //        Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
-            //    foreach (IHasCostSubs est in this.Items)
+            //    foreach (IHasCostCorrelations est in this.Items)
             //    {
             //        est.ContainingSheetObject.GetSubEstimates(est.xlRow); 
             //        PrintCorrel_Cost(est, correlTemp);  //recursively build out children
@@ -40,7 +40,7 @@ namespace CorrelationTest
             //private void BuildCorrelations_Phasing()
             //{
             //    //Period correlation
-            //    foreach (IHasPhasingSubs est in this.Items)
+            //    foreach (IHasPhasingCorrelations est in this.Items)
             //    {
             //        PrintCorrel_Phasing(est);
             //    }
@@ -107,7 +107,7 @@ namespace CorrelationTest
                     if (Items[index].xlTypeCell.Value == "CE")
                     {
                         int input_index = index;
-                        IHasCostSubs parentItem = (IHasCostSubs)Items[input_index];
+                        IHasCostCorrelations parentItem = (IHasCostCorrelations)Items[input_index];
                         while (input_index < Items.Count - 1)
                         {
                             ISub thisItem = (ISub)Items[++input_index];
@@ -126,7 +126,7 @@ namespace CorrelationTest
                     else if (Items[index].xlTypeCell.Value == "CASE")
                     {
                         int input_index = index;
-                        IHasCostSubs parentItem = (IHasCostSubs)Items[input_index];
+                        IHasCostCorrelations parentItem = (IHasCostCorrelations)Items[input_index];
                         if (Items[input_index + 1] is ScheduleEstimate)
                         {
                             ISub thisItem = (ISub)Items[++input_index];
@@ -153,7 +153,7 @@ namespace CorrelationTest
                     else if (Items[index].xlTypeCell.Value == "SE")
                     {
                         int input_index = index;
-                        IHasDurationSubs parentItem = (IHasDurationSubs)Items[input_index];
+                        IHasDurationCorrelations parentItem = (IHasDurationCorrelations)Items[input_index];
                         
                         while (true)
                         {
@@ -173,7 +173,7 @@ namespace CorrelationTest
                     else if(Items[index].xlTypeCell.Value == "SACE")
                     {
                         int input_index = index;
-                        IHasDurationSubs parentItem = (IHasDurationSubs)Items[input_index];
+                        IHasDurationCorrelations parentItem = (IHasDurationCorrelations)Items[input_index];
                         //GRAB THE COST ESTIMATE
                         if (Items[input_index + 1] is CostEstimate)
                         {
@@ -206,12 +206,12 @@ namespace CorrelationTest
             {
                 foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
                 {
-                    if (item is IHasCostSubs)
-                        ((IHasCostSubs)item).PrintCostCorrelString();
-                    if (item is IHasPhasingSubs)
-                        ((IHasPhasingSubs)item).PrintPhasingCorrelString();
-                    if (item is IHasDurationSubs)
-                        ((IHasDurationSubs)item).PrintDurationCorrelString();
+                    if (item is IHasCostCorrelations)
+                        ((IHasCostCorrelations)item).PrintCostCorrelString();
+                    if (item is IHasPhasingCorrelations)
+                        ((IHasPhasingCorrelations)item).PrintPhasingCorrelString();
+                    if (item is IHasDurationCorrelations)
+                        ((IHasDurationCorrelations)item).PrintDurationCorrelString();
                     if (item is IJointEstimate)
                     {
                         if (item is CostScheduleEstimate)

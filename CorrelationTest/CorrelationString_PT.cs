@@ -93,7 +93,7 @@ namespace CorrelationTest
             {
                 return this.Triple.GetCorrelationMatrix(fields);
             }
-            
+
             public override void PrintToSheet(Excel.Range xlPhasingCorrelCell)
             {
                 //Clean the string

@@ -49,59 +49,58 @@ namespace CorrelationTest
                 FieldDict = GetFieldDict(fieldsRange, matrixRange);
             }
 
-            public static CorrelationMatrix ConstructFromParentItem(IHasSubs ParentItem, SheetType correlType)
+            public static CorrelationMatrix ConstructFromParentItem(IHasCorrelations ParentItem, SheetType correlType)
             {
-                string[] fields = ParentItem.GetFields();
                 CorrelationMatrix matrix;
                 //this should vary based on what type of CorrelationString!!
                 switch (correlType)
                 {
                     case SheetType.Correlation_CT:
                         matrix = new Data.CorrelationMatrix_Inputs();
-                        matrix.IDs = (from ISub sub in ParentItem.SubEstimates select sub.uID.ID).ToArray();
-                        matrix.Fields = fields;
-                        matrix.Matrix = ((IHasCostSubs)ParentItem).CostCorrelationString.GetMatrix(fields);
+                        matrix.IDs = (from ISub sub in ((IHasCostCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
+                        matrix.Fields = ParentItem.GetFields();
+                        matrix.Matrix = ((IHasCostCorrelations)ParentItem).CostCorrelationString.GetMatrix(matrix.Fields);
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case SheetType.Correlation_CM:
                         matrix = new Data.CorrelationMatrix_Inputs();
-                        matrix.Fields = fields;
-                        matrix.Matrix = ((IHasCostSubs)ParentItem).CostCorrelationString.GetMatrix(fields);
+                        matrix.Fields = ParentItem.GetFields();
+                        matrix.Matrix = ((IHasCostCorrelations)ParentItem).CostCorrelationString.GetMatrix(matrix.Fields);
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = (from ISub sub in ParentItem.SubEstimates select sub.uID.ID).ToArray();
+                        matrix.IDs = (from ISub sub in ((IHasCostCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case SheetType.Correlation_PT:
                         matrix = new Data.CorrelationMatrix_Phasing();
-                        matrix.Fields = fields;
-                        matrix.Matrix = ((IHasPhasingSubs)ParentItem).PhasingCorrelationString.GetMatrix(fields);
+                        matrix.Fields = (from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
+                        matrix.Matrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix(matrix.Fields);
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = (from ISub sub in ParentItem.SubEstimates select sub.uID.ID).ToArray();
+                        matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case SheetType.Correlation_PM:
                         matrix = new Data.CorrelationMatrix_Phasing();
-                        matrix.Fields = fields;
-                        matrix.Matrix = ((IHasPhasingSubs)ParentItem).PhasingCorrelationString.GetMatrix(fields);
+                        matrix.Fields = (from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
+                        matrix.Matrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix(matrix.Fields);
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = (from ISub sub in ParentItem.SubEstimates select sub.uID.ID).ToArray();
+                        matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case SheetType.Correlation_DT:
                         matrix = new Data.CorrelationMatrix_Duration();
-                        matrix.Fields = fields;
-                        matrix.Matrix = ((IHasDurationSubs)ParentItem).DurationCorrelationString.GetMatrix(fields);
+                        matrix.Fields = ParentItem.GetFields();
+                        matrix.Matrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix(matrix.Fields);
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = (from ISub sub in ParentItem.SubEstimates select sub.uID.ID).ToArray();
+                        matrix.IDs = (from ISub sub in ((IHasDurationCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     case SheetType.Correlation_DM:
                         matrix = new Data.CorrelationMatrix_Duration();
-                        matrix.Fields = fields;
-                        matrix.Matrix = ((IHasDurationSubs)ParentItem).DurationCorrelationString.GetMatrix(fields);
+                        matrix.Fields = ParentItem.GetFields();
+                        matrix.Matrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix(matrix.Fields);
                         matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = (from ISub sub in ParentItem.SubEstimates select sub.uID.ID).ToArray();
+                        matrix.IDs = (from ISub sub in ((IHasDurationCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
                     default:

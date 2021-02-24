@@ -130,8 +130,8 @@ namespace CorrelationTest
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
             this.Siblings = new List<Estimate_Item>();
-            Estimate_Item parent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostSubs select est_item).First();
-            Estimate_Item grandparent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostSubs select est_item).First();
+            Estimate_Item parent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostCorrelations select est_item).First();
+            Estimate_Item grandparent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostCorrelations select est_item).First();
             if (parent == null) { return; }
             if (parent.Parents.Count() == 0) { return; }
             SheetType correlType = grandparent.CostCorrelationString.GetCorrelType();
