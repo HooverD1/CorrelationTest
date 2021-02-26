@@ -9,10 +9,10 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_PT : CorrelationString
+        public class CorrelationString_PP : CorrelationString
         {
             public Triple Triple { get; set; }
-            public CorrelationString_PT(Triple pt, string[] start_dates, string parent_id)        //build a triple string out of a triple
+            public CorrelationString_PP(Triple pt, string[] start_dates, string parent_id)        //build a triple string out of a triple
             {
                 this.Triple = pt;
                 StringBuilder sb = new StringBuilder();
@@ -29,7 +29,7 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
-            public CorrelationString_PT(Sheets.CorrelationSheet_Phasing correlSheet)
+            public CorrelationString_PP(Sheets.CorrelationSheet_Phasing correlSheet)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder fields = new StringBuilder();
@@ -39,7 +39,7 @@ namespace CorrelationTest
                 SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
-                string tripleString = Convert.ToString(correlSheet.xlTripleCell.Value);
+                string tripleString = Convert.ToString(correlSheet.xlPairsCell.Value);
                 Triple triple = new Triple(tripleString);
                 StringBuilder subIDs = new StringBuilder();
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
@@ -82,7 +82,7 @@ namespace CorrelationTest
             }
 
 
-            public CorrelationString_PT(string correlString)
+            public CorrelationString_PP(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
                 string triple = this.Value.Split('&')[1];

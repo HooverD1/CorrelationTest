@@ -57,7 +57,7 @@ namespace CorrelationTest
                         stringCol = 1;
 
                         break;
-                    case SheetType.Correlation_CT:
+                    case SheetType.Correlation_CP:
                         matrixRow = 4;
                         matrixCol = 4;
                         linkRow = 3;
@@ -91,7 +91,7 @@ namespace CorrelationTest
                         tripleRow = 2;
                         tripleCol = 2;
                         break;
-                    case SheetType.Correlation_PT:
+                    case SheetType.Correlation_PP:
                         matrixRow = 4;
                         matrixCol = 4;
                         linkRow = 3;
@@ -125,7 +125,7 @@ namespace CorrelationTest
                         tripleRow = 2;
                         tripleCol = 2;
                         break;
-                    case SheetType.Correlation_DT:
+                    case SheetType.Correlation_DP:
                         matrixRow = 4;
                         matrixCol = 9;
                         linkRow = 3;

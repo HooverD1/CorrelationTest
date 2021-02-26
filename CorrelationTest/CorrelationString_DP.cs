@@ -9,32 +9,30 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_CT : CorrelationString
+        public class CorrelationString_DP : CorrelationString
         {
             public Triple InputTriple { get; set; }
-            public CorrelationString_CT(string correlString)
+
+            public CorrelationString_DP(string correlStringValue)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
-                string[] lines = this.Value.Split('&');
-                string triple = lines[1];
+                this.Value = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
+                string triple = this.Value.Split('&')[1];
                 this.InputTriple = new Triple(this.GetParentID().ID, triple);
             }
 
-            //COLLAPSE
-            public CorrelationString_CT(Sheets.CorrelationSheet_Cost correlSheet)
+            public CorrelationString_DP(Sheets.CorrelationSheet_Duration correlSheet)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder fields = new StringBuilder();
                 StringBuilder values = new StringBuilder();
 
-
-                Excel.Range linkedRange = correlSheet.LinkToOrigin.LinkSource;
-                Excel.Range parentRow = linkedRange.EntireRow;
-                SheetType sourceType = ExtensionMethods.GetSheetType(linkedRange.Worksheet);
+                Excel.Range parentRow = correlSheet.LinkToOrigin.LinkSource.EntireRow;
+                SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
-                string tripleString = Convert.ToString(correlSheet.xlTripleCell.Value);
+                string tripleString = Convert.ToString(correlSheet.xlPairsCell.Value);
                 Triple triple = new Triple(tripleString);
+                StringBuilder subIDs = new StringBuilder();
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
                 Excel.Range fieldEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
@@ -44,28 +42,18 @@ namespace CorrelationTest
                 object[] fieldVals = ExtensionMethods.ToJaggedArray(fieldVals2D)[0];
                 int numberOfInputs = matrixVals.GetLength(0);
 
-                CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(linkedRange.Worksheet);
-                IHasCostCorrelations parentItem = (IHasCostCorrelations)(from Item parent in costSheet.Items where parent.uID.ID == parentID select parent).First();
-                IEnumerable<string> subStrings = from ISub sub in parentItem.SubEstimates select sub.uID.ID;
-
                 header.Append(numberOfInputs);
                 header.Append(",");
-                header.Append("CT");
+                header.Append("DT");
                 header.Append(",");
                 header.Append(parentID);
 
-                foreach(string subString in subStrings)
-                {
-                    header.Append(",");
-                    header.Append(subString);
-                }
-
-                foreach (object field in fieldVals)
-                {
-                    fields.Append(Convert.ToString(field));
-                    fields.Append(",");
-                }
-                fields.Remove(fields.Length - 1, 1);    //remove the final char
+                //foreach (object field in fieldVals)
+                //{
+                //    fields.Append(Convert.ToString(field));
+                //    fields.Append(",");
+                //}
+                //fields.Remove(fields.Length - 1, 1);    //remove the final char
 
                 values.Append(triple.GetValuesString());
 
@@ -85,11 +73,11 @@ namespace CorrelationTest
             }
 
 
-            public CorrelationString_CT(string[] fields, Triple it, string parent_id, string[] sub_ids)        //build a triple string out of a triple
+            public CorrelationString_DP(string[] fields, Triple it, string parent_id, string[] sub_ids)        //build a triple string out of a triple
             {
                 this.InputTriple = it;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{fields.Length},CT,{parent_id}");
+                sb.Append($"{fields.Length},DT,{parent_id}");
                 for (int j = 0; j < sub_ids.Length; j++)
                 {
                     sb.Append(",");
@@ -101,25 +89,15 @@ namespace CorrelationTest
                 //    sb.Append(fields[i]);
                 //    sb.Append(",");
                 //}
-                //sb.Append(fields[fields.Length-1]);
+                //sb.Append(fields[fields.Length - 1]);
                 //sb.AppendLine();
                 sb.Append(it.ToString());
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
-            public Triple GetTriple()
+            public static bool Validate()
             {
-                string[] correlLines = DelimitString(this.Value);
-                if (correlLines.Length != 2)
-                    throw new Exception("Malformed triple string.");
-                string uidString = correlLines[0].Split(',')[2];
-                string tripleString = correlLines[1];
-                return new Triple(uidString, tripleString);
-            }
-
-            public override object[,] GetMatrix(string[] fields)
-            {
-                return this.InputTriple.GetCorrelationMatrix(fields);
+                return true;
             }
 
             public override string[] GetIDs()
@@ -134,39 +112,49 @@ namespace CorrelationTest
                 return returnIDs;
             }
 
-            public static bool Validate()
+            public override object[,] GetMatrix(string[] fields)
             {
-                return true;
+                return this.InputTriple.GetCorrelationMatrix(fields);
+            }
+
+
+            public Triple GetTriple()
+            {
+                string[] correlLines = DelimitString(this.Value);
+                if (correlLines.Length != 2)
+                    throw new Exception("Malformed triple string.");
+                string uidString = correlLines[0].Split(',')[2];
+                string tripleString = correlLines[1];
+                return new Triple(uidString, tripleString);
             }
 
             public override UniqueID GetParentID()
-            {            
+            {
                 string[] lines = this.Value.Split('&');
                 return UniqueID.ConstructFromExisting(lines[0]);
             }
 
-            public override void PrintToSheet(Excel.Range[] xlCells)
+            public override void PrintToSheet(Excel.Range[] xlFragments)
             {
                 //Clean the string
                 //Split the string by lines
                 //Print it to the xlCells
 
                 this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
-                List<Excel.Range> xlFragments = xlCells.ToList();
+                
                 string[] lines = this.Value.Split('&');
                 int min;
-                if (lines.Count() <= xlCells.Count())
+                if (lines.Count() <= xlFragments.Count())
                     min = lines.Count();
                 else
-                    min = xlCells.Count();
+                    min = xlFragments.Count();
                 for (int i = 0; i < min; i++)
                 {
                     xlFragments[i].Value = lines[i];
-                    xlFragments[i].NumberFormat = "\"In Correl\";;;\"COST_CORREL\"";
+                    xlFragments[i].NumberFormat = "\"Sch Correl\";;;\"CORREL\"";
                 }
-                xlFragments[0].EntireColumn.ColumnWidth = 10;
             }
-
         }
     }
+    
 }

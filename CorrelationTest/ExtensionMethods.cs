@@ -71,15 +71,15 @@ namespace CorrelationTest
                     return "$INPUT";
                 case SheetType.FilterData:
                     return "$FILTER";
-                case SheetType.Correlation_CT:
+                case SheetType.Correlation_CP:
                     return "$CORRELATION_IT";
                 case SheetType.Correlation_CM:
                     return "$CORRELATION_IM";
                 case SheetType.Correlation_PM:
                     return "$CORRELATION_PM";
-                case SheetType.Correlation_PT:
+                case SheetType.Correlation_PP:
                     return "$CORRELATION_PT";
-                case SheetType.Correlation_DT:
+                case SheetType.Correlation_DP:
                     return "$CORRELATION_DT";
                 case SheetType.Correlation_DM:
                     return "$CORRELATION_DM";
@@ -94,17 +94,17 @@ namespace CorrelationTest
             switch (sheetIdent)
             {
                 case "$CORRELATION_CT":
-                    return SheetType.Correlation_CT;
+                    return SheetType.Correlation_CP;
                 case "$CORRELATION_CM":
                     return SheetType.Correlation_CM;
                 case "$CORRELATION_PM":
                     return SheetType.Correlation_PM;
                 case "$CORRELATION_PT":
-                    return SheetType.Correlation_PT;
+                    return SheetType.Correlation_PP;
                 case "$CORRELATION_DM":
                     return SheetType.Correlation_DM;
                 case "$CORRELATION_DT":
-                    return SheetType.Correlation_DT;
+                    return SheetType.Correlation_DP;
                 case "$WBS":
                     return SheetType.WBS;
                 case "$EST":

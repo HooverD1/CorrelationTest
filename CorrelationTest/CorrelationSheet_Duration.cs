@@ -25,7 +25,7 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                this.xlTripleCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
+                this.xlPairsCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -45,7 +45,7 @@ namespace CorrelationTest
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                this.xlTripleCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
+                this.xlPairsCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
                 
                 //LINK
                 this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
@@ -62,14 +62,14 @@ namespace CorrelationTest
                 //Get these from the Header.
                 string parent_id = Convert.ToString(xlIDCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-                if (sheetType == SheetType.Correlation_DT)
+                if (sheetType == SheetType.Correlation_DP)
                 {
                     //Build the triple from the string
                     //string correlStringVal = this.xlCorrelStringCell.Value;
 
                     //NEED TO BUILD OFF THE SHEET WITHOUT LEVERAGING A CORREL STRING CELL
                     //Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
-                    Triple triple = new Triple(Convert.ToString(xlTripleCell.Value));
+                    Triple triple = new Triple(Convert.ToString(xlPairsCell.Value));
 
                     //Check if the matrix still matches the triple.
                     if (this.CorrelMatrix.ValidateAgainstTriple(triple))
@@ -91,7 +91,7 @@ namespace CorrelationTest
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)        //Is this method being used?
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_DM" || sheet.Cells[1, 1].value == "$CORRELATION_DT"
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_DM" || sheet.Cells[1, 1].value == "$CORRELATION_DP"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
@@ -102,8 +102,8 @@ namespace CorrelationTest
                         case SheetType.Correlation_DM:
                             xlSheet = CreateXLCorrelSheet("_DM");
                             break;
-                        case SheetType.Correlation_DT:
-                            xlSheet = CreateXLCorrelSheet("_DT");
+                        case SheetType.Correlation_DP:
+                            xlSheet = CreateXLCorrelSheet("_DP");
                             break;
                         default:
                             throw new Exception("Bad sheet type");
@@ -173,9 +173,9 @@ namespace CorrelationTest
                     this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(tempEst, subIndex);
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
-                if (CorrelString is Data.CorrelationString_DT)       //Need to replicate this in PT and DT.
+                if (CorrelString is Data.CorrelationString_DP)       //Need to replicate this in PT and DT.
                 {
-                    this.xlTripleCell.Value = ((Data.CorrelationString_DT)CorrelString).GetTriple().GetValuesString();
+                    this.xlPairsCell.Value = ((Data.CorrelationString_DP)CorrelString).GetTriple().GetValuesString();
                 }
             }
         }

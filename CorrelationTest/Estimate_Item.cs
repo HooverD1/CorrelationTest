@@ -211,7 +211,7 @@ namespace CorrelationTest
 
         public virtual void LoadCostCorrelString()
         {
-            this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostTriple);
+            this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
         }
 
         public virtual void PrintCostCorrelString()
@@ -226,7 +226,7 @@ namespace CorrelationTest
 
         public virtual void LoadPhasingCorrelString()
         {
-            this.PhasingCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingTriple);
+            this.PhasingCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingPair);
         }
 
         public virtual void PrintPhasingCorrelString()
@@ -237,7 +237,7 @@ namespace CorrelationTest
 
         public virtual void LoadDurationCorrelString()
         {
-            this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationTriple);
+            this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
         }
 
         public virtual void PrintDurationCorrelString()

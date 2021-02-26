@@ -66,9 +66,9 @@ namespace CorrelationTest
         private const int Est_Type_Offset = 3;
         private const int Est_Name_Offset = 4;
         private const int Est_CostCorrel_Offset = 5;
-        private const int Est_PhasingCorrel_Offset = 7;
-        private const int Est_DurationCorrel_Offset = 6;
-        private const int Est_Distribution_Offset = 8;
+        private const int Est_PhasingCorrel_Offset = 6;
+        private const int Est_DurationCorrel_Offset = 5;
+        private const int Est_Distribution_Offset = 7;
         private const int Est_Dollar_Offset = 20;
 
         public DisplayCoords_Estimate()

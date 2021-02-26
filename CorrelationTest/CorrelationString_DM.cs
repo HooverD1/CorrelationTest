@@ -103,7 +103,7 @@ namespace CorrelationTest
                 for (int i = 0; i < min; i++)
                 {
                     xlFragments[i].Value = lines[i];
-                    xlFragments[i].NumberFormat = "\"Sch Correl\";;;\"SCH_CORREL\"";
+                    xlFragments[i].NumberFormat = "\"Sch Correl\";;;\"CORREL\"";
                 }
                 xlFragments[0].EntireColumn.ColumnWidth = 10;
             }

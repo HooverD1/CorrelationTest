@@ -206,21 +206,30 @@ namespace CorrelationTest
             {
                 foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
                 {
+                    if(item is ISub && item is IHasSubs)
+                    {
+                        //If it's a sub, see if its parent is a joint estimate. If so skip printing correlation.
+                        IEnumerable<IHasSubs> joint_parent = from IHasSubs p in ((ISub)item).Parents where p is IJointEstimate select p;
+                        if (joint_parent.Any())
+                        {
+                            continue;
+                        }
+                    }
                     if (item is IHasCostCorrelations)
                         ((IHasCostCorrelations)item).PrintCostCorrelString();
                     if (item is IHasPhasingCorrelations)
                         ((IHasPhasingCorrelations)item).PrintPhasingCorrelString();
                     if (item is IHasDurationCorrelations)
                         ((IHasDurationCorrelations)item).PrintDurationCorrelString();
-                    if (item is IJointEstimate)
-                    {
-                        if (item is CostScheduleEstimate)
-                            ((CostScheduleEstimate)item).scheduleEstimate.PrintDurationCorrelString();
-                        else if (item is ScheduleCostEstimate)
-                            ((ScheduleCostEstimate)item).costEstimate.PrintCostCorrelString();
-                        else
-                            throw new Exception("Unknown joint estimate type");
-                    }
+                    //if (item is IJointEstimate)
+                    //{
+                    //    if (item is CostScheduleEstimate)
+                    //        ((CostScheduleEstimate)item).scheduleEstimate.PrintDurationCorrelString();
+                    //    else if (item is ScheduleCostEstimate)
+                    //        ((ScheduleCostEstimate)item).costEstimate.PrintCostCorrelString();
+                    //    else
+                    //        throw new Exception("Unknown joint estimate type");
+                    //}
                 }
             }
 

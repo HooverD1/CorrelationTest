@@ -55,7 +55,7 @@ namespace CorrelationTest
                 //this should vary based on what type of CorrelationString!!
                 switch (correlType)
                 {
-                    case SheetType.Correlation_CT:
+                    case SheetType.Correlation_CP:
                         matrix = new Data.CorrelationMatrix_Inputs();
                         matrix.IDs = (from ISub sub in ((IHasCostCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.Fields = ParentItem.GetFields();
@@ -71,7 +71,7 @@ namespace CorrelationTest
                         matrix.IDs = (from ISub sub in ((IHasCostCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
-                    case SheetType.Correlation_PT:
+                    case SheetType.Correlation_PP:
                         matrix = new Data.CorrelationMatrix_Phasing();
                         matrix.Fields = (from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
                         matrix.Matrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix(matrix.Fields);
@@ -87,7 +87,7 @@ namespace CorrelationTest
                         matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
-                    case SheetType.Correlation_DT:
+                    case SheetType.Correlation_DP:
                         matrix = new Data.CorrelationMatrix_Duration();
                         matrix.Fields = ParentItem.GetFields();
                         matrix.Matrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix(matrix.Fields);
@@ -140,7 +140,7 @@ namespace CorrelationTest
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
-                    case SheetType.Correlation_CT:
+                    case SheetType.Correlation_CP:
                         matrix_obj = new CorrelationMatrix_Inputs();
                         matrix_obj.Parent_ID = parent_ID;
                         matrix_obj.IDs = sub_IDs;
@@ -157,7 +157,7 @@ namespace CorrelationTest
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
-                    case SheetType.Correlation_PT:
+                    case SheetType.Correlation_PP:
                         matrix_obj = new CorrelationMatrix_Phasing();
                         matrix_obj.Parent_ID = parent_ID;
                         PeriodID[] pids2 = PeriodID.GeneratePeriodIDs(UniqueID.ConstructFromExisting(Convert.ToString(parent_ID)), sub_fields.Count());
@@ -174,7 +174,7 @@ namespace CorrelationTest
                         matrix_obj.Matrix = matrix;
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
-                    case SheetType.Correlation_DT:
+                    case SheetType.Correlation_DP:
                         matrix_obj = new CorrelationMatrix_Duration();
                         matrix_obj.Parent_ID = parent_ID;
                         matrix_obj.IDs = sub_IDs;

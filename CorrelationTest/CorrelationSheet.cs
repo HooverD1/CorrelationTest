@@ -32,7 +32,7 @@ namespace CorrelationTest
             public Excel.Range xlCorrelStringCell { get; set; }
             public Excel.Range xlDistCell { get; set; }
             public Excel.Range xlSubIdCell { get; set; }
-            public Excel.Range xlTripleCell { get; set; }
+            public Excel.Range xlPairsCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
 
             //public CorrelationSheet(Data.CorrelationString_CM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
@@ -177,11 +177,11 @@ namespace CorrelationTest
                 {
                     SheetType sht_type = ExtensionMethods.GetSheetType(sht);
                     if (sht_type == SheetType.Correlation_DM ||
-                        sht_type == SheetType.Correlation_DT ||
-                        sht_type == SheetType.Correlation_CT ||
+                        sht_type == SheetType.Correlation_DP ||
+                        sht_type == SheetType.Correlation_CP ||
                         sht_type == SheetType.Correlation_CM ||
                         sht_type == SheetType.Correlation_PM ||
-                        sht_type == SheetType.Correlation_PT)
+                        sht_type == SheetType.Correlation_PP)
                     {
                         xlCorrelSheets.Add(sht);
                     }
@@ -204,13 +204,13 @@ namespace CorrelationTest
                 CorrelationSheet newSheet;
                 switch (sheet_type)
                 {
-                    case SheetType.Correlation_DT:
+                    case SheetType.Correlation_DP:
                         newSheet = new CorrelationSheet_Duration(sheet_type);
                         break;
                     case SheetType.Correlation_DM:
                         newSheet = new CorrelationSheet_Duration(sheet_type);
                         break;
-                    case SheetType.Correlation_CT:
+                    case SheetType.Correlation_CP:
                         newSheet = new CorrelationSheet_Cost(sheet_type);
                         break;
                     case SheetType.Correlation_CM:
@@ -219,7 +219,7 @@ namespace CorrelationTest
                     case SheetType.Correlation_PM:
                         newSheet = new CorrelationSheet_Phasing(sheet_type);
                         break;
-                    case SheetType.Correlation_PT:
+                    case SheetType.Correlation_PP:
                         newSheet = new CorrelationSheet_Phasing(sheet_type);
                         break;
                     default:
@@ -244,15 +244,15 @@ namespace CorrelationTest
                     //These need to be sending the parent and the correltype, no?
                     case SheetType.Correlation_CM:
                         return new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);       
-                    case SheetType.Correlation_CT:
+                    case SheetType.Correlation_CP:
                         return new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
                     case SheetType.Correlation_PM:
                         return new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
-                    case SheetType.Correlation_PT:
+                    case SheetType.Correlation_PP:
                         return new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
                     case SheetType.Correlation_DM:
                         return new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
-                    case SheetType.Correlation_DT:
+                    case SheetType.Correlation_DP:
                         return new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
                     default:
                         throw new Exception("Unknown correlation type");
@@ -265,15 +265,15 @@ namespace CorrelationTest
                 switch (correlStringValue)
                 {
                     case "CT":
-                        return Data.CorrelStringType.CostTriple;
+                        return Data.CorrelStringType.CostPair;
                     case "CM":
                         return Data.CorrelStringType.CostMatrix;
                     case "PM":
                         return Data.CorrelStringType.PhasingMatrix;
                     case "PT":
-                        return Data.CorrelStringType.PhasingTriple;
+                        return Data.CorrelStringType.PhasingPair;
                     case "DT":
-                        return Data.CorrelStringType.DurationTriple;
+                        return Data.CorrelStringType.DurationPair;
                     case "DM":
                         return Data.CorrelStringType.DurationMatrix;
                     default:
@@ -360,8 +360,8 @@ namespace CorrelationTest
             //    {
             //        case Data.CorrelationString_CM t1:
             //            return new CorrelationSheet_Cost((Data.CorrelationString_CM)correlString, source, specs);
-            //        case Data.CorrelationString_CT t2:
-            //            return new CorrelationSheet_Cost((Data.CorrelationString_CT)correlString, source, specs);
+            //        case Data.CorrelationString_CP t2:
+            //            return new CorrelationSheet_Cost((Data.CorrelationString_CP)correlString, source, specs);
             //        case Data.CorrelationString_PM t3:
             //            return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
             //        case Data.CorrelationString_PT t4:
