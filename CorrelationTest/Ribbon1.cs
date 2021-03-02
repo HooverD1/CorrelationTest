@@ -30,38 +30,40 @@ namespace CorrelationTest
             CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
             
             Item selectedItem = (from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item).First();
-            IHasCorrelations parent;
             CorrelationType correlType;
-            if(selection.Column == dispCoords.CostCorrel_Offset)
+            if(!(selectedItem is ISub))
+            {
+                //
+                return;
+            }
+            if (((ISub)selectedItem).Parent is IHasCostCorrelations)
             {
                 correlType = CorrelationType.Cost;
             }
-            else if(selection.Column == dispCoords.PhasingCorrel_Offset)
-            {
-                correlType = CorrelationType.Phasing;
-            }
-            else if(selection.Column == dispCoords.DurationCorrel_Offset)
+            else if (((ISub)selectedItem).Parent is IHasDurationCorrelations)
             {
                 correlType = CorrelationType.Duration;
+            }
+            else if (selection.Column == dispCoords.PhasingCorrel_Offset && ((ISub)selectedItem) is IHasPhasingCorrelations)
+            {
+                correlType = CorrelationType.Phasing;
             }
             else
             {
                 correlType = CorrelationType.Null;
+                throw new Exception("Unknown Correlation Type");
             }
-                
+
             switch (correlType)
             {
                 case CorrelationType.Cost:
-                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasCostCorrelations select p).First();
-                    parent.Expand(correlType);
+                    ((ISub)selectedItem).Parent.Expand(correlType);
                     break;
                 case CorrelationType.Duration:
-                    parent = (from IHasSubs p in ((ISub)selectedItem).Parents where p is IHasDurationCorrelations select p).First();
-                    parent.Expand(correlType);
+                    ((ISub)selectedItem).Parent.Expand(correlType);
                     break;
                 case CorrelationType.Phasing:
-                    parent = (IHasPhasingCorrelations)selectedItem;
-                    parent.Expand(correlType);
+                    ((IHasPhasingCorrelations)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Null:      //Not selecting a correlation column
                     return;     

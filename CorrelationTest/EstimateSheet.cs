@@ -119,7 +119,7 @@ namespace CorrelationTest
                             else
                             {
                                 parentItem.SubEstimates.Add(thisItem);
-                                thisItem.Parents.Add(parentItem);
+                                thisItem.Parent = parentItem;
                             }
                         }
                     }
@@ -131,7 +131,7 @@ namespace CorrelationTest
                         {
                             ISub thisItem = (ISub)Items[++input_index];
                             parentItem.SubEstimates.Add(thisItem);
-                            thisItem.Parents.Add(parentItem);
+                            thisItem.Parent = parentItem;
                         }
                         else
                             throw new Exception("Malformed CASE estimate");
@@ -146,7 +146,7 @@ namespace CorrelationTest
                             else
                             {
                                 parentItem.SubEstimates.Add(thisItem);
-                                thisItem.Parents.Add(parentItem);
+                                thisItem.Parent = parentItem;
                             }
                         }
                     }
@@ -166,7 +166,7 @@ namespace CorrelationTest
                             else
                             {
                                 parentItem.SubEstimates.Add(thisItem);
-                                thisItem.Parents.Add(parentItem);
+                                thisItem.Parent = parentItem;
                             }
                         }
                     }
@@ -179,7 +179,7 @@ namespace CorrelationTest
                         {
                             ISub thisItem = (ISub)Items[++input_index];
                             parentItem.SubEstimates.Add(thisItem);
-                            thisItem.Parents.Add(parentItem);
+                            thisItem.Parent = parentItem;
                         }
                         else
                             throw new Exception("Malformed SACE estimate");
@@ -195,7 +195,7 @@ namespace CorrelationTest
                             else
                             {
                                 parentItem.SubEstimates.Add(thisItem);
-                                thisItem.Parents.Add(parentItem);
+                                thisItem.Parent = parentItem;
                             }
                         }
                     }
@@ -209,11 +209,7 @@ namespace CorrelationTest
                     if(item is ISub && item is IHasSubs)
                     {
                         //If it's a sub, see if its parent is a joint estimate. If so skip printing correlation.
-                        IEnumerable<IHasSubs> joint_parent = from IHasSubs p in ((ISub)item).Parents where p is IJointEstimate select p;
-                        if (joint_parent.Any())
-                        {
-                            continue;
-                        }
+                        if(((ISub)item).Parent is IJointEstimate) { continue; }
                     }
                     if (item is IHasCostCorrelations)
                         ((IHasCostCorrelations)item).PrintCostCorrelString();

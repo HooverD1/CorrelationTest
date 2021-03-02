@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Accord.Statistics.Models.Regression.Linear;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
@@ -102,15 +103,19 @@ namespace CorrelationTest
         {
             int size = fields.Count();
             object[,] matrix = new object[size, size];
+            matrix[size - 1, size - 1] = 1;
             for(int row = 0; row < size-1; row++)
             {
+                matrix[row, row] = 1;
                 matrix[row, row + 1] = Pairs[row].Item1;
-                for (int col = row+1; col < size; col++)
+                
+                for (int upIndex = 1; upIndex <= row; upIndex++)
                 {
-                    for(int upIndex = row-1; upIndex == 0; upIndex--)
-                    {
-                        matrix[upIndex, col] = Pairs[row].Item1 - (Pairs[row].Item2 * (row - upIndex));
-                    }                    
+                    matrix[row - upIndex, row+1] = Pairs[row].Item1 - (Pairs[row].Item2 * (upIndex));
+                }
+                for(int downIndex = 1; downIndex < size - row; downIndex++)
+                {
+                    matrix[row + downIndex, row] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})";
                 }
             }
             return matrix;

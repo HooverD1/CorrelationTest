@@ -9,7 +9,7 @@ namespace CorrelationTest
 {
     public class Input_Item : Item, ISub
     {
-        public List<IHasSubs> Parents { get; set; } = new List<IHasSubs>();
+        public IHasSubs Parent { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }

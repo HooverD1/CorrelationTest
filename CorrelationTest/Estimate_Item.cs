@@ -21,7 +21,7 @@ namespace CorrelationTest
         public Dictionary<string, object> ValueDistributionParameters { get; set; }
         public Dictionary<string, object> PhasingDistributionParameters { get; set; }
         public string Type { get; set; }
-        public List<IHasSubs> Parents { get; set; } = new List<IHasSubs>();
+        public IHasSubs Parent { get; set; }
         public List<ISub> SubEstimates { get; set; } = new List<ISub>();
         public List<Estimate_Item> Siblings { get; set; }
         public Data.CorrelationString CorrelStringObj_Cost { get; set; }
@@ -130,13 +130,18 @@ namespace CorrelationTest
         private void LoadCorrelatedValues()      //this only ran on expand before -- now runs on build
         {
             this.Siblings = new List<Estimate_Item>();
-            Estimate_Item parent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostCorrelations select est_item).First();
-            Estimate_Item grandparent = (from Estimate_Item est_item in this.Parents where est_item is IHasCostCorrelations select est_item).First();
-            if (parent == null) { return; }
-            if (parent.Parents.Count() == 0) { return; }
-            SheetType correlType = grandparent.CostCorrelationString.GetCorrelType();
+            if (this.Parent == null) { return; }
+            if (!(Parent is ISub)) { return; }
+            if (((ISub)Parent).Parent == null) { return; }
+
+            IHasSubs grandparent = ((ISub)Parent).Parent;
+
+            SheetType correlType;
+            if (grandparent is IHasCostCorrelations) { correlType = ((IHasCostCorrelations)grandparent).CostCorrelationString.GetCorrelType(); }
+            else if(grandparent is IHasDurationCorrelations) { correlType = ((IHasDurationCorrelations)grandparent).DurationCorrelationString.GetCorrelType(); }
+            else { correlType = SheetType.Unknown; }
             Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructFromParentItem(grandparent, correlType);     //How to build the matrix?
-            foreach (Estimate_Item sibling in parent.SubEstimates)
+            foreach (Estimate_Item sibling in Parent.SubEstimates)
             {
                 if (sibling == this)
                     continue;

@@ -10,7 +10,7 @@ namespace CorrelationTest
     public interface ISub
     {
         //Estimates, inputs
-        List<IHasSubs> Parents { get; set; }
+        IHasSubs Parent { get; set; }
         DisplayCoords dispCoords { get; set; }
         Excel.Range xlTypeCell { get; set; }
         Excel.Range xlCorrelCell_Cost { get; set; }
