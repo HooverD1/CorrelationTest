@@ -9,7 +9,6 @@ namespace CorrelationTest
 {
     public class CostEstimate : Estimate_Item, IHasCostCorrelations, IHasPhasingCorrelations, ISub
     {
-        public IHasSubs Parent { get; set; }
         public CostEstimate(Excel.Range itemRow, CostSheet ContainingSheetObject) : base(itemRow, ContainingSheetObject)
         {
             this.ValueDistributionParameters = new Dictionary<string, object>() {
@@ -21,7 +20,7 @@ namespace CorrelationTest
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
             this.CostDistribution = new Distribution(ValueDistributionParameters);       //Is this useless?
 
-            this.CorrelStringObj_Cost = Data.CorrelationString.ConstructFromParentItem_Cost(this);
+            //this.CorrelStringObj_Cost = Data.CorrelationString.ConstructFromParentItem_Cost(this);
             this.CorrelStringObj_Phasing = Data.CorrelationString.ConstructFromParentItem_Phasing(this);
         }
     }

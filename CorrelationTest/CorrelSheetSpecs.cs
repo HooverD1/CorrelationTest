@@ -24,8 +24,8 @@ namespace CorrelationTest
             private int distCol { get; }
             private int stringRow { get; }
             private int stringCol { get; }
-            private int tripleRow { get; }
-            private int tripleCol { get; }
+            private int pairsRow { get; }
+            private int pairsCol { get; }
 
             public Tuple<int, int> MatrixCoords { get; }
             public Tuple<int, int> MatrixCoords_End { get; set; }
@@ -34,7 +34,7 @@ namespace CorrelationTest
             public Tuple<int, int> SubIdCoords { get; }
             public Tuple<int, int> DistributionCoords { get; }
             public Tuple<int, int> StringCoords { get; }
-            public Tuple<int, int> TripleCoords { get; }
+            public Tuple<int, int> PairsCoords { get; }
             public string LinkFormat { get; }
 
             public CorrelSheetSpecs(SheetType correlSheetType)
@@ -71,8 +71,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        tripleRow = 2;
-                        tripleCol = 2;
+                        pairsRow = 2;
+                        pairsCol = 2;
                         break;
                     case SheetType.Correlation_PM:
                         matrixRow = 4;
@@ -88,8 +88,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        tripleRow = 2;
-                        tripleCol = 2;
+                        pairsRow = 2;
+                        pairsCol = 2;
                         break;
                     case SheetType.Correlation_PP:
                         matrixRow = 4;
@@ -105,8 +105,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        tripleRow = 2;
-                        tripleCol = 2;
+                        pairsRow = 2;
+                        pairsCol = 2;
                         break;
                     case SheetType.Correlation_DM:
                         matrixRow = 4;
@@ -122,8 +122,8 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        tripleRow = 2;
-                        tripleCol = 2;
+                        pairsRow = 2;
+                        pairsCol = 2;
                         break;
                     case SheetType.Correlation_DP:
                         matrixRow = 4;
@@ -134,13 +134,13 @@ namespace CorrelationTest
                         idRow = 4;
                         idCol = 1;
                         subIdRow = 5;
-                        subIdCol = 7;
+                        subIdCol = 5;
                         distRow = 5;
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        tripleRow = 2;
-                        tripleCol = 2;
+                        pairsRow = 5;
+                        pairsCol = 6;       //Requires a 2 cell width
                         break;
                     default:
                         throw new Exception("Unknown correl sheet type");
@@ -152,7 +152,7 @@ namespace CorrelationTest
                 this.SubIdCoords = new Tuple<int, int>(subIdRow, subIdCol);
                 this.DistributionCoords = new Tuple<int, int>(distRow, distCol);
                 this.StringCoords = new Tuple<int, int>(stringRow, stringCol);
-                this.TripleCoords = new Tuple<int, int>(tripleRow, tripleCol);
+                this.PairsCoords = new Tuple<int, int>(pairsRow, pairsCol);
             }
 
             public void PrintLinkCoords(Excel.Worksheet xlSheet)

@@ -33,8 +33,8 @@ namespace CorrelationTest
                 SheetType sourceType = ExtensionMethods.GetSheetType(linkedRange.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
-                string tripleString = Convert.ToString(correlSheet.xlPairsCell.Value);
-                Triple triple = new Triple(tripleString);
+                string pairString = Convert.ToString(correlSheet.xlPairsCell.Value);
+                PairSpecification pairs = PairSpecification.ConstructFromString(pairString);
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
                 Excel.Range fieldEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
@@ -50,7 +50,7 @@ namespace CorrelationTest
 
                 header.Append(numberOfInputs);
                 header.Append(",");
-                header.Append("CT");
+                header.Append("CP");
                 header.Append(",");
                 header.Append(parentID);
 
@@ -67,7 +67,7 @@ namespace CorrelationTest
                 }
                 fields.Remove(fields.Length - 1, 1);    //remove the final char
 
-                values.Append(triple.GetValuesString());
+                values.Append(pairs.GetValuesString());
 
                 //This code to convert to matrix:
                 /*
@@ -112,9 +112,9 @@ namespace CorrelationTest
                 return PairSpecification.ConstructFromString(this.Value);
             }
 
-            public override object[,] GetMatrix(string[] fields)
+            public override object[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
             {
-                return this.Pairs.GetCorrelationMatrix(fields);
+                return this.Pairs.GetCorrelationMatrix_Formulas(CorrelSheet);
             }
 
             public override string[] GetIDs()

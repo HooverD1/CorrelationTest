@@ -17,7 +17,6 @@ namespace CorrelationTest
                 SheetType correlType = CorrelString.GetCorrelType();
                 this.Specs = new Data.CorrelSheetSpecs(correlType);
                 this.xlSheet = GetXlSheet(correlType);
-                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType);
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Duration);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -25,14 +24,15 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                this.xlPairsCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
+                this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
                 this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
+                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType, this);
+                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
             }
-
+            //COLLAPSE
             public CorrelationSheet_Duration(SheetType shtType) //build from the xlsheet to get the string
             {
                 //Need a link
@@ -45,7 +45,7 @@ namespace CorrelationTest
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                this.xlPairsCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
+                this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 
                 //LINK
                 this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
@@ -69,10 +69,10 @@ namespace CorrelationTest
 
                     //NEED TO BUILD OFF THE SHEET WITHOUT LEVERAGING A CORREL STRING CELL
                     //Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
-                    Triple triple = new Triple(Convert.ToString(xlPairsCell.Value));
+                    PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, ids.Count()-1);
 
                     //Check if the matrix still matches the triple.
-                    if (this.CorrelMatrix.ValidateAgainstTriple(triple))
+                    if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
                     {       //If YES - create cs_triple object
                         this.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(this);
                     }
@@ -175,7 +175,8 @@ namespace CorrelationTest
                 }
                 if (CorrelString is Data.CorrelationString_DP)       //Need to replicate this in PT and DT.
                 {
-                    this.xlPairsCell.Value = ((Data.CorrelationString_DP)CorrelString).GetTriple().GetValuesString();
+                    this.xlPairsCell.Resize[tempEst.SubEstimates.Count()-1,2].Value = ((Data.CorrelationString_DP)CorrelString).GetPairwise().GetValuesString_Split();
+
                 }
             }
         }

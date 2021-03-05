@@ -140,7 +140,7 @@ namespace CorrelationTest
             if (grandparent is IHasCostCorrelations) { correlType = ((IHasCostCorrelations)grandparent).CostCorrelationString.GetCorrelType(); }
             else if(grandparent is IHasDurationCorrelations) { correlType = ((IHasDurationCorrelations)grandparent).DurationCorrelationString.GetCorrelType(); }
             else { correlType = SheetType.Unknown; }
-            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructFromParentItem(grandparent, correlType);     //How to build the matrix?
+            Data.CorrelationMatrix parentMatrix = Data.CorrelationMatrix.ConstructFromParentItem(grandparent, correlType, null);     //How to build the matrix?
             foreach (Estimate_Item sibling in Parent.SubEstimates)
             {
                 if (sibling == this)

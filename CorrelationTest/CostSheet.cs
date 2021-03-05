@@ -43,7 +43,7 @@ namespace CorrelationTest
         {
             this.Items = GetItemRows();
             LinkItemRows();
-            this.LoadCorrelStrings();
+            this.LoadCorrelStrings();       //This has to be done after linking so that it knows what the parent child relationships are
             //Create CorrelationStrings
         }
         public virtual List<ISub> GetSubEstimates(Excel.Range parentRow) { throw new Exception("Failed override"); }    //Is this junk?

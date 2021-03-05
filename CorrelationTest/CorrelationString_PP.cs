@@ -11,12 +11,12 @@ namespace CorrelationTest
     {
         public class CorrelationString_PP : CorrelationString
         {
-            public Triple Triple { get; set; }
-            public CorrelationString_PP(Triple pt, string[] start_dates, string parent_id)        //build a triple string out of a triple
+            public PairSpecification Pairs { get; set; }
+            public CorrelationString_PP(PairSpecification pairs, string[] start_dates, string parent_id)        //build a triple string out of a triple
             {
-                this.Triple = pt;
+                this.Pairs = pairs;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{start_dates.Length},PT,{parent_id}");  //Header
+                sb.Append($"{start_dates.Length},PP,{parent_id}");  //Header
                 sb.AppendLine();
                 //foreach (string start_date in start_dates)
                 //{
@@ -25,7 +25,7 @@ namespace CorrelationTest
                 //}
                 //sb.Remove(sb.Length - 1, 1);    //remove the final comma on the fields
                 //sb.AppendLine();
-                sb.Append(pt.ToString());
+                sb.Append(pairs.ToString());
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
@@ -39,8 +39,8 @@ namespace CorrelationTest
                 SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
-                string tripleString = Convert.ToString(correlSheet.xlPairsCell.Value);
-                Triple triple = new Triple(tripleString);
+                string pairString = Convert.ToString(correlSheet.xlPairsCell.Value);
+                PairSpecification pairs = PairSpecification.ConstructFromString(pairString);
                 StringBuilder subIDs = new StringBuilder();
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
@@ -53,7 +53,7 @@ namespace CorrelationTest
 
                 header.Append(numberOfInputs);
                 header.Append(",");
-                header.Append("PT");
+                header.Append("PP");
                 header.Append(",");
                 header.Append(parentID);
 
@@ -64,7 +64,7 @@ namespace CorrelationTest
                 }
                 fields.Remove(fields.Length - 1, 1);    //remove the final char
 
-                values.Append(triple.GetValuesString());
+                values.Append(pairs.GetValuesString());
 
                 //This code to convert to matrix:
                 /*
@@ -85,13 +85,15 @@ namespace CorrelationTest
             public CorrelationString_PP(string correlString)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
-                string triple = this.Value.Split('&')[1];
-                this.Triple = new Triple(this.GetParentID().ID, triple);
+                int firstLine = this.Value.IndexOf('&') + 1;
+                string pairString = this.Value.Substring(firstLine);
+                //string pairString = this.Value.Split('&')[1];
+                this.Pairs = PairSpecification.ConstructFromString(pairString);
             }
 
-            public override object[,] GetMatrix(string[] fields)
+            public override object[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
             {
-                return this.Triple.GetCorrelationMatrix(fields);
+                return this.Pairs.GetCorrelationMatrix_Formulas(CorrelSheet);
             }
 
             public override void PrintToSheet(Excel.Range xlPhasingCorrelCell)
@@ -135,14 +137,14 @@ namespace CorrelationTest
                 return UniqueID.ConstructFromExisting(header[2]);
             }
 
-            public Triple GetTriple()
+            public PairSpecification GetPairwise()
             {
                 string[] correlLines = DelimitString(this.Value);
                 if (correlLines.Length != 2)
                     throw new Exception("Malformed triple string.");
-                string uidString = correlLines[0].Split(',')[2];
-                string tripleString = correlLines[1];
-                return new Triple(uidString, tripleString);
+                //string uidString = correlLines[0].Split(',')[2];
+                string pairString = correlLines[1];
+                return PairSpecification.ConstructFromString(pairString);
             }
 
             public override string[] GetIDs()

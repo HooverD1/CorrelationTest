@@ -72,15 +72,15 @@ namespace CorrelationTest
                 case SheetType.FilterData:
                     return "$FILTER";
                 case SheetType.Correlation_CP:
-                    return "$CORRELATION_IT";
+                    return "$CORRELATION_CP";
                 case SheetType.Correlation_CM:
-                    return "$CORRELATION_IM";
+                    return "$CORRELATION_CM";
                 case SheetType.Correlation_PM:
                     return "$CORRELATION_PM";
                 case SheetType.Correlation_PP:
-                    return "$CORRELATION_PT";
+                    return "$CORRELATION_PP";
                 case SheetType.Correlation_DP:
-                    return "$CORRELATION_DT";
+                    return "$CORRELATION_DP";
                 case SheetType.Correlation_DM:
                     return "$CORRELATION_DM";
                 default:
@@ -93,17 +93,17 @@ namespace CorrelationTest
             string sheetIdent = xlSheet.Cells[1, 1].Value;
             switch (sheetIdent)
             {
-                case "$CORRELATION_CT":
+                case "$CORRELATION_CP":
                     return SheetType.Correlation_CP;
                 case "$CORRELATION_CM":
                     return SheetType.Correlation_CM;
                 case "$CORRELATION_PM":
                     return SheetType.Correlation_PM;
-                case "$CORRELATION_PT":
+                case "$CORRELATION_PP":
                     return SheetType.Correlation_PP;
                 case "$CORRELATION_DM":
                     return SheetType.Correlation_DM;
-                case "$CORRELATION_DT":
+                case "$CORRELATION_DP":
                     return SheetType.Correlation_DP;
                 case "$WBS":
                     return SheetType.WBS;
@@ -175,22 +175,40 @@ namespace CorrelationTest
         {
             SheetType sheetType = ExtensionMethods.GetSheetType(linkSource.Worksheet);
             DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sheetType);
+            string parentType = Convert.ToString(linkSource.EntireRow.Cells[1, dc.Type_Offset].value);
 
-            if(dc.CostCorrel_Offset == linkSource.Column)
+            CorrelationType cType = GetCorrelationTypeFromItemType(parentType);
+            if (cType == CorrelationType.Null)
             {
-                return CorrelationType.Cost;
-            }
-            else if(dc.PhasingCorrel_Offset == linkSource.Column)
-            {
-                return CorrelationType.Phasing;
-            }
-            else if(dc.DurationCorrel_Offset == linkSource.Column)
-            {
-                return CorrelationType.Duration;
+                if (dc.PhasingCorrel_Offset == linkSource.Column)
+                {
+                    return CorrelationType.Phasing;
+                }
+                else
+                {
+                    throw new Exception("Unknown correlation type");
+                }
             }
             else
             {
-                return CorrelationType.Null;    
+                return cType;
+            }
+            
+        }
+        public static CorrelationType GetCorrelationTypeFromItemType(string itemType)
+        {
+            switch (itemType)
+            {
+                case "CASE":
+                    return CorrelationType.Cost;
+                case "SACE":
+                    return CorrelationType.Duration;
+                case "CE":
+                    return CorrelationType.Cost;
+                case "SE":
+                    return CorrelationType.Duration;
+                default:
+                    return CorrelationType.Null;
             }
         }
     }

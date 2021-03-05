@@ -224,10 +224,11 @@ namespace CorrelationTest
                         break;
                     default:
                         throw new Exception("Not a valid Correlation Sheet type");
+                    
                 }
-
                 //Why aren't these being done in the constructors...?
                 newSheet.xlSheet = xlCorrelationSheet;
+                newSheet.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(newSheet);
                 return newSheet;
             }
 
@@ -264,15 +265,15 @@ namespace CorrelationTest
             {
                 switch (correlStringValue)
                 {
-                    case "CT":
+                    case "CP":
                         return Data.CorrelStringType.CostPair;
                     case "CM":
                         return Data.CorrelStringType.CostMatrix;
                     case "PM":
                         return Data.CorrelStringType.PhasingMatrix;
-                    case "PT":
+                    case "PP":
                         return Data.CorrelStringType.PhasingPair;
-                    case "DT":
+                    case "DP":
                         return Data.CorrelStringType.DurationPair;
                     case "DM":
                         return Data.CorrelStringType.DurationMatrix;
@@ -287,8 +288,6 @@ namespace CorrelationTest
                 CorrelationType cType = ExtensionMethods.GetCorrelationTypeFromLink(correlSheet.LinkToOrigin.LinkSource);
                 if (correlSheet == null)
                     return;
-                Data.CorrelationString correlationString = Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet);
-                correlSheet.CorrelString = correlationString;
 
                 //Validate matrix checks
                 //Validate link source ID

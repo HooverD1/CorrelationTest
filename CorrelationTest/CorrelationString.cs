@@ -105,7 +105,9 @@ namespace CorrelationTest
                 return correlLines;
             }
 
-            public virtual object[,] GetMatrix(string[] fields)
+            public virtual object[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet) { throw new Exception("Failed override"); }
+
+            public virtual object[,] GetMatrix_Values()
             {   //returning 2,2 instead of 3,3
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] lines = DelimitString(myValue);
@@ -149,15 +151,15 @@ namespace CorrelationTest
                 {
                     case "CM":
                         return SheetType.Correlation_CM;
-                    case "CT":
+                    case "CP":
                         return SheetType.Correlation_CP;
                     case "PM":
                         return SheetType.Correlation_PM;
-                    case "PT":
+                    case "PP":
                         return SheetType.Correlation_PP;
                     case "DM":
                         return SheetType.Correlation_DM;
-                    case "DT":
+                    case "DP":
                         return SheetType.Correlation_DP;
                     default:
                         throw new Exception("Unknown correl type");
@@ -195,7 +197,7 @@ namespace CorrelationTest
                 header.Append(ParentItem.SubEstimates.Count);
                 header.Append(",");
 
-                header.Append("CT");
+                header.Append("CP");
                 header.Append(",");
 
                 header.Append(ParentItem.uID.ID);
@@ -204,9 +206,12 @@ namespace CorrelationTest
                     header.Append(",");
                     header.Append(ParentItem.SubEstimates[i].uID.ID);
                 }
-
-                values.Append("0,0,0");
-                return new CorrelationString_CP($"{header}&{values}");
+                for(int i = 0; i < ParentItem.SubEstimates.Count; i++)
+                {
+                    values.Append("&0,0");
+                }
+                    
+                return new CorrelationString_CP($"{header}{values}");
             }
 
             public static CorrelationString_PP ConstructFromParentItem_Phasing(IHasPhasingCorrelations ParentItem)
@@ -217,7 +222,7 @@ namespace CorrelationTest
                 header.Append(ParentItem.Periods.Count());
                 header.Append(",");
 
-                header.Append("PT");
+                header.Append("PP");
                 header.Append(",");
 
                 header.Append(ParentItem.uID.ID);
@@ -226,9 +231,12 @@ namespace CorrelationTest
                     header.Append(",");
                     header.Append(ParentItem.Periods[i].pID.ID);
                 }
-
-                values.Append("0,0,0");
-                return new CorrelationString_PP($"{header}&{values}");
+                for(int i = 0; i< ParentItem.Periods.Count(); i++)
+                {
+                    values.Append("&0,0");
+                }
+                
+                return new CorrelationString_PP($"{header}{values}");
             }
 
             public static CorrelationString_DP ConstructFromParentItem_Duration(IHasDurationCorrelations ParentItem)
@@ -239,7 +247,7 @@ namespace CorrelationTest
                 header.Append(ParentItem.SubEstimates.Count);
                 header.Append(",");
 
-                header.Append("DT");
+                header.Append("DP");
                 header.Append(",");
 
                 header.Append(ParentItem.uID.ID);
@@ -248,9 +256,11 @@ namespace CorrelationTest
                     header.Append(",");
                     header.Append(ParentItem.SubEstimates[i].uID.ID);
                 }
-
-                values.Append("0,0,0");
-                return new CorrelationString_DP($"{header}&{values}");
+                for (int i = 0; i < ParentItem.SubEstimates.Count; i++)
+                {
+                    values.Append("&0,0");
+                }
+                return new CorrelationString_DP($"{header}{values}");
             }
 
             private static CorrelStringType ParseCorrelType(string correlStringValue)
@@ -263,13 +273,13 @@ namespace CorrelationTest
                 {
                     case "CM":
                         return CorrelStringType.CostMatrix;
-                    case "CT":
+                    case "CP":
                         return CorrelStringType.CostPair;
                     case "PM":
                         return CorrelStringType.PhasingMatrix;
-                    case "PT":
+                    case "PP":
                         return CorrelStringType.PhasingPair;
-                    case "DT":
+                    case "DP":
                         return CorrelStringType.DurationPair;
                     case "DM":
                         return CorrelStringType.DurationMatrix;
@@ -369,15 +379,15 @@ namespace CorrelationTest
                 string sheetTag = Convert.ToString(correlSheet.xlSheet.Cells[1, 1].value);
                 switch(sheetTag)
                 {
-                    case "$CORRELATION_CT":
+                    case "$CORRELATION_CP":
                         return new CorrelationString_CP((Sheets.CorrelationSheet_Cost)correlSheet);
                     case "$CORRELATION_CM":
                         return new CorrelationString_CM((Sheets.CorrelationSheet_Cost)correlSheet);
-                    case "$CORRELATION_PT":
+                    case "$CORRELATION_PP":
                         return new CorrelationString_PP((Sheets.CorrelationSheet_Phasing)correlSheet);
                     case "$CORRELATION_PM":
                         return new CorrelationString_PM((Sheets.CorrelationSheet_Phasing)correlSheet);
-                    case "$CORRELATION_DT":
+                    case "$CORRELATION_DP":
                         return new CorrelationString_DP((Sheets.CorrelationSheet_Duration)correlSheet);
                     case "$CORRELATION_DM":
                         return new CorrelationString_DM((Sheets.CorrelationSheet_Duration)correlSheet);
@@ -392,15 +402,15 @@ namespace CorrelationTest
                 string[] header = lines[0].Split(',');
                 switch (header[1])
                 {
-                    case "CT":
+                    case "CP":
                         return new CorrelationString_CP(correlStringValue);
                     case "CM":
                         return new CorrelationString_CM(correlStringValue);
-                    case "PT":
+                    case "PP":
                         return new CorrelationString_PP(correlStringValue);
                     case "PM":
                         return new CorrelationString_PM(correlStringValue);
-                    case "DT":
+                    case "DP":
                         return new CorrelationString_DP(correlStringValue);
                     case "DM":
                         return new CorrelationString_DM(correlStringValue);
@@ -414,9 +424,9 @@ namespace CorrelationTest
                 switch (csType)
                 {
                     case CorrelStringType.PhasingPair:
-                        Triple pt = new Triple(item.uID.ID, "0,0,0");
                         string[] start_dates = ((IHasPhasingCorrelations)item).Periods.Select(x => x.Start_Date).ToArray();
-                        return new Data.CorrelationString_PP(pt, start_dates, item.uID.ID);
+                        PairSpecification pairs = PairSpecification.ConstructFromSinglePair(start_dates.Count(), 0, 0);
+                        return new Data.CorrelationString_PP(pairs, start_dates, item.uID.ID);
                     case CorrelStringType.PhasingMatrix:
                         IEnumerable<string> start_dates2 = from Period prd in ((IHasPhasingCorrelations)item).Periods select prd.pID.PeriodTag.ToString();
                         return CorrelationString_PM.ConstructZeroString(start_dates2.ToArray());
@@ -436,8 +446,9 @@ namespace CorrelationTest
                     case CorrelStringType.DurationPair:
                         if (((IHasDurationCorrelations)item).SubEstimates.Count < 2)
                             return null;
-                        Triple it2 = new Triple(item.uID.ID, "0,0,0");
+                        
                         IEnumerable<string> fields3 = from ISub sub in ((IHasDurationCorrelations)item).SubEstimates select sub.Name;
+                        PairSpecification it2 = PairSpecification.ConstructFromSinglePair(fields3.Count(), 0, 0);
                         return new Data.CorrelationString_DP(fields3.ToArray(), it2, item.uID.ID, ((IHasDurationCorrelations)item).SubEstimates.Select(x => x.uID.ID).ToArray());
                     default:
                         throw new Exception("Cannot construct CorrelationString");

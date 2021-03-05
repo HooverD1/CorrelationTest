@@ -25,6 +25,20 @@ namespace CorrelationTest
             return pairSpec;
         }
 
+        public static PairSpecification ConstructFromRange(Excel.Range xlPairsCell, int sizeOfRange)
+        {
+            StringBuilder sb = new StringBuilder();
+            for(int row = 1; row <= sizeOfRange; row++)
+            {
+                sb.Append((string)Convert.ToString(xlPairsCell.Cells[row, 1].value));
+                sb.Append(",");
+                sb.Append((string)Convert.ToString(xlPairsCell.Cells[row, 2].value));
+                sb.Append("&");
+            }
+            sb.Remove(sb.Length - 1, 1);    //remove the final char
+            return PairSpecification.ConstructFromString(sb.ToString());
+        }
+
         public static PairSpecification ConstructFromString(string pairString)
         {
             PairSpecification pairSpec = new PairSpecification();
@@ -33,14 +47,15 @@ namespace CorrelationTest
             //Pair 2
             // ...
             //Pair N
+            pairSpec.Value = pairString;
             string[] lines = pairString.Split('&');
-            pairSpec.Pairs = new Tuple<double, double>[lines.Count() - 1];
-            for(int i = 1; i < lines.Length; i++)
+            pairSpec.Pairs = new Tuple<double, double>[lines.Count()];
+            for(int i = 0; i < lines.Length; i++)
             {
                 string[] pair = lines[i].Split(',');
-                pairSpec.Pairs[i - 1] = new Tuple<double, double>(Convert.ToDouble(pair[0]), Convert.ToDouble(pair[1]));
+                pairSpec.Pairs[i] = new Tuple<double, double>(Convert.ToDouble(pair[0]), Convert.ToDouble(pair[1]));
             }
-            pairSpec.Value = pairSpec.ToString();
+            
             return pairSpec;
         }
 
@@ -99,9 +114,9 @@ namespace CorrelationTest
             return sb.ToString();
         }
 
-        public object[,] GetCorrelationMatrix(string[] fields)
+        public object[,] GetCorrelationMatrix_Values()
         {
-            int size = fields.Count();
+            int size = this.Pairs.Count() + 1;
             object[,] matrix = new object[size, size];
             matrix[size - 1, size - 1] = 1;
             for(int row = 0; row < size-1; row++)
@@ -119,6 +134,50 @@ namespace CorrelationTest
                 }
             }
             return matrix;
+        }
+
+        public object[,] GetCorrelationMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
+        {
+            int size = this.Pairs.Count() + 1;
+            Excel.Worksheet xlCorrelSheet = CorrelSheet.xlSheet;
+            Data.CorrelSheetSpecs specs = CorrelSheet.Specs;
+            Excel.Range pairsRange = CorrelSheet.xlPairsCell;
+            
+            object[,] matrix = new object[size, size];
+            matrix[size - 1, size - 1] = 1;
+            for (int row = 0; row < size - 1; row++)
+            {
+                matrix[row, row] = 1;
+                matrix[row, row + 1] = $"={pairsRange.Cells[row+1, 1].Address}";
+
+                for (int upIndex = 1; upIndex <= row; upIndex++)
+                {
+                    matrix[row - upIndex, row + 1] = $"={pairsRange.Cells[row+1, 1].Address} - {pairsRange.Cells[row+1, 2].Address} * {upIndex}";
+                }
+                for (int downIndex = 1; downIndex < size - row; downIndex++)
+                {
+                    matrix[row + downIndex, row] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})";
+                }
+            }
+            return matrix;
+        }
+
+        public object[,] GetValuesString_Split()
+        {
+            string[] lines = this.Value.Split('&');
+            object[,] returnValues = new object[lines.Length, 2];
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] pair = lines[i].Split(',');
+                returnValues[i, 0] = pair[0];
+                returnValues[i, 1] = pair[1];
+            }
+            return returnValues;
+        }
+
+        public string GetValuesString()
+        {
+            return this.Value;
         }
     }
 }

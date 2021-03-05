@@ -17,7 +17,7 @@ namespace CorrelationTest
                 SheetType correlType = CorrelString.GetCorrelType();
                 this.Specs = new Data.CorrelSheetSpecs(correlType);
                 this.xlSheet = GetXlSheet(correlType);
-                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType);
+                
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Cost);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -25,12 +25,14 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                this.xlPairsCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
+                this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
+                
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
                 this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
+                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType, this);
+                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
             }
 
             //COLLAPSE METHOD
@@ -46,7 +48,7 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 if(shtType == SheetType.Correlation_CP)
-                    this.xlPairsCell = xlSheet.Cells[Specs.TripleCoords.Item1, Specs.TripleCoords.Item2];
+                    this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.LinkToOrigin = new Data.Link(Convert.ToString(xlLinkCell.Value));
                 //
                 //Build the CorrelMatrix
@@ -72,9 +74,9 @@ namespace CorrelationTest
                     //string correlStringVal = this.xlCorrelStringCell.Value;
                     //Data.CorrelationString_CP existing_cst = new Data.CorrelationString_CP(correlStringVal);
 
-                    Triple triple = new Triple(Convert.ToString(xlPairsCell.Value));
+                    PairSpecification pairs = PairSpecification.ConstructFromString(Convert.ToString(xlPairsCell.Value));
                     //Check if the matrix still matches the triple.
-                    if (this.CorrelMatrix.ValidateAgainstTriple(triple))
+                    if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
                     {       //If YES - create cs_triple object
                         this.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(this);
                     }
