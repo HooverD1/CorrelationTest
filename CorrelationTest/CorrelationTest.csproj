@@ -200,6 +200,7 @@
     <Compile Include="CostEstimate.cs" />
     <Compile Include="CostScheduleEstimate.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="MyGlobals.cs" />
     <Compile Include="IJointEstimate.cs" />
     <Compile Include="ISub.cs" />
     <Compile Include="Item.cs" />

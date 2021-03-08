@@ -49,10 +49,11 @@ namespace CorrelationTest
                 
                 //LINK
                 this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
-                
+
                 //Build the CorrelMatrix
-                object[] ids = Data.CorrelationString.GetIDsFromString(xlCorrelStringCell.Value);
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
+                object[] ids = ExtensionMethods.ToJaggedArray((object[,])this.xlSubIdCell.Resize[fieldsValues.GetLength(1), 1].Value)[1];
+                
                 fieldsValues = ExtensionMethods.ReIndexArray(fieldsValues);
                 object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[0];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown]];
@@ -178,6 +179,13 @@ namespace CorrelationTest
                     this.xlPairsCell.Resize[tempEst.SubEstimates.Count()-1,2].Value = ((Data.CorrelationString_DP)CorrelString).GetPairwise().GetValuesString_Split();
 
                 }
+            }
+
+            public override void FormatSheet()
+            {
+                Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
+                Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
+                matrixRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
             }
         }
     }

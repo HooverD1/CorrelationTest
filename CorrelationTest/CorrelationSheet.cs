@@ -239,26 +239,32 @@ namespace CorrelationTest
                 //Cast the parent item
                 //Pick up its sheet type off the correlstring on the parent item
                 //Remove correltype parameter
-
+                CorrelationSheet returnSheet;
                 switch (CorrelType)
                 {
                     //These need to be sending the parent and the correltype, no?
                     case SheetType.Correlation_CM:
-                        return new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);       
+                        returnSheet = new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
+                        break;
                     case SheetType.Correlation_CP:
-                        return new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
+                        break;
                     case SheetType.Correlation_PM:
-                        return new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
+                        break;
                     case SheetType.Correlation_PP:
-                        return new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
+                        break;
                     case SheetType.Correlation_DM:
-                        return new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
+                        break;
                     case SheetType.Correlation_DP:
-                        return new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
+                        break;
                     default:
                         throw new Exception("Unknown correlation type");
                 }
-                throw new NotImplementedException();
+                return returnSheet;
             }
 
             private Data.CorrelStringType GetCorrelType(string correlStringValue)
@@ -351,6 +357,11 @@ namespace CorrelationTest
                 //Create the form
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
                 CorrelVisual.Show();
+            }
+
+            public virtual void FormatSheet()
+            {
+                //throw new Exception("Failed override");
             }
 
             //public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator

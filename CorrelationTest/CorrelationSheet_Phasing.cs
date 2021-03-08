@@ -166,6 +166,11 @@ namespace CorrelationTest
                 }
                 //this.xlDistCell.Value = tempEst.ItemDistribution.Name;
             }
+
+            public override void FormatSheet()
+            {
+
+            }
         }
     }
 }

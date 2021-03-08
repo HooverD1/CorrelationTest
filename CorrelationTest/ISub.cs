@@ -12,10 +12,10 @@ namespace CorrelationTest
         //Estimates, inputs
         IHasSubs Parent { get; set; }
         DisplayCoords dispCoords { get; set; }
+        Excel.Range xlRow { get; set; }
         Excel.Range xlTypeCell { get; set; }
         Excel.Range xlCorrelCell_Cost { get; set; }
         Excel.Range xlCorrelCell_Duration { get; set; }
-        Excel.Range xlCorrelCell_Phasing { get; set; }
         //Period[] Periods { get; set; }
         UniqueID uID { get; set; }
         Distribution CostDistribution { get; set; }

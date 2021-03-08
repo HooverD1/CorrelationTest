@@ -114,8 +114,7 @@ namespace CorrelationTest
 
         public void PrintCostCorrelString()
         {
-            IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
-                                                   select sub.xlCorrelCell_Cost;
+            IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates select sub.xlCorrelCell_Cost;
             if (this.CostCorrelationString != null)
                 this.CostCorrelationString.PrintToSheet(xlFragments.ToArray());
         }

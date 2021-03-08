@@ -43,10 +43,13 @@
             this.btnVisualize = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.FakeFields = this.Factory.CreateRibbonButton();
+            this.DebugModeToggle = this.Factory.CreateRibbonButton();
+            this.DeveloperTools = this.Factory.CreateRibbonGroup();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
+            this.DeveloperTools.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -55,6 +58,7 @@
             this.tab1.Groups.Add(this.group1);
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group3);
+            this.tab1.Groups.Add(this.DeveloperTools);
             this.tab1.Label = "TabAddIns";
             this.tab1.Name = "tab1";
             // 
@@ -108,6 +112,18 @@
             this.FakeFields.Name = "FakeFields";
             this.FakeFields.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.FakeFields_Click);
             // 
+            // DebugModeToggle
+            // 
+            this.DebugModeToggle.Label = "Toggle Debug Mode";
+            this.DebugModeToggle.Name = "DebugModeToggle";
+            this.DebugModeToggle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.DebugModeToggle_Click);
+            // 
+            // DeveloperTools
+            // 
+            this.DeveloperTools.Items.Add(this.DebugModeToggle);
+            this.DeveloperTools.Label = "DeveloperTools";
+            this.DeveloperTools.Name = "DeveloperTools";
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -122,6 +138,8 @@
             this.group2.PerformLayout();
             this.group3.ResumeLayout(false);
             this.group3.PerformLayout();
+            this.DeveloperTools.ResumeLayout(false);
+            this.DeveloperTools.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -137,6 +155,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnVisualize;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup DeveloperTools;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton DebugModeToggle;
     }
 
     partial class ThisRibbonCollection

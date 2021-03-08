@@ -13,10 +13,12 @@ namespace CorrelationTest
         {
             public PairSpecification Pairs { get; set; }
 
+            //EXPAND
             public CorrelationString_DP(string correlStringValue)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
-                string pairString = this.Value.Split('&')[1];
+                int firstLine = this.Value.IndexOf('&');
+                string pairString = this.Value.Substring(firstLine + 1);
                 this.Pairs = PairSpecification.ConstructFromString(pairString);
             }
 

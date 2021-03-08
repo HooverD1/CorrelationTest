@@ -40,8 +40,8 @@ namespace CorrelationTest
             this.xlDollarCell = itemRow.Cells[1, dispCoords.Dollar_Offset];
             this.xlTypeCell = itemRow.Cells[1, dispCoords.Type_Offset];
             this.xlCorrelCell_Cost = itemRow.Cells[1, dispCoords.CostCorrel_Offset];
-            this.xlCorrelCell_Phasing = itemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
             this.xlCorrelCell_Duration = itemRow.Cells[1, dispCoords.DurationCorrel_Offset];
+            this.xlCorrelCell_Phasing = itemRow.Cells[1, dispCoords.PhasingCorrel_Offset];
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
             this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
@@ -242,7 +242,27 @@ namespace CorrelationTest
 
         public virtual void LoadDurationCorrelString()
         {
-            this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
+            //This needs to check if a string already exists.
+            //It checks in the first child since Duration correlation is stored against the child row
+            var firstChild = this.SubEstimates.First();
+            if(firstChild.xlCorrelCell_Duration.Value == null)
+            {
+                this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
+            }
+            else
+            {
+                //Something in the cell that can either be resolved into a correl string or not
+                try
+                {
+                    string durationString = Data.CorrelationString.ConstructStringFromRange(from ISub sub in this.SubEstimates select sub.xlCorrelCell_Duration);
+                    this.DurationCorrelationString = Data.CorrelationString.ConstructFromStringValue(durationString);
+                }
+                catch
+                {
+                    if(MyGlobals.DebugMode)
+                        throw new Exception("Malformed correl string");
+                }
+            }            
         }
 
         public virtual void PrintDurationCorrelString()
@@ -285,6 +305,7 @@ namespace CorrelationTest
             SheetType typeOfCost = this.CostCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
             correlSheet.PrintToSheet();
+            correlSheet.FormatSheet();
         }
 
         private void Expand_Phasing()
@@ -292,13 +313,16 @@ namespace CorrelationTest
             SheetType typeOfCost = this.PhasingCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
             correlSheet.PrintToSheet();
+            correlSheet.FormatSheet();
         }
 
         private void Expand_Duration()
         {
             SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            //This needs to pull in any existing correlation string
             correlSheet.PrintToSheet();
+            correlSheet.FormatSheet();
         }
     }
 

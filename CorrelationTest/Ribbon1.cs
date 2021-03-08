@@ -334,5 +334,13 @@ namespace CorrelationTest
             correlSheet.VisualizeCorrel();
         }
 
+        private void DebugModeToggle_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (MyGlobals.DebugMode)
+                MyGlobals.DebugMode = false;
+            else
+                MyGlobals.DebugMode = true;
+            MessageBox.Show($"Debug Mode set to {MyGlobals.DebugMode.ToString()}");
+        }
     }
 }

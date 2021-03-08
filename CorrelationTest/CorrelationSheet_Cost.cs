@@ -33,6 +33,7 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType, this);
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
+                this.FormatSheet();
             }
 
             //COLLAPSE METHOD
@@ -89,7 +90,14 @@ namespace CorrelationTest
                 {
                     this.CorrelString = new Data.CorrelationString_CM(parent_id, ids, fields, this.CorrelMatrix);
                 }
-                
+                this.FormatSheet();
+            }
+
+            public override void FormatSheet()
+            {
+                Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
+                Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
+                matrixRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
             }
             
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
