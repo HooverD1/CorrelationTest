@@ -219,6 +219,7 @@
     <Compile Include="PairSpecification.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PeriodID.cs" />
+    <Compile Include="Sandbox.cs" />
     <Compile Include="ScheduleCostEstimate.cs" />
     <Compile Include="ScheduleEstimate.cs" />
     <Compile Include="Sum_Item.cs" />

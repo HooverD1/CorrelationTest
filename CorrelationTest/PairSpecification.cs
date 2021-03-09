@@ -63,27 +63,9 @@ namespace CorrelationTest
 
         public static PairSpecification ConstructByFittingMatrix(object[,] matrix, bool forceFitToOffDiagonal = false)
         {
-            int size = matrix.GetLength(1);
-            Tuple<double, double>[] pairs = new Tuple<double, double>[size-1];
-            if(matrix.GetLength(0) != size)
-            {
-                throw new Exception("Matrix is not square");
-            }
-            for(int row = 0; row < size - 1; row++)
-            {
-                for (int col = row+2; col < size; col++)
-                {
-                    double[] points = GetPoints(row, matrix);
-                    if (!forceFitToOffDiagonal)
-                        pairs[row] = GetPair(points);
-                    else
-                        throw new NotImplementedException();
-                }
-            }
-            PairSpecification pspec = new PairSpecification();
-            pspec.Pairs = pairs;
-            pspec.Value = pspec.ToString();
-            return pspec;
+            PairSpecification ps = new PairSpecification();
+            ps.Pairs = Sandbox.FitMatrix(matrix, forceFitToOffDiagonal);
+            return ps;
         }
 
         private static double[] GetPoints(int row, object[,] matrix)
@@ -181,5 +163,7 @@ namespace CorrelationTest
         {
             return this.Value;
         }
+
+
     }
 }

@@ -9,7 +9,7 @@ namespace CorrelationTest
 {
     public static class ExtensionMethods
     {
-        internal static T[][] ToJaggedArray<T>(this T[,] twoDimensionalArray)
+        internal static T[][] ToJaggedArray<T>(this T[,] twoDimensionalArray, bool transpose = false)
         {
             int rowsFirstIndex = twoDimensionalArray.GetLowerBound(0);
             int rowsLastIndex = twoDimensionalArray.GetUpperBound(0);
@@ -26,10 +26,27 @@ namespace CorrelationTest
 
                 for (int j = columnsFirstIndex; j <= columnsLastIndex; j++)
                 {
-                    jaggedArray[i][j] = twoDimensionalArray[i, j];
+                    if(!transpose)
+                        jaggedArray[i][j] = twoDimensionalArray[i, j];
+                    else
+                        jaggedArray[i][j] = twoDimensionalArray[j, i];
                 }
             }
             return jaggedArray;
+        }
+
+        public static T[,] Transpose<T>(T[,] inputArray)
+        {
+            int size = inputArray.GetLength(0);
+            T[,] returnArray = new T[size, size];
+            for(int r = 0; r < size; r++)
+            {
+                for(int c = 0; c < size; c++)
+                {
+                    returnArray[c, r] = inputArray[r, c];
+                }
+            }
+            return returnArray;
         }
 
         public static T[] ReIndexArray<T>(T[] inputArray)
@@ -211,5 +228,7 @@ namespace CorrelationTest
                     return CorrelationType.Null;
             }
         }
+
+        
     }
 }

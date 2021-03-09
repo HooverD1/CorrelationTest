@@ -343,5 +343,32 @@ namespace CorrelationTest
                 MyGlobals.DebugMode = true;
             MessageBox.Show($"Debug Mode set to {MyGlobals.DebugMode.ToString()}");
         }
+
+        private void GenerateMatrix_Click(object sender, RibbonControlEventArgs e)
+        {
+            const int size = 1000;
+            const string xlSheetName = "Matrix Fit Test";
+            Excel.Worksheet xlSheet;
+            IEnumerable<Excel.Worksheet> xlSheets = from Excel.Worksheet ms in ThisAddIn.MyApp.Worksheets where ms.Name == xlSheetName select ms;
+            if(!xlSheets.Any())
+            {
+                //Create the sheet
+                xlSheet = ThisAddIn.MyApp.Worksheets.Add();
+                xlSheet.Name = xlSheetName;
+            }
+            else
+            {
+                xlSheet = xlSheets.First();
+            }
+            object[,] testMatrix = Sandbox.CreateRandomTestCorrelationMatrix(size);
+            xlSheet.Cells[1, 3].Resize[size, size].value = testMatrix;
+            
+            var pairs = Sandbox.FitMatrix(testMatrix, false);
+            for(int i = 1; i <= pairs.Count(); i++)
+            {
+                xlSheet.Cells[i, 1].value = pairs[i - 1].Item1;
+                xlSheet.Cells[i, 2].value = pairs[i - 1].Item2;
+            }
+        }
     }
 }

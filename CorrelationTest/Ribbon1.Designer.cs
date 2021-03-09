@@ -43,8 +43,9 @@
             this.btnVisualize = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.FakeFields = this.Factory.CreateRibbonButton();
-            this.DebugModeToggle = this.Factory.CreateRibbonButton();
             this.DeveloperTools = this.Factory.CreateRibbonGroup();
+            this.DebugModeToggle = this.Factory.CreateRibbonButton();
+            this.GenerateMatrix = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -103,6 +104,7 @@
             // group3
             // 
             this.group3.Items.Add(this.FakeFields);
+            this.group3.Items.Add(this.GenerateMatrix);
             this.group3.Label = "Fake Data";
             this.group3.Name = "group3";
             // 
@@ -112,17 +114,23 @@
             this.FakeFields.Name = "FakeFields";
             this.FakeFields.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.FakeFields_Click);
             // 
+            // DeveloperTools
+            // 
+            this.DeveloperTools.Items.Add(this.DebugModeToggle);
+            this.DeveloperTools.Label = "DeveloperTools";
+            this.DeveloperTools.Name = "DeveloperTools";
+            // 
             // DebugModeToggle
             // 
             this.DebugModeToggle.Label = "Toggle Debug Mode";
             this.DebugModeToggle.Name = "DebugModeToggle";
             this.DebugModeToggle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.DebugModeToggle_Click);
             // 
-            // DeveloperTools
+            // GenerateMatrix
             // 
-            this.DeveloperTools.Items.Add(this.DebugModeToggle);
-            this.DeveloperTools.Label = "DeveloperTools";
-            this.DeveloperTools.Name = "DeveloperTools";
+            this.GenerateMatrix.Label = "Generate Random Matrix";
+            this.GenerateMatrix.Name = "GenerateMatrix";
+            this.GenerateMatrix.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateMatrix_Click);
             // 
             // Ribbon1
             // 
@@ -157,6 +165,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnVisualize;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup DeveloperTools;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton DebugModeToggle;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton GenerateMatrix;
     }
 
     partial class ThisRibbonCollection
