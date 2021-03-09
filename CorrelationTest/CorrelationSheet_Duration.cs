@@ -20,7 +20,7 @@ namespace CorrelationTest
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Duration);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];      //Is this junk?
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
@@ -61,7 +61,8 @@ namespace CorrelationTest
                 this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
                 //Build the CorrelString, which can print itself during collapse
                 //Get these from the Header.
-                string parent_id = Convert.ToString(xlIDCell.Value);
+                //string parent_id = Convert.ToString(xlIDCell.Value);        //Get this from the header
+                string parent_id = Data.CorrelationString.GetParentIDFromCorrelStringValue(xlCorrelStringCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 if (sheetType == SheetType.Correlation_DP)
                 {
@@ -70,7 +71,7 @@ namespace CorrelationTest
 
                     //NEED TO BUILD OFF THE SHEET WITHOUT LEVERAGING A CORREL STRING CELL
                     //Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
-                    PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, ids.Count()-1);
+                    PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Count()-1);
 
                     //Check if the matrix still matches the triple.
                     if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
@@ -158,34 +159,82 @@ namespace CorrelationTest
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                IHasDurationCorrelations tempEst = (IHasDurationCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
-                tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
+                //Aren't the estimates already here?
+                Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
+                IHasDurationCorrelations parentEstimate;
+                if(!(parentItem is IHasDurationCorrelations))
+                {
+                    throw new Exception("Item has no duration correlations");
+                }
+                else
+                {
+                    parentEstimate = (IHasDurationCorrelations)parentItem;
+                }
+                //IHasDurationCorrelations tempEst = (IHasDurationCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
+                //tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
-                this.xlIDCell.ColumnWidth = 40;
                 CorrelString.PrintToSheet(xlCorrelStringCell);
-                for (int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
+                for (int subIndex = 0; subIndex < parentEstimate.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
                     //Distributions
-                    if(tempEst.SubEstimates[subIndex] is IHasDurationCorrelations)
-                        this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
+                    if(parentEstimate.SubEstimates[subIndex] is IHasDurationCorrelations)
+                        this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(parentEstimate, subIndex);
                     //IDs
-                    this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(tempEst, subIndex);
+                    this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(parentEstimate, subIndex);
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
                 if (CorrelString is Data.CorrelationString_DP)       //Need to replicate this in PT and DT.
                 {
-                    this.xlPairsCell.Resize[tempEst.SubEstimates.Count()-1,2].Value = ((Data.CorrelationString_DP)CorrelString).GetPairwise().GetValuesString_Split();
-
+                    this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count()-1,2].Value = ((Data.CorrelationString_DP)CorrelString).GetPairwise().GetValuesString_Split();
                 }
+                PrintColumnHeaders();
+            }
+
+            private void PrintColumnHeaders()
+            {
+                SheetType sType = ExtensionMethods.GetSheetType(this.xlSheet);
+                if(sType == SheetType.Correlation_DP)
+                {
+                    this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
+                    this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
+                }
+                this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+
             }
 
             public override void FormatSheet()
             {
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
-                matrixRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+
+                //THIS SHOULD HAVE A DIFFERENT SUBCLASS
+                if (ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DM)
+                {
+                    foreach (Excel.Range cell in matrixRange.Cells)
+                    {
+                        int rowIndex = cell.Row - matrixStart.Row;
+                        int colIndex = cell.Column - matrixStart.Column;
+                        if (colIndex > rowIndex)
+                            cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+                        else
+                            cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
+                    }
+                }
+                else if(ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DP)
+                {
+                    foreach (Excel.Range cell in matrixRange.Cells)
+                    {
+                        int rowIndex = cell.Row - matrixStart.Row;
+                        int colIndex = cell.Column - matrixStart.Column;
+                        cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
+                    }
+                    Excel.Range xlPairsRange = this.xlPairsCell.Resize[matrixRange.Rows.Count - 1, 2];
+                    foreach(Excel.Range cell in xlPairsRange)
+                    {
+                        cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+                    }
+                }
             }
         }
     }

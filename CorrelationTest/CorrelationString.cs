@@ -449,7 +449,7 @@ namespace CorrelationTest
                         
                         IEnumerable<string> fields3 = from ISub sub in ((IHasDurationCorrelations)item).SubEstimates select sub.Name;
                         PairSpecification it2 = PairSpecification.ConstructFromSinglePair(fields3.Count(), 0, 0);
-                        return new Data.CorrelationString_DP(fields3.ToArray(), it2, item.uID.ID, ((IHasDurationCorrelations)item).SubEstimates.Select(x => x.uID.ID).ToArray());
+                        return new Data.CorrelationString_DP(fields3.ToArray(), it2, item.uID.ID);
                     default:
                         throw new Exception("Cannot construct CorrelationString");
                 }
@@ -469,6 +469,27 @@ namespace CorrelationTest
                 }
                 sb.Remove(sb.Length - 1, 1);    //remove the final &
                 return sb.ToString();
+            }
+
+            public static string GetNumberOfInputsFromCorrelStringValue(object correlString)
+            {
+                string cs = correlString.ToString();
+                string[] delimited = cs.Split(',');
+                return delimited[0];
+            }
+
+            public static string GetTypeOfCorrelationFromCorrelStringValue(object correlString)
+            {
+                string cs = correlString.ToString();
+                string[] delimited = cs.Split(',');
+                return delimited[1];
+            }
+
+            public static string GetParentIDFromCorrelStringValue(object correlString)
+            {
+                string cs = correlString.ToString();
+                string[] delimited = cs.Split(',');
+                return delimited[2];
             }
             #endregion
 

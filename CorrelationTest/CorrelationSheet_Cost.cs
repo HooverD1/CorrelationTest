@@ -98,12 +98,13 @@ namespace CorrelationTest
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
                 matrixRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+
             }
             
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_CM" || sheet.Cells[1,1].value == "$CORRELATION_CT"
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_CM" || sheet.Cells[1,1].value == "$CORRELATION_CP"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
@@ -169,29 +170,56 @@ namespace CorrelationTest
                 //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                
+
                 //This needs to find the parent..
-                IHasCostCorrelations tempEst = (IHasCostCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
-                tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
+                //IHasCostCorrelations tempEst = (IHasCostCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
+                //tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
+
+                Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
+                IHasCostCorrelations parentEstimate;
+
+                if (!(parentItem is IHasCostCorrelations))
+                {
+                    throw new Exception("Item has no cost correlations");
+                }
+                else
+                {
+                    parentEstimate = (IHasCostCorrelations)parentItem;
+                }
+
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
+                this.xlIDCell.Value = parentEstimate.uID.ID;                                               //Print the ID
                 this.xlIDCell.ColumnWidth = 40;
                 
                 CorrelString.PrintToSheet(xlCorrelStringCell);
                 if(CorrelString is Data.CorrelationString_CP)       //Need to replicate this in PT and DT.
                 {
-                    this.xlPairsCell.Value = ((Data.CorrelationString_CP)CorrelString).GetPairs().Value;
+                    this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count() - 1, 2].Value = ((Data.CorrelationString_CP)CorrelString).GetPairwise().GetValuesString_Split();
+                    //this.xlPairsCell.Value = ((Data.CorrelationString_CP)CorrelString).GetPairs().Value;
                 }
                     
-                for (int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
+                for (int subIndex = 0; subIndex < parentEstimate.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
                     //Distributions
-                    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
+                    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(parentEstimate, subIndex);
                     //IDs
-                    this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(tempEst, subIndex);
+                    this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(parentEstimate, subIndex);
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
+                PrintColumnHeaders();
+            }
+
+            private void PrintColumnHeaders()
+            {
+                SheetType sType = ExtensionMethods.GetSheetType(this.xlSheet);
+                if (sType == SheetType.Correlation_CP)
+                {
+                    this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
+                    this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
+                }
+                this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+
             }
         }
     }

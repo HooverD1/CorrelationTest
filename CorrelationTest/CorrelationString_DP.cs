@@ -17,9 +17,9 @@ namespace CorrelationTest
             public CorrelationString_DP(string correlStringValue)
             {
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlStringValue);
-                int firstLine = this.Value.IndexOf('&');
-                string pairString = this.Value.Substring(firstLine + 1);
-                this.Pairs = PairSpecification.ConstructFromString(pairString);
+                //int firstLine = this.Value.IndexOf('&');
+                //string pairString = this.Value.Substring(firstLine + 1);
+                this.Pairs = PairSpecification.ConstructFromString(this.Value);
             }
 
             //COLLAPSE
@@ -29,11 +29,11 @@ namespace CorrelationTest
                 StringBuilder fields = new StringBuilder();
                 StringBuilder values = new StringBuilder();
 
+                
                 Excel.Range parentRow = correlSheet.LinkToOrigin.LinkSource.EntireRow;
                 SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
-                PairSpecification pairs = PairSpecification.ConstructFromRange(correlSheet.xlPairsCell, correlSheet.GetIDs().Length - 1);
                 StringBuilder subIDs = new StringBuilder();
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
@@ -43,48 +43,24 @@ namespace CorrelationTest
                 fieldVals2D = ExtensionMethods.ReIndexArray(fieldVals2D);
                 object[] fieldVals = ExtensionMethods.ToJaggedArray(fieldVals2D)[0];
                 int numberOfInputs = matrixVals.GetLength(0);
+                PairSpecification pairs = PairSpecification.ConstructFromRange(correlSheet.xlPairsCell, numberOfInputs-1);
 
                 header.Append(numberOfInputs);
                 header.Append(",");
                 header.Append("DP");
                 header.Append(",");
                 header.Append(parentID);
-
-                //foreach (object field in fieldVals)
-                //{
-                //    fields.Append(Convert.ToString(field));
-                //    fields.Append(",");
-                //}
-                //fields.Remove(fields.Length - 1, 1);    //remove the final char
-
                 values.Append(pairs.GetValuesString());
 
-                //This code to convert to matrix:
-                /*
-                for (int row = 1; row < matrixVals.GetLength(0) - 1; row++)
-                {
-                    for (int col = row + 1; col < matrixVals.GetLength(1); col++)
-                    {
-                        values.Append(matrixVals[row, col]);
-                        values.Append(",");
-                    }
-                    values.Remove(values.Length - 1, 1);    //remove the final char
-                }
-                */
                 this.Value = $"{header.ToString()}&{values.ToString()}";
             }
 
 
-            public CorrelationString_DP(string[] fields, PairSpecification pairs, string parent_id, string[] sub_ids)        //build a triple string out of a triple
+            public CorrelationString_DP(string[] fields, PairSpecification pairs, string parent_id)        //build a triple string out of a triple
             {
                 this.Pairs = pairs;
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"{fields.Length},DP,{parent_id}");
-                for (int j = 0; j < sub_ids.Length; j++)
-                {
-                    sb.Append(",");
-                    sb.Append(sub_ids[j]);
-                }
                 sb.AppendLine();
                 //for (int i = 0; i < fields.Length - 1; i++)
                 //{
@@ -124,9 +100,7 @@ namespace CorrelationTest
             {
                 string[] correlLines = DelimitString(this.Value);
                 string uidString = correlLines[0].Split(',')[2];
-                int firstLine = this.Value.IndexOf('&');
-                string pairString = this.Value.Substring(firstLine + 1);
-                return PairSpecification.ConstructFromString(pairString);
+                return PairSpecification.ConstructFromString(this.Value);
             }
 
             public override UniqueID GetParentID()

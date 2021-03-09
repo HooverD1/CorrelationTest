@@ -320,7 +320,6 @@ namespace CorrelationTest
         {
             SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
-            //This needs to pull in any existing correlation string
             correlSheet.PrintToSheet();
             correlSheet.FormatSheet();
         }

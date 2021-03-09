@@ -89,7 +89,7 @@ namespace CorrelationTest
             {
                 this.Pairs = ps;
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{fields.Length},CT,{parent_id}");
+                sb.Append($"{fields.Length},CP,{parent_id}");
                 for (int j = 0; j < sub_ids.Length; j++)
                 {
                     sb.Append(",");
@@ -107,8 +107,15 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
-            public PairSpecification GetPairs()
+            //public PairSpecification GetPairs()
+            //{
+            //    return PairSpecification.ConstructFromString(this.Value);
+            //}
+
+            public PairSpecification GetPairwise()
             {
+                string[] correlLines = DelimitString(this.Value);
+                string uidString = correlLines[0].Split(',')[2];
                 return PairSpecification.ConstructFromString(this.Value);
             }
 

@@ -59,20 +59,20 @@ namespace CorrelationTest
                         break;
                     case SheetType.Correlation_CP:
                         matrixRow = 4;
-                        matrixCol = 4;
+                        matrixCol = 9;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
                         subIdRow = 5;
-                        subIdCol = 2;
+                        subIdCol = 5;
                         distRow = 5;
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        pairsRow = 2;
-                        pairsCol = 2;
+                        pairsRow = 5;
+                        pairsCol = 6;       //Requires a 2 cell width
                         break;
                     case SheetType.Correlation_PM:
                         matrixRow = 4;

@@ -33,7 +33,8 @@ namespace CorrelationTest
             CorrelationType correlType;
             if(!(selectedItem is ISub))
             {
-                //
+                //Invalid selection
+                //Don't throw an error, just don't do anything.
                 return;
             }
             if (((ISub)selectedItem).Parent is IHasCostCorrelations)

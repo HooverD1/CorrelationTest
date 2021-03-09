@@ -93,23 +93,8 @@ namespace CorrelationTest
                 xlCorrelSheet.Cells[Sheets.CorrelationSheet.param_RowMatrix2.Item1, Sheets.CorrelationSheet.param_RowMatrix2.Item2].Value = this.Specs.MatrixCoords_End.Item1;  //prints the row coord
                 xlCorrelSheet.Cells[Sheets.CorrelationSheet.param_ColMatrix2.Item1, Sheets.CorrelationSheet.param_ColMatrix2.Item2].Value = this.Specs.MatrixCoords_End.Item2;  //prints the col coord
             }
-            public override void PrintToSheet()  //expanding from string
-            {
-                throw new Exception("Failed override");
-                ////build a sheet object off the linksource
-                //CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
-                //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                ////tempEst.LoadSubEstimates();
-                //tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
-                //this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
-                //this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                //this.xlIDCell.Value = tempEst.uID.ID;                                               //Print the ID
-                //CorrelString.PrintToSheet(xlCorrelStringCell);
-                //for(int subIndex = 0; subIndex < tempEst.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
-                //{
-                //    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(tempEst, subIndex);
-                //}                
-            }
+
+            public override void PrintToSheet() { throw new Exception("Failed override"); }
 
             protected string[] GetFieldsFromXlCorrelSheet()
             {
@@ -299,10 +284,10 @@ namespace CorrelationTest
                 //Validate link source ID
                 //Validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
                 CostSheet originSheet = CostSheet.ConstructFromXlCostSheet(correlSheet.LinkToOrigin.LinkSource.Worksheet);
-                object id_followLink = correlSheet.LinkToOrigin.LinkSource.EntireRow.Cells[1, originSheet.Specs.ID_Offset].value;
-                object id_correlSheet = correlSheet.xlIDCell.Value;
+                string id_followLink = Convert.ToString(correlSheet.LinkToOrigin.LinkSource.EntireRow.Cells[1, originSheet.Specs.ID_Offset].value);
+                string id_correlSheet = Data.CorrelationString.GetParentIDFromCorrelStringValue(correlSheet.xlCorrelStringCell.Value);
                 
-                if (id_followLink.ToString() == id_correlSheet.ToString())
+                if (id_followLink.ToString() == id_correlSheet)
                 {
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
                     if (cType == CorrelationType.Cost)

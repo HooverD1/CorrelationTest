@@ -47,6 +47,8 @@ namespace CorrelationTest
             //Pair 2
             // ...
             //Pair N
+            int firstLine = pairString.IndexOf('&');
+            pairString = pairString.Substring(firstLine + 1);
             pairSpec.Value = pairString;
             string[] lines = pairString.Split('&');
             pairSpec.Pairs = new Tuple<double, double>[lines.Count()];
@@ -130,7 +132,7 @@ namespace CorrelationTest
                 }
                 for(int downIndex = 1; downIndex < size - row; downIndex++)
                 {
-                    matrix[row + downIndex, row] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})";
+                    matrix[row + downIndex, row] = $"=MIN(1,MAX(-1,OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})))";
                 }
             }
             return matrix;
@@ -148,11 +150,11 @@ namespace CorrelationTest
             for (int row = 0; row < size - 1; row++)
             {
                 matrix[row, row] = 1;
-                matrix[row, row + 1] = $"={pairsRange.Cells[row+1, 1].Address}";
+                matrix[row, row + 1] = $"=MIN(1,MAX(-1,{pairsRange.Cells[row+1, 1].Address}))";
 
                 for (int upIndex = 1; upIndex <= row; upIndex++)
                 {
-                    matrix[row - upIndex, row + 1] = $"={pairsRange.Cells[row+1, 1].Address} - {pairsRange.Cells[row+1, 2].Address} * {upIndex}";
+                    matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,{pairsRange.Cells[row+1, 1].Address} - {pairsRange.Cells[row+1, 2].Address} * {upIndex}))";
                 }
                 for (int downIndex = 1; downIndex < size - row; downIndex++)
                 {
