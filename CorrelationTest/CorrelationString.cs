@@ -380,17 +380,17 @@ namespace CorrelationTest
                 switch(sheetTag)
                 {
                     case "$CORRELATION_CP":
-                        return new CorrelationString_CP((Sheets.CorrelationSheet_Cost)correlSheet);
+                        return new CorrelationString_CP((Sheets.CorrelationSheet_CP)correlSheet);
                     case "$CORRELATION_CM":
-                        return new CorrelationString_CM((Sheets.CorrelationSheet_Cost)correlSheet);
+                        return new CorrelationString_CM((Sheets.CorrelationSheet_CM)correlSheet);
                     case "$CORRELATION_PP":
-                        return new CorrelationString_PP((Sheets.CorrelationSheet_Phasing)correlSheet);
+                        return new CorrelationString_PP((Sheets.CorrelationSheet_PP)correlSheet);
                     case "$CORRELATION_PM":
-                        return new CorrelationString_PM((Sheets.CorrelationSheet_Phasing)correlSheet);
+                        return new CorrelationString_PM((Sheets.CorrelationSheet_PM)correlSheet);
                     case "$CORRELATION_DP":
-                        return new CorrelationString_DP((Sheets.CorrelationSheet_Duration)correlSheet);
+                        return new CorrelationString_DP((Sheets.CorrelationSheet_DP)correlSheet);
                     case "$CORRELATION_DM":
-                        return new CorrelationString_DM((Sheets.CorrelationSheet_Duration)correlSheet);
+                        return new CorrelationString_DM((Sheets.CorrelationSheet_DM)correlSheet);
                     default:
                         throw new Exception("Malformed correlation string");
                 }

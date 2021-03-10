@@ -23,7 +23,7 @@ namespace CorrelationTest
             }
 
             //COLLAPSE
-            public CorrelationString_DP(Sheets.CorrelationSheet_Duration correlSheet)
+            public CorrelationString_DP(Sheets.CorrelationSheet_DP correlSheet)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder fields = new StringBuilder();

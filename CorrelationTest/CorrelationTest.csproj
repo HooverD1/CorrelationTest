@@ -186,9 +186,12 @@
     <Compile Include="CorrelationMatrix_Inputs.cs" />
     <Compile Include="CorrelationMatrix_Phasing.cs" />
     <Compile Include="CorrelationSheet.cs" />
-    <Compile Include="CorrelationSheet_Duration.cs" />
-    <Compile Include="CorrelationSheet_Cost.cs" />
-    <Compile Include="CorrelationSheet_Phasing.cs" />
+    <Compile Include="CorrelationSheet_CM.cs" />
+    <Compile Include="CorrelationSheet_CP.cs" />
+    <Compile Include="CorrelationSheet_DM.cs" />
+    <Compile Include="CorrelationSheet_DP.cs" />
+    <Compile Include="CorrelationSheet_PM.cs" />
+    <Compile Include="CorrelationSheet_PP.cs" />
     <Compile Include="CorrelationString_DM.cs" />
     <Compile Include="CorrelationString_DP.cs" />
     <Compile Include="CorrelationString_CM.cs" />

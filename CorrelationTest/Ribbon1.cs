@@ -361,14 +361,9 @@ namespace CorrelationTest
                 xlSheet = xlSheets.First();
             }
             object[,] testMatrix = Sandbox.CreateRandomTestCorrelationMatrix(size);
-            xlSheet.Cells[1, 3].Resize[size, size].value = testMatrix;
             
-            var pairs = Sandbox.FitMatrix(testMatrix, false);
-            for(int i = 1; i <= pairs.Count(); i++)
-            {
-                xlSheet.Cells[i, 1].value = pairs[i - 1].Item1;
-                xlSheet.Cells[i, 2].value = pairs[i - 1].Item2;
-            }
+            PairSpecification pairSpec = PairSpecification.ConstructByFittingMatrix(testMatrix, false);
+            pairSpec.PrintToSheet(xlSheet.Cells[1, 1]);
         }
     }
 }

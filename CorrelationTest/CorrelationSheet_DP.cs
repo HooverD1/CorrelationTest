@@ -9,11 +9,14 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_Duration : CorrelationSheet
+        public class CorrelationSheet_DP : CorrelationSheet
         {
-            public CorrelationSheet_Duration(IHasDurationCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
+            public PairSpecification PairSpec { get; set; }
+            public Data.CorrelationString_DP CorrelString { get; set; }
+
+            public CorrelationSheet_DP(IHasDurationCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
-                this.CorrelString = ParentItem.DurationCorrelationString;
+                this.CorrelString = (Data.CorrelationString_DP)ParentItem.DurationCorrelationString;
                 SheetType correlType = CorrelString.GetCorrelType();
                 this.Specs = new Data.CorrelSheetSpecs(correlType);
                 this.xlSheet = GetXlSheet(correlType);
@@ -33,7 +36,7 @@ namespace CorrelationTest
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
             }
             //COLLAPSE
-            public CorrelationSheet_Duration(SheetType shtType) //build from the xlsheet to get the string
+            public CorrelationSheet_DP(SheetType shtType) //build from the xlsheet to get the string
             {
                 //Need a link
                 this.xlSheet = GetXlSheet(shtType);
@@ -46,14 +49,14 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
-                
+
                 //LINK
                 this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
 
                 //Build the CorrelMatrix
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
                 object[] ids = ExtensionMethods.ToJaggedArray((object[,])this.xlSubIdCell.Resize[fieldsValues.GetLength(1), 1].Value)[1];
-                
+
                 fieldsValues = ExtensionMethods.ReIndexArray(fieldsValues);
                 object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[0];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown]];
@@ -64,30 +67,18 @@ namespace CorrelationTest
                 //string parent_id = Convert.ToString(xlIDCell.Value);        //Get this from the header
                 string parent_id = Data.CorrelationString.GetParentIDFromCorrelStringValue(xlCorrelStringCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
-                if (sheetType == SheetType.Correlation_DP)
-                {
-                    //Build the triple from the string
-                    //string correlStringVal = this.xlCorrelStringCell.Value;
+                PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Count() - 1);
 
-                    //NEED TO BUILD OFF THE SHEET WITHOUT LEVERAGING A CORREL STRING CELL
-                    //Data.CorrelationString_DT existing_cst = new Data.CorrelationString_DT(correlStringVal);
-                    PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Count()-1);
-
-                    //Check if the matrix still matches the triple.
-                    if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
-                    {       //If YES - create cs_triple object
-                        this.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(this);
-                    }
-                    else
-                    {       //If NO - create cs_periods object
-                        this.CorrelString = new Data.CorrelationString_DM(parent_id, ids, fields, CorrelMatrix);
-                    }
+                //Check if the matrix still matches the triple.
+                if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
+                {       //If YES - create cs_triple object
+                    this.CorrelString = (Data.CorrelationString_DP)Data.CorrelationString.ConstructFromCorrelationSheet(this);
                 }
-                else if (sheetType == SheetType.Correlation_DM)
-                {
-                    this.CorrelString = new Data.CorrelationString_DM(parent_id, ids, fields, this.CorrelMatrix);
-                }
-
+                else
+                {       //If NO - create cs_periods object
+                    throw new NotImplementedException();
+                    //Alert the user and give option to cancel or launch conversion form
+                }                
             }
 
             protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)        //Is this method being used?
@@ -125,16 +116,16 @@ namespace CorrelationTest
                 return xlCorrelSheet;
             }
 
-            public override void UpdateCorrelationString(string[] ids)
-            {
-                //What is the purpose of this method? To update the matrix values?
-                //Update the string on the sheet to match the altered matrix
-                UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
-                object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
-                this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
-                this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
-                this.xlCorrelStringCell.Value = this.CorrelString.Value;
-            }
+            //public override void UpdateCorrelationString(string[] ids)
+            //{
+            //    //What is the purpose of this method? To update the matrix values?
+            //    //Update the string on the sheet to match the altered matrix
+            //    UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
+            //    object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
+            //    this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
+            //    this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
+            //    this.xlCorrelStringCell.Value = this.CorrelString.Value;
+            //}
 
             protected override string GetDistributionString(IHasCorrelations est, int subIndex)
             {
@@ -162,7 +153,7 @@ namespace CorrelationTest
                 //Aren't the estimates already here?
                 Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
                 IHasDurationCorrelations parentEstimate;
-                if(!(parentItem is IHasDurationCorrelations))
+                if (!(parentItem is IHasDurationCorrelations))
                 {
                     throw new Exception("Item has no duration correlations");
                 }
@@ -178,23 +169,20 @@ namespace CorrelationTest
                 for (int subIndex = 0; subIndex < parentEstimate.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
                     //Distributions
-                    if(parentEstimate.SubEstimates[subIndex] is IHasDurationCorrelations)
+                    if (parentEstimate.SubEstimates[subIndex] is IHasDurationCorrelations)
                         this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(parentEstimate, subIndex);
                     //IDs
                     this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(parentEstimate, subIndex);
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
-                if (CorrelString is Data.CorrelationString_DP)       //Need to replicate this in PT and DT.
-                {
-                    this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count()-1,2].Value = ((Data.CorrelationString_DP)CorrelString).GetPairwise().GetValuesString_Split();
-                }
+                this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count() - 1, 2].Value = ((Data.CorrelationString_DP)CorrelString).GetPairwise().GetValuesString_Split();
                 PrintColumnHeaders();
             }
 
             private void PrintColumnHeaders()
             {
                 SheetType sType = ExtensionMethods.GetSheetType(this.xlSheet);
-                if(sType == SheetType.Correlation_DP)
+                if (sType == SheetType.Correlation_DP)
                 {
                     this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
                     this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
@@ -221,7 +209,7 @@ namespace CorrelationTest
                             cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
                     }
                 }
-                else if(ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DP)
+                else if (ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DP)
                 {
                     foreach (Excel.Range cell in matrixRange.Cells)
                     {
@@ -230,11 +218,18 @@ namespace CorrelationTest
                         cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
                     }
                     Excel.Range xlPairsRange = this.xlPairsCell.Resize[matrixRange.Rows.Count - 1, 2];
-                    foreach(Excel.Range cell in xlPairsRange)
+                    foreach (Excel.Range cell in xlPairsRange)
                     {
                         cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
                     }
                 }
+            }
+
+            public CorrelationSheet_DM ConvertToCorrelationSheet_DP()
+            {
+                var convertedSheet = new CorrelationSheet_DM(SheetType.Correlation_DM);
+                //Take the existing matrix and push it into a _DM object
+                return convertedSheet;
             }
         }
     }

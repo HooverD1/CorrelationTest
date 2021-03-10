@@ -61,13 +61,6 @@ namespace CorrelationTest
             return pairSpec;
         }
 
-        public static PairSpecification ConstructByFittingMatrix(object[,] matrix, bool forceFitToOffDiagonal = false)
-        {
-            PairSpecification ps = new PairSpecification();
-            ps.Pairs = Sandbox.FitMatrix(matrix, forceFitToOffDiagonal);
-            return ps;
-        }
-
         private static double[] GetPoints(int row, object[,] matrix)
         {
             double[] points = new double[row];
@@ -164,6 +157,73 @@ namespace CorrelationTest
             return this.Value;
         }
 
+        private object[,] ConvertTuplesToRangeValues()
+        {
+            int numberOfPairs = this.Pairs.Count();
+            object[,] rangeValues = new object[numberOfPairs, 2];
+            for (int i=0;i<numberOfPairs; i++)
+            {
+                rangeValues[i, 0] = Pairs[i].Item1;
+                rangeValues[i, 1] = Pairs[i].Item2;
+            }
+            return rangeValues;
+        }
 
+        public void PrintToSheet(Excel.Range xlPrintCell)
+        {
+            //Resize to fit the pairs
+            Excel.Range xlPrintRange = xlPrintCell.Resize[this.Pairs.Count(), 2];
+            //Convert tuples to object array
+            xlPrintRange.Value = ConvertTuplesToRangeValues();
+        }
+
+        public static PairSpecification ConstructByFittingMatrix(object[,] matrixRange, bool forceFitDiagonal = false)
+        {
+            PairSpecification ps = new PairSpecification();
+            //Give back an array of pairwise spec values
+            Tuple<double, double>[] pairs = new Tuple<double, double>[matrixRange.GetLength(0) - 1];
+            object[][] jaggedMatrix = ExtensionMethods.ToJaggedArray(matrixRange, true);
+
+            for (int i = matrixRange.GetLength(0) - 2; i >= 0; i--)
+            {
+                double[] yVals = (from object val in jaggedMatrix[i] where val != null select Convert.ToDouble(val)).ToArray();
+                double[] xVals = new double[yVals.Length];
+                for (int x = 0; x < yVals.Length; x++)
+                    xVals[x] = yVals.Length - x - 1;
+                SimpleLinearRegression slr;
+                var ols = new OrdinaryLeastSquares();
+                double verticalShift = 0;
+                if (forceFitDiagonal)
+                {
+                    ols.UseIntercept = false;
+                    //Have to shift the y values down by fx(0) so that fx(0) = 0.
+                    //Then run with .UseIntercept = false and add fx(0) to each slr.Intercept value
+                    verticalShift = yVals[yVals.Length - 1];
+                    for (int j = 0; j < yVals.Length; j++)
+                    {
+                        yVals[i] -= verticalShift;
+                    }
+                }
+                if (xVals.Length != yVals.Length)
+                    throw new Exception("Malformed regression inputs");
+                else if (xVals.Length < 2)
+                    pairs[i] = new Tuple<double, double>(0, yVals[yVals.Length - 1]);
+                else
+                {
+                    try
+                    {
+                        slr = ols.Learn(xVals, yVals);
+                        pairs[i] = new Tuple<double, double>(slr.Slope, slr.Intercept + verticalShift);
+                    }
+                    catch
+                    {
+                        if (MyGlobals.DebugMode)
+                            throw new Exception("OLS.learn failure");
+                    }
+                }
+            }
+            ps.Pairs = pairs;
+            return ps;
+        }
     }
 }

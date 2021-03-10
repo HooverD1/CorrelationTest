@@ -128,7 +128,7 @@
             // 
             // GenerateMatrix
             // 
-            this.GenerateMatrix.Label = "Generate Random Matrix";
+            this.GenerateMatrix.Label = "Test Fit Matrix";
             this.GenerateMatrix.Name = "GenerateMatrix";
             this.GenerateMatrix.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateMatrix_Click);
             // 

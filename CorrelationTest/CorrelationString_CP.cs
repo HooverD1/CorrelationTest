@@ -21,7 +21,7 @@ namespace CorrelationTest
             }
 
             //COLLAPSE
-            public CorrelationString_CP(Sheets.CorrelationSheet_Cost correlSheet)
+            public CorrelationString_CP(Sheets.CorrelationSheet_CP correlSheet)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder fields = new StringBuilder();

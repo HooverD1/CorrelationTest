@@ -23,7 +23,7 @@ namespace CorrelationTest
             public readonly static Tuple<int, int> param_RowDist = new Tuple<int, int>(1, 10);    //where to find the last col param for the Distribution
             public readonly static Tuple<int, int> param_ColDist = new Tuple<int, int>(1, 11);    //where to find the last col param for the Distribution
 
-            public Data.CorrelationString CorrelString { get; set; }
+            //public Data.CorrelationString CorrelString { get; set; }
             protected Data.CorrelationMatrix CorrelMatrix { get; set; }
             public Excel.Range xlMatrixCell { get; set; }
             public Data.Link LinkToOrigin { get; set; }
@@ -76,7 +76,7 @@ namespace CorrelationTest
                 }
                 return returnString;
             }
-            public override bool Validate()
+            public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
             {
                 bool validateMatrix_to_String = this.CorrelString.ValidateAgainstMatrix(this.CorrelMatrix.Fields);
                 //need to get fields from xlSheet fresh, not the object, to validate
@@ -190,22 +190,22 @@ namespace CorrelationTest
                 switch (sheet_type)
                 {
                     case SheetType.Correlation_DP:
-                        newSheet = new CorrelationSheet_Duration(sheet_type);
+                        newSheet = new CorrelationSheet_DP(sheet_type);
                         break;
                     case SheetType.Correlation_DM:
-                        newSheet = new CorrelationSheet_Duration(sheet_type);
+                        newSheet = new CorrelationSheet_DM(sheet_type);
                         break;
                     case SheetType.Correlation_CP:
-                        newSheet = new CorrelationSheet_Cost(sheet_type);
+                        newSheet = new CorrelationSheet_CP(sheet_type);
                         break;
                     case SheetType.Correlation_CM:
-                        newSheet = new CorrelationSheet_Cost(sheet_type);
+                        newSheet = new CorrelationSheet_CM(sheet_type);
                         break;
                     case SheetType.Correlation_PM:
-                        newSheet = new CorrelationSheet_Phasing(sheet_type);
+                        newSheet = new CorrelationSheet_PM(sheet_type);
                         break;
                     case SheetType.Correlation_PP:
-                        newSheet = new CorrelationSheet_Phasing(sheet_type);
+                        newSheet = new CorrelationSheet_PP(sheet_type);
                         break;
                     default:
                         throw new Exception("Not a valid Correlation Sheet type");
@@ -229,22 +229,22 @@ namespace CorrelationTest
                 {
                     //These need to be sending the parent and the correltype, no?
                     case SheetType.Correlation_CM:
-                        returnSheet = new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_CM((IHasCostCorrelations)ParentItem);
                         break;
                     case SheetType.Correlation_CP:
-                        returnSheet = new CorrelationSheet_Cost((IHasCostCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_CP((IHasCostCorrelations)ParentItem);
                         break;
                     case SheetType.Correlation_PM:
-                        returnSheet = new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_PM((IHasPhasingCorrelations)ParentItem);
                         break;
                     case SheetType.Correlation_PP:
-                        returnSheet = new CorrelationSheet_Phasing((IHasPhasingCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_PP((IHasPhasingCorrelations)ParentItem);
                         break;
                     case SheetType.Correlation_DM:
-                        returnSheet = new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_DM((IHasDurationCorrelations)ParentItem);
                         break;
                     case SheetType.Correlation_DP:
-                        returnSheet = new CorrelationSheet_Duration((IHasDurationCorrelations)ParentItem);
+                        returnSheet = new CorrelationSheet_DP((IHasDurationCorrelations)ParentItem);
                         break;
                     default:
                         throw new Exception("Unknown correlation type");

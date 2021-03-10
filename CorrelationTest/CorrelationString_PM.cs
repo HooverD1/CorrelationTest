@@ -27,7 +27,7 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
 
-            public CorrelationString_PM(Sheets.CorrelationSheet_Phasing correlSheet)
+            public CorrelationString_PM(Sheets.CorrelationSheet_PM correlSheet)
             {
 
             }

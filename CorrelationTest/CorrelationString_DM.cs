@@ -23,7 +23,7 @@ namespace CorrelationTest
                 return new CorrelationString_DM(csi.Value);
             }
 
-            public CorrelationString_DM(Sheets.CorrelationSheet_Duration correlSheet)
+            public CorrelationString_DM(Sheets.CorrelationSheet_DM correlSheet)
             {
 
             }

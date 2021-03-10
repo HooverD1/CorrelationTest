@@ -29,7 +29,7 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
-            public CorrelationString_PP(Sheets.CorrelationSheet_Phasing correlSheet)
+            public CorrelationString_PP(Sheets.CorrelationSheet_PP correlSheet)
             {
                 StringBuilder header = new StringBuilder();
                 StringBuilder fields = new StringBuilder();
