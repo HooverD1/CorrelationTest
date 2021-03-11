@@ -66,7 +66,7 @@ namespace CorrelationTest
                 string parent_id = Convert.ToString(xlIDCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
 
-                PairSpecification pairs = PairSpecification.ConstructFromString(Convert.ToString(xlPairsCell.Value));
+                PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Length);
                 //Check if the matrix still matches the triple.
                 if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
                 {       //If YES - create cs_triple object
@@ -208,6 +208,14 @@ namespace CorrelationTest
                 }
                 this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
 
+            }
+
+            public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
+            {
+                bool validateMatrix_to_String = this.CorrelString.ValidateAgainstMatrix(this.CorrelMatrix.Fields);
+                //need to get fields from xlSheet fresh, not the object, to validate
+                bool validateMatrix_to_xlSheet = this.CorrelMatrix.ValidateAgainstXlSheet(this.Get_xlFields());
+                return validateMatrix_to_String && validateMatrix_to_xlSheet;
             }
         }
     }

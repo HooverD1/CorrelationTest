@@ -148,6 +148,14 @@ namespace CorrelationTest
             {
 
             }
+
+            public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
+            {
+                bool validateMatrix_to_String = this.CorrelString.ValidateAgainstMatrix(this.CorrelMatrix.Fields);
+                //need to get fields from xlSheet fresh, not the object, to validate
+                bool validateMatrix_to_xlSheet = this.CorrelMatrix.ValidateAgainstXlSheet(this.Get_xlFields());
+                return validateMatrix_to_String && validateMatrix_to_xlSheet;
+            }
         }
     }
 }

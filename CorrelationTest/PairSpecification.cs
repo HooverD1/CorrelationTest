@@ -25,21 +25,23 @@ namespace CorrelationTest
             return pairSpec;
         }
 
-        public static PairSpecification ConstructFromRange(Excel.Range xlPairsCell, int sizeOfRange)
+        //COLLAPSE
+        public static PairSpecification ConstructFromRange(Excel.Range xlPairsCell, int sizeOfRange)    //Pull the pair spec from the correl sheet
         {
             StringBuilder sb = new StringBuilder();
+            Excel.Range xlPairsRange = xlPairsCell.Resize[sizeOfRange, 2];
             for(int row = 1; row <= sizeOfRange; row++)
             {
-                sb.Append((string)Convert.ToString(xlPairsCell.Cells[row, 1].value));
+                sb.Append((string)Convert.ToString(xlPairsRange.Cells[row, 1].value));
                 sb.Append(",");
-                sb.Append((string)Convert.ToString(xlPairsCell.Cells[row, 2].value));
+                sb.Append((string)Convert.ToString(xlPairsRange.Cells[row, 2].value));
                 sb.Append("&");
             }
             sb.Remove(sb.Length - 1, 1);    //remove the final char
-            return PairSpecification.ConstructFromString(sb.ToString());
+            return PairSpecification.ConstructFromString(sb.ToString(), false);
         }
 
-        public static PairSpecification ConstructFromString(string pairString)
+        public static PairSpecification ConstructFromString(string pairString, bool includesHeader = true)
         {
             PairSpecification pairSpec = new PairSpecification();
             //Header
@@ -47,8 +49,10 @@ namespace CorrelationTest
             //Pair 2
             // ...
             //Pair N
-            int firstLine = pairString.IndexOf('&');
-            pairString = pairString.Substring(firstLine + 1);
+            if (includesHeader)
+            {   //Remove the header if it is included
+                pairString = pairString.Substring(pairString.IndexOf('&') + 1);
+            }
             pairSpec.Value = pairString;
             string[] lines = pairString.Split('&');
             pairSpec.Pairs = new Tuple<double, double>[lines.Count()];
@@ -96,18 +100,21 @@ namespace CorrelationTest
             int size = this.Pairs.Count() + 1;
             object[,] matrix = new object[size, size];
             matrix[size - 1, size - 1] = 1;
-            for(int row = 0; row < size-1; row++)
+            for(int row = 0; row < size; row++)
             {
                 matrix[row, row] = 1;
-                matrix[row, row + 1] = Pairs[row].Item1;
+                //matrix[row, row + 1] = Pairs[row].Item1;
                 
                 for (int upIndex = 1; upIndex <= row; upIndex++)
                 {
-                    matrix[row - upIndex, row+1] = Pairs[row].Item1 - (Pairs[row].Item2 * (upIndex));
+                    matrix[row - upIndex, row] = Pairs[row-1].Item1 - (Pairs[row-1].Item2 * (upIndex));
                 }
-                for(int downIndex = 1; downIndex < size - row; downIndex++)
+            }
+            for(int itRow = 1; itRow < size; itRow++)
+            {
+                for(int itCol = 0; itCol < itRow; itCol++)
                 {
-                    matrix[row + downIndex, row] = $"=MIN(1,MAX(-1,OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})))";
+                    matrix[itRow, itCol] = matrix[itCol, itRow];
                 }
             }
             return matrix;

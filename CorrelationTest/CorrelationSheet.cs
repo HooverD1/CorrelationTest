@@ -76,13 +76,7 @@ namespace CorrelationTest
                 }
                 return returnString;
             }
-            public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
-            {
-                bool validateMatrix_to_String = this.CorrelString.ValidateAgainstMatrix(this.CorrelMatrix.Fields);
-                //need to get fields from xlSheet fresh, not the object, to validate
-                bool validateMatrix_to_xlSheet = this.CorrelMatrix.ValidateAgainstXlSheet(this.Get_xlFields());  
-                return validateMatrix_to_String && validateMatrix_to_xlSheet;
-            }
+
             private Tuple<int, int> GetMatrixEndCoords(Excel.Range xlMatrixCell, int fieldCount)
             {
                 return new Tuple<int, int>(xlMatrixCell.Row + fieldCount, xlMatrixCell.Column + fieldCount-1);
@@ -213,7 +207,7 @@ namespace CorrelationTest
                 }
                 //Why aren't these being done in the constructors...?
                 newSheet.xlSheet = xlCorrelationSheet;
-                newSheet.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(newSheet);
+                //newSheet.CorrelString = Data.CorrelationString.ConstructFromCorrelationSheet(newSheet);
                 return newSheet;
             }
 
@@ -276,7 +270,7 @@ namespace CorrelationTest
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
                 CorrelationSheet correlSheet = CorrelationSheet.ConstructFromXlCorrelationSheet();
-                CorrelationType cType = ExtensionMethods.GetCorrelationTypeFromLink(correlSheet.LinkToOrigin.LinkSource);
+                //CorrelationType cType = ExtensionMethods.GetCorrelationTypeFromLink(correlSheet.LinkToOrigin.LinkSource);
                 if (correlSheet == null)
                     return;
 
@@ -290,12 +284,12 @@ namespace CorrelationTest
                 if (id_followLink.ToString() == id_correlSheet)
                 {
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
-                    if (cType == CorrelationType.Cost)
-                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
-                    else if (cType == CorrelationType.Duration)
-                        correlSheet.CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
-                    else if (cType == CorrelationType.Phasing)
-                        correlSheet.CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
+                    if (correlSheet is Sheets.CorrelationSheet_CP)
+                        ((Sheets.CorrelationSheet_CP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    else if (correlSheet is Sheets.CorrelationSheet_DP)
+                        ((Sheets.CorrelationSheet_DP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    else if (correlSheet is Sheets.CorrelationSheet_PP)
+                        ((Sheets.CorrelationSheet_PP)correlSheet).CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
                     else
                         throw new Exception("Unknown parent type");
                     
@@ -348,6 +342,8 @@ namespace CorrelationTest
             {
                 //throw new Exception("Failed override");
             }
+
+            public override bool Validate() { throw new Exception("Failed override"); }
 
             //public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
             //{
