@@ -228,7 +228,19 @@ namespace CorrelationTest
                     return CorrelationType.Null;
             }
         }
-
+        public static string[] GetStringFromObject(object[] inObject)
+        {
+            if (inObject == null)
+                throw new Exception("Object is null");
+            if(inObject.GetLowerBound(0) == 1)
+                inObject = ReIndexArray(inObject);
+            string[] outString = new string[inObject.Length];
+            for(int i = 0; i < inObject.Length; i++)
+            {
+                outString[i] = Convert.ToString(inObject[i]);
+            }
+            return outString;
+        }
         
     }
 }

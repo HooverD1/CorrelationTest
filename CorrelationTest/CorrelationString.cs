@@ -108,26 +108,26 @@ namespace CorrelationTest
             public virtual object[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet) { throw new Exception("Failed override"); }
 
             public virtual object[,] GetMatrix_Values()
-            {   //returning 2,2 instead of 3,3
+            {
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] lines = DelimitString(myValue);
                 string[] header = lines[0].Split(',');
                 int length = Convert.ToInt32(header[0]);
                 object[,] matrix = new object[length, length];
 
-                for (int row = 1; row < length + 1; row++)
+                for (int row = 0; row < length; row++)
                 {
                     string[] values;
-                    if (row < length)
-                        values = lines[row].Split(',');       //broken by entry
+                    if (row + 1 < length)
+                        values = lines[row+1].Split(',');       //broken by entry
                     else
                         values = null;
 
-                    for (int col = length; col >= 0; col--)
+                    for (int col = row; col < length; col++)
                     {
                         if (col == row)
                             matrix[row, col] = 1;
-                        else if (col > row)
+                        else if (col > row && values != null)
                         {
                             if (Double.TryParse(values[(col - row) - 1], out double conversion))
                             {
@@ -140,6 +140,16 @@ namespace CorrelationTest
                             matrix[row, col] = null;
                     }
                 }
+
+                //Fill in lower triangular
+                for(int row = 0; row < length; row++)
+                {
+                    for(int col = 0; col < row; col++)
+                    {
+                        matrix[row, col] = matrix[col, row];
+                    }
+                }
+
                 return matrix;
                 throw new Exception("Failed override");
             }
@@ -385,8 +395,6 @@ namespace CorrelationTest
                         return new CorrelationString_CM((Sheets.CorrelationSheet_CM)correlSheet);
                     case "$CORRELATION_PP":
                         return new CorrelationString_PP((Sheets.CorrelationSheet_PP)correlSheet);
-                    case "$CORRELATION_PM":
-                        return new CorrelationString_PM((Sheets.CorrelationSheet_PM)correlSheet);
                     case "$CORRELATION_DP":
                         return new CorrelationString_DP((Sheets.CorrelationSheet_DP)correlSheet);
                     case "$CORRELATION_DM":
@@ -408,8 +416,6 @@ namespace CorrelationTest
                         return new CorrelationString_CM(correlStringValue);
                     case "PP":
                         return new CorrelationString_PP(correlStringValue);
-                    case "PM":
-                        return new CorrelationString_PM(correlStringValue);
                     case "DP":
                         return new CorrelationString_DP(correlStringValue);
                     case "DM":
@@ -427,9 +433,6 @@ namespace CorrelationTest
                         string[] start_dates = ((IHasPhasingCorrelations)item).Periods.Select(x => x.Start_Date).ToArray();
                         PairSpecification pairs = PairSpecification.ConstructFromSinglePair(start_dates.Count(), 0, 0);
                         return new Data.CorrelationString_PP(pairs, start_dates, item.uID.ID);
-                    case CorrelStringType.PhasingMatrix:
-                        IEnumerable<string> start_dates2 = from Period prd in ((IHasPhasingCorrelations)item).Periods select prd.pID.PeriodTag.ToString();
-                        return CorrelationString_PM.ConstructZeroString(start_dates2.ToArray());
                     case CorrelStringType.CostPair:
                         if (((IHasCostCorrelations)item).SubEstimates.Count < 2)
                             return null;
@@ -471,11 +474,18 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            public static string GetNumberOfInputsFromCorrelStringValue(object correlString)
+            public static int GetNumberOfInputsFromCorrelStringValue(object correlString)
             {
                 string cs = correlString.ToString();
                 string[] delimited = cs.Split(',');
-                return delimited[0];
+                return Convert.ToInt32(delimited[0]);
+            }
+
+            public static string GetParentIdFromCorrelStringValue(object correlString)
+            {
+                string cs = correlString.ToString();
+                string[] delimited = cs.Split(',');
+                return delimited[2];
             }
 
             public static string GetTypeOfCorrelationFromCorrelStringValue(object correlString)

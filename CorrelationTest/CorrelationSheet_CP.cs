@@ -15,9 +15,8 @@ namespace CorrelationTest
             public CorrelationSheet_CP(IHasCostCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {
                 this.CorrelString = (Data.CorrelationString_CP)ParentItem.CostCorrelationString;
-                SheetType correlType = CorrelString.GetCorrelType();
-                this.Specs = new Data.CorrelSheetSpecs(correlType);
-                this.xlSheet = GetXlSheet(correlType);
+                this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CP);
+                this.xlSheet = GetXlSheet();
 
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Cost);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
@@ -32,16 +31,16 @@ namespace CorrelationTest
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
                 this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType, this);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_CP, this);
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.FormatSheet();
             }
 
             //COLLAPSE METHOD
-            public CorrelationSheet_CP(SheetType shtType) //build from the xlsheet to get the string
+            public CorrelationSheet_CP() //build from the xlsheet to get the string
             {
-                this.xlSheet = GetXlSheet(shtType);
-                this.Specs = new Data.CorrelSheetSpecs(shtType);
+                this.xlSheet = GetXlSheet();
+                this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CP);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -49,8 +48,7 @@ namespace CorrelationTest
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                if (shtType == SheetType.Correlation_CP)
-                    this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
+                this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.LinkToOrigin = new Data.Link(Convert.ToString(xlLinkCell.Value));
                 //
                 //Build the CorrelMatrix
@@ -89,27 +87,15 @@ namespace CorrelationTest
 
             }
 
-            protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
+            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_CM" || sheet.Cells[1, 1].value == "$CORRELATION_CP"
+                                     where sheet.Cells[1, 1].value == "$CORRELATION_CP"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
                 else if (CreateNew)
-                {
-                    switch (sheetType)
-                    {
-                        case SheetType.Correlation_CM:
-                            xlSheet = CreateXLCorrelSheet("_CM");
-                            break;
-                        case SheetType.Correlation_CP:
-                            xlSheet = CreateXLCorrelSheet("_CP");
-                            break;
-                        default:
-                            throw new Exception("Bad sheet type");
-                    }
-                }
+                    xlSheet = CreateXLCorrelSheet("_CP");
                 else
                     throw new Exception("No input matrix correlation sheet found.");
                 return xlSheet;
@@ -216,6 +202,11 @@ namespace CorrelationTest
                 //need to get fields from xlSheet fresh, not the object, to validate
                 bool validateMatrix_to_xlSheet = this.CorrelMatrix.ValidateAgainstXlSheet(this.Get_xlFields());
                 return validateMatrix_to_String && validateMatrix_to_xlSheet;
+            }
+
+            public override void ConvertCorrelation(bool PreserveOffDiagonal=false)
+            {
+                throw new NotImplementedException();
             }
         }
     }

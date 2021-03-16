@@ -152,27 +152,6 @@ namespace CorrelationTest
 
         }
 
-        public void LoadExistingCorrelations()      //useful?
-        {
-            if (this.xlCorrelCell_Cost != null)
-            {
-                Data.CorrelationString_CM csi = new Data.CorrelationString_CM(xlCorrelCell_Cost.Value);
-                this.CorrelStringObj_Cost = csi;
-
-            }
-            if (this.xlCorrelCell_Phasing != null)
-            {
-                Data.CorrelationString_PM csp = new Data.CorrelationString_PM(xlCorrelCell_Phasing.Value);
-                this.CorrelStringObj_Phasing = csp;
-            }
-            if (this.xlCorrelCell_Duration != null)
-            {
-                Data.CorrelationString_DM csd = new Data.CorrelationString_DM(xlCorrelCell_Duration.Value);
-                this.CorrelStringObj_Duration = csd;
-
-            }
-        }
-
         public string[] GetSubEstimateIDs()
         {
             string[] subIDs = new string[this.SubEstimates.Count];
@@ -316,7 +295,7 @@ namespace CorrelationTest
             correlSheet.FormatSheet();
         }
 
-        private void Expand_Duration()
+        private void Expand_Duration()      //Inefficiency: I believe all the items are already loaded when creationg correlSheet - .PrintToSheet() reloads the cost sheet, which reloads the items.
         {
             SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);

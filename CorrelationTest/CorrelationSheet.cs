@@ -39,19 +39,36 @@ namespace CorrelationTest
 
 
             protected virtual Excel.Worksheet CreateXLCorrelSheet(string postfix) { throw new Exception("Failed override"); }
-            protected virtual Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true) { throw new Exception("Failed override"); }
+            protected virtual Excel.Worksheet GetXlSheet(bool CreateNew = true) { throw new Exception("Failed override"); }
             public virtual void UpdateCorrelationString(string[] ids) { throw new Exception("Failed override"); }
 
             public virtual string[] GetIDs()
             {
-                string[] lines = Data.CorrelationString.DelimitString(Convert.ToString(this.xlCorrelStringCell.Value));
-                string[] header = lines[0].Split(',');
-                string[] ids = new string[header.Length - 3];
-                for (int i = 3; i < header.Length; i++)
-                    ids[i - 3] = header[i];
+                //This needs to pull the IDs range off the sheet, not use the correl string - which no longer appears on the sheet fully
+                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlCorrelStringCell.Value);
+                Excel.Range xlSubIdRange = xlSubIdCell.Resize[numberOfSubs, 1];
+                string[] ids = new string[numberOfSubs];
+                for (int i = 0; i < numberOfSubs; i++)
+                    ids[i] = Convert.ToString(xlSubIdRange.Cells[i + 1, 1].value);
                 return ids;
             }
 
+            public virtual string[] GetFields()
+            {
+                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlCorrelStringCell.Value);
+                Excel.Range xlSubIdRange = xlMatrixCell.Offset[1,-1].Resize[numberOfSubs, 1];
+                string[] fields = new string[numberOfSubs];
+                for (int i = 0; i < numberOfSubs; i++)
+                    fields[i] = Convert.ToString(xlSubIdRange.Cells[i + 1, 1].value);
+                return fields;
+            }
+
+            public virtual object[,] GetMatrix()
+            {
+                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlCorrelStringCell.Value);
+                Excel.Range xlMatrixRange = xlMatrixCell.Offset[1, 0].Resize[numberOfSubs, numberOfSubs];
+                return xlMatrixRange.Value;
+            }
 
             public Data.CorrelationString CollapseToString(object[,] correlArray)
             {
@@ -184,22 +201,19 @@ namespace CorrelationTest
                 switch (sheet_type)
                 {
                     case SheetType.Correlation_DP:
-                        newSheet = new CorrelationSheet_DP(sheet_type);
+                        newSheet = new CorrelationSheet_DP();
                         break;
                     case SheetType.Correlation_DM:
-                        newSheet = new CorrelationSheet_DM(sheet_type);
+                        newSheet = new CorrelationSheet_DM();
                         break;
                     case SheetType.Correlation_CP:
-                        newSheet = new CorrelationSheet_CP(sheet_type);
+                        newSheet = new CorrelationSheet_CP();
                         break;
                     case SheetType.Correlation_CM:
-                        newSheet = new CorrelationSheet_CM(sheet_type);
-                        break;
-                    case SheetType.Correlation_PM:
-                        newSheet = new CorrelationSheet_PM(sheet_type);
+                        newSheet = new CorrelationSheet_CM();
                         break;
                     case SheetType.Correlation_PP:
-                        newSheet = new CorrelationSheet_PP(sheet_type);
+                        newSheet = new CorrelationSheet_PP();
                         break;
                     default:
                         throw new Exception("Not a valid Correlation Sheet type");
@@ -227,9 +241,6 @@ namespace CorrelationTest
                         break;
                     case SheetType.Correlation_CP:
                         returnSheet = new CorrelationSheet_CP((IHasCostCorrelations)ParentItem);
-                        break;
-                    case SheetType.Correlation_PM:
-                        returnSheet = new CorrelationSheet_PM((IHasPhasingCorrelations)ParentItem);
                         break;
                     case SheetType.Correlation_PP:
                         returnSheet = new CorrelationSheet_PP((IHasPhasingCorrelations)ParentItem);
@@ -286,12 +297,17 @@ namespace CorrelationTest
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
                     if (correlSheet is Sheets.CorrelationSheet_CP)
                         ((Sheets.CorrelationSheet_CP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    else if(correlSheet is Sheets.CorrelationSheet_CM)
+                        ((Sheets.CorrelationSheet_CM)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
                     else if (correlSheet is Sheets.CorrelationSheet_DP)
                         ((Sheets.CorrelationSheet_DP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    else if(correlSheet is Sheets.CorrelationSheet_DM)
+                        ((Sheets.CorrelationSheet_DM)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
                     else if (correlSheet is Sheets.CorrelationSheet_PP)
                         ((Sheets.CorrelationSheet_PP)correlSheet).CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
                     else
                         throw new Exception("Unknown parent type");
+                    
                     
                     if (!correlSheet.CorrelMatrix.CheckForPSD())
                         MessageBox.Show("Not PSD");
@@ -338,33 +354,11 @@ namespace CorrelationTest
                 CorrelVisual.Show();
             }
 
-            public virtual void FormatSheet()
-            {
-                //throw new Exception("Failed override");
-            }
+            public virtual void FormatSheet() { throw new Exception("Failed override"); }
 
             public override bool Validate() { throw new Exception("Failed override"); }
 
-            //public static CorrelationSheet Construct(Data.CorrelationString correlString, Excel.Range source, Data.CorrelSheetSpecs specs)       //CorrelationSheet dynamic creator
-            //{
-            //    switch (correlString)       //Switch on type
-            //    {
-            //        case Data.CorrelationString_CM t1:
-            //            return new CorrelationSheet_Cost((Data.CorrelationString_CM)correlString, source, specs);
-            //        case Data.CorrelationString_CP t2:
-            //            return new CorrelationSheet_Cost((Data.CorrelationString_CP)correlString, source, specs);
-            //        case Data.CorrelationString_PM t3:
-            //            return new CorrelationSheet_Phasing((Data.CorrelationString_PM)correlString, source, specs);
-            //        case Data.CorrelationString_PT t4:
-            //            return new CorrelationSheet_Phasing((Data.CorrelationString_PT)correlString, source, specs);
-            //        case Data.CorrelationString_DM t5:
-            //            return new CorrelationSheet_Duration((Data.CorrelationString_DM)correlString, source, specs);
-            //        case Data.CorrelationString_DT t6:
-            //            return new CorrelationSheet_Duration((Data.CorrelationString_DT)correlString, source, specs);
-            //        default:
-            //            throw new Exception("Unknown Correlation String type");
-            //    }
-            //}
+            public virtual void ConvertCorrelation( bool PreserveOffDiagonal=false) { throw new Exception("Failed override"); }
 
         }
     }

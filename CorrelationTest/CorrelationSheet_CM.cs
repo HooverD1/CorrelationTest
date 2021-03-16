@@ -13,12 +13,13 @@ namespace CorrelationTest
         {
             public Data.CorrelationString_CM CorrelString { get; set; }
 
+            //EXPAND
             public CorrelationSheet_CM(IHasCostCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {
                 this.CorrelString = (Data.CorrelationString_CM)ParentItem.CostCorrelationString;
                 SheetType correlType = CorrelString.GetCorrelType();
                 this.Specs = new Data.CorrelSheetSpecs(correlType);
-                this.xlSheet = GetXlSheet(correlType);
+                this.xlSheet = GetXlSheet();
 
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Cost);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
@@ -39,10 +40,10 @@ namespace CorrelationTest
             }
 
             //COLLAPSE METHOD
-            public CorrelationSheet_CM(SheetType shtType) //build from the xlsheet to get the string
+            public CorrelationSheet_CM() //build from the xlsheet to get the string
             {
-                this.xlSheet = GetXlSheet(shtType);
-                this.Specs = new Data.CorrelSheetSpecs(shtType);
+                this.xlSheet = GetXlSheet();
+                this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CM);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -50,8 +51,6 @@ namespace CorrelationTest
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
-                if (shtType == SheetType.Correlation_CP)
-                    this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.LinkToOrigin = new Data.Link(Convert.ToString(xlLinkCell.Value));
                 //
                 //Build the CorrelMatrix
@@ -103,27 +102,15 @@ namespace CorrelationTest
 
             }
 
-            protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
+            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_CM" || sheet.Cells[1, 1].value == "$CORRELATION_CP"
+                                     where sheet.Cells[1, 1].Value == "$CORRELATION_CM"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
                 else if (CreateNew)
-                {
-                    switch (sheetType)
-                    {
-                        case SheetType.Correlation_CM:
-                            xlSheet = CreateXLCorrelSheet("_CM");
-                            break;
-                        case SheetType.Correlation_CP:
-                            xlSheet = CreateXLCorrelSheet("_CP");
-                            break;
-                        default:
-                            throw new Exception("Bad sheet type");
-                    }
-                }
+                    xlSheet = CreateXLCorrelSheet("_CM");
                 else
                     throw new Exception("No input matrix correlation sheet found.");
                 return xlSheet;
@@ -225,6 +212,11 @@ namespace CorrelationTest
                 //need to get fields from xlSheet fresh, not the object, to validate
                 bool validateMatrix_to_xlSheet = this.CorrelMatrix.ValidateAgainstXlSheet(this.Get_xlFields());
                 return validateMatrix_to_String && validateMatrix_to_xlSheet;
+            }
+
+            public override void ConvertCorrelation(bool PreserveOffDiagonal=false)
+            {
+                throw new NotImplementedException();
             }
         }
     }

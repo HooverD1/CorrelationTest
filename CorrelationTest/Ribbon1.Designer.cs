@@ -43,9 +43,9 @@
             this.btnVisualize = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.FakeFields = this.Factory.CreateRibbonButton();
+            this.GenerateMatrix = this.Factory.CreateRibbonButton();
             this.DeveloperTools = this.Factory.CreateRibbonGroup();
             this.DebugModeToggle = this.Factory.CreateRibbonButton();
-            this.GenerateMatrix = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -114,6 +114,12 @@
             this.FakeFields.Name = "FakeFields";
             this.FakeFields.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.FakeFields_Click);
             // 
+            // GenerateMatrix
+            // 
+            this.GenerateMatrix.Label = "Test Fit Matrix";
+            this.GenerateMatrix.Name = "GenerateMatrix";
+            this.GenerateMatrix.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateMatrix_Click);
+            // 
             // DeveloperTools
             // 
             this.DeveloperTools.Items.Add(this.DebugModeToggle);
@@ -125,12 +131,6 @@
             this.DebugModeToggle.Label = "Toggle Debug Mode";
             this.DebugModeToggle.Name = "DebugModeToggle";
             this.DebugModeToggle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.DebugModeToggle_Click);
-            // 
-            // GenerateMatrix
-            // 
-            this.GenerateMatrix.Label = "Test Fit Matrix";
-            this.GenerateMatrix.Name = "GenerateMatrix";
-            this.GenerateMatrix.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateMatrix_Click);
             // 
             // Ribbon1
             // 

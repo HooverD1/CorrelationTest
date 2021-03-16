@@ -175,6 +175,12 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="CorrelationConversionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CorrelationConversionForm.Designer.cs">
+      <DependentUpon>CorrelationConversionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CorrelationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -190,14 +196,12 @@
     <Compile Include="CorrelationSheet_CP.cs" />
     <Compile Include="CorrelationSheet_DM.cs" />
     <Compile Include="CorrelationSheet_DP.cs" />
-    <Compile Include="CorrelationSheet_PM.cs" />
     <Compile Include="CorrelationSheet_PP.cs" />
     <Compile Include="CorrelationString_DM.cs" />
     <Compile Include="CorrelationString_DP.cs" />
     <Compile Include="CorrelationString_CM.cs" />
     <Compile Include="CorrelationString.cs" />
     <Compile Include="CorrelationString_CP.cs" />
-    <Compile Include="CorrelationString_PM.cs" />
     <Compile Include="CorrelationString_PP.cs" />
     <Compile Include="CorrelSheetSpecs.cs" />
     <Compile Include="CostEstimate.cs" />
@@ -239,6 +243,9 @@
     <Compile Include="UniqueID.cs" />
     <Compile Include="WBSSheet.cs" />
     <Compile Include="WBS_Item.cs" />
+    <EmbeddedResource Include="CorrelationConversionForm.resx">
+      <DependentUpon>CorrelationConversionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CorrelationForm.resx">
       <DependentUpon>CorrelationForm.cs</DependentUpon>
       <SubType>Designer</SubType>

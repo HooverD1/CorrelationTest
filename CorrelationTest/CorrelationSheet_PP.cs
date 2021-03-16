@@ -17,10 +17,8 @@ namespace CorrelationTest
             public CorrelationSheet_PP(IHasPhasingCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = (Data.CorrelationString_PP)ParentItem.PhasingCorrelationString;
-                SheetType correlType = CorrelString.GetCorrelType();
-                this.Specs = new Data.CorrelSheetSpecs(correlType);
-                this.xlSheet = GetXlSheet(correlType);
-
+                this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_PP);
+                this.xlSheet = GetXlSheet();
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Phasing);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -33,14 +31,14 @@ namespace CorrelationTest
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
                 this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, correlType, this);
+                CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_PP, this);
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
             }
 
-            public CorrelationSheet_PP(SheetType shtType) //build from the xlsheet to get the string
+            public CorrelationSheet_PP() //build from the xlsheet to get the string
             {
-                this.xlSheet = GetXlSheet(shtType);
-                this.Specs = new Data.CorrelSheetSpecs(shtType);
+                this.xlSheet = GetXlSheet();
+                this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_PP);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -82,7 +80,7 @@ namespace CorrelationTest
             //    this.CorrelString = new Data.CorrelationString_PM(ids, this.CorrelMatrix);
             //}
 
-            protected override Excel.Worksheet GetXlSheet(SheetType sheetType, bool CreateNew = true)
+            protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
                                      where sheet.Cells[1, 1].Value == "$CORRELATION_PM" || sheet.Cells[1, 1].value == "$CORRELATION_PT"
@@ -90,19 +88,7 @@ namespace CorrelationTest
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();
                 else if (CreateNew)
-                {
-                    switch (sheetType)
-                    {
-                        case SheetType.Correlation_PM:
-                            xlSheet = CreateXLCorrelSheet("_PM");
-                            break;
-                        case SheetType.Correlation_PP:
-                            xlSheet = CreateXLCorrelSheet("_PT");
-                            break;
-                        default:
-                            throw new Exception("Bad sheet type");
-                    }
-                }
+                    xlSheet = CreateXLCorrelSheet("_PP");
                 else
                     throw new Exception("No input matrix correlation sheet found.");
                 return xlSheet;
