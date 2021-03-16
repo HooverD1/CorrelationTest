@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
+using Vsto = Microsoft.Office.Tools.Excel;
 
 namespace CorrelationTest
 {
@@ -12,6 +13,7 @@ namespace CorrelationTest
         public class CorrelationSheet_DM : CorrelationSheet
         {
             public Data.CorrelationString_DM CorrelString { get; set; }
+            public Excel.Range xlButton_ConvertCorrel { get; set; }
 
             public CorrelationSheet_DM(IHasDurationCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
@@ -21,11 +23,12 @@ namespace CorrelationTest
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Duration);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];      //Is this junk?
+                //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];      //Is this junk?
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
+                this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
                 this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
@@ -42,7 +45,7 @@ namespace CorrelationTest
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
@@ -79,7 +82,7 @@ namespace CorrelationTest
                 //Set up the xlCells
                 this.xlLinkCell = this.xlSheet.Cells[this.Specs.LinkCoords.Item1, this.Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = this.xlSheet.Cells[this.Specs.StringCoords.Item1, this.Specs.StringCoords.Item2];
-                this.xlIDCell = this.xlSheet.Cells[this.Specs.IdCoords.Item1, this.Specs.IdCoords.Item2];
+                //this.xlIDCell = this.xlSheet.Cells[this.Specs.IdCoords.Item1, this.Specs.IdCoords.Item2];
                 this.xlDistCell = this.xlSheet.Cells[this.Specs.DistributionCoords.Item1, this.Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = this.xlSheet.Cells[this.Specs.SubIdCoords.Item1, this.Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = this.xlSheet.Cells[this.Specs.MatrixCoords.Item1, this.Specs.MatrixCoords.Item2];
@@ -184,6 +187,22 @@ namespace CorrelationTest
                 }
                 this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
 
+            }
+
+            private void AddUserControls()
+            {
+                Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
+                System.Windows.Forms.Button btn_ConvertToDM = new System.Windows.Forms.Button();
+                vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToDM");
+                btn_ConvertToDM.Text = "Convert to Matrix Specification";
+                btn_ConvertToDM.Click += ConversionFormClicked;
+            }
+
+            private void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
+            {
+                var conversionForm = new CorrelationConversionForm();
+                conversionForm.Show();
+                conversionForm.Focus();
             }
 
             public override void FormatSheet()

@@ -14,7 +14,7 @@ namespace CorrelationTest
         {
             public PairSpecification PairSpec { get; set; }
             public Data.CorrelationString_DP CorrelString { get; set; }
-            public Excel.Range xlButton_ConvertToDM { get; set; }
+            public Excel.Range xlButton_ConvertCorrel { get; set; }
 
             public CorrelationSheet_DP(IHasDurationCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
@@ -24,12 +24,12 @@ namespace CorrelationTest
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Duration);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];      //Is this junk?
+                //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];      //Is this junk?
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
-                this.xlButton_ConvertToDM = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
+                this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
                 this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
@@ -47,7 +47,7 @@ namespace CorrelationTest
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
@@ -91,7 +91,7 @@ namespace CorrelationTest
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
@@ -219,7 +219,7 @@ namespace CorrelationTest
             {
                 Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
                 System.Windows.Forms.Button btn_ConvertToDM = new System.Windows.Forms.Button();
-                vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertToDM.Resize[1,3], "ConvertToDM");
+                vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[1,3], "ConvertToDM");
                 btn_ConvertToDM.Text = "Convert to Matrix Specification";
                 btn_ConvertToDM.Click += ConversionFormClicked;
             }

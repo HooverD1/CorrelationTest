@@ -119,7 +119,7 @@ namespace CorrelationTest
                 {
                     string[] values;
                     if (row + 1 < length)
-                        values = lines[row+1].Split(',');       //broken by entry
+                        values = lines[row + 1].Split(',');       //broken by entry
                     else
                         values = null;
 
@@ -142,16 +142,15 @@ namespace CorrelationTest
                 }
 
                 //Fill in lower triangular
-                for(int row = 0; row < length; row++)
+                for (int row = 0; row < length; row++)
                 {
-                    for(int col = 0; col < row; col++)
+                    for (int col = 0; col < row; col++)
                     {
-                        matrix[row, col] = matrix[col, row];
+                        matrix[row, col] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{row-col},{row-col})";
                     }
                 }
 
                 return matrix;
-                throw new Exception("Failed override");
             }
 
             public SheetType GetCorrelType()

@@ -28,7 +28,7 @@ namespace CorrelationTest
             public Excel.Range xlMatrixCell { get; set; }
             public Data.Link LinkToOrigin { get; set; }
             public Excel.Range xlLinkCell { get; set; }
-            public Excel.Range xlIDCell { get; set; }
+            //public Excel.Range xlIDCell { get; set; }
             public Excel.Range xlCorrelStringCell { get; set; }
             public Excel.Range xlDistCell { get; set; }
             public Excel.Range xlSubIdCell { get; set; }

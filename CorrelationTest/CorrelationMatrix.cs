@@ -79,14 +79,6 @@ namespace CorrelationTest
                         matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
-                    case SheetType.Correlation_PM:
-                        matrix = new Data.CorrelationMatrix_Phasing();
-                        matrix.Fields = (from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
-                        matrix.Matrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix_Values();
-                        matrix.FieldCount = matrix.Fields.Count();
-                        matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();
-                        matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
-                        break;
                     case SheetType.Correlation_DP:
                         matrix = new Data.CorrelationMatrix_Duration();
                         matrix.Fields = ParentItem.GetFields();
