@@ -211,14 +211,14 @@ namespace CorrelationTest
             {
                 Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
                 System.Windows.Forms.Button btn_ConvertToDM = new System.Windows.Forms.Button();
-                vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[1,3], "ConvertToDM");
                 btn_ConvertToDM.Text = "Convert to Matrix Specification";
                 btn_ConvertToDM.Click += ConversionFormClicked;
+                vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[1,3], "ConvertToDM");
             }
 
             private void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
             {
-                var conversionForm = new CorrelationConversionForm();
+                var conversionForm = new CorrelationConversionForm(this);
                 conversionForm.Show();
                 conversionForm.Focus();
             }

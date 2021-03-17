@@ -212,7 +212,7 @@ namespace CorrelationTest
                     verticalShift = yVals[yVals.Length - 1];
                     for (int j = 0; j < yVals.Length; j++)
                     {
-                        yVals[i] -= verticalShift;
+                        yVals[j] -= verticalShift;
                     }
                 }
                 if (i < 2)

@@ -197,15 +197,14 @@ namespace CorrelationTest
             {
                 Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
                 System.Windows.Forms.Button btn_ConvertToDP = new System.Windows.Forms.Button();
-                btn_ConvertToDP.Text = "Convert to Matrix Specification";
+                btn_ConvertToDP.Text = "Convert to Pairwise Specification";
                 btn_ConvertToDP.Click += ConversionFormClicked;
                 vstoSheet.Controls.AddControl(btn_ConvertToDP, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToDP");
-
             }
 
             private void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
             {
-                var conversionForm = new CorrelationConversionForm();
+                var conversionForm = new CorrelationConversionForm(this);
                 conversionForm.Show();
                 conversionForm.Focus();
             }
@@ -251,7 +250,7 @@ namespace CorrelationTest
                  * This includes fitting the pairs to a matrix.
                  * Need the fields, matrix, IDs, Link, Header
                  */
-                var pairs = PairSpecification.ConstructByFittingMatrix(this.CorrelMatrix.GetMatrix());
+                var pairs = PairSpecification.ConstructByFittingMatrix(this.CorrelMatrix.GetMatrix(), PreserveOffDiagonal);
                 object[] ids = this.GetIDs();
                 object[] fields = this.GetFields();
                 object header = this.xlCorrelStringCell.Value;
