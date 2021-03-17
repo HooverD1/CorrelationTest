@@ -32,8 +32,8 @@ namespace CorrelationTest
             public Excel.Range xlCorrelStringCell { get; set; }
             public Excel.Range xlDistCell { get; set; }
             public Excel.Range xlSubIdCell { get; set; }
-            public Excel.Range xlPairsCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
+            public Excel.Range xlPairsCell { get; set; }
 
             public string Header { get; set; }
 
@@ -362,6 +362,12 @@ namespace CorrelationTest
 
             public virtual void ConvertCorrelation( bool PreserveOffDiagonal=false) { throw new Exception("Failed override"); }
 
+            protected void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
+            {
+                var conversionForm = new CorrelationConversionForm(this);
+                conversionForm.Show();
+                conversionForm.Focus();
+            }
         }
     }
 }

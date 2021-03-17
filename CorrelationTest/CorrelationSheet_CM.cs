@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
+using Vsto = Microsoft.Office.Tools.Excel;
 
 namespace CorrelationTest
 {
@@ -94,12 +95,62 @@ namespace CorrelationTest
                 this.FormatSheet();
             }
 
+            //CONVERT
+            public CorrelationSheet_CM(object[,] matrix, object[] ids, object[] fields, object header, object link, Excel.Worksheet replaceXlSheet) //build from the xlsheet to get the string
+            {
+                ThisAddIn.MyApp.DisplayAlerts = false;
+                replaceXlSheet.Delete();
+                ThisAddIn.MyApp.DisplayAlerts = true;
+                this.xlSheet = this.GetXlSheet();
+                this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CM);
+                //Set up the xlCells
+                this.xlLinkCell = this.xlSheet.Cells[this.Specs.LinkCoords.Item1, this.Specs.LinkCoords.Item2];
+                this.xlCorrelStringCell = this.xlSheet.Cells[this.Specs.StringCoords.Item1, this.Specs.StringCoords.Item2];
+                //this.xlIDCell = this.xlSheet.Cells[this.Specs.IdCoords.Item1, this.Specs.IdCoords.Item2];
+                this.xlDistCell = this.xlSheet.Cells[this.Specs.DistributionCoords.Item1, this.Specs.DistributionCoords.Item2];
+                this.xlSubIdCell = this.xlSheet.Cells[this.Specs.SubIdCoords.Item1, this.Specs.SubIdCoords.Item2];
+                this.xlMatrixCell = this.xlSheet.Cells[this.Specs.MatrixCoords.Item1, this.Specs.MatrixCoords.Item2];
+                this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
+                //LINK
+                this.LinkToOrigin = new Data.Link(link.ToString());
+
+                //Build the CorrelMatrix
+                Excel.Range matrixRange = this.xlSheet.Range[this.xlMatrixCell.Offset[1, 0], this.xlMatrixCell.End[Excel.XlDirection.xlToRight].End[Excel.XlDirection.xlDown]];
+                //This needs to construct off the un-printed sheet
+                this.CorrelMatrix = Data.CorrelationMatrix.ConstructForConversion(matrix, ids, fields, header);
+                //Build the CorrelString, which can print itself during collapse
+                string parent_id = Data.CorrelationString.GetParentIDFromCorrelStringValue(header);
+                SheetType sheetType = ExtensionMethods.GetSheetType(this.xlSheet);
+                this.CorrelString = new Data.CorrelationString_CM(parent_id, ids, fields, this.CorrelMatrix);
+                this.Header = header.ToString();
+            }
+
+
             public override void FormatSheet()
             {
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
-                matrixRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+                Excel.Range diagonal = matrixRange.Cells[1, 1];
+                for (int i = 2; i <= matrixRange.Columns.Count; i++)
+                {
+                    diagonal = ThisAddIn.MyApp.Union(diagonal, matrixRange.Cells[i, i]);
+                }
 
+                foreach (Excel.Range cell in matrixRange.Cells)
+                {
+                    int rowIndex = cell.Row - matrixStart.Row;
+                    int colIndex = cell.Column - matrixStart.Column;
+                    if (colIndex > rowIndex)
+                        cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+                    else
+                        cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
+                }
+
+                diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
+                diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
+
+                matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -154,6 +205,17 @@ namespace CorrelationTest
                 return ((IHasCostCorrelations)est).SubEstimates[subIndex].uID.ID;
             }
 
+            private void AddUserControls()
+            {
+                Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
+                System.Windows.Forms.Button btn_ConvertToCP = new System.Windows.Forms.Button();
+                btn_ConvertToCP.Text = "Convert to Matrix Specification";
+                btn_ConvertToCP.Click += ConversionFormClicked;
+                vstoSheet.Controls.AddControl(btn_ConvertToCP, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToCP");
+            }
+
+
+
             public override void PrintToSheet()  //expanding from string
             {
                 //build a sheet object off the linksource
@@ -190,6 +252,7 @@ namespace CorrelationTest
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
                 PrintColumnHeaders();
+                AddUserControls();
             }
 
             private void PrintColumnHeaders()
@@ -214,7 +277,19 @@ namespace CorrelationTest
 
             public override void ConvertCorrelation(bool PreserveOffDiagonal=false)
             {
-                throw new NotImplementedException();
+                /*
+                 * This method needs to construct a _DM type using the information on the _DP type.
+                 * This includes fitting the pairs to a matrix.
+                 * Need the fields, matrix, IDs, Link, Header
+                 */
+                var pairs = PairSpecification.ConstructByFittingMatrix(this.CorrelMatrix.GetMatrix(), PreserveOffDiagonal);
+                object[] ids = this.GetIDs();
+                object[] fields = this.GetFields();
+                object header = this.xlCorrelStringCell.Value;
+                object link = this.xlLinkCell.Value;
+                CorrelationSheet_CP convertedSheet = new CorrelationSheet_CP(pairs, ids, fields, header, link, this.xlSheet);
+                convertedSheet.PrintToSheet();
+                convertedSheet.FormatSheet();
             }
         }
     }

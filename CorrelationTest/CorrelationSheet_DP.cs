@@ -216,19 +216,17 @@ namespace CorrelationTest
                 vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[1,3], "ConvertToDM");
             }
 
-            private void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
-            {
-                var conversionForm = new CorrelationConversionForm(this);
-                conversionForm.Show();
-                conversionForm.Focus();
-            }
-
             public override void FormatSheet()
             {
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
+                Excel.Range diagonal = matrixRange.Cells[1,1];
+                for(int i = 2; i <= matrixRange.Columns.Count; i++)
+                {
+                    diagonal = ThisAddIn.MyApp.Union(diagonal, matrixRange.Cells[i,i]);
+                }
+                Excel.Range pairwiseRange = this.xlPairsCell.Resize[matrixRange.Columns.Count - 1, 2];
 
-                //THIS SHOULD HAVE A DIFFERENT SUBCLASS
                 if (ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DM)
                 {
                     foreach (Excel.Range cell in matrixRange.Cells)
@@ -255,6 +253,15 @@ namespace CorrelationTest
                         cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
                     }
                 }
+
+                diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
+                diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
+
+                matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+
+                pairwiseRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                pairwiseRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
             }
 
             public override void ConvertCorrelation(bool PreserveOffDiagonal=false)

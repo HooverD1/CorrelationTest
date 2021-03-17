@@ -202,45 +202,32 @@ namespace CorrelationTest
                 vstoSheet.Controls.AddControl(btn_ConvertToDP, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToDP");
             }
 
-            private void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
-            {
-                var conversionForm = new CorrelationConversionForm(this);
-                conversionForm.Show();
-                conversionForm.Focus();
-            }
-
             public override void FormatSheet()
             {
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
+                Excel.Range diagonal = matrixRange.Cells[1, 1];
+                for (int i = 2; i <= matrixRange.Columns.Count; i++)
+                {
+                    diagonal = ThisAddIn.MyApp.Union(diagonal, matrixRange.Cells[i, i]);
+                }
+                
 
-                //THIS SHOULD HAVE A DIFFERENT SUBCLASS
-                if (ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DM)
+                foreach (Excel.Range cell in matrixRange.Cells)
                 {
-                    foreach (Excel.Range cell in matrixRange.Cells)
-                    {
-                        int rowIndex = cell.Row - matrixStart.Row;
-                        int colIndex = cell.Column - matrixStart.Column;
-                        if (colIndex > rowIndex)
-                            cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
-                        else
-                            cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
-                    }
-                }
-                else if (ExtensionMethods.GetSheetType(this.xlSheet) == SheetType.Correlation_DP)
-                {
-                    foreach (Excel.Range cell in matrixRange.Cells)
-                    {
-                        int rowIndex = cell.Row - matrixStart.Row;
-                        int colIndex = cell.Column - matrixStart.Column;
-                        cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
-                    }
-                    Excel.Range xlPairsRange = this.xlPairsCell.Resize[matrixRange.Rows.Count - 1, 2];
-                    foreach (Excel.Range cell in xlPairsRange)
-                    {
+                    int rowIndex = cell.Row - matrixStart.Row;
+                    int colIndex = cell.Column - matrixStart.Column;
+                    if (colIndex > rowIndex)
                         cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
-                    }
+                    else
+                        cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
                 }
+
+                diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
+                diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
+
+                matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
             }
 
             public override void ConvertCorrelation(bool PreserveOffDiagonal=false) //Convert DP --> DM (fit matrix)
