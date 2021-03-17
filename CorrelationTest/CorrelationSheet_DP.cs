@@ -271,7 +271,7 @@ namespace CorrelationTest
                  * This includes fitting the pairs to a matrix.
                  * Need the fields, matrix, IDs, Link, Header
                  */
-                object[,] matrix = this.CorrelMatrix.GetMatrix();
+                object[,] matrix = this.CorrelMatrix.GetMatrix_Formulas();
                 object[] ids = this.GetIDs();   //This isn't returning anything
                 object[] fields = this.CorrelMatrix.Fields;
                 object header = this.xlCorrelStringCell.Value;

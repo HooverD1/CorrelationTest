@@ -44,7 +44,7 @@ namespace CorrelationTest
 
             public CorrelationString_CM(string parent_id, object[] sub_ids, object[] sub_fields, Data.CorrelationMatrix matrix)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, matrix.GetMatrix()));
+                this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue(parent_id, sub_ids, sub_fields, matrix.GetMatrix_Values()));
             }
 
             private static object[] GetFieldsFromRange(Excel.Range correlRange)

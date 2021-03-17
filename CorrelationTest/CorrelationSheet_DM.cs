@@ -237,7 +237,7 @@ namespace CorrelationTest
                  * This includes fitting the pairs to a matrix.
                  * Need the fields, matrix, IDs, Link, Header
                  */
-                var pairs = PairSpecification.ConstructByFittingMatrix(this.CorrelMatrix.GetMatrix(), PreserveOffDiagonal);
+                var pairs = PairSpecification.ConstructByFittingMatrix(this.CorrelMatrix.GetMatrix_Values(), PreserveOffDiagonal);
                 object[] ids = this.GetIDs();
                 object[] fields = this.GetFields();
                 object header = this.xlCorrelStringCell.Value;

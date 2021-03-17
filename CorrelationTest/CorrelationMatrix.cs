@@ -298,9 +298,35 @@ namespace CorrelationTest
                 return FieldDict;
             }
 
-            public object[,] GetMatrix()
+            public object[,] GetMatrix_Values()
             {
                 return Matrix;
+            }
+
+            public object[,] GetMatrix_Formulas()
+            {
+                //Start with this.Matrix
+                //Fix the Upper Triangular & Diagonal
+                //Set the Lower Triangular as formulas
+                
+                int size = Matrix.GetLength(0);
+                object[,] formulaMatrix = new object[size,size];
+                for (int row = 0; row < size; row++)
+                {
+                    for(int col=0; col < size; col++)
+                    {
+                        if(row <= col)
+                        {
+                            //Upper Triangular and Diagonal
+                            formulaMatrix[row, col] = Matrix[row, col];
+                        }
+                        else if(row > col)
+                        {
+                            formulaMatrix[row, col] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{row - col},{row - col})";
+                        }
+                    }
+                }
+                return formulaMatrix;
             }
 
             public object[] GetFields()

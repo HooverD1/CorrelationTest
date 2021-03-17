@@ -39,6 +39,7 @@ namespace CorrelationTest
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_CP, this);
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Header = CorrelString.GetHeader();
+                this.PairSpec = CorrelString.GetPairwise();
                 this.FormatSheet();
             }
 
@@ -221,11 +222,7 @@ namespace CorrelationTest
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
 
                 this.xlCorrelStringCell.Value = this.Header;
-                if (CorrelString is Data.CorrelationString_CP)       //Need to replicate this in PT and DT.
-                {
-                    this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count() - 1, 2].Value = ((Data.CorrelationString_CP)CorrelString).GetPairwise().GetValuesString_Split();
-                    //this.xlPairsCell.Value = ((Data.CorrelationString_CP)CorrelString).GetPairs().Value;
-                }
+                this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count() - 1, 2].Value = this.PairSpec.GetValuesString_Split();
 
                 for (int subIndex = 0; subIndex < parentEstimate.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
@@ -275,7 +272,8 @@ namespace CorrelationTest
                  * This includes fitting the pairs to a matrix.
                  * Need the fields, matrix, IDs, Link, Header
                  */
-                object[,] matrix = this.CorrelMatrix.GetMatrix();
+                
+                object[,] matrix = this.CorrelMatrix.GetMatrix_Formulas();
                 object[] ids = this.GetIDs();   //This isn't returning anything
                 object[] fields = this.CorrelMatrix.Fields;
                 object header = this.xlCorrelStringCell.Value;
