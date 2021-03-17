@@ -35,6 +35,8 @@ namespace CorrelationTest
             public Excel.Range xlPairsCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
 
+            public string Header { get; set; }
+
             //public CorrelationSheet(Data.CorrelationString_CM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
 
 

@@ -36,6 +36,13 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(CreateValue_Zero(fields));
             }
 
+            public string GetHeader()
+            {
+                string correlString = ExtensionMethods.CleanStringLinebreaks(this.Value);
+                string[] lines = DelimitString(correlString);
+                return lines[0];
+            }
+
             public static string GetParentIDFromString(CorrelationString correlString_Object)
             {
                 string correlString = Convert.ToString(correlString_Object.Value);

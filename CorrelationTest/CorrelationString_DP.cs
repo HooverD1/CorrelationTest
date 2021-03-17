@@ -50,7 +50,7 @@ namespace CorrelationTest
                 header.Append("DP");
                 header.Append(",");
                 header.Append(parentID);
-                values.Append(pairs.GetValuesString());
+                values.Append(pairs.Value);
 
                 this.Value = $"{header.ToString()}&{values.ToString()}";
             }

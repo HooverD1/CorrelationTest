@@ -15,6 +15,7 @@ namespace CorrelationTest
             public Data.CorrelationString_DM CorrelString { get; set; }
             public Excel.Range xlButton_ConvertCorrel { get; set; }
 
+            //EXPAND
             public CorrelationSheet_DM(IHasDurationCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {   //Build from the correlString to get the xlSheet
                 this.CorrelString = (Data.CorrelationString_DM)ParentItem.DurationCorrelationString;
@@ -35,6 +36,7 @@ namespace CorrelationTest
                 this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_DM, this);
                 this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
+                this.Header = CorrelString.GetHeader();
             }
             //COLLAPSE
             public CorrelationSheet_DM() //build from the xlsheet to get the string
@@ -50,7 +52,7 @@ namespace CorrelationTest
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
-
+                this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 //LINK
                 this.LinkToOrigin = new Data.Link(xlLinkCell.Value);
 
@@ -86,7 +88,7 @@ namespace CorrelationTest
                 this.xlDistCell = this.xlSheet.Cells[this.Specs.DistributionCoords.Item1, this.Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = this.xlSheet.Cells[this.Specs.SubIdCoords.Item1, this.Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = this.xlSheet.Cells[this.Specs.MatrixCoords.Item1, this.Specs.MatrixCoords.Item2];
-
+                this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 //LINK
                 this.LinkToOrigin = new Data.Link(link.ToString());
 
@@ -100,6 +102,7 @@ namespace CorrelationTest
                 string parent_id = Data.CorrelationString.GetParentIDFromCorrelStringValue(header);
                 SheetType sheetType = ExtensionMethods.GetSheetType(this.xlSheet);
                 this.CorrelString = new Data.CorrelationString_DM(parent_id, ids, fields, this.CorrelMatrix);
+                this.Header = header.ToString();
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)        //Is this method being used?
@@ -164,7 +167,7 @@ namespace CorrelationTest
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 //This should really just print the header:
-                CorrelString.PrintToSheet(xlCorrelStringCell);
+                this.xlCorrelStringCell.Value = this.Header;
                 for (int subIndex = 0; subIndex < parentEstimate.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
                 {
                     //Distributions
@@ -175,6 +178,7 @@ namespace CorrelationTest
                     this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
                 }
                 PrintColumnHeaders();
+                AddUserControls();
             }
 
             private void PrintColumnHeaders()
@@ -192,10 +196,11 @@ namespace CorrelationTest
             private void AddUserControls()
             {
                 Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
-                System.Windows.Forms.Button btn_ConvertToDM = new System.Windows.Forms.Button();
-                vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToDM");
-                btn_ConvertToDM.Text = "Convert to Matrix Specification";
-                btn_ConvertToDM.Click += ConversionFormClicked;
+                System.Windows.Forms.Button btn_ConvertToDP = new System.Windows.Forms.Button();
+                btn_ConvertToDP.Text = "Convert to Matrix Specification";
+                btn_ConvertToDP.Click += ConversionFormClicked;
+                vstoSheet.Controls.AddControl(btn_ConvertToDP, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToDP");
+
             }
 
             private void ConversionFormClicked(object sender, EventArgs e)      //This works.. but why? Isn't the object gone?
@@ -239,7 +244,7 @@ namespace CorrelationTest
                 }
             }
 
-            public override void ConvertCorrelation(bool PreserveOffDiagonal=false)
+            public override void ConvertCorrelation(bool PreserveOffDiagonal=false) //Convert DP --> DM (fit matrix)
             {
                 /*
                  * This method needs to construct a _DM type using the information on the _DP type.
@@ -247,11 +252,13 @@ namespace CorrelationTest
                  * Need the fields, matrix, IDs, Link, Header
                  */
                 var pairs = PairSpecification.ConstructByFittingMatrix(this.CorrelMatrix.GetMatrix());
-                object[] fields = this.GetFieldsFromXlCorrelSheet();
+                object[] ids = this.GetIDs();
+                object[] fields = this.GetFields();
                 object header = this.xlCorrelStringCell.Value;
                 object link = this.xlLinkCell.Value;
-                CorrelationSheet_DP convertedSheet = new CorrelationSheet_DP(pairs, fields, header, link);
+                CorrelationSheet_DP convertedSheet = new CorrelationSheet_DP(pairs, ids, fields, header, link, this.xlSheet);
                 convertedSheet.PrintToSheet();
+                convertedSheet.FormatSheet();
             }
 
             public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass

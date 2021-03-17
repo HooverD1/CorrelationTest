@@ -107,7 +107,7 @@ namespace CorrelationTest
                 
                 for (int upIndex = 1; upIndex <= row; upIndex++)
                 {
-                    matrix[row - upIndex, row] = Pairs[row-1].Item1 - (Pairs[row-1].Item2 * (upIndex));
+                    matrix[row - upIndex, row] = Pairs[row-1].Item1 - (Pairs[row-1].Item2 * (upIndex-1));
                 }
             }
             for(int itRow = 1; itRow < size; itRow++)
@@ -159,11 +159,6 @@ namespace CorrelationTest
             return returnValues;
         }
 
-        public string GetValuesString()
-        {
-            return this.Value;
-        }
-
         private object[,] ConvertTuplesToRangeValues()
         {
             int numberOfPairs = this.Pairs.Count();
@@ -186,17 +181,26 @@ namespace CorrelationTest
 
         public static PairSpecification ConstructByFittingMatrix(object[,] matrixRange, bool forceFitDiagonal = false)
         {
+            if (matrixRange == null)
+                throw new ArgumentNullException();
+            if (matrixRange.GetLength(0) != matrixRange.GetLength(1))
+                throw new Exception("Matrix is not square");
             PairSpecification ps = new PairSpecification();
             //Give back an array of pairwise spec values
             Tuple<double, double>[] pairs = new Tuple<double, double>[matrixRange.GetLength(0) - 1];
             object[][] jaggedMatrix = ExtensionMethods.ToJaggedArray(matrixRange, true);
 
-            for (int i = matrixRange.GetLength(0) - 2; i >= 0; i--)
+            for (int i = 1; i < matrixRange.GetLength(0); i++)
             {
-                double[] yVals = (from object val in jaggedMatrix[i] where val != null select Convert.ToDouble(val)).ToArray();
-                double[] xVals = new double[yVals.Length];
-                for (int x = 0; x < yVals.Length; x++)
-                    xVals[x] = yVals.Length - x - 1;
+                //yVals needs populated by the values above the i'th position
+                double[] yVals = new double[i];
+                double[] xVals = new double[i];
+                for (int x = 0; x < i; x++)
+                {
+                    xVals[x] = i - x - 1;
+                    yVals[x] = Convert.ToDouble(jaggedMatrix[i][x]);
+                }
+                    
                 SimpleLinearRegression slr;
                 var ols = new OrdinaryLeastSquares();
                 double verticalShift = 0;
@@ -211,16 +215,14 @@ namespace CorrelationTest
                         yVals[i] -= verticalShift;
                     }
                 }
-                if (xVals.Length != yVals.Length)
-                    throw new Exception("Malformed regression inputs");
-                else if (xVals.Length < 2)
-                    pairs[i] = new Tuple<double, double>(0, yVals[yVals.Length - 1]);
+                if (i < 2)
+                    pairs[i-1] = new Tuple<double, double>(yVals[i - 1], 0);
                 else
                 {
                     try
                     {
                         slr = ols.Learn(xVals, yVals);
-                        pairs[i] = new Tuple<double, double>(slr.Slope, slr.Intercept + verticalShift);
+                        pairs[i-1] = new Tuple<double, double>(slr.Intercept + verticalShift, (-1)*slr.Slope);  //Invert the slope because it stores as the "decrease"
                     }
                     catch
                     {
@@ -230,6 +232,7 @@ namespace CorrelationTest
                 }
             }
             ps.Pairs = pairs;
+            ps.Value = ps.ToString();
             return ps;
         }
     }

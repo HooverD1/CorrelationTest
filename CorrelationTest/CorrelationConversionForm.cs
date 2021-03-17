@@ -27,17 +27,17 @@ namespace CorrelationTest
              */
 
             //Build the  viewmodel for the existing correlation sheet.
-            try
-            {
+            //try
+            //{
                 var correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
                 correlSheet.ConvertCorrelation();
                 this.Close();
-            }
-            catch
-            {
-                if (MyGlobals.DebugMode)
-                    throw new Exception("Correlation conversion failed");
-            }
+            //}
+            //catch(Exception except)
+            //{
+            //    if (MyGlobals.DebugMode)
+            //        throw except;
+            //}
         }
     }
 }

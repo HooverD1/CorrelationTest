@@ -142,7 +142,7 @@ namespace CorrelationTest
 
                 if (CorrelString is Data.CorrelationString_PP)       //Need to replicate this in PT and DT.
                 {
-                    this.xlPairsCell.Value = ((Data.CorrelationString_PP)CorrelString).GetPairwise().GetValuesString();
+                    this.xlPairsCell.Value = ((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;
                 }
                 //this.xlDistCell.Value = tempEst.ItemDistribution.Name;
             }

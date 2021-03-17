@@ -67,7 +67,7 @@ namespace CorrelationTest
                 }
                 fields.Remove(fields.Length - 1, 1);    //remove the final char
 
-                values.Append(pairs.GetValuesString());
+                values.Append(pairs.Value);
 
                 //This code to convert to matrix:
                 /*
