@@ -242,26 +242,163 @@ namespace CorrelationTest
             return outString;
         }
         
-        public static void FastPasteSquare(Excel.Range pasteRange, object[,] pasteValues)
+        public static void FastPaste_Square(Excel.Range pasteRange, object[,] pasteValues)
         {
-            //This method splits up the inputs into chunks of max size 255 because it speeds up pasting into Excel
-            //Does converting to jagged actually speed it up?
-            Excel.Range partialPaste = pasteRange.Offset[0,0].Resize[1,1];
+            //Error checking
             int size = pasteRange.Columns.Count;
             if (size != pasteRange.Rows.Count)
                 throw new Exception("Not square");
+            if (pasteValues.GetLength(0) != size || pasteValues.GetLength(1) != size)
+                throw new Exception("Values array size does not match range size");
+            //Error checking
 
-            if(size > 255)  //Need to split the rows
+            //This method splits up the inputs into chunks of max size 250 x 250 and handles them separately
+
+            Excel.Range pasteCell = pasteRange.Cells[1, 1];     //The top left cell
+            Excel.Range[] partialPasteRange;     //Max 250 x 250 cell blocks
+            object[] partialValues;
+
+            if(size <= 250)
             {
-                int iterationsPerRow = size / 255;
-                if (size % 255 > 0)
-                    iterationsPerRow++;
-                for(int i = 0; i < iterationsPerRow; i++)
-                {
+                partialPasteRange = new Excel.Range[1];
+                partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[size, size];
 
+                partialValues = new object[1];
+                partialValues[0] = pasteValues;     //object arrays are themselves objects..
+                partialPasteRange[0].Value = partialValues[0];
+            }
+            else if(size <= 500)
+            {
+                //2 x 2 blocks of roughly 250 x 250
+                partialPasteRange = new Excel.Range[4];
+                int blockSize = size / 2 + (size % 2)/2;
+                partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[blockSize, blockSize];     //full width
+                partialPasteRange[1] = pasteCell.Offset[0, blockSize].Resize[blockSize, size - blockSize]; //partial width
+                partialPasteRange[2] = pasteCell.Offset[blockSize, 0].Resize[size - blockSize, blockSize]; //full width
+                partialPasteRange[3] = pasteCell.Offset[blockSize, blockSize].Resize[size - blockSize, size - blockSize]; //partial width
+
+                partialValues = new object[4];
+                partialValues[0] = SliceArray(pasteValues, 0, 0, blockSize, blockSize);
+                partialValues[1] = SliceArray(pasteValues, 0, blockSize, blockSize, size - blockSize);
+                partialValues[2] = SliceArray(pasteValues, blockSize, 0, size - blockSize, blockSize);
+                partialValues[3] = SliceArray(pasteValues, blockSize, blockSize, size - blockSize, size - blockSize);
+
+                partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
+                partialPasteRange[0].Value = partialValues[1];
+                partialPasteRange[0].Value = partialValues[2];
+                partialPasteRange[0].Value = partialValues[3];
+            }
+            else if(size <= 750)
+            {
+                //3 x 3 blocks of 250 x 250
+                partialPasteRange = new Excel.Range[9];
+                int blockSize = size / 3 + (size % 3) / 3;
+                partialPasteRange[0] = pasteCell.Offset[blockSize * 0, blockSize*0].Resize[blockSize, blockSize];   //full width
+                partialPasteRange[1] = pasteCell.Offset[blockSize * 0, blockSize*1].Resize[blockSize, blockSize];   //full width
+                partialPasteRange[2] = pasteCell.Offset[blockSize * 0, blockSize*2].Resize[blockSize, size - (blockSize*2)];   //partial width
+                partialPasteRange[3] = pasteCell.Offset[blockSize * 1, blockSize*0].Resize[blockSize, blockSize];   //full width
+                partialPasteRange[4] = pasteCell.Offset[blockSize * 1, blockSize*1].Resize[blockSize, blockSize];   //full width
+                partialPasteRange[5] = pasteCell.Offset[blockSize * 1, blockSize*2].Resize[blockSize, size - (blockSize * 2)];   //partial width
+                partialPasteRange[6] = pasteCell.Offset[blockSize * 2, blockSize*0].Resize[size - (blockSize * 2), blockSize];   //full width
+                partialPasteRange[7] = pasteCell.Offset[blockSize * 2, blockSize*1].Resize[size - (blockSize * 2), blockSize];   //full width
+                partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize*2].Resize[size - (blockSize * 2), size - (blockSize * 2)];   //partial width
+
+                partialValues = new object[9];
+                partialValues[0] = SliceArray(pasteValues, blockSize*0, blockSize*0, blockSize, blockSize);
+                partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2);
+                partialValues[3] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
+                partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
+                partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2);
+                partialValues[6] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
+                partialValues[7] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
+                partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2);
+
+                partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
+                partialPasteRange[1].Value = partialValues[1];
+                partialPasteRange[2].Value = partialValues[2];
+                partialPasteRange[3].Value = partialValues[3];
+                partialPasteRange[4].Value = partialValues[4];
+                partialPasteRange[5].Value = partialValues[5];
+                partialPasteRange[6].Value = partialValues[6];
+                partialPasteRange[7].Value = partialValues[7];
+                partialPasteRange[8].Value = partialValues[8];
+                partialPasteRange[9].Value = partialValues[9];
+            }
+            else if(size <= 1000)
+            {
+                //4 x 4 blocks of 250 x 250
+                partialPasteRange = new Excel.Range[16];
+                int blockSize = size / 4 + (size % 4) / 4;
+                partialPasteRange[0] = pasteCell.Offset[blockSize * 0, blockSize * 0].Resize[blockSize, blockSize];
+                partialPasteRange[1] = pasteCell.Offset[blockSize * 0, blockSize * 1].Resize[blockSize, blockSize];
+                partialPasteRange[2] = pasteCell.Offset[blockSize * 0, blockSize * 2].Resize[blockSize, blockSize];
+                partialPasteRange[3] = pasteCell.Offset[blockSize * 0, blockSize * 3].Resize[blockSize, size - blockSize*3];//
+                partialPasteRange[4] = pasteCell.Offset[blockSize * 1, blockSize * 0].Resize[blockSize, blockSize];
+                partialPasteRange[5] = pasteCell.Offset[blockSize * 1, blockSize * 1].Resize[blockSize, blockSize];
+                partialPasteRange[6] = pasteCell.Offset[blockSize * 1, blockSize * 2].Resize[blockSize, blockSize];
+                partialPasteRange[7] = pasteCell.Offset[blockSize * 1, blockSize * 3].Resize[blockSize, size - blockSize * 3];//
+                partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize * 0].Resize[blockSize, blockSize];
+                partialPasteRange[9] = pasteCell.Offset[blockSize * 2, blockSize * 1].Resize[blockSize, blockSize];
+                partialPasteRange[10] = pasteCell.Offset[blockSize * 2, blockSize * 2].Resize[blockSize, blockSize];
+                partialPasteRange[11] = pasteCell.Offset[blockSize * 2, blockSize * 3].Resize[blockSize, size - blockSize * 3];//
+                partialPasteRange[12] = pasteCell.Offset[blockSize * 3, blockSize * 0].Resize[size - blockSize * 3, blockSize];
+                partialPasteRange[13] = pasteCell.Offset[blockSize * 3, blockSize * 1].Resize[size - blockSize * 3, blockSize];
+                partialPasteRange[14] = pasteCell.Offset[blockSize * 3, blockSize * 2].Resize[size - blockSize * 3, blockSize];
+                partialPasteRange[15] = pasteCell.Offset[blockSize * 3, blockSize * 3].Resize[size - blockSize * 3, size - blockSize * 3];//
+
+                partialValues = new object[16];
+                partialValues[0] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, blockSize, blockSize);
+                partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, blockSize);
+                partialValues[3] = SliceArray(pasteValues, blockSize * 0, blockSize * 3, blockSize, size - blockSize * 3);
+                partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
+                partialValues[5] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                partialValues[6] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, blockSize);
+                partialValues[7] = SliceArray(pasteValues, blockSize * 1, blockSize * 3, blockSize, size - blockSize * 3);
+                partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
+                partialValues[9] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                partialValues[10] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, blockSize);
+                partialValues[11] = SliceArray(pasteValues, blockSize * 2, blockSize * 3, blockSize, size - blockSize * 3);
+                partialValues[12] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, size - blockSize * 3, blockSize);
+                partialValues[13] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, size - blockSize * 3, blockSize);
+                partialValues[14] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, size - blockSize * 3, blockSize);
+                partialValues[15] = SliceArray(pasteValues, blockSize * 0, blockSize * 3, size - blockSize * 3, size - blockSize * 3);
+
+                partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
+                partialPasteRange[1].Value = partialValues[1];
+                partialPasteRange[2].Value = partialValues[2];
+                partialPasteRange[3].Value = partialValues[3];
+                partialPasteRange[4].Value = partialValues[4];
+                partialPasteRange[5].Value = partialValues[5];
+                partialPasteRange[6].Value = partialValues[6];
+                partialPasteRange[7].Value = partialValues[7];
+                partialPasteRange[8].Value = partialValues[8];
+                partialPasteRange[9].Value = partialValues[9];
+                partialPasteRange[10].Value = partialValues[10];
+                partialPasteRange[11].Value = partialValues[11];
+                partialPasteRange[12].Value = partialValues[12];
+                partialPasteRange[13].Value = partialValues[13];
+                partialPasteRange[14].Value = partialValues[14];
+                partialPasteRange[15].Value = partialValues[15];
+            }
+            else
+            {
+                throw new Exception("Matrix is too larger");
+            }
+        }
+
+        public static object[,] SliceArray(object[,] fullArray, int x_start, int y_start, int x_length, int y_length)   //for generic object[x, y]
+        {
+            object[,] slicedArray = new object[x_length, y_length];
+            for(int x = 0; x < x_length; x++)
+            {
+                for(int y = 0; y < y_length; y++)
+                {
+                    slicedArray[x, y] = fullArray[x + x_start, y + y_start];        //Does a quicker way than iteration exist?
                 }
             }
-               
+            return slicedArray;
         }
     }
 }

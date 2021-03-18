@@ -59,22 +59,13 @@ namespace CorrelationTest
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
                 fieldsValues = ExtensionMethods.ReIndexArray(fieldsValues);
                 object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[0];
-                Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
+                int size = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(xlHeaderCell.Value);
+                Excel.Range matrixRange = xlMatrixCell.Offset[1, 0].Resize[size,size]; //xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
                 object[,] matrix = matrixRange.Value;
                 this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
                 this.Header = Convert.ToString(xlHeaderCell.Value);
 
                 PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Length - 1);
-                //Check if the matrix still matches the triple.
-                if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
-                {       //If YES - create cs_triple object
-                    this.CorrelString = (Data.CorrelationString_CP)Data.CorrelationString.ConstructFromCorrelationSheet(this);
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                    //Alert user about matrix changes & give option to reset or launch the conversion form?
-                }
             }
 
             //CONVERT
@@ -106,7 +97,6 @@ namespace CorrelationTest
 
             public override void FormatSheet()
             {
-                Diagnostics.StartTimer();
                 int size = this.CorrelMatrix.Fields.Length;
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[size, size];
@@ -126,7 +116,6 @@ namespace CorrelationTest
 
                 diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
                 diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
-                Diagnostics.StopTimer("CP Format", true);
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -172,7 +161,6 @@ namespace CorrelationTest
 
             public override void PrintToSheet()  //expanding from string
             {
-                Diagnostics.StartTimer();
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
                 IHasCostCorrelations parentEstimate;
@@ -218,7 +206,6 @@ namespace CorrelationTest
                 //this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
 
                 AddUserControls();
-                Diagnostics.StopTimer("CP Print", true);
                 FormatSheet();
             }
 

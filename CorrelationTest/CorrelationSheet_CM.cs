@@ -126,7 +126,6 @@ namespace CorrelationTest
 
             public override void FormatSheet()
             {
-                Diagnostics.StartTimer();
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
                 Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
                 Excel.Range upperTriangular = matrixStart.Offset[0, 1];
@@ -153,7 +152,6 @@ namespace CorrelationTest
 
                 matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
                 matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-                Diagnostics.StopTimer("CM Format", true);
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -219,7 +217,6 @@ namespace CorrelationTest
 
             public override void PrintToSheet()  //expanding from string
             {
-                Diagnostics.StartTimer();
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
                 IHasCostCorrelations parentEstimate;
@@ -238,7 +235,6 @@ namespace CorrelationTest
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
 
                 CorrelString.PrintToSheet(xlHeaderCell);
-
                 Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
                 object[,] xlDistValues = new object[subCount, subCount];
                 Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];
@@ -254,7 +250,6 @@ namespace CorrelationTest
                 xlSubIdRange.NumberFormat = "\"ID\";;;\"ID\"";
 
                 AddUserControls();
-                Diagnostics.StopTimer("Print CM", true);
                 FormatSheet();
             }
 

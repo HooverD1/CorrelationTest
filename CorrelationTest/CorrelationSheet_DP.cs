@@ -69,17 +69,6 @@ namespace CorrelationTest
                 string parent_id = Data.CorrelationString.GetParentIDFromCorrelStringValue(xlHeaderCell.Value);
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Count() - 1);
-
-                //Check if the matrix still matches the triple.
-                if (this.CorrelMatrix.ValidateAgainstPairs(pairs))
-                {       //If YES - create cs_triple object
-                    this.CorrelString = (Data.CorrelationString_DP)Data.CorrelationString.ConstructFromCorrelationSheet(this);
-                }
-                else
-                {       //If NO - create cs_periods object
-                    throw new NotImplementedException();
-                    //Alert the user and give option to cancel or launch conversion form
-                }                
             }
 
             //CONVERT

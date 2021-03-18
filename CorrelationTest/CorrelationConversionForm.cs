@@ -69,9 +69,9 @@ namespace CorrelationTest
             //Build the  viewmodel for the existing correlation sheet.
             //try
             //{
-                var correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
-                correlSheet.ConvertCorrelation(this.checkboxPreserveOffDiagonal.Checked);
-                this.Close();
+            var correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
+            correlSheet.ConvertCorrelation(this.checkboxPreserveOffDiagonal.Checked);
+            this.Close();
             //}
             //catch(Exception except)
             //{

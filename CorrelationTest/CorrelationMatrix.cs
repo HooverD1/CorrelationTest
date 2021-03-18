@@ -364,7 +364,9 @@ namespace CorrelationTest
                 for (int i = 0; i < this.Fields.Length; i++)
                     transpose[i, 0] = this.Fields[i];
                 xlRange.Offset[1, -1].Resize[this.FieldCount, 1].Value = transpose;
-                xlRange.Offset[1,0].Resize[Matrix.GetLength(0),Matrix.GetLength(1)].Value = this.Matrix;    //print matrix
+                //xlRange.Offset[1,0].Resize[Matrix.GetLength(0),Matrix.GetLength(1)].Value = this.Matrix;    //print matrix
+                Excel.Range pasteRange = xlRange.Offset[1, 0].Resize[Matrix.GetLength(0), Matrix.GetLength(1)];
+                ExtensionMethods.FastPaste_Square(pasteRange, Matrix);
             }
             public bool ValidateAgainstXlSheet(object[] xlSheetFields)
             {
