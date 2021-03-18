@@ -242,5 +242,26 @@ namespace CorrelationTest
             return outString;
         }
         
+        public static void FastPasteSquare(Excel.Range pasteRange, object[,] pasteValues)
+        {
+            //This method splits up the inputs into chunks of max size 255 because it speeds up pasting into Excel
+            //Does converting to jagged actually speed it up?
+            Excel.Range partialPaste = pasteRange.Offset[0,0].Resize[1,1];
+            int size = pasteRange.Columns.Count;
+            if (size != pasteRange.Rows.Count)
+                throw new Exception("Not square");
+
+            if(size > 255)  //Need to split the rows
+            {
+                int iterationsPerRow = size / 255;
+                if (size % 255 > 0)
+                    iterationsPerRow++;
+                for(int i = 0; i < iterationsPerRow; i++)
+                {
+
+                }
+            }
+               
+        }
     }
 }

@@ -33,7 +33,7 @@ namespace CorrelationTest
                 SheetType sourceType = ExtensionMethods.GetSheetType(linkedRange.Worksheet);
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
-                int size = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(correlSheet.xlCorrelStringCell.Value);
+                int size = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(correlSheet.xlHeaderCell.Value);
                 PairSpecification pairs = PairSpecification.ConstructFromRange(correlSheet.xlPairsCell, size - 1);
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];

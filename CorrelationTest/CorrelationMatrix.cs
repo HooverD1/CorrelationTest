@@ -107,8 +107,8 @@ namespace CorrelationTest
                 //Need to do this without building it into a string object
 
                 //These are all coming in wrong.
-                string parent_ID = Data.CorrelationString.GetParentIDFromCorrelStringValue(CorrelSheet.xlCorrelStringCell.Value);
-                //get the parent_ID from the header (xlCorrelStringCell)
+                string parent_ID = Data.CorrelationString.GetParentIDFromCorrelStringValue(CorrelSheet.xlHeaderCell.Value);
+                //get the parent_ID from the header (xlHeaderCell)
                 string[] sub_fields = CorrelSheet.GetFields();
                 string[] sub_IDs = CorrelSheet.GetIDs();
 
@@ -184,7 +184,7 @@ namespace CorrelationTest
                 
                 //These are all coming in wrong.
                 string parent_ID = Data.CorrelationString.GetParentIDFromCorrelStringValue(header);
-                //get the parent_ID from the header (xlCorrelStringCell)
+                //get the parent_ID from the header (xlHeaderCell)
 
                 CorrelationMatrix matrix_obj;
                 string containing_sheet_type = Data.CorrelationString.GetTypeOfCorrelationFromCorrelStringValue(header);

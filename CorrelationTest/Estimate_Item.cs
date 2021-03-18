@@ -284,7 +284,6 @@ namespace CorrelationTest
             SheetType typeOfCost = this.CostCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
             correlSheet.PrintToSheet();
-            correlSheet.FormatSheet();
         }
 
         private void Expand_Phasing()
@@ -292,7 +291,6 @@ namespace CorrelationTest
             SheetType typeOfCost = this.PhasingCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
             correlSheet.PrintToSheet();
-            correlSheet.FormatSheet();
         }
 
         private void Expand_Duration()      //Inefficiency: I believe all the items are already loaded when creationg correlSheet - .PrintToSheet() reloads the cost sheet, which reloads the items.
@@ -300,7 +298,6 @@ namespace CorrelationTest
             SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
             correlSheet.PrintToSheet();
-            correlSheet.FormatSheet();
         }
     }
 

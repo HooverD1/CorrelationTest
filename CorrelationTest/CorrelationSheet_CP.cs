@@ -24,23 +24,19 @@ namespace CorrelationTest
 
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Cost);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlHeaderCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
                 //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
-                this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-
-                this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
-                this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
-                this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_CP, this);
-                this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
                 this.Header = CorrelString.GetHeader();
                 this.PairSpec = CorrelString.GetPairwise();
-                this.FormatSheet();
+
+                //Should these be in PrintSheet()?
+
             }
 
             //COLLAPSE METHOD
@@ -50,8 +46,7 @@ namespace CorrelationTest
                 this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CP);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
-                //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
+                this.xlHeaderCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
@@ -60,14 +55,14 @@ namespace CorrelationTest
                 this.LinkToOrigin = new Data.Link(Convert.ToString(xlLinkCell.Value));
                 //
                 //Build the CorrelMatrix
-                object[] ids = Data.CorrelationString.GetIDsFromString(xlCorrelStringCell.Value);
+                object[] ids = Data.CorrelationString.GetIDsFromString(xlHeaderCell.Value);
                 object[,] fieldsValues = xlSheet.Range[xlMatrixCell, xlMatrixCell.End[Excel.XlDirection.xlToRight]].Value;
                 fieldsValues = ExtensionMethods.ReIndexArray(fieldsValues);
                 object[] fields = ExtensionMethods.ToJaggedArray(fieldsValues)[0];
                 Excel.Range matrixRange = xlSheet.Range[xlMatrixCell.Offset[1, 0], xlMatrixCell.End[Excel.XlDirection.xlDown].End[Excel.XlDirection.xlToRight]];
                 object[,] matrix = matrixRange.Value;
                 this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
-                this.Header = Convert.ToString(xlCorrelStringCell.Value);
+                this.Header = Convert.ToString(xlHeaderCell.Value);
 
                 PairSpecification pairs = PairSpecification.ConstructFromRange(xlPairsCell, fields.Length - 1);
                 //Check if the matrix still matches the triple.
@@ -80,8 +75,6 @@ namespace CorrelationTest
                     throw new NotImplementedException();
                     //Alert user about matrix changes & give option to reset or launch the conversion form?
                 }
-                
-                this.FormatSheet();
             }
 
             //CONVERT
@@ -94,7 +87,7 @@ namespace CorrelationTest
                 this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CP);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlHeaderCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
                 //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
@@ -113,35 +106,27 @@ namespace CorrelationTest
 
             public override void FormatSheet()
             {
+                Diagnostics.StartTimer();
+                int size = this.CorrelMatrix.Fields.Length;
                 Excel.Range matrixStart = this.xlMatrixCell.Offset[1, 0];
-                Excel.Range matrixRange = matrixStart.Resize[this.CorrelMatrix.Fields.Length, this.CorrelMatrix.Fields.Length];
+                Excel.Range matrixRange = matrixStart.Resize[size, size];
+                Excel.Range xlPairsRange = this.xlPairsCell.Resize[size - 1, 2];
                 Excel.Range diagonal = matrixRange.Cells[1, 1];
-                for (int i = 2; i <= matrixRange.Columns.Count; i++)
-                {
+                for (int i = 2; i <= size; i++)
                     diagonal = ThisAddIn.MyApp.Union(diagonal, matrixRange.Cells[i, i]);
-                }
-                Excel.Range pairwiseRange = this.xlPairsCell.Resize[matrixRange.Columns.Count - 1, 2];
 
-                foreach (Excel.Range cell in matrixRange.Cells)
-                {
-                    int rowIndex = cell.Row - matrixStart.Row;
-                    int colIndex = cell.Column - matrixStart.Column;
-                    cell.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
-                }
-                Excel.Range xlPairsRange = this.xlPairsCell.Resize[matrixRange.Rows.Count - 1, 2];
-                foreach (Excel.Range cell in xlPairsRange)
-                {
-                    cell.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
-                }
-        
-                diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
-                diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
-
+                int test = matrixRange.Cells.Count;
+                matrixRange.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
                 matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
                 matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
 
-                pairwiseRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-                pairwiseRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+                xlPairsRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
+                xlPairsRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                xlPairsRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+
+                diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
+                diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
+                Diagnostics.StopTimer("CP Format", true);
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -167,17 +152,6 @@ namespace CorrelationTest
                 return xlCorrelSheet;
             }
 
-            //public override void UpdateCorrelationString(string[] ids)
-            //{
-            //    //What is the purpose of this method? To update the matrix values?
-            //    //Update the string on the sheet to match the altered matrix
-            //    UniqueID parentID = UniqueID.ConstructFromExisting(Convert.ToString(this.xlIDCell.Value));
-            //    object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
-            //    this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
-            //    this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
-            //    this.xlCorrelStringCell.Value = this.CorrelString.Value;
-            //}
-
             protected override string GetDistributionString(IHasCorrelations est, int subIndex)
             {
                 StringBuilder sb = new StringBuilder();
@@ -198,14 +172,8 @@ namespace CorrelationTest
 
             public override void PrintToSheet()  //expanding from string
             {
-                //build a sheet object off the linksource
+                Diagnostics.StartTimer();
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
-                //Estimate_Item tempEst = new Estimate_Item(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-
-                //This needs to find the parent..
-                //IHasCostCorrelations tempEst = (IHasCostCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);
-                //tempEst.SubEstimates = tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
-
                 Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
                 IHasCostCorrelations parentEstimate;
 
@@ -217,23 +185,41 @@ namespace CorrelationTest
                 {
                     parentEstimate = (IHasCostCorrelations)parentItem;
                 }
-
+                int subCount = parentEstimate.SubEstimates.Count();
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
+                this.xlHeaderCell.Value = this.Header;
+                this.xlPairsCell.Resize[subCount - 1, 2].Value = this.PairSpec.GetValuesString_Split();
 
-                this.xlCorrelStringCell.Value = this.Header;
-                this.xlPairsCell.Resize[parentEstimate.SubEstimates.Count() - 1, 2].Value = this.PairSpec.GetValuesString_Split();
+                Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
+                object[,] xlDistValues = new object[subCount, subCount];
+                Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];
+                object[,] xlSubIdValues = new object[subCount, subCount];
 
-                for (int subIndex = 0; subIndex < parentEstimate.SubEstimates.Count(); subIndex++)      //Print the Distribution strings
+                for (int subIndex = 0; subIndex < subCount; subIndex++)      //Load object arrays for printing
                 {
-                    //Distributions
-                    this.xlDistCell.Offset[subIndex, 0].Value = GetDistributionString(parentEstimate, subIndex);
-                    //IDs
-                    this.xlSubIdCell.Offset[subIndex, 0].Value = GetSubIdString(parentEstimate, subIndex);
-                    this.xlSubIdCell.Offset[subIndex, 0].NumberFormat = "\"ID\";;;\"ID\"";
+                    xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
+                    xlSubIdValues[subIndex, 0] = GetSubIdString(parentEstimate, subIndex);
                 }
-                PrintColumnHeaders();
+                xlDistRange.Value = xlDistValues;                           //Print object arrays
+                xlSubIdRange.Value = xlSubIdValues;
+                xlSubIdRange.NumberFormat = "\"ID\";;;\"ID\"";
+
+                //Print column headers
+                this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
+                this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
+                this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+
+                //I don't think these are necessary
+                //this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
+                //this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
+                //this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
+                //this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
+                //this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
+
                 AddUserControls();
+                Diagnostics.StopTimer("CP Print", true);
+                FormatSheet();
             }
 
             private void AddUserControls()
@@ -242,19 +228,7 @@ namespace CorrelationTest
                 System.Windows.Forms.Button btn_ConvertToCM = new System.Windows.Forms.Button();
                 btn_ConvertToCM.Text = "Convert to Matrix Specification";
                 btn_ConvertToCM.Click += ConversionFormClicked;
-                vstoSheet.Controls.AddControl(btn_ConvertToCM, this.xlButton_ConvertCorrel.Resize[1, 3], "ConvertToCM");
-            }
-
-            private void PrintColumnHeaders()
-            {
-                SheetType sType = ExtensionMethods.GetSheetType(this.xlSheet);
-                if (sType == SheetType.Correlation_CP)
-                {
-                    this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
-                    this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
-                }
-                this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
-
+                vstoSheet.Controls.AddControl(btn_ConvertToCM, this.xlButton_ConvertCorrel.Resize[2, 3], "ConvertToCM");
             }
 
             public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
@@ -276,11 +250,10 @@ namespace CorrelationTest
                 object[,] matrix = this.CorrelMatrix.GetMatrix_Formulas();
                 object[] ids = this.GetIDs();   //This isn't returning anything
                 object[] fields = this.CorrelMatrix.Fields;
-                object header = this.xlCorrelStringCell.Value;
+                object header = this.xlHeaderCell.Value;
                 object link = this.xlLinkCell.Value;
                 Sheets.CorrelationSheet_CM newSheet = new Sheets.CorrelationSheet_CM(matrix, ids, fields, header, link, this.xlSheet);
                 newSheet.PrintToSheet();
-                newSheet.FormatSheet();
             }
         }
     }

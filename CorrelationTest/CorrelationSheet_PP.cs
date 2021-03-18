@@ -21,7 +21,7 @@ namespace CorrelationTest
                 this.xlSheet = GetXlSheet();
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Phasing);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlHeaderCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
                 //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.DistributionCoords.Item2];
@@ -41,7 +41,7 @@ namespace CorrelationTest
                 this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_PP);
                 //Set up the xlCells
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
-                this.xlCorrelStringCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
+                this.xlHeaderCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
                 //this.xlIDCell = xlSheet.Cells[Specs.IdCoords.Item1, Specs.IdCoords.Item2];
                 this.xlDistCell = xlSheet.Cells[Specs.DistributionCoords.Item1, Specs.IdCoords.Item2];
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
@@ -51,7 +51,7 @@ namespace CorrelationTest
                 this.LinkToOrigin = new Data.Link(Convert.ToString(xlLinkCell.Value));
 
                 //Build the CorrelMatrix
-                int fields = Convert.ToInt32(Convert.ToString(xlCorrelStringCell.Value).Split(',')[0]);
+                int fields = Convert.ToInt32(Convert.ToString(xlHeaderCell.Value).Split(',')[0]);
                 Excel.Range fieldRange = xlMatrixCell.Resize[1, fields];
                 Excel.Range matrixRange = xlMatrixCell.Offset[1, 0].Resize[fields, fields];
                 //this.CorrelMatrix = new Data.CorrelationMatrix(this, fieldRange, matrixRange);
@@ -59,7 +59,7 @@ namespace CorrelationTest
                 //Build the CorrelString, which can print itself during collapse
                 SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
                 //Build the triple from the string
-                string correlStringVal = this.xlCorrelStringCell.Value;
+                string correlStringVal = this.xlHeaderCell.Value;
                 Data.CorrelationString_PP existing_cst = new Data.CorrelationString_PP(correlStringVal);
                 PairSpecification pairs = existing_cst.GetPairwise();
                 //Check if the matrix still matches the triple.
@@ -109,7 +109,7 @@ namespace CorrelationTest
             //    object[,] matrix = this.xlMatrixCell.Offset[1, 0].Resize[ids.Length, ids.Length].Value;
             //    this.CorrelMatrix = Data.CorrelationMatrix.ConstructFromCorrelationSheet(this);
             //    this.CorrelString = new Data.CorrelationString_CM(parentID.ID, ids, this.CorrelMatrix.Fields, CorrelMatrix);
-            //    this.xlCorrelStringCell.Value = this.CorrelString.Value;
+            //    this.xlHeaderCell.Value = this.CorrelString.Value;
             //}
 
             //Bring in the coordinates - use an enum to build them for each sheet type
@@ -130,21 +130,13 @@ namespace CorrelationTest
 
             public override void PrintToSheet()  //expanding from string
             {
-                //build a sheet object off the linksource
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
                 IHasPhasingCorrelations tempEst = (IHasPhasingCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
-                //tempEst.LoadSubEstimates();                //Load the sub-estimates for this estimate
-                //tempEst.ContainingSheetObject.GetSubEstimates(tempEst.xlRow);                //Load the sub-estimates for this estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                CorrelString.PrintToSheet(xlCorrelStringCell);
+                CorrelString.PrintToSheet(xlHeaderCell);
                 this.xlDistCell.Value = GetDistributionString(tempEst);
-
-                if (CorrelString is Data.CorrelationString_PP)       //Need to replicate this in PT and DT.
-                {
-                    this.xlPairsCell.Value = ((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;
-                }
-                //this.xlDistCell.Value = tempEst.ItemDistribution.Name;
+                this.xlPairsCell.Value = ((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;
             }
 
             public override void FormatSheet()

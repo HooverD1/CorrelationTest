@@ -29,7 +29,7 @@ namespace CorrelationTest
             public Data.Link LinkToOrigin { get; set; }
             public Excel.Range xlLinkCell { get; set; }
             //public Excel.Range xlIDCell { get; set; }
-            public Excel.Range xlCorrelStringCell { get; set; }
+            public Excel.Range xlHeaderCell { get; set; }
             public Excel.Range xlDistCell { get; set; }
             public Excel.Range xlSubIdCell { get; set; }
             public Data.CorrelSheetSpecs Specs { get; set; }
@@ -47,7 +47,7 @@ namespace CorrelationTest
             public virtual string[] GetIDs()
             {
                 //This needs to pull the IDs range off the sheet, not use the correl string - which no longer appears on the sheet fully
-                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlCorrelStringCell.Value);
+                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlHeaderCell.Value);
                 Excel.Range xlSubIdRange = xlSubIdCell.Resize[numberOfSubs, 1];
                 string[] ids = new string[numberOfSubs];
                 for (int i = 0; i < numberOfSubs; i++)
@@ -57,7 +57,7 @@ namespace CorrelationTest
 
             public virtual string[] GetFields()
             {
-                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlCorrelStringCell.Value);
+                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlHeaderCell.Value);
                 Excel.Range xlSubIdRange = xlMatrixCell.Offset[1,-1].Resize[numberOfSubs, 1];
                 string[] fields = new string[numberOfSubs];
                 for (int i = 0; i < numberOfSubs; i++)
@@ -67,7 +67,7 @@ namespace CorrelationTest
 
             public virtual object[,] GetMatrix()
             {
-                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlCorrelStringCell.Value);
+                int numberOfSubs = Data.CorrelationString.GetNumberOfInputsFromCorrelStringValue(this.xlHeaderCell.Value);
                 Excel.Range xlMatrixRange = xlMatrixCell.Offset[1, 0].Resize[numberOfSubs, numberOfSubs];
                 return xlMatrixRange.Value;
             }
@@ -292,7 +292,7 @@ namespace CorrelationTest
                 //Validate that the linkSource still has an ID match. If so, .PrintToSheet ... Otherwise, search for the ID and throw a warning ... if no ID can be found, throw an error and don't delete the sheet
                 CostSheet originSheet = CostSheet.ConstructFromXlCostSheet(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 string id_followLink = Convert.ToString(correlSheet.LinkToOrigin.LinkSource.EntireRow.Cells[1, originSheet.Specs.ID_Offset].value);
-                string id_correlSheet = Data.CorrelationString.GetParentIDFromCorrelStringValue(correlSheet.xlCorrelStringCell.Value);
+                string id_correlSheet = Data.CorrelationString.GetParentIDFromCorrelStringValue(correlSheet.xlHeaderCell.Value);
                 
                 if (id_followLink.ToString() == id_correlSheet)
                 {

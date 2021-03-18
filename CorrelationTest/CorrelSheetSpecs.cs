@@ -58,7 +58,7 @@ namespace CorrelationTest
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        btnConvertRow = matrixRow - 1;
+                        btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
                         break;
                     case SheetType.Correlation_CP:
@@ -77,7 +77,7 @@ namespace CorrelationTest
                         stringCol = 1;
                         pairsRow = 5;
                         pairsCol = 6;       //Requires a 2 cell width
-                        btnConvertRow = matrixRow - 1;
+                        btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
                         break;
                     case SheetType.Correlation_PM:
@@ -96,7 +96,7 @@ namespace CorrelationTest
                         stringCol = 1;
                         pairsRow = 2;
                         pairsCol = 2;
-                        btnConvertRow = matrixRow - 1;
+                        btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
                         break;
                     case SheetType.Correlation_PP:
@@ -115,7 +115,7 @@ namespace CorrelationTest
                         stringCol = 1;
                         pairsRow = 2;
                         pairsCol = 2;
-                        btnConvertRow = matrixRow - 1;
+                        btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
                         break;
                     case SheetType.Correlation_DM:
@@ -134,7 +134,7 @@ namespace CorrelationTest
                         stringCol = 1;
                         pairsRow = 2;
                         pairsCol = 2;
-                        btnConvertRow = matrixRow - 1;
+                        btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
                         break;
                     case SheetType.Correlation_DP:
@@ -153,7 +153,7 @@ namespace CorrelationTest
                         stringCol = 1;
                         pairsRow = 5;
                         pairsCol = 6;       //Requires a 2 cell width
-                        btnConvertRow = matrixRow - 1;
+                        btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
                         break;
                     default:
