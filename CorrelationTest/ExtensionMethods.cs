@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -241,8 +242,9 @@ namespace CorrelationTest
             }
             return outString;
         }
-        
-        public static void FastPaste_Square(Excel.Range pasteRange, object[,] pasteValues)
+
+               
+        public static void SturdyPaste_Square(Excel.Range pasteRange, object[,] pasteValues)
         {
             //Error checking
             int size = pasteRange.Columns.Count;
@@ -258,7 +260,14 @@ namespace CorrelationTest
             Excel.Range[] partialPasteRange;     //Max 250 x 250 cell blocks
             object[] partialValues;
 
-            if(size <= 250)
+            void ProcessBlock(int blockIndex, int param1, int param2, int param3, int param4)
+            {
+                //partialPasteRange[blockIndex] = pasteCell.Offset[param1, param2].Resize[param3, param4];
+                partialValues[blockIndex] = SliceArray(pasteValues, param1, param2, param3, param4);
+                partialPasteRange[blockIndex].FormulaR1C1 = partialValues[blockIndex];
+            }
+
+            if (size <= 250)
             {
                 partialPasteRange = new Excel.Range[1];
                 partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[size, size];
@@ -268,7 +277,7 @@ namespace CorrelationTest
                 partialPasteRange[0].Value = partialValues[0];
             }
             else if(size <= 500)
-            {
+            {               
                 //2 x 2 blocks of roughly 250 x 250
                 partialPasteRange = new Excel.Range[4];
                 int blockSize = size / 2 + (size % 2)/2;
@@ -278,15 +287,32 @@ namespace CorrelationTest
                 partialPasteRange[3] = pasteCell.Offset[blockSize, blockSize].Resize[size - blockSize, size - blockSize]; //partial width
 
                 partialValues = new object[4];
-                partialValues[0] = SliceArray(pasteValues, 0, 0, blockSize, blockSize);
-                partialValues[1] = SliceArray(pasteValues, 0, blockSize, blockSize, size - blockSize);
-                partialValues[2] = SliceArray(pasteValues, blockSize, 0, size - blockSize, blockSize);
-                partialValues[3] = SliceArray(pasteValues, blockSize, blockSize, size - blockSize, size - blockSize);
 
-                partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
-                partialPasteRange[0].Value = partialValues[1];
-                partialPasteRange[0].Value = partialValues[2];
-                partialPasteRange[0].Value = partialValues[3];
+                Thread th1 = new Thread(() => ProcessBlock(0, 0, 0, blockSize, blockSize));
+                Thread th2 = new Thread(() => ProcessBlock(1, 0, blockSize, blockSize, size - blockSize));
+                Thread th3 = new Thread(() => ProcessBlock(2, blockSize, 0, size - blockSize, blockSize));
+                Thread th4 = new Thread(() => ProcessBlock(3, blockSize, blockSize, size - blockSize, size - blockSize));
+                th1.Start();
+                th2.Start();
+                th3.Start();
+                th4.Start();
+                th1.Join();
+                th2.Join();
+                th3.Join();
+                th4.Join();
+                //partialValues[0] = SliceArray(pasteValues, 0, 0, blockSize, blockSize);
+                //ProcessBlock(0, 0, 0, blockSize, blockSize);
+                //partialValues[1] = SliceArray(pasteValues, 0, blockSize, blockSize, size - blockSize);
+                //ProcessBlock(1, 0, blockSize, blockSize, size - blockSize);
+                //partialValues[2] = SliceArray(pasteValues, blockSize, 0, size - blockSize, blockSize);
+                //ProcessBlock(2, blockSize, 0, size - blockSize, blockSize);
+                //partialValues[3] = SliceArray(pasteValues, blockSize, blockSize, size - blockSize, size - blockSize);
+                //ProcessBlock(3, blockSize, blockSize, size - blockSize, size - blockSize);
+
+                //partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
+                //partialPasteRange[0].Value = partialValues[1];
+                //partialPasteRange[0].Value = partialValues[2];
+                //partialPasteRange[0].Value = partialValues[3];
             }
             else if(size <= 750)
             {
@@ -304,26 +330,53 @@ namespace CorrelationTest
                 partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize*2].Resize[size - (blockSize * 2), size - (blockSize * 2)];   //partial width
 
                 partialValues = new object[9];
-                partialValues[0] = SliceArray(pasteValues, blockSize*0, blockSize*0, blockSize, blockSize);
-                partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
-                partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2);
-                partialValues[3] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
-                partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
-                partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2);
-                partialValues[6] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
-                partialValues[7] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
-                partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2);
+                Thread th1 = new Thread(() => ProcessBlock(0, blockSize * 0, blockSize * 0, blockSize, blockSize));
+                th1.Start();
+                Thread th2 = new Thread(() => ProcessBlock(1, blockSize * 0, blockSize * 1, blockSize, blockSize));
+                th2.Start();
+                Thread th3 = new Thread(() => ProcessBlock(2, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2));
+                th3.Start();
+                th1.Join();
+                th1 = new Thread(() => ProcessBlock(3, blockSize * 1, blockSize * 0, blockSize, blockSize));
+                th1.Start();
+                th2.Join();
+                th2 = new Thread(() => ProcessBlock(4, blockSize * 1, blockSize * 1, blockSize, blockSize));
+                th2.Start();
+                th3.Join();
+                th3 = new Thread(() => ProcessBlock(5, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2));
+                th3.Start();
+                th1.Join();
+                th1 = new Thread(() => ProcessBlock(6, blockSize * 2, blockSize * 0, blockSize, blockSize));
+                th1.Start();
+                th2.Join();
+                th2 = new Thread(() => ProcessBlock(7, blockSize * 2, blockSize * 1, blockSize, blockSize));
+                th2.Start();
+                th3.Join();
+                th3 = new Thread(() => ProcessBlock(8, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2));
+                th3.Start();
+                th1.Join();
+                th2.Join();
+                th3.Join();
 
-                partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
-                partialPasteRange[1].Value = partialValues[1];
-                partialPasteRange[2].Value = partialValues[2];
-                partialPasteRange[3].Value = partialValues[3];
-                partialPasteRange[4].Value = partialValues[4];
-                partialPasteRange[5].Value = partialValues[5];
-                partialPasteRange[6].Value = partialValues[6];
-                partialPasteRange[7].Value = partialValues[7];
-                partialPasteRange[8].Value = partialValues[8];
-                partialPasteRange[9].Value = partialValues[9];
+                //partialValues[0] = SliceArray(pasteValues, blockSize*0, blockSize*0, blockSize, blockSize);
+                //partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                //partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2);
+                //partialValues[3] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
+                //partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
+                //partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2);
+                //partialValues[6] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
+                //partialValues[7] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
+                //partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2);
+
+                //partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
+                //partialPasteRange[1].Value = partialValues[1];
+                //partialPasteRange[2].Value = partialValues[2];
+                //partialPasteRange[3].Value = partialValues[3];
+                //partialPasteRange[4].Value = partialValues[4];
+                //partialPasteRange[5].Value = partialValues[5];
+                //partialPasteRange[6].Value = partialValues[6];
+                //partialPasteRange[7].Value = partialValues[7];
+                //partialPasteRange[8].Value = partialValues[8];
             }
             else if(size <= 1000)
             {
@@ -348,22 +401,70 @@ namespace CorrelationTest
                 partialPasteRange[15] = pasteCell.Offset[blockSize * 3, blockSize * 3].Resize[size - blockSize * 3, size - blockSize * 3];//
 
                 partialValues = new object[16];
+                //Thread th1 = new Thread(() => ProcessBlock(0, blockSize * 0, blockSize * 0, blockSize, blockSize));
+                //th1.Start();
+                //Thread th2 = new Thread(() => ProcessBlock(1, blockSize * 0, blockSize * 1, blockSize, blockSize));
+                //th2.Start();
+                //Thread th3 = new Thread(() => ProcessBlock(2, blockSize * 0, blockSize * 2, blockSize, blockSize));
+                //th3.Start();
+                //Thread th4 = new Thread(() => ProcessBlock(3, blockSize * 0, blockSize * 3, blockSize, size - blockSize * 3));
+                //th4.Start();
+                //th1.Join();
+                //th1 = new Thread(() => ProcessBlock(4, blockSize * 1, blockSize * 0, blockSize, blockSize));
+                //th1.Start();
+                //th2.Join();
+                //th2 = new Thread(() => ProcessBlock(5, blockSize * 1, blockSize * 1, blockSize, blockSize));
+                //th2.Start();
+                //th3.Join();
+                //th3 = new Thread(() => ProcessBlock(6, blockSize * 1, blockSize * 2, blockSize, blockSize));
+                //th3.Start();
+                //th4.Join();
+                //th4 = new Thread(() => ProcessBlock(7, blockSize * 1, blockSize * 3, blockSize, size - blockSize * 3));
+                //th4.Start();
+                //th1.Join();
+                //th1 = new Thread(() => ProcessBlock(8, blockSize * 2, blockSize * 0, blockSize, blockSize));
+                //th1.Start();
+                //th2.Join();
+                //th2 = new Thread(() => ProcessBlock(9, blockSize * 2, blockSize * 1, blockSize, blockSize));
+                //th2.Start();
+                //th3.Join();
+                //th3 = new Thread(() => ProcessBlock(10, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize));
+                //th3.Start();
+                //th1.Join();
+                //th1 = new Thread(() => ProcessBlock(11, blockSize * 2, blockSize * 3, blockSize, size - blockSize * 3));
+                //th1.Start();
+                //th2.Join();
+                //th2 = new Thread(() => ProcessBlock(12, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize));
+                //th2.Start();
+                //th3.Join();
+                //th3 = new Thread(() => ProcessBlock(13, blockSize * 3, blockSize * 1, size - blockSize * 3, blockSize));
+                //th3.Start();
+                //th1.Join();
+                //th1 = new Thread(() => ProcessBlock(14, blockSize * 3, blockSize * 2, size - blockSize * 3, blockSize));
+                //th1.Start();
+                //th2.Join();
+                //th2 = new Thread(() => ProcessBlock(15, blockSize * 3, blockSize * 3, size - blockSize * 3, size - blockSize * 3));
+                //th2.Start();
+                //th3.Join();
+                //th1.Join();
+                //th2.Join();
+
                 partialValues[0] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, blockSize, blockSize);
                 partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
                 partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, blockSize);
                 partialValues[3] = SliceArray(pasteValues, blockSize * 0, blockSize * 3, blockSize, size - blockSize * 3);
                 partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
-                partialValues[5] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
                 partialValues[6] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, blockSize);
                 partialValues[7] = SliceArray(pasteValues, blockSize * 1, blockSize * 3, blockSize, size - blockSize * 3);
                 partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
-                partialValues[9] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+                partialValues[9] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
                 partialValues[10] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, blockSize);
                 partialValues[11] = SliceArray(pasteValues, blockSize * 2, blockSize * 3, blockSize, size - blockSize * 3);
-                partialValues[12] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, size - blockSize * 3, blockSize);
-                partialValues[13] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, size - blockSize * 3, blockSize);
-                partialValues[14] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, size - blockSize * 3, blockSize);
-                partialValues[15] = SliceArray(pasteValues, blockSize * 0, blockSize * 3, size - blockSize * 3, size - blockSize * 3);
+                partialValues[12] = SliceArray(pasteValues, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize);
+                partialValues[13] = SliceArray(pasteValues, blockSize * 3, blockSize * 1, size - blockSize * 3, blockSize);
+                partialValues[14] = SliceArray(pasteValues, blockSize * 3, blockSize * 2, size - blockSize * 3, blockSize);
+                partialValues[15] = SliceArray(pasteValues, blockSize * 3, blockSize * 3, size - blockSize * 3, size - blockSize * 3);
 
                 partialPasteRange[0].Value = partialValues[0];      //Can I multi-thread this?
                 partialPasteRange[1].Value = partialValues[1];
@@ -400,5 +501,6 @@ namespace CorrelationTest
             }
             return slicedArray;
         }
+
     }
 }

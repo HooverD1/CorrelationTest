@@ -104,11 +104,12 @@ namespace CorrelationTest
                 Excel.Range diagonal = matrixRange.Cells[1, 1];
                 for (int i = 2; i <= size; i++)
                     diagonal = ThisAddIn.MyApp.Union(diagonal, matrixRange.Cells[i, i]);
-
-                int test = matrixRange.Cells.Count;
-                matrixRange.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);
-                matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-                matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+                foreach (Excel.Range row in matrixRange.Rows)
+                {
+                    row.Interior.Color = System.Drawing.Color.FromArgb(225, 225, 225);      //Dying right here if you try to do it all at once?
+                    row.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                    row.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+                }
 
                 xlPairsRange.Interior.Color = System.Drawing.Color.FromArgb(255, 255, 190);
                 xlPairsRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
@@ -205,8 +206,10 @@ namespace CorrelationTest
                 //this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
                 //this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
 
-                AddUserControls();
+                
                 FormatSheet();
+
+                AddUserControls();
             }
 
             private void AddUserControls()

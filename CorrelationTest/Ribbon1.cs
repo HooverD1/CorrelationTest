@@ -188,7 +188,7 @@ namespace CorrelationTest
             est_1.Cells[15, edc.Distribution_Offset + 2] = 1;
 
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 System.Threading.Thread.Sleep(1);
                 est_1.Cells[16 + i, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Accord.Statistics.Models.Regression.Linear;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Threading;
 
 namespace CorrelationTest
 {
@@ -120,29 +121,84 @@ namespace CorrelationTest
             return matrix;
         }
 
+        //Serial version -- ~.1 second slower
+        //public object[,] Old_GetCorrelationMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
+        //{
+        //    Diagnostics.StartTimer();
+        //    int size = this.Pairs.Count() + 1;
+        //    Excel.Worksheet xlCorrelSheet = CorrelSheet.xlSheet;
+        //    Data.CorrelSheetSpecs specs = CorrelSheet.Specs;
+        //    Excel.Range pairsRange = CorrelSheet.xlPairsCell;
+        //    int startRow = pairsRange.Row;
+        //    int startCol = pairsRange.Column;
+        //    object[,] matrix = new object[size, size];
+        //    matrix[size - 1, size - 1] = "1";
+        //    for (int row = 0; row < size - 1; row++)
+        //    {
+        //        matrix[row, row] = "1";
+        //        matrix[row, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol}))";
+
+        //        for (int upIndex = 1; upIndex <= row; upIndex++)
+        //        {
+        //            matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow}C{startCol + 1} * {upIndex}))";
+        //        }
+        //        for (int downIndex = 1; downIndex < size - row; downIndex++)
+        //        {
+        //            matrix[row + downIndex, row] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})";
+        //        }
+        //    }
+        //    long time = Diagnostics.CheckTimer();
+        //    Diagnostics.StopTimer();
+        //    return matrix;
+        //}
+
         public object[,] GetCorrelationMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
         {
+            Diagnostics.StartTimer();
             int size = this.Pairs.Count() + 1;
             Excel.Worksheet xlCorrelSheet = CorrelSheet.xlSheet;
             Data.CorrelSheetSpecs specs = CorrelSheet.Specs;
             Excel.Range pairsRange = CorrelSheet.xlPairsCell;
-            
+
             object[,] matrix = new object[size, size];
-            matrix[size - 1, size - 1] = 1;
+            string[,] addresses = new string[size, size];
+            matrix[size - 1, size - 1] = "1";
+            int startRow = pairsRange.Row;
+            int startCol = pairsRange.Column;
+            
             for (int row = 0; row < size - 1; row++)
             {
-                matrix[row, row] = 1;
-                matrix[row, row + 1] = $"=MIN(1,MAX(-1,{pairsRange.Cells[row+1, 1].Address}))";
-
-                for (int upIndex = 1; upIndex <= row; upIndex++)
+                matrix[row, row] = "1";
+                matrix[row, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol}))";
+            }
+            void LoadUpperTriangular()
+            {
+                for (int row = 0; row < size - 1; row++)
                 {
-                    matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,{pairsRange.Cells[row+1, 1].Address} - {pairsRange.Cells[row+1, 2].Address} * {upIndex}))";
-                }
-                for (int downIndex = 1; downIndex < size - row; downIndex++)
-                {
-                    matrix[row + downIndex, row] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})";
+                    for (int upIndex = 1; upIndex <= row; upIndex++)        //Getting the .Address off the cell is slowing it down... and probably causing conflicts w threading
+                    {
+                        matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow}C{startCol + 1} * {upIndex}))";
+                    }
                 }
             }
+            void LoadLowerTriangular()
+            {
+                for (int row = 0; row < size - 1; row++)
+                {
+                    for (int downIndex = 1; downIndex < size - row; downIndex++)
+                    {
+                        matrix[row + downIndex, row] = $"=OFFSET(INDIRECT(ADDRESS(ROW(),COLUMN(),4,1)),-{downIndex},{downIndex})";
+                    }
+                }
+            }
+            Thread th1 = new Thread(() => LoadUpperTriangular());
+            th1.Start();
+            Thread th2 = new Thread(() => LoadLowerTriangular());
+            th2.Start();
+            th1.Join();
+            th2.Join();
+            long time = Diagnostics.CheckTimer();
+            Diagnostics.StopTimer();
             return matrix;
         }
 

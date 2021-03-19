@@ -366,7 +366,11 @@ namespace CorrelationTest
                 xlRange.Offset[1, -1].Resize[this.FieldCount, 1].Value = transpose;
                 //xlRange.Offset[1,0].Resize[Matrix.GetLength(0),Matrix.GetLength(1)].Value = this.Matrix;    //print matrix
                 Excel.Range pasteRange = xlRange.Offset[1, 0].Resize[Matrix.GetLength(0), Matrix.GetLength(1)];
-                ExtensionMethods.FastPaste_Square(pasteRange, Matrix);
+                Diagnostics.StartTimer();
+                ExtensionMethods.SturdyPaste_Square(pasteRange, Matrix);        //Crashing if I use the standard .Value = Matrix operation.
+                long time = Diagnostics.CheckTimer();
+                Diagnostics.StopTimer();
+                //pasteRange.Value = Matrix;
             }
             public bool ValidateAgainstXlSheet(object[] xlSheetFields)
             {

@@ -18,6 +18,11 @@ namespace CorrelationTest
             MyStopwatch.Start();
         }
 
+        public static long CheckTimer()
+        {
+            return MyStopwatch.ElapsedMilliseconds;
+        }
+
         public static void StopTimer(string message="", bool showTime = false)
         {
             MyStopwatch.Stop();
