@@ -140,7 +140,7 @@ namespace CorrelationTest
 
         //        for (int upIndex = 1; upIndex <= row; upIndex++)
         //        {
-        //            matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow}C{startCol + 1} * {upIndex}))";
+        //            matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow + row}C{startCol + 1} * {upIndex}))";
         //        }
         //        for (int downIndex = 1; downIndex < size - row; downIndex++)
         //        {
@@ -177,7 +177,7 @@ namespace CorrelationTest
                 {
                     for (int upIndex = 1; upIndex <= row; upIndex++)        //Getting the .Address off the cell is slowing it down... and probably causing conflicts w threading
                     {
-                        matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow}C{startCol + 1} * {upIndex}))";
+                        matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow + row}C{startCol + 1} * {upIndex}))";
                     }
                 }
             }
