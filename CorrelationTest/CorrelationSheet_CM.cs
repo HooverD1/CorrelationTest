@@ -234,7 +234,7 @@ namespace CorrelationTest
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
 
-                CorrelString.PrintToSheet(xlHeaderCell);
+                this.xlHeaderCell.Value = this.Header;
                 Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
                 object[,] xlDistValues = new object[subCount, subCount];
                 Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];

@@ -295,18 +295,44 @@ namespace CorrelationTest
                 string id_correlSheet = Data.CorrelationString.GetParentIDFromCorrelStringValue(correlSheet.xlHeaderCell.Value);
                 
                 if (id_followLink.ToString() == id_correlSheet)
-                {
+                {   //THESE NEED REFACTORED TO BUILD THE CORRELSTRING FROM COMPONENTS
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
                     if (correlSheet is Sheets.CorrelationSheet_CP)
-                        ((Sheets.CorrelationSheet_CP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    {
+                        Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet).PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                        //((Sheets.CorrelationSheet_CP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    }
                     else if(correlSheet is Sheets.CorrelationSheet_CM)
-                        ((Sheets.CorrelationSheet_CM)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    {
+                        IEnumerable<Excel.Range> printEnumerable = from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost;
+                        Excel.Range[] printArray;
+                        if (printEnumerable.Any())
+                        {
+                            printArray = printEnumerable.ToArray();
+                            Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet).PrintToSheet(printArray);
+                        }
+                        else
+                        {
+                            throw new Exception("No print area");
+                        }
+                        //((Sheets.CorrelationSheet_CM)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasCostCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Cost).ToArray());
+                    }
                     else if (correlSheet is Sheets.CorrelationSheet_DP)
-                        ((Sheets.CorrelationSheet_DP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    {
+                        Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet).PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                        //((Sheets.CorrelationSheet_DP)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    }
+
                     else if(correlSheet is Sheets.CorrelationSheet_DM)
-                        ((Sheets.CorrelationSheet_DM)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    {
+                        Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet).PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                        //    ((Sheets.CorrelationSheet_DM)correlSheet).CorrelString.PrintToSheet((from ISub sub in ((IHasDurationCorrelations)sourceParent).SubEstimates select sub.xlCorrelCell_Duration).ToArray());
+                    }
                     else if (correlSheet is Sheets.CorrelationSheet_PP)
-                        ((Sheets.CorrelationSheet_PP)correlSheet).CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
+                    {
+                        Data.CorrelationString.ConstructFromCorrelationSheet(correlSheet).PrintToSheet(sourceParent.xlCorrelCell_Phasing);
+                        //((Sheets.CorrelationSheet_PP)correlSheet).CorrelString.PrintToSheet(sourceParent.xlCorrelCell_Phasing);
+                    }
                     else
                         throw new Exception("Unknown parent type");
                     

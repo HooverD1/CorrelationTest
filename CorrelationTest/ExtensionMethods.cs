@@ -189,6 +189,16 @@ namespace CorrelationTest
             return my_string;
         }
 
+        public static object[,] Convert1Dto2D(object[] inputArray)
+        {
+            object[,] verticalArray = new object[inputArray.Length, 1];
+            for(int i = 0; i < inputArray.Length; i++)
+            {
+                verticalArray[i, 0] = inputArray[i];
+            }
+            return verticalArray;
+        }
+
         public static CorrelationType GetCorrelationTypeFromLink(Excel.Range linkSource)
         {
             SheetType sheetType = ExtensionMethods.GetSheetType(linkSource.Worksheet);

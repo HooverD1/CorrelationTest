@@ -508,7 +508,10 @@ namespace CorrelationTest
                 return delimited[2];
             }
             #endregion
-
+            public void PrintHeader(Excel.Range xlHeaderCell)
+            {
+                xlHeaderCell.Value = this.GetHeader();
+            }
         }
     }
     

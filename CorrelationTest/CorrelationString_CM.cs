@@ -18,9 +18,43 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
             }
 
+            public CorrelationString_CM() { }
+
+            //COLLAPSE
             public CorrelationString_CM(Sheets.CorrelationSheet_CM correlSheet)
             {
+                StringBuilder header = new StringBuilder();
+                StringBuilder values = new StringBuilder();
 
+                Excel.Range parentRow = correlSheet.LinkToOrigin.LinkSource.EntireRow;
+                SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+                DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
+                string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
+                StringBuilder subIDs = new StringBuilder();
+                Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
+                matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
+                Excel.Range fieldEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
+                object[,] matrixVals = correlSheet.xlSheet.Range[correlSheet.xlMatrixCell.Offset[1, 0], matrixEnd].Value;
+                int numberOfInputs = matrixVals.GetLength(0);
+
+                header.Append(numberOfInputs);
+                header.Append(",");
+                header.Append("CM");
+                header.Append(",");
+                header.Append(parentID);
+
+                for (int row = 1; row <= matrixVals.GetLength(0) - 1; row++)
+                {
+                    values.Append("&");
+                    for (int col = row + 1; col <= matrixVals.GetLength(1); col++)
+                    {
+                        values.Append(matrixVals[row, col].ToString());
+                        values.Append(",");
+                    }
+                    values.Remove(values.Length - 1, 1);    //remove the final ","
+                }
+
+                this.Value = $"{header.ToString()}{values.ToString()}";
             }
 
             public CorrelationString_CM(string parent_id, object[] ids, object[] fields, object[,] correlArray)
@@ -254,27 +288,24 @@ namespace CorrelationTest
                 this.Value = sb.ToString();
             }
 
-
+            //COLLAPSE
             public override void PrintToSheet(Excel.Range[] xlCells)
             {
                 //Clean the string
                 //Split the string by lines
                 //Print it to the xlCells
-
-                this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
-                List<Excel.Range> xlFragments = xlCells.ToList();
-                string[] lines = this.Value.Split('&');
-                int min;
-                if (lines.Count() <= xlCells.Count())
-                    min = lines.Count();
-                else
-                    min = xlCells.Count();
-                for (int i= 0; i < min; i++)
+                Excel.Range xlPrintRange = xlCells.First();
+                foreach(Excel.Range xlCell in xlCells)
                 {
-                    xlFragments[i].Value = lines[i];
-                    xlFragments[i].NumberFormat = "\"In Correl\";;;\"COST_CORREL\"";
+                    xlPrintRange = ThisAddIn.MyApp.Union(xlPrintRange, xlCell);
                 }
-                xlFragments[0].EntireColumn.ColumnWidth = 10;
+
+                //Need to check for malformed this.Value
+                this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
+                string[] lines = this.Value.Split('&');
+                xlPrintRange.Value = ExtensionMethods.Convert1Dto2D(lines);
+                xlPrintRange.NumberFormat = "\"In Correl\";;;\"CORREL\"";
+
             }
         }
     }

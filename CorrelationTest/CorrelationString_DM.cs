@@ -11,6 +11,8 @@ namespace CorrelationTest
     {
         public class CorrelationString_DM : CorrelationString
         {
+
+            //EXPAND
             public CorrelationString_DM(string correlStringValue)
             {
                 this.Value = correlStringValue;
@@ -23,9 +25,42 @@ namespace CorrelationTest
                 return new CorrelationString_DM(csi.Value);
             }
 
+
+            //COLLAPSE
             public CorrelationString_DM(Sheets.CorrelationSheet_DM correlSheet)
             {
+                StringBuilder header = new StringBuilder();
+                StringBuilder values = new StringBuilder();
 
+                Excel.Range parentRow = correlSheet.LinkToOrigin.LinkSource.EntireRow;
+                SheetType sourceType = ExtensionMethods.GetSheetType(correlSheet.LinkToOrigin.LinkSource.Worksheet);
+                DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
+                string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
+                StringBuilder subIDs = new StringBuilder();
+                Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
+                matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
+                Excel.Range fieldEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
+                object[,] matrixVals = correlSheet.xlSheet.Range[correlSheet.xlMatrixCell.Offset[1, 0], matrixEnd].Value;
+                int numberOfInputs = matrixVals.GetLength(0);
+
+                header.Append(numberOfInputs);
+                header.Append(",");
+                header.Append("DM");
+                header.Append(",");
+                header.Append(parentID);
+
+                for(int row = 1; row <= matrixVals.GetLength(0) - 1; row++)
+                {
+                    values.Append("&");
+                    for(int col = row+1; col <= matrixVals.GetLength(1); col++)
+                    {
+                        values.Append(matrixVals[row, col].ToString());
+                        values.Append(",");
+                    }
+                    values.Remove(values.Length - 1, 1);    //remove the final ","
+                }
+
+                this.Value = $"{header.ToString()}{values.ToString()}";
             }
 
 
@@ -86,6 +121,7 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
+            //COLLAPSE
             public override void PrintToSheet(Excel.Range[] xlCells)
             {
                 //Clean the string
