@@ -46,6 +46,7 @@
             this.GenerateMatrix = this.Factory.CreateRibbonButton();
             this.DeveloperTools = this.Factory.CreateRibbonGroup();
             this.DebugModeToggle = this.Factory.CreateRibbonButton();
+            this.testPrint = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -123,6 +124,7 @@
             // DeveloperTools
             // 
             this.DeveloperTools.Items.Add(this.DebugModeToggle);
+            this.DeveloperTools.Items.Add(this.testPrint);
             this.DeveloperTools.Label = "DeveloperTools";
             this.DeveloperTools.Name = "DeveloperTools";
             // 
@@ -131,6 +133,12 @@
             this.DebugModeToggle.Label = "Toggle Debug Mode";
             this.DebugModeToggle.Name = "DebugModeToggle";
             this.DebugModeToggle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.DebugModeToggle_Click);
+            // 
+            // testPrint
+            // 
+            this.testPrint.Label = "Test Print Time";
+            this.testPrint.Name = "testPrint";
+            this.testPrint.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.testPrint_Click);
             // 
             // Ribbon1
             // 
@@ -166,6 +174,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup DeveloperTools;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton DebugModeToggle;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton GenerateMatrix;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton testPrint;
     }
 
     partial class ThisRibbonCollection

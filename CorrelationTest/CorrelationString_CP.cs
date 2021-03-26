@@ -119,7 +119,7 @@ namespace CorrelationTest
                 return PairSpecification.ConstructFromString(this.Value);
             }
 
-            public override object[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
+            public override string[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
             {
                 return this.Pairs.GetCorrelationMatrix_Formulas(CorrelSheet);
             }

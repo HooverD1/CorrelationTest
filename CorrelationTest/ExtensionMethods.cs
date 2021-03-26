@@ -254,260 +254,360 @@ namespace CorrelationTest
         }
 
                
-        public static void SturdyPaste_Square(Excel.Range pasteRange, object[,] pasteValues)
+        //public static void SturdyPaste_Square(Excel.Range pasteRange, object[,] pasteValues)
+        //{
+        //    //Error checking
+        //    int size = pasteRange.Columns.Count;
+        //    if (size != pasteRange.Rows.Count)
+        //        throw new Exception("Not square");
+        //    if (pasteValues.GetLength(0) != size || pasteValues.GetLength(1) != size)
+        //        throw new Exception("Values array size does not match range size");
+        //    //Error checking
+
+        //    //This method splits up the inputs into chunks of max size 250 x 250 and handles them separately
+
+        //    Excel.Range pasteCell = pasteRange.Cells[1, 1];     //The top left cell
+        //    Excel.Range[] partialPasteRange;     //Max 250 x 250 cell blocks
+        //    object[] partialValues;
+
+        //    void ThreadMe(int[,] parameters)
+        //    {
+        //        for(int block = 0; block < parameters.GetLength(1); block++)
+        //        {
+        //            ProcessBlock(parameters[4,block], parameters[0,block], parameters[1,block], parameters[2,block], parameters[3,block]);
+        //        }
+        //    }
+
+        //    void ProcessBlock(int blockIndex, int param1, int param2, int param3, int param4)
+        //    {
+        //        //partialPasteRange[blockIndex] = pasteCell.Offset[param1, param2].Resize[param3, param4];
+        //        partialValues[blockIndex] = SliceArray(pasteValues, param1, param2, param3, param4);
+        //        partialPasteRange[blockIndex].Value = partialValues[blockIndex];
+        //    }
+
+        //    if (size <= 250)
+        //    {
+        //        partialPasteRange = new Excel.Range[1];
+        //        partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[size, size];
+
+        //        partialValues = new object[1];
+        //        partialValues[0] = pasteValues;     //object arrays are themselves objects..
+        //        partialPasteRange[0].FormulaR1C1 = partialValues[0];
+        //    }
+        //    else if(size <= 500)
+        //    {               
+        //        //2 x 2 blocks of roughly 250 x 250
+        //        partialPasteRange = new Excel.Range[4];
+        //        int blockSize = size / 2 + (size % 2)/2;
+        //        partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[blockSize, blockSize];     //full width
+        //        partialPasteRange[1] = pasteCell.Offset[0, blockSize].Resize[blockSize, size - blockSize]; //partial width
+        //        partialPasteRange[2] = pasteCell.Offset[blockSize, 0].Resize[size - blockSize, blockSize]; //full width
+        //        partialPasteRange[3] = pasteCell.Offset[blockSize, blockSize].Resize[size - blockSize, size - blockSize]; //partial width
+
+        //        partialValues = new object[4];
+
+        //        //Thread th1 = new Thread(() => ProcessBlock(0, 0, 0, blockSize, blockSize));
+        //        //Thread th2 = new Thread(() => ProcessBlock(1, 0, blockSize, blockSize, size - blockSize));
+        //        //Thread th3 = new Thread(() => ProcessBlock(2, blockSize, 0, size - blockSize, blockSize));
+        //        //Thread th4 = new Thread(() => ProcessBlock(3, blockSize, blockSize, size - blockSize, size - blockSize));
+        //        //th1.Start();
+        //        //th2.Start();
+        //        //th3.Start();
+        //        //th4.Start();
+        //        //th1.Join();
+        //        //th2.Join();
+        //        //th3.Join();
+        //        //th4.Join();
+
+        //        partialValues[0] = SliceArray(pasteValues, 0, 0, blockSize, blockSize);
+        //        partialValues[1] = SliceArray(pasteValues, 0, blockSize, blockSize, size - blockSize);
+        //        partialValues[2] = SliceArray(pasteValues, blockSize, 0, size - blockSize, blockSize);
+        //        partialValues[3] = SliceArray(pasteValues, blockSize, blockSize, size - blockSize, size - blockSize);
+
+        //        partialPasteRange[0].FormulaR1C1 = partialValues[0];      //Can I multi-thread this?
+        //        partialPasteRange[1].FormulaR1C1 = partialValues[1];
+        //        partialPasteRange[2].FormulaR1C1 = partialValues[2];
+        //        partialPasteRange[3].FormulaR1C1 = partialValues[3];
+        //    }
+        //    else if(size <= 750)
+        //    {
+        //        //3 x 3 blocks of 250 x 250
+        //        partialPasteRange = new Excel.Range[9];
+        //        int blockSize = size / 3 + (size % 3) / 3;
+        //        partialPasteRange[0] = pasteCell.Offset[blockSize * 0, blockSize*0].Resize[blockSize, blockSize];   //full width
+        //        partialPasteRange[1] = pasteCell.Offset[blockSize * 0, blockSize*1].Resize[blockSize, blockSize];   //full width
+        //        partialPasteRange[2] = pasteCell.Offset[blockSize * 0, blockSize*2].Resize[blockSize, size - (blockSize*2)];   //partial width
+        //        partialPasteRange[3] = pasteCell.Offset[blockSize * 1, blockSize*0].Resize[blockSize, blockSize];   //full width
+        //        partialPasteRange[4] = pasteCell.Offset[blockSize * 1, blockSize*1].Resize[blockSize, blockSize];   //full width
+        //        partialPasteRange[5] = pasteCell.Offset[blockSize * 1, blockSize*2].Resize[blockSize, size - (blockSize * 2)];   //partial width
+        //        partialPasteRange[6] = pasteCell.Offset[blockSize * 2, blockSize*0].Resize[size - (blockSize * 2), blockSize];   //full width
+        //        partialPasteRange[7] = pasteCell.Offset[blockSize * 2, blockSize*1].Resize[size - (blockSize * 2), blockSize];   //full width
+        //        partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize*2].Resize[size - (blockSize * 2), size - (blockSize * 2)];   //partial width
+
+        //        partialValues = new object[9];
+        //        //Thread th1 = new Thread(() => ProcessBlock(0, blockSize * 0, blockSize * 0, blockSize, blockSize));
+        //        //th1.Start();
+        //        //Thread th2 = new Thread(() => ProcessBlock(1, blockSize * 0, blockSize * 1, blockSize, blockSize));
+        //        //th2.Start();
+        //        //Thread th3 = new Thread(() => ProcessBlock(2, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2));
+        //        //th3.Start();
+        //        //th1.Join();
+        //        //th1 = new Thread(() => ProcessBlock(3, blockSize * 1, blockSize * 0, blockSize, blockSize));
+        //        //th1.Start();
+        //        //th2.Join();
+        //        //th2 = new Thread(() => ProcessBlock(4, blockSize * 1, blockSize * 1, blockSize, blockSize));
+        //        //th2.Start();
+        //        //th3.Join();
+        //        //th3 = new Thread(() => ProcessBlock(5, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2));
+        //        //th3.Start();
+        //        //th1.Join();
+        //        //th1 = new Thread(() => ProcessBlock(6, blockSize * 2, blockSize * 0, blockSize, blockSize));
+        //        //th1.Start();
+        //        //th2.Join();
+        //        //th2 = new Thread(() => ProcessBlock(7, blockSize * 2, blockSize * 1, blockSize, blockSize));
+        //        //th2.Start();
+        //        //th3.Join();
+        //        //th3 = new Thread(() => ProcessBlock(8, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2));
+        //        //th3.Start();
+        //        //th1.Join();
+        //        //th2.Join();
+        //        //th3.Join();
+
+        //        partialValues[0] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, blockSize, blockSize);
+        //        partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+        //        partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2);
+        //        partialValues[3] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
+        //        partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
+        //        partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2);
+        //        partialValues[6] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
+        //        partialValues[7] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
+        //        partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2);
+
+        //        partialPasteRange[0].FormulaR1C1 = partialValues[0];      //Can I multi-thread this?
+        //        partialPasteRange[1].FormulaR1C1 = partialValues[1];
+        //        partialPasteRange[2].FormulaR1C1 = partialValues[2];
+        //        partialPasteRange[3].FormulaR1C1 = partialValues[3];
+        //        partialPasteRange[4].FormulaR1C1 = partialValues[4];
+        //        partialPasteRange[5].FormulaR1C1 = partialValues[5];
+        //        partialPasteRange[6].FormulaR1C1 = partialValues[6];
+        //        partialPasteRange[7].FormulaR1C1 = partialValues[7];
+        //        partialPasteRange[8].FormulaR1C1 = partialValues[8];
+        //    }
+        //    else if(size <= 1000)
+        //    {
+        //        //4 x 4 blocks of 250 x 250
+        //        partialPasteRange = new Excel.Range[16];
+        //        int blockSize = size / 4 + (size % 4) / 4;
+        //        partialPasteRange[0] = pasteCell.Offset[blockSize * 0, blockSize * 0].Resize[blockSize, blockSize];
+        //        partialPasteRange[1] = pasteCell.Offset[blockSize * 0, blockSize * 1].Resize[blockSize, blockSize];
+        //        partialPasteRange[2] = pasteCell.Offset[blockSize * 0, blockSize * 2].Resize[blockSize, blockSize];
+        //        partialPasteRange[3] = pasteCell.Offset[blockSize * 0, blockSize * 3].Resize[blockSize, size - blockSize*3];//
+        //        partialPasteRange[4] = pasteCell.Offset[blockSize * 1, blockSize * 0].Resize[blockSize, blockSize];
+        //        partialPasteRange[5] = pasteCell.Offset[blockSize * 1, blockSize * 1].Resize[blockSize, blockSize];
+        //        partialPasteRange[6] = pasteCell.Offset[blockSize * 1, blockSize * 2].Resize[blockSize, blockSize];
+        //        partialPasteRange[7] = pasteCell.Offset[blockSize * 1, blockSize * 3].Resize[blockSize, size - blockSize * 3];//
+        //        partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize * 0].Resize[blockSize, blockSize];
+        //        partialPasteRange[9] = pasteCell.Offset[blockSize * 2, blockSize * 1].Resize[blockSize, blockSize];
+        //        partialPasteRange[10] = pasteCell.Offset[blockSize * 2, blockSize * 2].Resize[blockSize, blockSize];
+        //        partialPasteRange[11] = pasteCell.Offset[blockSize * 2, blockSize * 3].Resize[blockSize, size - blockSize * 3];//
+        //        partialPasteRange[12] = pasteCell.Offset[blockSize * 3, blockSize * 0].Resize[size - blockSize * 3, blockSize];
+        //        partialPasteRange[13] = pasteCell.Offset[blockSize * 3, blockSize * 1].Resize[size - blockSize * 3, blockSize];
+        //        partialPasteRange[14] = pasteCell.Offset[blockSize * 3, blockSize * 2].Resize[size - blockSize * 3, blockSize];
+        //        partialPasteRange[15] = pasteCell.Offset[blockSize * 3, blockSize * 3].Resize[size - blockSize * 3, size - blockSize * 3];//
+
+        //        partialValues = new object[16];
+        //        //int[,] parameters = new int[5,4];       //[param, block]        //One of these per thread
+        //        //parameters[0, 0] = blockSize * 0;
+        //        //parameters[1, 0] = blockSize * 0;
+        //        //parameters[2, 0] = blockSize;
+        //        //parameters[3, 0] = blockSize;
+        //        //parameters[4, 0] = 0;
+
+        //        //parameters[0, 1] = blockSize * 0;
+        //        //parameters[1, 1] = blockSize * 1;
+        //        //parameters[2, 1] = blockSize;
+        //        //parameters[3, 1] = blockSize;
+        //        //parameters[4, 1] = 1;
+
+        //        //parameters[0, 2] = blockSize * 0;
+        //        //parameters[1, 2] = blockSize * 2;
+        //        //parameters[2, 2] = blockSize;
+        //        //parameters[3, 2] = blockSize;
+        //        //parameters[4, 2] = 2;
+
+        //        //parameters[0, 3] = blockSize * 0;
+        //        //parameters[1, 3] = blockSize * 3;
+        //        //parameters[2, 3] = blockSize;
+        //        //parameters[3, 3] = size - blockSize * 3;
+        //        //parameters[4, 3] = 3;
+
+        //        ////oh christ
+        //        //Thread th1 = new Thread(() => ThreadMe(parameters));
+        //        //th1.Start();
+
+        //        //parameters[0, 0] = blockSize * 1;
+        //        //parameters[1, 0] = blockSize * 0;
+        //        //parameters[2, 0] = blockSize;
+        //        //parameters[3, 0] = blockSize;
+        //        //parameters[4, 0] = 4;
+
+        //        //parameters[0, 1] = blockSize * 1;
+        //        //parameters[1, 1] = blockSize * 1;
+        //        //parameters[2, 1] = blockSize;
+        //        //parameters[3, 1] = blockSize;
+        //        //parameters[4, 1] = 5;
+
+        //        //parameters[0, 2] = blockSize * 1;
+        //        //parameters[1, 2] = blockSize * 2;
+        //        //parameters[2, 2] = blockSize;
+        //        //parameters[3, 2] = blockSize;
+        //        //parameters[4, 2] = 6;
+
+        //        //parameters[0, 3] = blockSize * 1;
+        //        //parameters[1, 3] = blockSize * 3;
+        //        //parameters[2, 3] = blockSize;
+        //        //parameters[3, 3] = size - blockSize * 3;
+        //        //parameters[4, 3] = 7;
+
+        //        //Thread th2 = new Thread(() => ThreadMe(parameters));
+        //        //th2.Start();
+
+        //        //parameters[0, 0] = blockSize * 2;
+        //        //parameters[1, 0] = blockSize * 0;
+        //        //parameters[2, 0] = blockSize;
+        //        //parameters[3, 0] = blockSize;
+        //        //parameters[4, 0] = 8;
+
+        //        //parameters[0, 1] = blockSize * 2;
+        //        //parameters[1, 1] = blockSize * 1;
+        //        //parameters[2, 1] = blockSize;
+        //        //parameters[3, 1] = blockSize;
+        //        //parameters[4, 1] = 9;
+
+        //        //parameters[0, 2] = blockSize * 2;
+        //        //parameters[1, 2] = blockSize * 2;
+        //        //parameters[2, 2] = blockSize;
+        //        //parameters[3, 2] = blockSize;
+        //        //parameters[4, 2] = 10;
+
+        //        //parameters[0, 3] = blockSize * 2;
+        //        //parameters[1, 3] = blockSize * 3;
+        //        //parameters[2, 3] = blockSize;
+        //        //parameters[3, 3] = size - blockSize * 3;
+        //        //parameters[4, 3] = 11;
+
+        //        //Thread th3 = new Thread(() => ThreadMe(parameters));
+        //        //th3.Start();
+
+        //        //parameters[0, 0] = blockSize * 3;
+        //        //parameters[1, 0] = blockSize * 0;
+        //        //parameters[2, 0] = size - blockSize * 3;
+        //        //parameters[3, 0] = blockSize;
+        //        //parameters[4, 0] = 12;
+
+        //        //parameters[0, 1] = blockSize * 3;
+        //        //parameters[1, 1] = blockSize * 1;
+        //        //parameters[2, 1] = size - blockSize * 3;
+        //        //parameters[3, 1] = blockSize;
+        //        //parameters[4, 1] = 13;
+
+        //        //parameters[0, 2] = blockSize * 3;
+        //        //parameters[1, 2] = blockSize * 2;
+        //        //parameters[2, 2] = size - blockSize * 3;
+        //        //parameters[3, 2] = blockSize;
+        //        //parameters[4, 2] = 14;
+
+        //        //parameters[0, 3] = blockSize * 3;
+        //        //parameters[1, 3] = blockSize * 3;
+        //        //parameters[2, 3] = size - blockSize * 3;
+        //        //parameters[3, 3] = size - blockSize * 3;
+        //        //parameters[4, 3] = 15;
+
+        //        //Thread th4 = new Thread(() => ThreadMe(parameters));
+        //        //th4.Start();
+
+        //        //th1.Join();
+        //        //th2.Join();
+        //        //th3.Join();
+        //        //th4.Join();
+
+        //        partialValues[0] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, blockSize, blockSize);
+        //        partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
+        //        partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, blockSize);
+        //        partialValues[3] = SliceArray(pasteValues, blockSize * 0, blockSize * 3, blockSize, size - blockSize * 3);
+        //        partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
+        //        partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
+        //        partialValues[6] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, blockSize);
+        //        partialValues[7] = SliceArray(pasteValues, blockSize * 1, blockSize * 3, blockSize, size - blockSize * 3);
+        //        partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
+        //        partialValues[9] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
+        //        partialValues[10] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, blockSize);
+        //        partialValues[11] = SliceArray(pasteValues, blockSize * 2, blockSize * 3, blockSize, size - blockSize * 3);
+        //        partialValues[12] = SliceArray(pasteValues, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize);
+        //        partialValues[13] = SliceArray(pasteValues, blockSize * 3, blockSize * 1, size - blockSize * 3, blockSize);
+        //        partialValues[14] = SliceArray(pasteValues, blockSize * 3, blockSize * 2, size - blockSize * 3, blockSize);
+        //        partialValues[15] = SliceArray(pasteValues, blockSize * 3, blockSize * 3, size - blockSize * 3, size - blockSize * 3);
+
+        //        partialPasteRange[0].FormulaR1C1 = partialValues[0];      //Can I multi-thread this?
+        //        partialPasteRange[1].FormulaR1C1 = partialValues[1];
+        //        partialPasteRange[2].FormulaR1C1 = partialValues[2];
+        //        partialPasteRange[3].FormulaR1C1 = partialValues[3];
+        //        partialPasteRange[4].FormulaR1C1 = partialValues[4];
+        //        partialPasteRange[5].FormulaR1C1 = partialValues[5];
+        //        partialPasteRange[6].FormulaR1C1 = partialValues[6];
+        //        partialPasteRange[7].FormulaR1C1 = partialValues[7];
+        //        partialPasteRange[8].FormulaR1C1 = partialValues[8];
+        //        partialPasteRange[9].FormulaR1C1 = partialValues[9];
+        //        partialPasteRange[10].FormulaR1C1 = partialValues[10];
+        //        partialPasteRange[11].FormulaR1C1 = partialValues[11];
+        //        partialPasteRange[12].FormulaR1C1 = partialValues[12];
+        //        partialPasteRange[13].FormulaR1C1 = partialValues[13];
+        //        partialPasteRange[14].FormulaR1C1 = partialValues[14];
+        //        partialPasteRange[15].FormulaR1C1 = partialValues[15];
+        //    }
+        //    else
+        //    {
+        //        throw new Exception("Matrix is too larger");
+        //    }
+        //}
+
+        public static void SturdyPaste2(Excel.Range pasteRange, object[][] pasteValues)
         {
-            //Error checking
-            int size = pasteRange.Columns.Count;
-            if (size != pasteRange.Rows.Count)
-                throw new Exception("Not square");
-            if (pasteValues.GetLength(0) != size || pasteValues.GetLength(1) != size)
-                throw new Exception("Values array size does not match range size");
-            //Error checking
-
-            //This method splits up the inputs into chunks of max size 250 x 250 and handles them separately
-
-            Excel.Range pasteCell = pasteRange.Cells[1, 1];     //The top left cell
-            Excel.Range[] partialPasteRange;     //Max 250 x 250 cell blocks
-            object[] partialValues;
-
-            void ProcessBlock(int blockIndex, int param1, int param2, int param3, int param4)
+            ThisAddIn.MyApp.ReferenceStyle = Excel.XlReferenceStyle.xlR1C1;
+            for(int i = 1; i <= pasteRange.Rows.Count; i++)
             {
-                //partialPasteRange[blockIndex] = pasteCell.Offset[param1, param2].Resize[param3, param4];
-                partialValues[blockIndex] = SliceArray(pasteValues, param1, param2, param3, param4);
-                partialPasteRange[blockIndex].Value = partialValues[blockIndex];
+                pasteRange.Rows[i].FormulaR1C1 = pasteValues[i-1];
             }
-
-            if (size <= 250)
-            {
-                partialPasteRange = new Excel.Range[1];
-                partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[size, size];
-
-                partialValues = new object[1];
-                partialValues[0] = pasteValues;     //object arrays are themselves objects..
-                partialPasteRange[0].FormulaR1C1 = partialValues[0];
-            }
-            else if(size <= 500)
-            {               
-                //2 x 2 blocks of roughly 250 x 250
-                partialPasteRange = new Excel.Range[4];
-                int blockSize = size / 2 + (size % 2)/2;
-                partialPasteRange[0] = pasteCell.Offset[0, 0].Resize[blockSize, blockSize];     //full width
-                partialPasteRange[1] = pasteCell.Offset[0, blockSize].Resize[blockSize, size - blockSize]; //partial width
-                partialPasteRange[2] = pasteCell.Offset[blockSize, 0].Resize[size - blockSize, blockSize]; //full width
-                partialPasteRange[3] = pasteCell.Offset[blockSize, blockSize].Resize[size - blockSize, size - blockSize]; //partial width
-
-                partialValues = new object[4];
-
-                //Thread th1 = new Thread(() => ProcessBlock(0, 0, 0, blockSize, blockSize));
-                //Thread th2 = new Thread(() => ProcessBlock(1, 0, blockSize, blockSize, size - blockSize));
-                //Thread th3 = new Thread(() => ProcessBlock(2, blockSize, 0, size - blockSize, blockSize));
-                //Thread th4 = new Thread(() => ProcessBlock(3, blockSize, blockSize, size - blockSize, size - blockSize));
-                //th1.Start();
-                //th2.Start();
-                //th3.Start();
-                //th4.Start();
-                //th1.Join();
-                //th2.Join();
-                //th3.Join();
-                //th4.Join();
-
-                partialValues[0] = SliceArray(pasteValues, 0, 0, blockSize, blockSize);
-                partialValues[1] = SliceArray(pasteValues, 0, blockSize, blockSize, size - blockSize);
-                partialValues[2] = SliceArray(pasteValues, blockSize, 0, size - blockSize, blockSize);
-                partialValues[3] = SliceArray(pasteValues, blockSize, blockSize, size - blockSize, size - blockSize);
-
-                partialPasteRange[0].FormulaR1C1 = partialValues[0];      //Can I multi-thread this?
-                partialPasteRange[1].FormulaR1C1 = partialValues[1];
-                partialPasteRange[2].FormulaR1C1 = partialValues[2];
-                partialPasteRange[3].FormulaR1C1 = partialValues[3];
-            }
-            else if(size <= 750)
-            {
-                //3 x 3 blocks of 250 x 250
-                partialPasteRange = new Excel.Range[9];
-                int blockSize = size / 3 + (size % 3) / 3;
-                partialPasteRange[0] = pasteCell.Offset[blockSize * 0, blockSize*0].Resize[blockSize, blockSize];   //full width
-                partialPasteRange[1] = pasteCell.Offset[blockSize * 0, blockSize*1].Resize[blockSize, blockSize];   //full width
-                partialPasteRange[2] = pasteCell.Offset[blockSize * 0, blockSize*2].Resize[blockSize, size - (blockSize*2)];   //partial width
-                partialPasteRange[3] = pasteCell.Offset[blockSize * 1, blockSize*0].Resize[blockSize, blockSize];   //full width
-                partialPasteRange[4] = pasteCell.Offset[blockSize * 1, blockSize*1].Resize[blockSize, blockSize];   //full width
-                partialPasteRange[5] = pasteCell.Offset[blockSize * 1, blockSize*2].Resize[blockSize, size - (blockSize * 2)];   //partial width
-                partialPasteRange[6] = pasteCell.Offset[blockSize * 2, blockSize*0].Resize[size - (blockSize * 2), blockSize];   //full width
-                partialPasteRange[7] = pasteCell.Offset[blockSize * 2, blockSize*1].Resize[size - (blockSize * 2), blockSize];   //full width
-                partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize*2].Resize[size - (blockSize * 2), size - (blockSize * 2)];   //partial width
-
-                partialValues = new object[9];
-                //Thread th1 = new Thread(() => ProcessBlock(0, blockSize * 0, blockSize * 0, blockSize, blockSize));
-                //th1.Start();
-                //Thread th2 = new Thread(() => ProcessBlock(1, blockSize * 0, blockSize * 1, blockSize, blockSize));
-                //th2.Start();
-                //Thread th3 = new Thread(() => ProcessBlock(2, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2));
-                //th3.Start();
-                //th1.Join();
-                //th1 = new Thread(() => ProcessBlock(3, blockSize * 1, blockSize * 0, blockSize, blockSize));
-                //th1.Start();
-                //th2.Join();
-                //th2 = new Thread(() => ProcessBlock(4, blockSize * 1, blockSize * 1, blockSize, blockSize));
-                //th2.Start();
-                //th3.Join();
-                //th3 = new Thread(() => ProcessBlock(5, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2));
-                //th3.Start();
-                //th1.Join();
-                //th1 = new Thread(() => ProcessBlock(6, blockSize * 2, blockSize * 0, blockSize, blockSize));
-                //th1.Start();
-                //th2.Join();
-                //th2 = new Thread(() => ProcessBlock(7, blockSize * 2, blockSize * 1, blockSize, blockSize));
-                //th2.Start();
-                //th3.Join();
-                //th3 = new Thread(() => ProcessBlock(8, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2));
-                //th3.Start();
-                //th1.Join();
-                //th2.Join();
-                //th3.Join();
-
-                partialValues[0] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, blockSize, blockSize);
-                partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
-                partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, size - blockSize * 2);
-                partialValues[3] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
-                partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
-                partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, size - blockSize * 2);
-                partialValues[6] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
-                partialValues[7] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
-                partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, size - blockSize * 2);
-
-                partialPasteRange[0].FormulaR1C1 = partialValues[0];      //Can I multi-thread this?
-                partialPasteRange[1].FormulaR1C1 = partialValues[1];
-                partialPasteRange[2].FormulaR1C1 = partialValues[2];
-                partialPasteRange[3].FormulaR1C1 = partialValues[3];
-                partialPasteRange[4].FormulaR1C1 = partialValues[4];
-                partialPasteRange[5].FormulaR1C1 = partialValues[5];
-                partialPasteRange[6].FormulaR1C1 = partialValues[6];
-                partialPasteRange[7].FormulaR1C1 = partialValues[7];
-                partialPasteRange[8].FormulaR1C1 = partialValues[8];
-            }
-            else if(size <= 1000)
-            {
-                //4 x 4 blocks of 250 x 250
-                partialPasteRange = new Excel.Range[16];
-                int blockSize = size / 4 + (size % 4) / 4;
-                partialPasteRange[0] = pasteCell.Offset[blockSize * 0, blockSize * 0].Resize[blockSize, blockSize];
-                partialPasteRange[1] = pasteCell.Offset[blockSize * 0, blockSize * 1].Resize[blockSize, blockSize];
-                partialPasteRange[2] = pasteCell.Offset[blockSize * 0, blockSize * 2].Resize[blockSize, blockSize];
-                partialPasteRange[3] = pasteCell.Offset[blockSize * 0, blockSize * 3].Resize[blockSize, size - blockSize*3];//
-                partialPasteRange[4] = pasteCell.Offset[blockSize * 1, blockSize * 0].Resize[blockSize, blockSize];
-                partialPasteRange[5] = pasteCell.Offset[blockSize * 1, blockSize * 1].Resize[blockSize, blockSize];
-                partialPasteRange[6] = pasteCell.Offset[blockSize * 1, blockSize * 2].Resize[blockSize, blockSize];
-                partialPasteRange[7] = pasteCell.Offset[blockSize * 1, blockSize * 3].Resize[blockSize, size - blockSize * 3];//
-                partialPasteRange[8] = pasteCell.Offset[blockSize * 2, blockSize * 0].Resize[blockSize, blockSize];
-                partialPasteRange[9] = pasteCell.Offset[blockSize * 2, blockSize * 1].Resize[blockSize, blockSize];
-                partialPasteRange[10] = pasteCell.Offset[blockSize * 2, blockSize * 2].Resize[blockSize, blockSize];
-                partialPasteRange[11] = pasteCell.Offset[blockSize * 2, blockSize * 3].Resize[blockSize, size - blockSize * 3];//
-                partialPasteRange[12] = pasteCell.Offset[blockSize * 3, blockSize * 0].Resize[size - blockSize * 3, blockSize];
-                partialPasteRange[13] = pasteCell.Offset[blockSize * 3, blockSize * 1].Resize[size - blockSize * 3, blockSize];
-                partialPasteRange[14] = pasteCell.Offset[blockSize * 3, blockSize * 2].Resize[size - blockSize * 3, blockSize];
-                partialPasteRange[15] = pasteCell.Offset[blockSize * 3, blockSize * 3].Resize[size - blockSize * 3, size - blockSize * 3];//
-
-                partialValues = new object[16];
-                //Thread th1 = new Thread(() => ProcessBlock(0, blockSize * 0, blockSize * 0, blockSize, blockSize));
-                //th1.Start();
-                //Thread th2 = new Thread(() => ProcessBlock(1, blockSize * 0, blockSize * 1, blockSize, blockSize));
-                //th2.Start();
-                //Thread th3 = new Thread(() => ProcessBlock(2, blockSize * 0, blockSize * 2, blockSize, blockSize));
-                //th3.Start();
-                //Thread th4 = new Thread(() => ProcessBlock(3, blockSize * 0, blockSize * 3, blockSize, size - blockSize * 3));
-                //th4.Start();
-                //th1.Join();
-                //th1 = new Thread(() => ProcessBlock(4, blockSize * 1, blockSize * 0, blockSize, blockSize));
-                //th1.Start();
-                //th2.Join();
-                //th2 = new Thread(() => ProcessBlock(5, blockSize * 1, blockSize * 1, blockSize, blockSize));
-                //th2.Start();
-                //th3.Join();
-                //th3 = new Thread(() => ProcessBlock(6, blockSize * 1, blockSize * 2, blockSize, blockSize));
-                //th3.Start();
-                //th4.Join();
-                //th4 = new Thread(() => ProcessBlock(7, blockSize * 1, blockSize * 3, blockSize, size - blockSize * 3));
-                //th4.Start();
-                //th1.Join();
-                //th1 = new Thread(() => ProcessBlock(8, blockSize * 2, blockSize * 0, blockSize, blockSize));
-                //th1.Start();
-                //th2.Join();
-                //th2 = new Thread(() => ProcessBlock(9, blockSize * 2, blockSize * 1, blockSize, blockSize));
-                //th2.Start();
-                //th3.Join();
-                //th3 = new Thread(() => ProcessBlock(10, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize));
-                //th3.Start();
-                //th1.Join();
-                //th1 = new Thread(() => ProcessBlock(11, blockSize * 2, blockSize * 3, blockSize, size - blockSize * 3));
-                //th1.Start();
-                //th2.Join();
-                //th2 = new Thread(() => ProcessBlock(12, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize));
-                //th2.Start();
-                //th3.Join();
-                //th3 = new Thread(() => ProcessBlock(13, blockSize * 3, blockSize * 1, size - blockSize * 3, blockSize));
-                //th3.Start();
-                //th1.Join();
-                //th1 = new Thread(() => ProcessBlock(14, blockSize * 3, blockSize * 2, size - blockSize * 3, blockSize));
-                //th1.Start();
-                //th2.Join();
-                //th2 = new Thread(() => ProcessBlock(15, blockSize * 3, blockSize * 3, size - blockSize * 3, size - blockSize * 3));
-                //th2.Start();
-                //th3.Join();
-                //th1.Join();
-                //th2.Join();
-
-                partialValues[0] = SliceArray(pasteValues, blockSize * 0, blockSize * 0, blockSize, blockSize);
-                partialValues[1] = SliceArray(pasteValues, blockSize * 0, blockSize * 1, blockSize, blockSize);
-                partialValues[2] = SliceArray(pasteValues, blockSize * 0, blockSize * 2, blockSize, blockSize);
-                partialValues[3] = SliceArray(pasteValues, blockSize * 0, blockSize * 3, blockSize, size - blockSize * 3);
-                partialValues[4] = SliceArray(pasteValues, blockSize * 1, blockSize * 0, blockSize, blockSize);
-                partialValues[5] = SliceArray(pasteValues, blockSize * 1, blockSize * 1, blockSize, blockSize);
-                partialValues[6] = SliceArray(pasteValues, blockSize * 1, blockSize * 2, blockSize, blockSize);
-                partialValues[7] = SliceArray(pasteValues, blockSize * 1, blockSize * 3, blockSize, size - blockSize * 3);
-                partialValues[8] = SliceArray(pasteValues, blockSize * 2, blockSize * 0, blockSize, blockSize);
-                partialValues[9] = SliceArray(pasteValues, blockSize * 2, blockSize * 1, blockSize, blockSize);
-                partialValues[10] = SliceArray(pasteValues, blockSize * 2, blockSize * 2, blockSize, blockSize);
-                partialValues[11] = SliceArray(pasteValues, blockSize * 2, blockSize * 3, blockSize, size - blockSize * 3);
-                partialValues[12] = SliceArray(pasteValues, blockSize * 3, blockSize * 0, size - blockSize * 3, blockSize);
-                partialValues[13] = SliceArray(pasteValues, blockSize * 3, blockSize * 1, size - blockSize * 3, blockSize);
-                partialValues[14] = SliceArray(pasteValues, blockSize * 3, blockSize * 2, size - blockSize * 3, blockSize);
-                partialValues[15] = SliceArray(pasteValues, blockSize * 3, blockSize * 3, size - blockSize * 3, size - blockSize * 3);
-
-                partialPasteRange[0].FormulaR1C1 = partialValues[0];      //Can I multi-thread this?
-                partialPasteRange[1].FormulaR1C1 = partialValues[1];
-                partialPasteRange[2].FormulaR1C1 = partialValues[2];
-                partialPasteRange[3].FormulaR1C1 = partialValues[3];
-                partialPasteRange[4].FormulaR1C1 = partialValues[4];
-                partialPasteRange[5].FormulaR1C1 = partialValues[5];
-                partialPasteRange[6].FormulaR1C1 = partialValues[6];
-                partialPasteRange[7].FormulaR1C1 = partialValues[7];
-                partialPasteRange[8].FormulaR1C1 = partialValues[8];
-                partialPasteRange[9].FormulaR1C1 = partialValues[9];
-                partialPasteRange[10].FormulaR1C1 = partialValues[10];
-                partialPasteRange[11].FormulaR1C1 = partialValues[11];
-                partialPasteRange[12].FormulaR1C1 = partialValues[12];
-                partialPasteRange[13].FormulaR1C1 = partialValues[13];
-                partialPasteRange[14].FormulaR1C1 = partialValues[14];
-                partialPasteRange[15].FormulaR1C1 = partialValues[15];
-            }
-            else
-            {
-                throw new Exception("Matrix is too larger");
-            }
+            
         }
 
-        public static object[,] SliceArray(object[,] fullArray, int x_start, int y_start, int x_length, int y_length)   //for generic object[x, y]
+        public static string[] SliceArray(string[,] fullArray, int row_start, int columns)   //for generic object[x, y]
         {
-            object[,] slicedArray = new object[x_length, y_length];
-            for(int x = 0; x < x_length; x++)
+            string[] slicedArray = new string[columns];
+            for(int y = 0; y < columns; y++)
             {
-                for(int y = 0; y < y_length; y++)
-                {
-                    slicedArray[x, y] = fullArray[x + x_start, y + y_start];        //Does a quicker way than iteration exist?
-                }
+                slicedArray[y] = fullArray[row_start, y];        //Does a quicker way than iteration exist?
             }
             return slicedArray;
         }
 
+
+        public static void TurnOffUpdating()
+        {
+            Excel.Application App = ThisAddIn.MyApp;
+            App.Calculation = Excel.XlCalculation.xlCalculationManual;
+            App.ScreenUpdating = false;
+            App.EnableEvents = false;
+            App.DisplayStatusBar = false;
+        }
+
+        public static void TurnOnUpdating()
+        {
+            Excel.Application App = ThisAddIn.MyApp;
+            App.ScreenUpdating = true;
+            App.EnableEvents = true;
+            App.DisplayStatusBar = true;
+            App.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
+        }
     }
 }

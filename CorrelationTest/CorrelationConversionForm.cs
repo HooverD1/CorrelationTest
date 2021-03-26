@@ -60,24 +60,11 @@ namespace CorrelationTest
 
         private void btnConvert_Click(object sender, EventArgs e)
         {
-            //sender is the button itself!
-
-            /*
-             * If I want to convert, I need to build the original first, pull its components, and send them to the new one's constructor.
-             */
-
-            //Build the  viewmodel for the existing correlation sheet.
-            //try
-            //{
+            ExtensionMethods.TurnOffUpdating();
             var correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
             correlSheet.ConvertCorrelation(this.checkboxPreserveOffDiagonal.Checked);
             this.Close();
-            //}
-            //catch(Exception except)
-            //{
-            //    if (MyGlobals.DebugMode)
-            //        throw except;
-            //}
+            ExtensionMethods.TurnOnUpdating();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)

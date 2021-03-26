@@ -152,7 +152,7 @@ namespace CorrelationTest
         //    return matrix;
         //}
 
-        public object[,] GetCorrelationMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
+        public string[,] GetCorrelationMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
         {
             Diagnostics.StartTimer();
             int size = this.Pairs.Count() + 1;
@@ -160,7 +160,7 @@ namespace CorrelationTest
             Data.CorrelSheetSpecs specs = CorrelSheet.Specs;
             Excel.Range pairsRange = CorrelSheet.xlPairsCell;
 
-            object[,] matrix = new object[size, size];
+            string[,] matrix = new string[size, size];
             string[,] addresses = new string[size, size];
             matrix[size - 1, size - 1] = "1";
             int startRow = pairsRange.Row;
@@ -168,7 +168,7 @@ namespace CorrelationTest
             
             for (int row = 0; row < size - 1; row++)
             {
-                matrix[row, row] = "1";
+                matrix[row, row] = "=1";
                 matrix[row, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol}))";
             }
             void LoadUpperTriangular()

@@ -23,7 +23,8 @@ namespace CorrelationTest
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
             SendKeys.Send("{ESC}");
-            
+            ExtensionMethods.TurnOffUpdating();
+
             Excel.Range selection = ThisAddIn.MyApp.Selection;
             SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
             DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(sheetType);
@@ -71,16 +72,20 @@ namespace CorrelationTest
                 default:
                     throw new Exception("Unknown correlation expand issue");
             }
+            ExtensionMethods.TurnOnUpdating();
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
         {
+            ExtensionMethods.TurnOffUpdating();
             //cancel edits
             Sheets.CorrelationSheet.CollapseToSheet();
+            ExtensionMethods.TurnOnUpdating();
         }
 
         private void FakeFields_Click(object sender, RibbonControlEventArgs e)
         {
+            ExtensionMethods.TurnOffUpdating();
             //Search for existing EST_1 sheet
             Excel.Worksheet est_1 = ExtensionMethods.GetWorksheet("EST_1", SheetType.Estimate);
             DisplayCoords edc = DisplayCoords.ConstructDisplayCoords(SheetType.Estimate);
@@ -324,6 +329,7 @@ namespace CorrelationTest
             CostSheet wbsSheet_example = CostSheet.ConstructFromXlCostSheet(wbs_1);
             wbsSheet_example.PrintDefaultCorrelStrings();
 
+            ExtensionMethods.TurnOnUpdating();
         }
 
         private void btnVisualize_Click(object sender, RibbonControlEventArgs e)
@@ -365,5 +371,31 @@ namespace CorrelationTest
             PairSpecification pairSpec = PairSpecification.ConstructByFittingMatrix(testMatrix, false);
             pairSpec.PrintToSheet(xlSheet.Cells[1, 1]);
         }
+
+        private void testPrint_Click(object sender, RibbonControlEventArgs e)
+        {
+            List<long> times = new List<long>();
+
+            
+            string[,] stringValues = new string[1000,1000];
+            for(int row = 0; row < 1000; row++)
+            {
+                for(int col = 0; col < 1000; col++)
+                {
+                    stringValues[row, col] = $"=({col} + {row})";
+                }
+            }
+            Diagnostics.StartTimer();
+            Excel.Range stringRange = ThisAddIn.MyApp.Worksheets["Sheet1"].Cells[1, 1];
+            ThisAddIn.MyApp.ScreenUpdating = false;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationManual;
+            stringRange.Resize[1000, 1000].Value2 = stringValues;
+            ThisAddIn.MyApp.ScreenUpdating = true;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
+            long time = Diagnostics.CheckTimer();
+            Diagnostics.StopTimer();          
+        }
+
+        
     }
 }

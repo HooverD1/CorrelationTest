@@ -112,15 +112,15 @@ namespace CorrelationTest
                 return correlLines;
             }
 
-            public virtual object[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet) { throw new Exception("Failed override"); }
+            public virtual string[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet) { throw new Exception("Failed override"); }
 
-            public virtual object[,] GetMatrix_Values()
+            public virtual string[,] GetMatrix_Values()
             {
                 string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 string[] lines = DelimitString(myValue);
                 string[] header = lines[0].Split(',');
                 int length = Convert.ToInt32(header[0]);
-                object[,] matrix = new object[length, length];
+                string[,] matrix = new string[length, length];
 
                 for (int row = 0; row < length; row++)
                 {
@@ -133,18 +133,15 @@ namespace CorrelationTest
                     for (int col = row; col < length; col++)
                     {
                         if (col == row)
-                            matrix[row, col] = 1;
+                            matrix[row, col] = "1";
                         else if (col > row && values != null)
                         {
                             if (Double.TryParse(values[(col - row) - 1], out double conversion))
                             {
-                                matrix[row, col] = conversion;
+                                matrix[row, col] = conversion.ToString();
                             }
                         }
 
-
-                        else  //col < row
-                            matrix[row, col] = null;
                     }
                 }
 

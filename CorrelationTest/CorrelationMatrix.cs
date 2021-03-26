@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Runtime.InteropServices;
+using Vsto = Microsoft.Office.Tools.Excel;
 
 namespace CorrelationTest
 {
@@ -354,7 +357,7 @@ namespace CorrelationTest
 
             public void SetCorrelation(string id1, string id2, double correlation)
             {
-                Matrix[FieldDict[id1], FieldDict[id2]] = correlation;
+                Matrix[FieldDict[id1], FieldDict[id2]] = correlation.ToString();
             }
          
             public void PrintToSheet(Excel.Range xlRange)
@@ -364,13 +367,12 @@ namespace CorrelationTest
                 for (int i = 0; i < this.Fields.Length; i++)
                     transpose[i, 0] = this.Fields[i];
                 xlRange.Offset[1, -1].Resize[this.FieldCount, 1].Value = transpose;
-                //xlRange.Offset[1,0].Resize[Matrix.GetLength(0),Matrix.GetLength(1)].Value = this.Matrix;    //print matrix
-                Excel.Range pasteRange = xlRange.Offset[1, 0].Resize[Matrix.GetLength(0), Matrix.GetLength(1)];
-                Diagnostics.StartTimer();
-                ExtensionMethods.SturdyPaste_Square(pasteRange, Matrix);        //Crashing if I use the standard .Value = Matrix operation.
-                long time = Diagnostics.CheckTimer();
-                Diagnostics.StopTimer();
-                //pasteRange.Value = Matrix;
+                
+                Excel.Range offsetCell = xlRange.Offset[1, 0];
+                Excel.Range pasteRange = offsetCell.Resize[Matrix.GetLength(0), Matrix.GetLength(1)];
+                
+                ExtensionMethods.SturdyPaste2(pasteRange, ExtensionMethods.ToJaggedArray(Matrix));
+                pasteRange.Worksheet.Calculate();
             }
             public bool ValidateAgainstXlSheet(object[] xlSheetFields)
             {
