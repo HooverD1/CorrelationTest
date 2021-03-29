@@ -14,10 +14,10 @@ namespace CorrelationTest
     {
         public enum MatrixErrors
         {
-            AboveUpperBound,
+            None,
             BelowLowerBound,
             MisplacedValue,
-            None
+            AboveUpperBound
         }
 
         public class CorrelationMatrix
@@ -418,15 +418,14 @@ namespace CorrelationTest
 
             public MatrixErrors[,] CheckMatrixForTransitivity()
             {
-                
                 this.DoubleMatrix = GetDoubleMatrix(this.Matrix);
                 MatrixErrors[,] errorMatrix = new MatrixErrors[this.Matrix.GetLength(0), this.Matrix.GetLength(1)];
 
-                for(int row = 0; row < errorMatrix.GetLength(0); row++)
+                for(int row = 0; row < Matrix.GetLength(0); row++)
                 {
-                    for(int col = 0; col < errorMatrix.GetLength(1); col++)
+                    for(int col = row; col < Matrix.GetLength(1); col++)
                     {
-                        if (row == col)
+                        if (row == col)     //DIAGONAL
                         {
                             if (DoubleMatrix[row, col] > 1)
                                 errorMatrix[row, col] = MatrixErrors.AboveUpperBound;
@@ -434,45 +433,39 @@ namespace CorrelationTest
                                 errorMatrix[row, col] = MatrixErrors.BelowLowerBound;
                             else
                                 errorMatrix[row, col] = MatrixErrors.None;
-                            continue;
                         }
-                        if(col < row)
+                        else   //UPPER TRIANGULAR
                         {
-                            if (DoubleMatrix[row, col] == Convert.ToDouble(this.Matrix[col, row]))
+                            double max_lower = -1;
+                            double min_upper = 1;
+                            for (int via = 0; via < errorMatrix.GetLength(0); via++)
+                            {
+                                if (row == via || col == via)
+                                    continue;
+                                double lowerBound = GetTransLowerBound(row, via, col);
+                                double upperBound = GetTransUpperBound(row, via, col);
+                                if (lowerBound > max_lower)
+                                    max_lower = lowerBound;
+                                if (upperBound < min_upper)
+                                    min_upper = upperBound;
+
+                            }
+                            if (min_upper < DoubleMatrix[row, col])
+                            {
+                                errorMatrix[row, col] = MatrixErrors.AboveUpperBound;
+                            }
+                            else if (max_lower > DoubleMatrix[row, col])
+                            {
+                                errorMatrix[row, col] = MatrixErrors.BelowLowerBound;
+                            }
+                            else if (max_lower <= DoubleMatrix[row, col] && min_upper >= DoubleMatrix[row, col])
+                            {
                                 errorMatrix[row, col] = MatrixErrors.None;
+                            }
                             else
-                                errorMatrix[row, col] = MatrixErrors.MisplacedValue;
-                            continue;
-                        }
-                        double max_lower=-1;
-                        double min_upper=1;
-                        for(int via = 0; via < errorMatrix.GetLength(0); via++)
-                        {
-                            if (row == via || col == via)
-                                continue;
-                            double lowerBound = GetTransLowerBound(row, via, col);
-                            double upperBound = GetTransUpperBound(row, via, col);
-                            if (lowerBound > max_lower)
-                                max_lower = lowerBound;
-                            if (upperBound < min_upper)
-                                min_upper = upperBound;
-                            
-                        }
-                        if (min_upper < DoubleMatrix[row, col])
-                        {
-                            errorMatrix[row, col] = MatrixErrors.AboveUpperBound;
-                        }
-                        else if(max_lower > DoubleMatrix[row, col])
-                        {
-                            errorMatrix[row, col] = MatrixErrors.BelowLowerBound;
-                        }
-                        else if (max_lower <= DoubleMatrix[row, col] && min_upper >= DoubleMatrix[row, col])
-                        {
-                            errorMatrix[row, col] = MatrixErrors.None;
-                        }
-                        else
-                        {
-                            errorMatrix[row, col] = MatrixErrors.None;
+                            {
+                                errorMatrix[row, col] = MatrixErrors.None;
+                            }
                         }
                     }
                 }
@@ -515,6 +508,12 @@ namespace CorrelationTest
                 object[,] pairsMatrix = pairs.GetCorrelationMatrix_Values();
                 return this.Equals(pairsMatrix);
             }
+
+            public void FixMatrixForPSD()
+            {
+                throw new NotImplementedException();
+            }
+
         }   //class
     }//Data
 }//namespace

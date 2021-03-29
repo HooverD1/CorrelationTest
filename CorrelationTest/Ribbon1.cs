@@ -22,15 +22,17 @@ namespace CorrelationTest
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
-            SendKeys.Send("{ESC}");
+            //SendKeys.Send("{ESC}");
             ExtensionMethods.TurnOffUpdating();
 
             Excel.Range selection = ThisAddIn.MyApp.Selection;
             SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
+            if (sheetType == SheetType.Unknown) { ExtensionMethods.TurnOnUpdating(); return; }
             DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(sheetType);
             CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
-            
-            Item selectedItem = (from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item).First();
+            IEnumerable<Item> items = from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item;
+            if (!items.Any()) { ExtensionMethods.TurnOnUpdating(); return; }
+            Item selectedItem = items.First();
             CorrelationType correlType;
             if(!(selectedItem is ISub))
             {
@@ -193,7 +195,7 @@ namespace CorrelationTest
             est_1.Cells[15, edc.Distribution_Offset + 2] = 1;
 
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 50; i++)
             {
                 System.Threading.Thread.Sleep(1);
                 est_1.Cells[16 + i, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";

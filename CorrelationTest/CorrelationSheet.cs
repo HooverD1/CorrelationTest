@@ -35,6 +35,9 @@ namespace CorrelationTest
             public Data.CorrelSheetSpecs Specs { get; set; }
             public Excel.Range xlPairsCell { get; set; }
 
+            public Excel.Range xlButton_CollapseCorrel { get; set; }
+            public Excel.Range xlButton_Cancel { get; set; }
+
             public string Header { get; set; }
 
             //public CorrelationSheet(Data.CorrelationString_CM correlString, Excel.Range launchedFrom) : this(correlString, launchedFrom, new Data.CorrelSheetSpecs()) { }       //default locations
@@ -133,12 +136,13 @@ namespace CorrelationTest
                 {
                     for (int row = 0; row < matrixErrors.GetLength(0); row++)
                     {
-                        for (int col = 0; col < matrixErrors.GetLength(1); col++)
+                        for (int col = row; col < matrixErrors.GetLength(1); col++)
                         {
                             if (matrixErrors[row, col] == Data.MatrixErrors.None)
                             {
                                 this.xlMatrixCell.Offset[row + 1, col].ClearComments();
-                                this.xlMatrixCell.Offset[row + 1, col].Interior.ColorIndex = 8;
+                                if(row != col)
+                                    this.xlMatrixCell.Offset[row + 1, col].Interior.ColorIndex = 8;
                             }
                             else if (matrixErrors[row, col] == Data.MatrixErrors.AboveUpperBound)
                             {
@@ -282,6 +286,7 @@ namespace CorrelationTest
 
             public static void CollapseToSheet()    //grab the xlSheet matrix, build the correlString from it, place it at the origin, delete the xlSheet
             {
+                ExtensionMethods.TurnOffUpdating();
                 CorrelationSheet correlSheet = CorrelationSheet.ConstructFromXlCorrelationSheet();
                 //CorrelationType cType = ExtensionMethods.GetCorrelationTypeFromLink(correlSheet.LinkToOrigin.LinkSource);
                 if (correlSheet == null)
@@ -295,7 +300,7 @@ namespace CorrelationTest
                 string id_correlSheet = Data.CorrelationString.GetParentIDFromCorrelStringValue(correlSheet.xlHeaderCell.Value);
                 
                 if (id_followLink.ToString() == id_correlSheet)
-                {   //THESE NEED REFACTORED TO BUILD THE CORRELSTRING FROM COMPONENTS
+                {
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
                     if (correlSheet is Sheets.CorrelationSheet_CP)
                     {
@@ -335,22 +340,40 @@ namespace CorrelationTest
                     }
                     else
                         throw new Exception("Unknown parent type");
-                    
-                    
+
+                    bool psd_errors = false;
                     if (!correlSheet.CorrelMatrix.CheckForPSD())
-                        MessageBox.Show("Not PSD");
-                    bool errors = correlSheet.PaintMatrixErrors(correlSheet.CorrelMatrix.CheckMatrixForTransitivity());
-                    if (!errors)
+                    {
+                        psd_errors = true;
+                        DialogResult dialog_fixPSD = MessageBox.Show("Would you like to adjust this matrix to be positive semi-definite?", "Matrix is not PSD", MessageBoxButtons.YesNoCancel);
+                        if(dialog_fixPSD == DialogResult.Cancel)
+                        {
+                            //Do nothing
+                        }
+                        else if (dialog_fixPSD == DialogResult.No)
+                        {
+                            MessageBox.Show("Matrix cannot be saved.");
+                        }
+                        else if (dialog_fixPSD == DialogResult.Yes)
+                        {
+                            correlSheet.CorrelMatrix.FixMatrixForPSD();
+                        }
+                        //Launch form to correct PSD
+                    }
+                    bool trans_errors = correlSheet.PaintMatrixErrors(correlSheet.CorrelMatrix.CheckMatrixForTransitivity());         //This is stalling out a large matrix
+                    if (!trans_errors && !psd_errors)
                     {
                         ThisAddIn.MyApp.DisplayAlerts = false; 
                         correlSheet.xlSheet.Delete();
+                        correlSheet.LinkToOrigin.LinkSource.Worksheet.Activate();
+                        correlSheet = null;
                         ThisAddIn.MyApp.DisplayAlerts = true;
                     }                    
                 }                    
                 else
                     MessageBox.Show("ID not found");
-
-                correlSheet.LinkToOrigin.LinkSource.Worksheet.Activate();
+                
+                ExtensionMethods.TurnOnUpdating();
             }
 
             private object[,] GetDistributionParamStrings()
@@ -393,6 +416,20 @@ namespace CorrelationTest
                 var conversionForm = new CorrelationConversionForm(this);
                 conversionForm.Show();
                 conversionForm.Focus();
+            }
+
+            protected void CollapseCorrelationClicked(object sender, EventArgs e)
+            {
+                CollapseToSheet();
+            }
+
+            protected void CancelChangesClicked(object sender, EventArgs e)
+            {
+                //Delete the sheet
+                ThisAddIn.MyApp.DisplayAlerts = false;
+                this.LinkToOrigin.LinkSource.Worksheet.Activate();
+                this.xlSheet.Delete();
+                ThisAddIn.MyApp.DisplayAlerts = true;
             }
         }
     }

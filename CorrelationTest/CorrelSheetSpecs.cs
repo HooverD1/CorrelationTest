@@ -28,6 +28,10 @@ namespace CorrelationTest
             private int pairsCol { get; }
             private int btnConvertRow { get; }
             private int btnConvertCol { get; }
+            private int btnCollapseRow { get; }
+            private int btnCollapseCol { get; }
+            private int btnCancelRow { get; }
+            private int btnCancelCol { get; }
 
             public Tuple<int, int> MatrixCoords { get; }
             public Tuple<int, int> MatrixCoords_End { get; set; }
@@ -38,6 +42,8 @@ namespace CorrelationTest
             public Tuple<int, int> StringCoords { get; }
             public Tuple<int, int> PairsCoords { get; }
             public Tuple<int, int> Btn_ConvertCoords { get; }
+            public Tuple<int, int> Btn_Collapse { get; }
+            public Tuple<int, int> Btn_Cancel { get; }
             public string LinkFormat { get; }
 
             public CorrelSheetSpecs(SheetType correlSheetType)
@@ -60,6 +66,10 @@ namespace CorrelationTest
                         stringCol = 1;
                         btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
+                        btnCancelRow = btnCollapseRow;
+                        btnCancelCol = btnCollapseCol + 4;
                         break;
                     case SheetType.Correlation_CP:
                         matrixRow = 4;
@@ -79,6 +89,10 @@ namespace CorrelationTest
                         pairsCol = 6;       //Requires a 2 cell width
                         btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
+                        btnCancelRow = btnCollapseRow;
+                        btnCancelCol = btnCollapseCol + 4;
                         break;
                     case SheetType.Correlation_PM:
                         matrixRow = 4;
@@ -98,6 +112,10 @@ namespace CorrelationTest
                         pairsCol = 2;
                         btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
+                        btnCancelRow = btnCollapseRow;
+                        btnCancelCol = btnCollapseCol + 4;
                         break;
                     case SheetType.Correlation_PP:
                         matrixRow = 4;
@@ -117,6 +135,10 @@ namespace CorrelationTest
                         pairsCol = 2;
                         btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
+                        btnCancelRow = btnCollapseRow;
+                        btnCancelCol = btnCollapseCol + 4;
                         break;
                     case SheetType.Correlation_DM:
                         matrixRow = 4;
@@ -136,6 +158,10 @@ namespace CorrelationTest
                         pairsCol = 2;
                         btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
+                        btnCancelRow = btnCollapseRow;
+                        btnCancelCol = btnCollapseCol + 4;
                         break;
                     case SheetType.Correlation_DP:
                         matrixRow = 4;
@@ -155,7 +181,10 @@ namespace CorrelationTest
                         pairsCol = 6;       //Requires a 2 cell width
                         btnConvertRow = matrixRow - 2;
                         btnConvertCol = matrixCol;
-                        break;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
+                        btnCancelRow = btnCollapseRow;
+                        btnCancelCol = btnCollapseCol + 4; break;
                     default:
                         throw new Exception("Unknown correl sheet type");
                 }
@@ -168,6 +197,8 @@ namespace CorrelationTest
                 this.StringCoords = new Tuple<int, int>(stringRow, stringCol);
                 this.PairsCoords = new Tuple<int, int>(pairsRow, pairsCol);
                 this.Btn_ConvertCoords = new Tuple<int, int>(btnConvertRow, btnConvertCol);
+                this.Btn_Collapse = new Tuple<int, int>(btnCollapseRow, btnCollapseCol);
+                this.Btn_Cancel = new Tuple<int, int>(btnCancelRow, btnCancelCol);
             }
 
             public void PrintLinkCoords(Excel.Worksheet xlSheet)

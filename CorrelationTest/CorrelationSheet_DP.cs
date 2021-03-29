@@ -31,6 +31,8 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
+                this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_DP, this);
                 this.Header = CorrelString.GetHeader();
                 this.PairSpec = ((Data.CorrelationString_DP)CorrelString).GetPairwise();
@@ -88,6 +90,8 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
+                this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
 
                 //LINK
                 this.LinkToOrigin = new Data.Link(link.ToString());
@@ -212,6 +216,19 @@ namespace CorrelationTest
                 btn_ConvertToDM.Text = "Convert to Matrix Specification";
                 btn_ConvertToDM.Click += ConversionFormClicked;
                 vstoSheet.Controls.AddControl(btn_ConvertToDM, this.xlButton_ConvertCorrel.Resize[2,3], "ConvertToDM");
+
+                //COLLAPSE
+                System.Windows.Forms.Button btn_CollapseCorrelation = new System.Windows.Forms.Button();
+                btn_CollapseCorrelation.Text = "Save Correlation";
+                btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
+                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+
+                //CANCEL
+                System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
+                btn_Cancel.Text = "Cancel Changes";
+                btn_Cancel.Click += CancelChangesClicked;
+                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 3], "CancelCorrelationChanges");
+
             }
 
             public override void FormatSheet()

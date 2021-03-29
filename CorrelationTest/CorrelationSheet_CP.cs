@@ -16,6 +16,7 @@ namespace CorrelationTest
             public Data.CorrelationString_CP CorrelString { get; set; }
             public Excel.Range xlButton_ConvertCorrel { get; set; }
 
+            //EXPAND
             public CorrelationSheet_CP(IHasCostCorrelations ParentItem)        //bring in the coordinates and set up the ranges once they exist
             {
                 this.CorrelString = (Data.CorrelationString_CP)ParentItem.CostCorrelationString;
@@ -31,6 +32,8 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
+                this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_CP, this);
                 this.Header = CorrelString.GetHeader();
                 this.PairSpec = CorrelString.GetPairwise();
@@ -85,6 +88,8 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
+                this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
 
                 this.LinkToOrigin = new Data.Link(link.ToString());
                 this.Header = header.ToString();
@@ -215,10 +220,25 @@ namespace CorrelationTest
             private void AddUserControls()
             {
                 Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
+
+                //CONVERT
                 System.Windows.Forms.Button btn_ConvertToCM = new System.Windows.Forms.Button();
                 btn_ConvertToCM.Text = "Convert to Matrix Specification";
                 btn_ConvertToCM.Click += ConversionFormClicked;
                 vstoSheet.Controls.AddControl(btn_ConvertToCM, this.xlButton_ConvertCorrel.Resize[2, 3], "ConvertToCM");
+
+                //COLLAPSE
+                System.Windows.Forms.Button btn_CollapseCorrelation = new System.Windows.Forms.Button();
+                btn_CollapseCorrelation.Text = "Save Correlation";
+                btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
+                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+
+                //CANCEL
+                System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
+                btn_Cancel.Text = "Cancel Changes";
+                btn_Cancel.Click += CancelChangesClicked;
+                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 3], "CancelCorrelationChanges");
+
             }
 
             public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
