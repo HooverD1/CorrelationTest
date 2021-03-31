@@ -195,7 +195,33 @@ namespace CorrelationTest
 
         public virtual void LoadCostCorrelString()
         {
-            this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
+            //this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
+            //return;
+
+            //This needs to check if a string already exists.
+            //It checks in the first child since Duration correlation is stored against the child row
+            if (!this.SubEstimates.Any())
+                return;
+            var firstChild = this.SubEstimates.First();
+            if (firstChild.xlCorrelCell_Cost.Value == null)
+            {
+                //This should check the correl type to split pairwise from matrix
+                this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
+            }
+            else
+            {
+                //Something in the cell that can either be resolved into a correl string or not
+                try
+                {
+                    string costString = Data.CorrelationString.ConstructStringFromRange(from ISub sub in this.SubEstimates select sub.xlCorrelCell_Cost);
+                    this.CostCorrelationString = Data.CorrelationString.ConstructFromStringValue(costString);
+                }
+                catch
+                {
+                    if (MyGlobals.DebugMode)
+                        throw new Exception("Malformed correl string");
+                }
+            }
         }
 
         public virtual void PrintCostCorrelString()

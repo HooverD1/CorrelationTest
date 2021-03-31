@@ -23,7 +23,7 @@ namespace CorrelationTest
         public class CorrelationMatrix
         {
             public Dictionary<string, int> FieldDict { get; set; }
-            public object[,] Matrix { get; set; }
+            public dynamic[,] Matrix { get; set; }
             private double[,] DoubleMatrix { get; set; }
             public int FieldCount { get; set; }
             public string[] Fields { get; set; }
@@ -33,11 +33,6 @@ namespace CorrelationTest
 
             protected CorrelationMatrix() { }       //default
 
-            protected CorrelationMatrix(double[,] phasingTriple)
-            {
-                //build a phasing correlation matrix from a provided triple
-            }
-
             public CorrelationMatrix(Sheets.CorrelationSheet containingSheet, Excel.Range fieldsRange, Excel.Range matrixRange)       //from matrix
             {
 
@@ -45,7 +40,7 @@ namespace CorrelationTest
                     throw new Exception("Names do not match matrix.");
                 this.ContainingSheet = containingSheet;
                 this.FieldCount = fieldsRange.Cells.Count;
-                Matrix = ExtensionMethods.ReIndexArray<object>(matrixRange.Value);
+                Matrix = ExtensionMethods.ReIndexArray<dynamic>(matrixRange.Value);
                 object[,] fieldTemp = fieldsRange.Value;
                 this.Fields = new string[fieldTemp.GetLength(1)];
                 for(int i = 0; i < fieldTemp.GetLength(1); i++) { this.Fields[i] = fieldTemp[1, i + 1].ToString(); }
@@ -367,11 +362,22 @@ namespace CorrelationTest
                 for (int i = 0; i < this.Fields.Length; i++)
                     transpose[i, 0] = this.Fields[i];
                 xlRange.Offset[1, -1].Resize[this.FieldCount, 1].Value = transpose;
-                
+
+                dynamic[,] dynamicMatrix = new dynamic[Matrix.GetLength(0), Matrix.GetLength(1)];
+                for(int r = 0; r < Matrix.GetLength(0); r++)
+                {
+                    for(int c=0; c < Matrix.GetLength(1); c++)
+                    {
+                        dynamicMatrix[r, c] = Matrix[r, c];
+                    }
+                }
+
                 Excel.Range offsetCell = xlRange.Offset[1, 0];
                 Excel.Range pasteRange = offsetCell.Resize[Matrix.GetLength(0), Matrix.GetLength(1)];
-                
-                ExtensionMethods.SturdyPaste2(pasteRange, ExtensionMethods.ToJaggedArray(Matrix));
+                Diagnostics.StartTimer();
+                pasteRange.FormulaR1C1 = dynamicMatrix;
+                long time = Diagnostics.CheckTimer();
+                Diagnostics.StopTimer();
                 pasteRange.Worksheet.Calculate();
             }
             public bool ValidateAgainstXlSheet(object[] xlSheetFields)

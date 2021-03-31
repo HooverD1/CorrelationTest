@@ -477,6 +477,23 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
+            public static string GetHeaderFromParentItem(IHasSubs parentItem, SheetType correlationType)
+            {
+                switch (correlationType)
+                {
+                    case SheetType.Correlation_CM:
+                        return parentItem.SubEstimates.First().xlCorrelCell_Cost.Value;
+                    case SheetType.Correlation_CP:
+                        return parentItem.SubEstimates.First().xlCorrelCell_Cost.Value;
+                    case SheetType.Correlation_DM:
+                        return parentItem.SubEstimates.First().xlCorrelCell_Duration.Value;
+                    case SheetType.Correlation_DP:
+                        return parentItem.SubEstimates.First().xlCorrelCell_Duration.Value;
+                    default:
+                        throw new Exception("Invalid correlation type for this method");
+                }                
+            }
+
             public static int GetNumberOfInputsFromCorrelStringValue(object correlString)
             {
                 string cs = correlString.ToString();

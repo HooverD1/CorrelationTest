@@ -377,25 +377,31 @@ namespace CorrelationTest
         private void testPrint_Click(object sender, RibbonControlEventArgs e)
         {
             List<long> times = new List<long>();
-
             
-            string[,] stringValues = new string[1000,1000];
-            for(int row = 0; row < 1000; row++)
+            dynamic[,] stringValues = new dynamic[1000, 1000];
+            for (int row = 0; row < 1000; row++)
             {
-                for(int col = 0; col < 1000; col++)
+                for (int col = 0; col < 1000; col++)
                 {
-                    stringValues[row, col] = $"=({col} + {row})";
+                    stringValues[row, col] = "5";
                 }
             }
-            Diagnostics.StartTimer();
+            
             Excel.Range stringRange = ThisAddIn.MyApp.Worksheets["Sheet1"].Cells[1, 1];
             ThisAddIn.MyApp.ScreenUpdating = false;
             ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationManual;
-            stringRange.Resize[1000, 1000].Value2 = stringValues;
+            Excel.Range pasteRange = stringRange.Resize[1000, 1000];
+            Diagnostics.StartTimer();
+            pasteRange.Formula = stringValues;
+            long time = Diagnostics.CheckTimer();
+            Diagnostics.StopTimer();
             ThisAddIn.MyApp.ScreenUpdating = true;
             ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
-            long time = Diagnostics.CheckTimer();
-            Diagnostics.StopTimer();          
+
+            Diagnostics.StartTimer();
+            object[,] readValues = pasteRange.Value;
+            long time2 = Diagnostics.CheckTimer();
+            Diagnostics.StopTimer();
         }
 
         

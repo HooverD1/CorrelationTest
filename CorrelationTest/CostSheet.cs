@@ -55,21 +55,29 @@ namespace CorrelationTest
             //Load off the sub cells if there is
             foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
             {
+                if(item is ISub)
+                {
+                    if(((ISub)item).Parent != null)
+                    {
+                        //items that have subs, can be a sub, and have a recorded parent are joint estimate sub-estimates and do not have their own correlation string
+                        continue;       
+                    }
+                }   
                 if (item is IHasCostCorrelations)
                     ((IHasCostCorrelations)item).LoadCostCorrelString();
                 if (item is IHasPhasingCorrelations)
                     ((IHasPhasingCorrelations)item).LoadPhasingCorrelString();
                 if (item is IHasDurationCorrelations)
                     ((IHasDurationCorrelations)item).LoadDurationCorrelString();
-                if (item is IJointEstimate)
-                {
-                    if (item is CostScheduleEstimate)
-                        ((CostScheduleEstimate)item).scheduleEstimate.LoadDurationCorrelString();
-                    else if (item is ScheduleCostEstimate)
-                        ((ScheduleCostEstimate)item).costEstimate.LoadCostCorrelString();
-                    else
-                        throw new Exception("Unknown joint estimate type");
-                }
+                //if (item is IJointEstimate)
+                //{
+                //    if (item is CostScheduleEstimate)
+                //        ((CostScheduleEstimate)item).scheduleEstimate.LoadDurationCorrelString();
+                //    else if (item is ScheduleCostEstimate)
+                //        ((ScheduleCostEstimate)item).costEstimate.LoadCostCorrelString();
+                //    else
+                //        throw new Exception("Unknown joint estimate type");
+                //}
             }
         }
 
