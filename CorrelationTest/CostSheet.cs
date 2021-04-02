@@ -26,11 +26,12 @@ namespace CorrelationTest
         protected DialogResult OverwriteRepeatedIDs { get; set; }
         public DisplayCoords Specs { get; set; }
         public List<Item> Items { get; set; }
-        protected SheetType sheetType{get;set;}
+        //protected SheetType sheetType{ get; set;}
 
         //EXPAND
         public CostSheet(Excel.Worksheet xlSheet)
         {
+            SheetType sheetType = ExtensionMethods.GetSheetType(xlSheet);
             this.Specs = DisplayCoords.ConstructDisplayCoords(sheetType);
             this.xlSheet = xlSheet;
             LoadItems();

@@ -28,27 +28,35 @@ namespace CorrelationTest
             Excel.Range selection = ThisAddIn.MyApp.Selection;
             SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
             if (sheetType == SheetType.Unknown) { ExtensionMethods.TurnOnUpdating(); return; }
-            DisplayCoords dispCoords = DisplayCoords.ConstructDisplayCoords(sheetType);
             CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
             IEnumerable<Item> items = from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item;
             if (!items.Any()) { ExtensionMethods.TurnOnUpdating(); return; }
             Item selectedItem = items.First();
             CorrelationType correlType;
-            if(!(selectedItem is ISub))
+            if(selectedItem is IHasSubs)
             {
+                if (((IHasSubs)selectedItem).SubEstimates.Count <= 1)
+                {
+                    ExtensionMethods.TurnOnUpdating();
+                    return;
+                }
                 //Invalid selection
                 //Don't throw an error, just don't do anything.
+            }
+            else
+            {
+                ExtensionMethods.TurnOnUpdating();
                 return;
             }
-            if (((ISub)selectedItem).Parent is IHasCostCorrelations)
+            if ((IHasSubs)selectedItem is IHasCostCorrelations && selection.Column == sheetObj.Specs.CostCorrel_Offset)
             {
                 correlType = CorrelationType.Cost;
             }
-            else if (((ISub)selectedItem).Parent is IHasDurationCorrelations)
+            else if ((IHasSubs)selectedItem is IHasDurationCorrelations && selection.Column == sheetObj.Specs.DurationCorrel_Offset)
             {
                 correlType = CorrelationType.Duration;
             }
-            else if (selection.Column == dispCoords.PhasingCorrel_Offset && ((ISub)selectedItem) is IHasPhasingCorrelations)
+            else if (selectedItem is IHasPhasingCorrelations && selection.Column == sheetObj.Specs.PhasingCorrel_Offset)
             {
                 correlType = CorrelationType.Phasing;
             }
@@ -61,13 +69,13 @@ namespace CorrelationTest
             switch (correlType)
             {
                 case CorrelationType.Cost:
-                    ((ISub)selectedItem).Parent.Expand(correlType);
+                    ((IHasSubs)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Duration:
-                    ((ISub)selectedItem).Parent.Expand(correlType);
+                    ((IHasSubs)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Phasing:
-                    ((IHasPhasingCorrelations)selectedItem).Expand(correlType);
+                    ((IHasSubs)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Null:      //Not selecting a correlation column
                     return;     
@@ -276,7 +284,7 @@ namespace CorrelationTest
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[12, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[12, wdc.Level_Offset] = 3;
+            wbs_1.Cells[12, wdc.Level_Offset] = 2;
             wbs_1.Cells[12, wdc.Type_Offset] = "CE";
             wbs_1.Cells[12, wdc.Name_Offset] = "Est7";
             wbs_1.Cells[12, wdc.Distribution_Offset] = "Normal";
@@ -285,7 +293,7 @@ namespace CorrelationTest
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[13, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
-            wbs_1.Cells[13, wdc.Level_Offset] = 3;
+            wbs_1.Cells[13, wdc.Level_Offset] = 2;
             wbs_1.Cells[13, wdc.Type_Offset] = "CE";
             wbs_1.Cells[13, wdc.Name_Offset] = "Est8";
             wbs_1.Cells[13, wdc.Distribution_Offset] = "Normal";
@@ -383,7 +391,7 @@ namespace CorrelationTest
             {
                 for (int col = 0; col < 1000; col++)
                 {
-                    stringValues[row, col] = "5";
+                    stringValues[row, col] = "=INDIRECT(ADDRESS(ROW()+1,COLUMN()+1,4,1))";
                 }
             }
             
@@ -392,7 +400,7 @@ namespace CorrelationTest
             ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationManual;
             Excel.Range pasteRange = stringRange.Resize[1000, 1000];
             Diagnostics.StartTimer();
-            pasteRange.Formula = stringValues;
+            pasteRange.Value = stringValues;
             long time = Diagnostics.CheckTimer();
             Diagnostics.StopTimer();
             ThisAddIn.MyApp.ScreenUpdating = true;

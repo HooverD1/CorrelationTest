@@ -109,7 +109,29 @@ namespace CorrelationTest
 
         public void LoadCostCorrelString()
         {
-            this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
+            if (!this.SubEstimates.Any())
+                return;
+            var firstChild = this.SubEstimates.First();
+            if (firstChild.xlCorrelCell_Cost.Value == null)
+            {
+                //This should check the correl type to split pairwise from matrix
+                this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
+            }
+            else
+            {
+                //Something in the cell that can either be resolved into a correl string or not
+                try
+                {
+                    string costString = Data.CorrelationString.ConstructStringFromRange(from ISub sub in this.SubEstimates select sub.xlCorrelCell_Cost);
+                    this.CostCorrelationString = Data.CorrelationString.ConstructFromStringValue(costString);
+                }
+                catch
+                {
+                    if (MyGlobals.DebugMode)
+                        throw new Exception("Malformed correl string");
+                }
+            }
+            //this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
         }
 
         public void PrintCostCorrelString()
@@ -127,7 +149,7 @@ namespace CorrelationTest
         public void PrintPhasingCorrelString()
         {
             if (this.PhasingCorrelationString != null)
-                this.PhasingCorrelationString.PrintToSheet(xlCorrelCell_Phasing.Resize[1,this.Periods.Count()]);
+                this.PhasingCorrelationString.PrintToSheet(xlCorrelCell_Phasing);
         }
 
         public void LoadDurationCorrelString()

@@ -13,10 +13,7 @@ namespace CorrelationTest
         public class EstimateSheet : CostSheet
         {           
 
-            public EstimateSheet(Excel.Worksheet xlSheet) : base(xlSheet)
-            {
-                sheetType = SheetType.Estimate;
-            }
+            public EstimateSheet(Excel.Worksheet xlSheet) : base(xlSheet) { }
 
             //public override void BuildCorrelations()
             //{

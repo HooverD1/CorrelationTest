@@ -12,11 +12,7 @@ namespace CorrelationTest
     {
         public class WBSSheet: CostSheet
         {
-            public WBSSheet(Excel.Worksheet xlSheet) : base(xlSheet)
-            {
-                sheetType = SheetType.WBS;
-
-            }
+            public WBSSheet(Excel.Worksheet xlSheet) : base(xlSheet) { }
 
             public override List<Item> GetItemRows()      //Returns a list of estimate objects for estimates on the sheet... this should really link to estimates on an estimate sheet
             {
@@ -35,12 +31,13 @@ namespace CorrelationTest
 
             public override void LinkItemRows()     //This is not working for WBS Sum Items
             {
+                //Have all the items in a list
+
                 for (int index = 0; index < Items.Count - 1; index++)
                 {
                     int parentLevel = Items[index].Level;
                     int indexStart = index+1;
-                    int subLevel = Items[indexStart].Level;
-                    while (subLevel > parentLevel && indexStart < Items.Count-1)
+                    while (Items[indexStart].Level > parentLevel && indexStart < Items.Count-1)
                     {
                         if (Items[indexStart].Level == parentLevel + 1)
                         {
@@ -49,9 +46,12 @@ namespace CorrelationTest
                             if (theseSubs.Count() > 1)
                                 throw new Exception("Duplicated ID");
                             else if (theseSubs.Any())
-                                ((IHasCostCorrelations)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
+                            {
+                                ((IHasSubs)Items[index]).SubEstimates.Add((ISub)Items[indexStart]); //If it found it, it must be a sub
+                                ((ISub)Items[indexStart]).Parent = (IHasSubs)Items[index];
+                            }                                
                         }
-                        subLevel = Items[++indexStart].Level;
+                        indexStart++;
                     }
 
                 }

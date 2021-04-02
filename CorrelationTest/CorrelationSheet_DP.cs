@@ -36,9 +36,6 @@ namespace CorrelationTest
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_DP, this);
                 this.Header = CorrelString.GetHeader();
                 this.PairSpec = ((Data.CorrelationString_DP)CorrelString).GetPairwise();
-
-                
-                
             }
             //COLLAPSE
             public CorrelationSheet_DP() //build from the xlsheet to get the string

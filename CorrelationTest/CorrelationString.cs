@@ -518,7 +518,8 @@ namespace CorrelationTest
             public static string GetParentIDFromCorrelStringValue(object correlString)
             {
                 string cs = correlString.ToString();
-                string[] delimited = cs.Split(',');
+                string[] lines = cs.Split('&');
+                string[] delimited = lines[0].Split(',');
                 return delimited[2];
             }
             #endregion

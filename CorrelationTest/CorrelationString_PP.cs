@@ -29,6 +29,7 @@ namespace CorrelationTest
                 this.Value = ExtensionMethods.CleanStringLinebreaks(sb.ToString());
             }
 
+            //COLLAPSE
             public CorrelationString_PP(Sheets.CorrelationSheet_PP correlSheet)
             {
                 StringBuilder header = new StringBuilder();
@@ -40,7 +41,6 @@ namespace CorrelationTest
                 DisplayCoords dc = DisplayCoords.ConstructDisplayCoords(sourceType);
                 string parentID = Convert.ToString(parentRow.Cells[1, dc.ID_Offset].value);
                 string pairString = Convert.ToString(correlSheet.xlPairsCell.Value);
-                PairSpecification pairs = PairSpecification.ConstructFromString(pairString);
                 StringBuilder subIDs = new StringBuilder();
                 Excel.Range matrixEnd = correlSheet.xlMatrixCell.End[Excel.XlDirection.xlToRight];
                 matrixEnd = matrixEnd.End[Excel.XlDirection.xlDown];
@@ -50,6 +50,7 @@ namespace CorrelationTest
                 fieldVals2D = ExtensionMethods.ReIndexArray(fieldVals2D);
                 object[] fieldVals = ExtensionMethods.ToJaggedArray(fieldVals2D)[0];
                 int numberOfInputs = matrixVals.GetLength(0);
+                PairSpecification pairs = PairSpecification.ConstructFromRange(correlSheet.xlPairsCell, numberOfInputs - 1);
 
                 header.Append(numberOfInputs);
                 header.Append(",");
@@ -140,8 +141,6 @@ namespace CorrelationTest
             public PairSpecification GetPairwise()
             {
                 string[] correlLines = DelimitString(this.Value);
-                if (correlLines.Length != 2)
-                    throw new Exception("Malformed triple string.");
                 //string uidString = correlLines[0].Split(',')[2];
                 string pairString = correlLines[1];
                 return PairSpecification.ConstructFromString(pairString);
