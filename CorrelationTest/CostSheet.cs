@@ -52,8 +52,8 @@ namespace CorrelationTest
 
         public void LoadCorrelStrings()
         {
-            //Load Defaults if there is nothing saved
-            //Load off the sub cells if there is
+            //Something buggy going on in here for Phasing...
+            //DAVID
             foreach (IHasSubs item in (from item in Items where item is IHasSubs select item))
             {
                 if(item is ISub)

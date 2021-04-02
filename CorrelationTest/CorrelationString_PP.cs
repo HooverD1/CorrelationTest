@@ -89,7 +89,7 @@ namespace CorrelationTest
                 int firstLine = this.Value.IndexOf('&') + 1;
                 string pairString = this.Value.Substring(firstLine);
                 //string pairString = this.Value.Split('&')[1];
-                this.Pairs = PairSpecification.ConstructFromString(pairString);
+                this.Pairs = PairSpecification.ConstructFromString(pairString, false);
             }
 
             public override string[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet)
@@ -140,10 +140,7 @@ namespace CorrelationTest
 
             public PairSpecification GetPairwise()
             {
-                string[] correlLines = DelimitString(this.Value);
-                //string uidString = correlLines[0].Split(',')[2];
-                string pairString = correlLines[1];
-                return PairSpecification.ConstructFromString(pairString);
+                return PairSpecification.ConstructFromString(this.Value);
             }
 
             public override string[] GetIDs()

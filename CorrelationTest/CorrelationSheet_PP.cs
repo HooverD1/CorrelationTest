@@ -128,9 +128,10 @@ namespace CorrelationTest
             public override void PrintToSheet()  //expanding from string
             {
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
+                //Should be some way to pull the already instantiated costSheet in here..
                 Item parentItem = (from Item i in costSheet.Items where i.uID.ID == Convert.ToString(this.LinkToOrigin.LinkSource.EntireRow.Cells[1, costSheet.Specs.ID_Offset].value) select i).First();
                 IHasPhasingCorrelations parentEstimate;
-                if (!(parentItem is IHasPhasingCorrelations))
+                if (!(parentItem is IHasPhasingCorrelations) || ((IHasPhasingCorrelations)parentItem).Periods.Count() < 2)
                 {
                     throw new Exception("Item has no phasing correlations");
                 }
@@ -139,11 +140,11 @@ namespace CorrelationTest
                     parentEstimate = (IHasPhasingCorrelations)parentItem;
                 }
 
-                IHasPhasingCorrelations tempEst = (IHasPhasingCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
+                //IHasPhasingCorrelations tempEst = (IHasPhasingCorrelations)Item.ConstructFromRow(this.LinkToOrigin.LinkSource.EntireRow, costSheet);        //Load only this parent estimate
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 CorrelString.PrintToSheet(xlHeaderCell);
-                this.xlDistCell.Value = GetDistributionString(tempEst);
+                this.xlDistCell.Value = GetDistributionString(parentEstimate);
                 int subCount = parentEstimate.Periods.Count();
                 Excel.Range xlPairsRange = xlPairsCell.Resize[subCount - 1, 2];
                 xlPairsRange.Value = this.PairSpec.GetValuesString_Split(); //((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;

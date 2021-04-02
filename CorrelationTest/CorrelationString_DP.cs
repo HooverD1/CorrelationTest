@@ -98,8 +98,6 @@ namespace CorrelationTest
 
             public PairSpecification GetPairwise()
             {
-                string[] correlLines = DelimitString(this.Value);
-                string uidString = correlLines[0].Split(',')[2];
                 return PairSpecification.ConstructFromString(this.Value);
             }
 

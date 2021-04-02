@@ -96,22 +96,24 @@ namespace CorrelationTest
                         break;
                     case SheetType.Correlation_PP:
                         matrixRow = 4;
-                        matrixCol = 6;
+                        matrixCol = 9;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
                         subIdRow = 5;
-                        subIdCol = 2;
+                        subIdCol = 5;
                         distRow = 5;
                         distCol = 1;
                         stringRow = 2;
                         stringCol = 1;
-                        pairsRow = matrixRow + 1;
-                        pairsCol = matrixCol - 3;
-                        btnCollapseRow = matrixRow - 3;
-                        btnCollapseCol = matrixCol - 3;
+                        pairsRow = 5;
+                        pairsCol = 6;       //Requires a 2 cell width
+                        btnConvertRow = matrixRow - 2;
+                        btnConvertCol = matrixCol;
+                        btnCollapseRow = btnConvertRow;
+                        btnCollapseCol = btnConvertCol + 4;
                         btnCancelRow = btnCollapseRow;
                         btnCancelCol = btnCollapseCol + 4;
                         break;
