@@ -236,7 +236,11 @@ namespace CorrelationTest
 
         public virtual void LoadPhasingCorrelString()
         {
-            this.PhasingCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingPair);
+            //Loading default
+            if(xlCorrelCell_Phasing.Value == null)
+                this.PhasingCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingPair);
+            else
+                this.PhasingCorrelationString = Data.CorrelationString.ConstructFromStringValue(xlCorrelCell_Phasing.Value);
         }
 
         public virtual void PrintPhasingCorrelString()
