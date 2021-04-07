@@ -12,9 +12,9 @@ namespace CorrelationTest
         public DisplayCoords dispCoords { get; set; }
         public Excel.Range xlDollarCell { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution CostDistribution { get; set; }
-        public Distribution PhasingDistribution { get; set; }
-        public Distribution DurationDistribution { get; set; }
+        public IEstimateDistribution CostDistribution { get; set; }
+        public IEstimateDistribution PhasingDistribution { get; set; }
+        public IEstimateDistribution DurationDistribution { get; set; }
         public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
         public Data.CorrelationString DurationCorrelationString { get; set; }
@@ -67,7 +67,7 @@ namespace CorrelationTest
                 { "Param3", 1 },
                 { "Param4", 0 },
                 { "Param5", 0 } };
-            this.PhasingDistribution = new Distribution(phasingDistributionParameters);
+            this.PhasingDistribution = new SpecifiedDistribution(phasingDistributionParameters);
             this.Periods = GetPeriods();
         }
         private Period[] GetPeriods()

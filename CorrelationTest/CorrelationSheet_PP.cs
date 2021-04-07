@@ -31,6 +31,7 @@ namespace CorrelationTest
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlSubIdCell = xlSheet.Cells[Specs.SubIdCoords.Item1, Specs.SubIdCoords.Item2];
                 this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Visualize = xlSheet.Cells[Specs.Btn_Visualize.Item1, Specs.Btn_Visualize.Item2];
                 this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
                 this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
@@ -125,6 +126,25 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
+            public override void VisualizeCorrel()
+            {
+                //Select a correlation
+                int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
+                int selectionCol = ThisAddIn.MyApp.Selection.Column;       //dependency..
+                //Make sure the row and column are within the matrix range
+                if (selectionRow < this.Specs.MatrixCoords.Item1 + 1 || selectionRow > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item1)
+                    return;
+                if (selectionCol < this.Specs.MatrixCoords.Item2 || selectionCol > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item2 - 1)
+                    return;
+                //Find the distributions to use
+                //Create distribution objects
+                SpecifiedDistribution d1 = new SpecifiedDistribution(xlDistCell.Value);
+                //Create the form
+                CorrelationForm CorrelVisual = new CorrelationForm(d1, d1);
+                CorrelVisual.Show();
+                CorrelVisual.Focus();
+            }
+
             public override void PrintToSheet()  //expanding from string
             {
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
@@ -145,6 +165,7 @@ namespace CorrelationTest
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 CorrelString.PrintToSheet(xlHeaderCell);
                 this.xlDistCell.Value = GetDistributionString(parentEstimate);
+                this.xlDistCell.NumberFormat = "\"DIST\";;;\"DIST\"";
                 int subCount = parentEstimate.Periods.Count();
                 Excel.Range xlPairsRange = xlPairsCell.Resize[subCount - 1, 2];
                 xlPairsRange.Value = this.PairSpec.GetValuesString_Split(); //((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;
@@ -194,6 +215,12 @@ namespace CorrelationTest
                 btn_CollapseCorrelation.Text = "Save Correlation";
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
                 vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+
+                //VISUALIZE
+                System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
+                btn_VisualizeCorrelation.Text = "Visualize";
+                btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
 
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();

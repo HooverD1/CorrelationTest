@@ -36,6 +36,7 @@ namespace CorrelationTest
             public Excel.Range xlPairsCell { get; set; }
 
             public Excel.Range xlButton_CollapseCorrel { get; set; }
+            public Excel.Range xlButton_Visualize { get; set; }
             public Excel.Range xlButton_Cancel { get; set; }
 
             public string Header { get; set; }
@@ -376,14 +377,14 @@ namespace CorrelationTest
                 ExtensionMethods.TurnOnUpdating();
             }
 
-            private object[,] GetDistributionParamStrings()
+            protected virtual object[,] GetDistributionParamStrings()
             {
                 int lastRow = xlDistCell.End[Excel.XlDirection.xlDown].Row;
                 Excel.Range distRange = xlDistCell.Resize[lastRow - xlDistCell.Row+1, 1];
                 return distRange.Value;
             }
 
-            public void VisualizeCorrel()
+            public virtual void VisualizeCorrel()
             {
                 //Select a correlation
                 int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
@@ -398,8 +399,8 @@ namespace CorrelationTest
                 int distRow = selectionRow - xlMatrixCell.Row;
                 int distCol = selectionCol - xlMatrixCell.Column+1;
                 //Create distribution objects
-                Distribution d1 = new Distribution(distParams[distRow, 1].ToString());
-                Distribution d2 = new Distribution(distParams[distCol, 1].ToString());
+                SpecifiedDistribution d1 = new SpecifiedDistribution(distParams[distRow, 1].ToString());
+                SpecifiedDistribution d2 = new SpecifiedDistribution(distParams[distCol, 1].ToString());
                 //Create the form
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
                 CorrelVisual.Show();
@@ -430,6 +431,15 @@ namespace CorrelationTest
                 this.LinkToOrigin.LinkSource.Worksheet.Activate();
                 this.xlSheet.Delete();
                 ThisAddIn.MyApp.DisplayAlerts = true;
+            }
+
+            protected void VisualizeCorrelationClicked(object sender, EventArgs e)
+            {
+                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
+                if (correlSheet == null)
+                    return;
+
+                correlSheet.VisualizeCorrel();
             }
         }
     }

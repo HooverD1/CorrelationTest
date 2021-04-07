@@ -12,9 +12,9 @@ namespace CorrelationTest
     {
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution PhasingDistribution { get; set; }
-        public Distribution CostDistribution { get; set; } //Cost or Schedule
-        public Distribution DurationDistribution { get; set; }
+        public IEstimateDistribution PhasingDistribution { get; set; }
+        public IEstimateDistribution CostDistribution { get; set; } //Cost or Schedule
+        public IEstimateDistribution DurationDistribution { get; set; }
         public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString DurationCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
@@ -56,7 +56,7 @@ namespace CorrelationTest
                 { "Param3", 1 },
                 { "Param4", 0 },
                 { "Param5", 0 } };
-            this.PhasingDistribution = new Distribution(PhasingDistributionParameters);    //Should this even be a Distribution object? More of a schedule.
+            this.PhasingDistribution = new SpecifiedDistribution(PhasingDistributionParameters);    //Should this even be a Distribution object? More of a schedule.
 
             this.Level = Convert.ToInt32(xlLevelCell.Value);
             this.Type = Convert.ToString(xlTypeCell.Value);

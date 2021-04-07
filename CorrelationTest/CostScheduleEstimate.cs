@@ -22,7 +22,7 @@ namespace CorrelationTest
                 { "Param3", xlDistributionCell.Offset[0,3].Value },
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new Distribution(ValueDistributionParameters);
+            this.CostDistribution = new SpecifiedDistribution(ValueDistributionParameters);
             this.scheduleEstimate = ConstructScheduleSubEstimate(xlRow, ContainingSheetObject);
         }
         

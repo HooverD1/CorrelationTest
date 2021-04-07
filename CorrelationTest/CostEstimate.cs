@@ -18,7 +18,9 @@ namespace CorrelationTest
                 { "Param3", xlDistributionCell.Offset[0,3].Value },
                 { "Param4", xlDistributionCell.Offset[0,4].Value },
                 { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new Distribution(ValueDistributionParameters);       //Is this useless?
+            this.CostDistribution = new SpecifiedDistribution(ValueDistributionParameters);       //Is this useless? //This should hold the aggregated version of the inputs
+                                                                                        //But if it can contain a custom distribution, this parameter list isn't sufficient
+                                                                                          //Should all the parameters be stored as a string in a single cell?
 
             //this.CorrelStringObj_Cost = Data.CorrelationString.ConstructFromParentItem_Cost(this);
             this.CorrelStringObj_Phasing = Data.CorrelationString.ConstructFromParentItem_Phasing(this);

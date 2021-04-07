@@ -27,7 +27,7 @@ namespace CorrelationTest
     {
         Data.CorrelationString CostCorrelationString { get; set; }
         Excel.Range xlCorrelCell_Cost { get; set; }
-        Distribution CostDistribution { get; set; }
+        IEstimateDistribution CostDistribution { get; set; }
         void LoadCostCorrelString();
         void PrintCostCorrelString();
     }
@@ -37,7 +37,7 @@ namespace CorrelationTest
         Excel.Range xlCorrelCell_Phasing { get; set; }
         Excel.Range xlDollarCell { get; set; }
         Period[] Periods { get; set; }      //The Periods should be the subs?
-        Distribution PhasingDistribution { get; set; }
+        IEstimateDistribution PhasingDistribution { get; set; }
         void LoadPhasing(Excel.Range xlRow);
         void LoadPhasingCorrelString();
         void PrintPhasingCorrelString();
@@ -45,7 +45,7 @@ namespace CorrelationTest
     public interface IHasDurationCorrelations : IHasSubs
     {
         Data.CorrelationString DurationCorrelationString { get; set; }
-        Distribution DurationDistribution { get; set; }
+        IEstimateDistribution DurationDistribution { get; set; }
         Excel.Range xlCorrelCell_Duration { get; set; }
         void LoadDurationCorrelString();
         void PrintDurationCorrelString();

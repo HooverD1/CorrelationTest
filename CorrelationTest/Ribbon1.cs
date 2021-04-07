@@ -33,21 +33,7 @@ namespace CorrelationTest
             if (!items.Any()) { ExtensionMethods.TurnOnUpdating(); return; }
             Item selectedItem = items.First();
             CorrelationType correlType;
-            if(selectedItem is IHasSubs)
-            {
-                if (((IHasSubs)selectedItem).SubEstimates.Count <= 1)
-                {
-                    ExtensionMethods.TurnOnUpdating();
-                    return;
-                }
-                //Invalid selection
-                //Don't throw an error, just don't do anything.
-            }
-            else
-            {
-                ExtensionMethods.TurnOnUpdating();
-                return;
-            }
+            
             if ((IHasSubs)selectedItem is IHasCostCorrelations && selection.Column == sheetObj.Specs.CostCorrel_Offset)
             {
                 correlType = CorrelationType.Cost;
@@ -69,13 +55,16 @@ namespace CorrelationTest
             switch (correlType)
             {
                 case CorrelationType.Cost:
-                    ((IHasSubs)selectedItem).Expand(correlType);
+                    if(CanExpand(selectedItem, correlType))
+                        ((IHasSubs)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Duration:
-                    ((IHasSubs)selectedItem).Expand(correlType);
+                    if (CanExpand(selectedItem, correlType))
+                        ((IHasSubs)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Phasing:
-                    ((IHasSubs)selectedItem).Expand(correlType);
+                    if (CanExpand(selectedItem, correlType))
+                        ((IHasSubs)selectedItem).Expand(correlType);
                     break;
                 case CorrelationType.Null:      //Not selecting a correlation column
                     return;     
@@ -83,6 +72,52 @@ namespace CorrelationTest
                     throw new Exception("Unknown correlation expand issue");
             }
             ExtensionMethods.TurnOnUpdating();
+        }
+
+        private bool CanExpand(Item selectedItem, CorrelationType correlType)
+        {
+            if(correlType == CorrelationType.Cost || correlType == CorrelationType.Duration)
+            {
+                if (selectedItem is IHasSubs)
+                {
+                    if (((IHasSubs)selectedItem).SubEstimates.Count <= 1)
+                    {
+                        ExtensionMethods.TurnOnUpdating();
+                        return false;
+                    }
+                    if (selectedItem is ISub)
+                    {
+                        if (((ISub)selectedItem).Parent is IJointEstimate)
+                        {
+                            ExtensionMethods.TurnOnUpdating();
+                            return false;
+                        }
+                    }
+                    //Invalid selection
+                    //Don't throw an error, just don't do anything.
+                    return true;
+                }
+                else
+                {
+                    ExtensionMethods.TurnOnUpdating();
+                    return false;
+                }
+            }
+            else if(correlType == CorrelationType.Phasing)
+            {
+                if(selectedItem is Input_Item)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
@@ -110,17 +145,14 @@ namespace CorrelationTest
             est_1.Cells[4, edc.Distribution_Offset+3] = "Param3";
 
             est_1.Cells[5, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
-            est_1.Cells[5, edc.Type_Offset] = "SACE";
+            est_1.Cells[5, edc.Type_Offset] = "CE";
             est_1.Cells[5, edc.Name_Offset] = "Est1";
             est_1.Cells[5, edc.Level_Offset] = 4;
-            est_1.Cells[5, edc.Distribution_Offset] = "Normal";
-            est_1.Cells[5, edc.Distribution_Offset + 1] = 0;
-            est_1.Cells[5, edc.Distribution_Offset + 2] = 1;
-
+            
             System.Threading.Thread.Sleep(1);
             est_1.Cells[6, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[6, edc.Level_Offset] = 3;  //# of inputs
-            est_1.Cells[6, edc.Type_Offset] = "CE";
+            est_1.Cells[6, edc.Type_Offset] = "I";
             est_1.Cells[6, edc.Name_Offset] = "Est1";
             est_1.Cells[6, edc.Distribution_Offset] = "Normal";
             est_1.Cells[6, edc.Distribution_Offset + 1] = 0;
@@ -412,6 +444,95 @@ namespace CorrelationTest
             Diagnostics.StopTimer();
         }
 
-        
+        private void TestDoubles_Click(object sender, RibbonControlEventArgs e)
+        {
+            List<long> times = new List<long>();
+            dynamic[,] stringValues = new dynamic[1000, 1000];
+            for (int row = 0; row < 1000; row++)
+            {
+                for (int col = 0; col < 1000; col++)
+                {
+                    stringValues[row, col] = 5;
+                }
+            }
+
+            Excel.Range stringRange = ThisAddIn.MyApp.Worksheets["Sheet1"].Cells[1, 1];
+            ThisAddIn.MyApp.ScreenUpdating = false;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationManual;
+            Excel.Range pasteRange = stringRange.Resize[1000, 1000];
+            for (int i = 0; i < 20; i++)
+            {
+                Diagnostics.StartTimer();
+                pasteRange.Value = stringValues;
+                times.Add(Diagnostics.CheckTimer());
+            }
+            double avgTime = times.Average();
+            Diagnostics.StopTimer();
+            ThisAddIn.MyApp.ScreenUpdating = true;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
+        }
+
+        private void TestStrings_Click(object sender, RibbonControlEventArgs e)
+        {
+            List<long> times = new List<long>();
+            dynamic[,] stringValues = new dynamic[1000, 1000];
+            for (int row = 0; row < 1000; row++)
+            {
+                for (int col = 0; col < 1000; col++)
+                {
+                    stringValues[row, col] = "Test String";
+                }
+            }
+
+            Excel.Range stringRange = ThisAddIn.MyApp.Worksheets["Sheet1"].Cells[1, 1];
+            ThisAddIn.MyApp.ScreenUpdating = false;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationManual;
+            Excel.Range pasteRange = stringRange.Resize[1000, 1000];
+            
+            for (int i = 0; i < 20; i++)
+            {
+                Diagnostics.StartTimer();
+                pasteRange.Value = stringValues;
+                times.Add(Diagnostics.CheckTimer());
+            }
+            
+            double avgTime = times.Average();   //1.1 for object[,]; 1.1 for dynamic[,] (loads as object[,])
+            Diagnostics.StopTimer();
+            ThisAddIn.MyApp.ScreenUpdating = true;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
+        }
+
+        private void TestFormulas_Click(object sender, RibbonControlEventArgs e)
+        {
+            List<long> times = new List<long>();
+            dynamic[,] stringValues = new dynamic[1000, 1000];
+            for (int row = 0; row < 1000; row++)
+            {
+                for (int col = 0; col < 1000; col++)
+                {
+                    stringValues[row, col] = "=SUM(A1:B50)";
+                    //"=INDIRECT(ADDRESS(ROW()+1,COLUMN()+1,4,1))";
+                }
+            }
+
+            Excel.Range stringRange = ThisAddIn.MyApp.Worksheets["Sheet1"].Cells[1, 1];
+            ThisAddIn.MyApp.ScreenUpdating = false;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationManual;
+            Excel.Range pasteRange = stringRange.Resize[1000, 1000];
+            Diagnostics.StartTimer();
+            for (int i = 0; i < 20; i++)
+            {
+                pasteRange.Clear();
+                Diagnostics.StartTimer();
+                pasteRange.Value = stringValues;
+                times.Add(Diagnostics.CheckTimer());
+            }
+            
+            double avgTime = times.Average();
+            Diagnostics.StopTimer();
+
+            ThisAddIn.MyApp.ScreenUpdating = true;
+            ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
+        }
     }
 }

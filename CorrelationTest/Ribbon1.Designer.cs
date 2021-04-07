@@ -47,11 +47,16 @@
             this.DeveloperTools = this.Factory.CreateRibbonGroup();
             this.DebugModeToggle = this.Factory.CreateRibbonButton();
             this.testPrint = this.Factory.CreateRibbonButton();
+            this.TimingTests = this.Factory.CreateRibbonGroup();
+            this.TestDoubles = this.Factory.CreateRibbonButton();
+            this.TestStrings = this.Factory.CreateRibbonButton();
+            this.TestFormulas = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
             this.DeveloperTools.SuspendLayout();
+            this.TimingTests.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -61,6 +66,7 @@
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.DeveloperTools);
+            this.tab1.Groups.Add(this.TimingTests);
             this.tab1.Label = "TabAddIns";
             this.tab1.Name = "tab1";
             // 
@@ -140,6 +146,32 @@
             this.testPrint.Name = "testPrint";
             this.testPrint.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.testPrint_Click);
             // 
+            // TimingTests
+            // 
+            this.TimingTests.Items.Add(this.TestDoubles);
+            this.TimingTests.Items.Add(this.TestStrings);
+            this.TimingTests.Items.Add(this.TestFormulas);
+            this.TimingTests.Label = "Timing Tests";
+            this.TimingTests.Name = "TimingTests";
+            // 
+            // TestDoubles
+            // 
+            this.TestDoubles.Label = "Test 1M Doubles";
+            this.TestDoubles.Name = "TestDoubles";
+            this.TestDoubles.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TestDoubles_Click);
+            // 
+            // TestStrings
+            // 
+            this.TestStrings.Label = "Test 1M Strings";
+            this.TestStrings.Name = "TestStrings";
+            this.TestStrings.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TestStrings_Click);
+            // 
+            // TestFormulas
+            // 
+            this.TestFormulas.Label = "Test 1M Formulas";
+            this.TestFormulas.Name = "TestFormulas";
+            this.TestFormulas.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TestFormulas_Click);
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -156,6 +188,8 @@
             this.group3.PerformLayout();
             this.DeveloperTools.ResumeLayout(false);
             this.DeveloperTools.PerformLayout();
+            this.TimingTests.ResumeLayout(false);
+            this.TimingTests.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -175,6 +209,10 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton DebugModeToggle;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton GenerateMatrix;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton testPrint;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup TimingTests;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton TestDoubles;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton TestStrings;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton TestFormulas;
     }
 
     partial class ThisRibbonCollection

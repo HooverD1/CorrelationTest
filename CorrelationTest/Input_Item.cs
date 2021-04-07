@@ -13,9 +13,9 @@ namespace CorrelationTest
         public Excel.Range xlDollarCell { get; set; }
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
-        public Distribution CostDistribution { get; set; }
-        public Distribution DurationDistribution { get; set; }
-        public Distribution PhasingDistribution { get; set; }       //Do I need this?
+        public IEstimateDistribution CostDistribution { get; set; }
+        public IEstimateDistribution DurationDistribution { get; set; }
+        public IEstimateDistribution PhasingDistribution { get; set; }
         public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString DurationCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
@@ -27,22 +27,25 @@ namespace CorrelationTest
         {
             var specs = this.ContainingSheetObject.Specs;
             var xlDistributionCell = xlItemRow.Cells[1, specs.Distribution_Offset];
-            this.ValueDistributionParameters = new Dictionary<string, object>() {
-                { "Type", xlDistributionCell.Offset[0,0].Value },
-                { "Param1", xlDistributionCell.Offset[0,1].Value },
-                { "Param2", xlDistributionCell.Offset[0,2].Value },
-                { "Param3", xlDistributionCell.Offset[0,3].Value },
-                { "Param4", xlDistributionCell.Offset[0,4].Value },
-                { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new Distribution(ValueDistributionParameters);       //Is this useless?
-            var phasingDistributionParameters = new Dictionary<string, object>() {
-                { "Type", "Normal" },
-                { "Param1", 1 },
-                { "Param2", 1 },
-                { "Param3", 1 },
-                { "Param4", 0 },
-                { "Param5", 0 } };
-            this.PhasingDistribution = new Distribution(phasingDistributionParameters);    //Should this even be a Distribution object? More of a schedule.
+
+            //The Distributions should be loaded after once I can switch on the Parent property
+
+            //this.ValueDistributionParameters = new Dictionary<string, object>() {
+            //    { "Type", xlDistributionCell.Offset[0,0].Value },
+            //    { "Param1", xlDistributionCell.Offset[0,1].Value },
+            //    { "Param2", xlDistributionCell.Offset[0,2].Value },
+            //    { "Param3", xlDistributionCell.Offset[0,3].Value },
+            //    { "Param4", xlDistributionCell.Offset[0,4].Value },
+            //    { "Param5", xlDistributionCell.Offset[0,5].Value } };
+            //this.CostDistribution = new Distribution(ValueDistributionParameters);       //Is this useless?
+            //var phasingDistributionParameters = new Dictionary<string, object>() {
+            //    { "Type", "Normal" },
+            //    { "Param1", 1 },
+            //    { "Param2", 1 },
+            //    { "Param3", 1 },
+            //    { "Param4", 0 },
+            //    { "Param5", 0 } };
+            //this.PhasingDistribution = new Distribution(phasingDistributionParameters);    //Should this even be a Distribution object? More of a schedule.
             LoadPhasing(xlItemRow);
 
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(SheetType.Estimate);

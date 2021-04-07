@@ -9,6 +9,7 @@ namespace CorrelationTest
 {
     public class ScheduleCostEstimate : Estimate_Item, IHasDurationCorrelations, IHasPhasingCorrelations, IJointEstimate
     {
+        //EXPAND
         public ScheduleCostEstimate(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)
         {
             //This is a joint estimate

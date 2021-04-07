@@ -32,6 +32,7 @@ namespace CorrelationTest
                 this.xlMatrixCell = xlSheet.Cells[Specs.MatrixCoords.Item1, Specs.MatrixCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Visualize = xlSheet.Cells[Specs.Btn_Visualize.Item1, Specs.Btn_Visualize.Item2];
                 this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
                 this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
 
@@ -113,6 +114,7 @@ namespace CorrelationTest
                 this.xlMatrixCell = this.xlSheet.Cells[this.Specs.MatrixCoords.Item1, this.Specs.MatrixCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Visualize = xlSheet.Cells[Specs.Btn_Visualize.Item1, Specs.Btn_Visualize.Item2];
                 this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
 
                 //LINK
@@ -226,6 +228,12 @@ namespace CorrelationTest
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
                 vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
 
+                //VISUALIZE
+                System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
+                btn_VisualizeCorrelation.Text = "Visualize";
+                btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
+
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
                 btn_Cancel.Text = "Cancel Changes";
@@ -295,6 +303,8 @@ namespace CorrelationTest
                 CorrelationSheet_CP convertedSheet = new CorrelationSheet_CP(pairs, ids, fields, header, link, this.xlSheet);
                 convertedSheet.PrintToSheet();
             }
+
+            
         }
     }
 }

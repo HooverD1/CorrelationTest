@@ -32,6 +32,7 @@ namespace CorrelationTest
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Visualize = xlSheet.Cells[Specs.Btn_Visualize.Item1, Specs.Btn_Visualize.Item2];
                 this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
                 CorrelMatrix = Data.CorrelationMatrix.ConstructFromParentItem(ParentItem, SheetType.Correlation_DP, this);
                 this.Header = CorrelString.GetHeader();
@@ -88,6 +89,7 @@ namespace CorrelationTest
                 this.xlPairsCell = xlSheet.Cells[Specs.PairsCoords.Item1, Specs.PairsCoords.Item2];
                 this.xlButton_ConvertCorrel = xlSheet.Cells[Specs.Btn_ConvertCoords.Item1, Specs.Btn_ConvertCoords.Item2];
                 this.xlButton_CollapseCorrel = xlSheet.Cells[Specs.Btn_Collapse.Item1, Specs.Btn_Collapse.Item2];
+                this.xlButton_Visualize = xlSheet.Cells[Specs.Btn_Visualize.Item1, Specs.Btn_Visualize.Item2];
                 this.xlButton_Cancel = xlSheet.Cells[Specs.Btn_Cancel.Item1, Specs.Btn_Cancel.Item2];
 
                 //LINK
@@ -180,10 +182,8 @@ namespace CorrelationTest
 
                 for (int subIndex = 0; subIndex < subCount; subIndex++)      //Print the Distribution strings
                 {
-                    if (parentEstimate.SubEstimates[subIndex] is IHasDurationCorrelations)
-                        xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
+                    xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
                     xlSubIdValues[subIndex, 0] = GetSubIdString(parentEstimate, subIndex);
-                    
                 }
                 xlDistRange.Value = xlDistValues;
                 xlSubIdRange.Value = xlSubIdValues;
@@ -219,6 +219,12 @@ namespace CorrelationTest
                 btn_CollapseCorrelation.Text = "Save Correlation";
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
                 vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+
+                //VISUALIZE
+                System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
+                btn_VisualizeCorrelation.Text = "Visualize";
+                btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
 
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
