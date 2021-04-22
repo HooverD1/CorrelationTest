@@ -10,11 +10,12 @@ namespace CorrelationTest
 {
     public class Estimate_Item : Item, IHasSubs
     {
+        public IEstimateDistribution CostDistribution { get; set; }
+        public IEstimateDistribution DurationDistribution { get; set; }
+        public IEstimateDistribution PhasingDistribution { get; set; }
+
         public DisplayCoords dispCoords { get; set; }
         public Period[] Periods { get; set; }
-        public IEstimateDistribution PhasingDistribution { get; set; }
-        public IEstimateDistribution CostDistribution { get; set; } //Cost or Schedule
-        public IEstimateDistribution DurationDistribution { get; set; }
         public Data.CorrelationString CostCorrelationString { get; set; }
         public Data.CorrelationString DurationCorrelationString { get; set; }
         public Data.CorrelationString PhasingCorrelationString { get; set; }
@@ -33,6 +34,7 @@ namespace CorrelationTest
         public string WBS_String { get; set; }
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
+        //EXPAND
         public Estimate_Item(Excel.Range itemRow, CostSheet ContainingSheetObject) : base(itemRow, ContainingSheetObject)
         {
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(itemRow.Worksheet));
@@ -47,16 +49,7 @@ namespace CorrelationTest
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
-
-
-            this.PhasingDistributionParameters = new Dictionary<string, object>() {
-                { "Type", "Normal" },
-                { "Param1", 1 },
-                { "Param2", 1 },
-                { "Param3", 1 },
-                { "Param4", 0 },
-                { "Param5", 0 } };
-            this.PhasingDistribution = new SpecifiedDistribution(PhasingDistributionParameters);    //Should this even be a Distribution object? More of a schedule.
+       
 
             this.Level = Convert.ToInt32(xlLevelCell.Value);
             this.Type = Convert.ToString(xlTypeCell.Value);
@@ -84,7 +77,7 @@ namespace CorrelationTest
             return fields.ToArray();
         }
 
-        private List<ISub> GetSubs()        //This only works for the estimate sheet because it tells you the number of subs and they're all contiguous
+        protected virtual List<ISub> GetSubs()        //This only works for the estimate sheet because it tells you the number of subs and they're all contiguous
         {
             List<ISub> subEstimates = new List<ISub>();
             //Get the number of inputs
@@ -293,7 +286,7 @@ namespace CorrelationTest
             //Build the CorrelationString object
         }
 
-        public void Expand(CorrelationType correlType)
+        public virtual void Expand(CorrelationType correlType)
         {
             switch (correlType)
             {
@@ -328,6 +321,27 @@ namespace CorrelationTest
             SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
             correlSheet.PrintToSheet();
+        }
+
+        public virtual string GetPhasingDistributionString()
+        {
+            //This needs to pull the parameters for the phasing distribution together into a string 
+            return "Normal,0,1";
+        }
+
+        public virtual string GetDistributionString(int subIndex)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"{this.SubEstimates[subIndex].ValueDistributionParameters["Type"]}");
+            sb.Append($",{this.SubEstimates[subIndex].ValueDistributionParameters["Mean"]}");
+            sb.Append($",{this.SubEstimates[subIndex].ValueDistributionParameters["Stdev"]}");
+            if(!(this.SubEstimates[subIndex].ValueDistributionParameters["Param1"] is null))
+                sb.Append($",{this.SubEstimates[subIndex].ValueDistributionParameters["Param1"]}");
+            if (!(this.SubEstimates[subIndex].ValueDistributionParameters["Param2"] is null))
+                sb.Append($",{this.SubEstimates[subIndex].ValueDistributionParameters["Param2"]}");
+            if (!(this.SubEstimates[subIndex].ValueDistributionParameters["Param3"] is null))
+                sb.Append($",{this.SubEstimates[subIndex].ValueDistributionParameters["Param3"]}");
+            return sb.ToString();
         }
     }
 

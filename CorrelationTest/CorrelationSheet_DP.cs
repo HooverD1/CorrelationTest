@@ -137,19 +137,6 @@ namespace CorrelationTest
             //    this.xlHeaderCell.Value = this.CorrelString.Value;
             //}
 
-            protected override string GetDistributionString(IHasCorrelations est, int subIndex)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasDurationCorrelations)est).SubEstimates[subIndex].DurationDistribution.Name}");
-                for (int i = 1; i < ((IHasDurationCorrelations)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
-                {
-                    string param = $"Param{i}";
-                    if (((IHasDurationCorrelations)est).SubEstimates[subIndex].ValueDistributionParameters[param] != null)
-                        sb.Append($",{((IHasDurationCorrelations)est).SubEstimates[subIndex].ValueDistributionParameters[param]}");
-                }
-                return sb.ToString();
-            }
-
             protected string GetSubIdString(IHasSubs est, int subIndex)
             {
                 return ((IHasDurationCorrelations)est).SubEstimates[subIndex].uID.ID;
@@ -182,7 +169,7 @@ namespace CorrelationTest
 
                 for (int subIndex = 0; subIndex < subCount; subIndex++)      //Print the Distribution strings
                 {
-                    xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
+                    xlDistValues[subIndex, 0] = ((Estimate_Item)parentEstimate).GetDistributionString(subIndex);
                     xlSubIdValues[subIndex, 0] = GetSubIdString(parentEstimate, subIndex);
                 }
                 xlDistRange.Value = xlDistValues;
@@ -194,6 +181,7 @@ namespace CorrelationTest
                 this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
                 this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
                 this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+                this.xlDistCell.Offset[-1, 0].Value = "Distribution";
 
                 //I don't think these are necessary
                 //this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords

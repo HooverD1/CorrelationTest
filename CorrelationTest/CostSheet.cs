@@ -58,21 +58,20 @@ namespace CorrelationTest
             {
                 if(item is Estimate_Item)
                 {
-                    string distString = SpecifiedDistribution.GetDistributionStringFromRange(((Estimate_Item)item).xlDistributionCell);
                     if (item is ISub)
                     {
                         if (((ISub)item) is IHasCostCorrelations)
                         {
-                            ((IHasCostCorrelations)item).CostDistribution = new SpecifiedDistribution(distString);
+                            ((IHasCostCorrelations)item).CostDistribution = Distribution.ConstructForExpansion(((Estimate_Item)item).xlDistributionCell, CorrelationType.Cost);
                         }
                         if (((ISub)item) is IHasDurationCorrelations)    //Really I want to have a place to store the duration correlation, not a distribution?
                         {
-                            ((IHasDurationCorrelations)item).DurationDistribution = new SpecifiedDistribution(distString);
+                            ((IHasDurationCorrelations)item).DurationDistribution = Distribution.ConstructForExpansion(((Estimate_Item)item).xlDistributionCell, CorrelationType.Duration);
                         }
                     }
                     if (item is IHasPhasingCorrelations)
                     {
-                        ((IHasPhasingCorrelations)item).PhasingDistribution = new SpecifiedDistribution(distString);
+                        ((IHasPhasingCorrelations)item).PhasingDistribution = Distribution.ConstructForExpansion(((Estimate_Item)item).xlDistributionCell, CorrelationType.Phasing);
                     }
                 }               
             }

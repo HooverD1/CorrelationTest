@@ -399,8 +399,10 @@ namespace CorrelationTest
                 int distRow = selectionRow - xlMatrixCell.Row;
                 int distCol = selectionCol - xlMatrixCell.Column+1;
                 //Create distribution objects
-                SpecifiedDistribution d1 = new SpecifiedDistribution(distParams[distRow, 1].ToString());
-                SpecifiedDistribution d2 = new SpecifiedDistribution(distParams[distCol, 1].ToString());
+                IEstimateDistribution d1 = Distribution.ConstructForVisualization(ThisAddIn.MyApp.Selection.Cells[1,1].EntireRow, this);
+                //Need to load the row corresponding to the column selected (distCol)
+                Excel.Range columnRow = this.xlDistCell.Offset[distCol, 0].EntireRow;
+                IEstimateDistribution d2 = Distribution.ConstructForVisualization(columnRow, this);
                 //Create the form
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
                 CorrelVisual.Show();

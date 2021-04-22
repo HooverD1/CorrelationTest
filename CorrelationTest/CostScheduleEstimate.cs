@@ -15,14 +15,14 @@ namespace CorrelationTest
         {
             //This is a joint estimate.
             //It needs to create a sub-estimate for schedule
-            this.ValueDistributionParameters = new Dictionary<string, object>() {
-                { "Type", xlDistributionCell.Offset[0,0].Value },
-                { "Param1", xlDistributionCell.Offset[0,1].Value },
-                { "Param2", xlDistributionCell.Offset[0,2].Value },
-                { "Param3", xlDistributionCell.Offset[0,3].Value },
-                { "Param4", xlDistributionCell.Offset[0,4].Value },
-                { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new SpecifiedDistribution(ValueDistributionParameters);
+            //this.ValueDistributionParameters = new Dictionary<string, object>() {
+            //    { "Type", xlDistributionCell.Offset[0,0].Value },
+            //    { "Param1", xlDistributionCell.Offset[0,1].Value },
+            //    { "Param2", xlDistributionCell.Offset[0,2].Value },
+            //    { "Param3", xlDistributionCell.Offset[0,3].Value },
+            //    { "Param4", xlDistributionCell.Offset[0,4].Value },
+            //    { "Param5", xlDistributionCell.Offset[0,5].Value } };
+            //this.CostDistribution = new SpecifiedDistribution(ValueDistributionParameters);
             this.scheduleEstimate = ConstructScheduleSubEstimate(xlRow, ContainingSheetObject);
         }
         

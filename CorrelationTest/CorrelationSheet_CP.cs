@@ -149,19 +149,6 @@ namespace CorrelationTest
                 return xlCorrelSheet;
             }
 
-            protected override string GetDistributionString(IHasCorrelations est, int subIndex)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasCostCorrelations)est).SubEstimates[subIndex].CostDistribution.Name}");
-                for (int i = 1; i < ((IHasCostCorrelations)est).SubEstimates[subIndex].ValueDistributionParameters.Count(); i++)
-                {
-                    string param = $"Param{i}";
-                    if (((IHasCostCorrelations)est).SubEstimates[subIndex].ValueDistributionParameters[param] != null)
-                        sb.Append($",{((IHasCostCorrelations)est).SubEstimates[subIndex].ValueDistributionParameters[param]}");
-                }
-                return sb.ToString();
-            }
-
             protected string GetSubIdString(IHasSubs est, int subIndex)
             {
                 return ((IHasCostCorrelations)est).SubEstimates[subIndex].uID.ID;
@@ -194,10 +181,11 @@ namespace CorrelationTest
 
                 for (int subIndex = 0; subIndex < subCount; subIndex++)      //Load object arrays for printing
                 {
-                    xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
+                    xlDistValues[subIndex, 0] = ((Estimate_Item)parentEstimate).GetDistributionString(subIndex);
                     xlSubIdValues[subIndex, 0] = GetSubIdString(parentEstimate, subIndex);
                 }
                 xlDistRange.Value = xlDistValues;                           //Print object arrays
+                xlDistRange.NumberFormat = "\"DIST\";;;\"DIST\"";
                 xlSubIdRange.Value = xlSubIdValues;
                 xlSubIdRange.NumberFormat = "\"ID\";;;\"ID\"";
 
@@ -205,6 +193,7 @@ namespace CorrelationTest
                 this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
                 this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
                 this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+                this.xlDistCell.Offset[-1, 0].Value = "Distribution";
 
                 //I don't think these are necessary
                 //this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords

@@ -20,6 +20,7 @@ namespace CorrelationTest
         UniqueID uID { get; set; }
         IEstimateDistribution CostDistribution { get; set; }
         IEstimateDistribution DurationDistribution { get; set; }
+        IEstimateDistribution PhasingDistribution { get; set; }
         string Name { get; set; }
         Dictionary<string, object> ValueDistributionParameters { get; set; }
         Dictionary<Estimate_Item, double> CorrelPairs { get; set; }

@@ -269,12 +269,16 @@ namespace CorrelationTest
 
                 for (int subIndex = 0; subIndex < subCount; subIndex++)    
                 {
-                    xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
+                    xlDistValues[subIndex, 0] = ((Estimate_Item)parentEstimate).GetDistributionString(subIndex);
                     xlSubIdValues[subIndex, 0] = GetSubIdString(parentEstimate, subIndex);
                 }
                 xlDistRange.Value = xlDistValues;
+                xlDistRange.NumberFormat = "\"DIST\";;;\"DIST\"";
                 xlSubIdRange.Value = xlSubIdValues;
                 xlSubIdRange.NumberFormat = "\"ID\";;;\"ID\"";
+
+                this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+                this.xlDistCell.Offset[-1, 0].Value = "Distribution";
 
                 AddUserControls();
                 FormatSheet();

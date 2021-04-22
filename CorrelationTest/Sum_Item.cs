@@ -7,25 +7,23 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CorrelationTest
 {
-    public class Sum_Item : Item, IHasCostCorrelations, IHasPhasingCorrelations, IHasDurationCorrelations
+    public class Sum_Item : Estimate_Item, IHasCostCorrelations, IHasPhasingCorrelations, IHasDurationCorrelations
     {
-        public DisplayCoords dispCoords { get; set; }
-        public Excel.Range xlDollarCell { get; set; }
-        public Period[] Periods { get; set; }
-        public IEstimateDistribution CostDistribution { get; set; }
-        public IEstimateDistribution PhasingDistribution { get; set; }
-        public IEstimateDistribution DurationDistribution { get; set; }
-        public Data.CorrelationString CostCorrelationString { get; set; }
-        public Data.CorrelationString PhasingCorrelationString { get; set; }
-        public Data.CorrelationString DurationCorrelationString { get; set; }
-        public List<ISub> SubEstimates { get; set; } = new List<ISub>();
-        public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }
-
+        
         public Sum_Item(Excel.Range xlItemRow, CostSheet ContainingSheetObject) : base(xlItemRow, ContainingSheetObject)
         {
             LoadUID();
             this.xlDollarCell = xlItemRow.Cells[1, ContainingSheetObject.Specs.Dollar_Offset];
             LoadPhasing(xlItemRow);
+
+
+            this.ValueDistributionParameters = new Dictionary<string, object>() {
+                { "Type", xlDistributionCell.Offset[0,0].Value },
+                { "Mean", xlDistributionCell.Offset[0,1].Value },
+                { "Stdev", xlDistributionCell.Offset[0,2].Value },
+                { "Param1", xlDistributionCell.Offset[0,3].Value },
+                { "Param2", xlDistributionCell.Offset[0,4].Value },
+                { "Param3", xlDistributionCell.Offset[0,5].Value } };
 
             this.dispCoords = DisplayCoords.ConstructDisplayCoords(SheetType.WBS);
             this.xlCorrelCell_Cost = xlItemRow.Cells[1, dispCoords.CostCorrel_Offset];
@@ -33,12 +31,7 @@ namespace CorrelationTest
             this.xlCorrelCell_Duration = xlItemRow.Cells[1, dispCoords.DurationCorrel_Offset];
         }
 
-        public void LoadUID()
-        {
-            this.uID = GetUID();
-        }
-
-        private UniqueID GetUID()
+        protected override UniqueID GetUID()
         {
             if(this.xlRow.Cells[1, ContainingSheetObject.Specs.ID_Offset].value != null)
             {
@@ -52,24 +45,18 @@ namespace CorrelationTest
             }
         }
 
-        public string[] GetFields()
-        {
-            IEnumerable<string> fields = from ISub sub in SubEstimates select sub.Name;
-            return fields.ToArray();
-        }
+        //public override string[] GetFields()
+        //{
+        //    IEnumerable<string> fields = from ISub sub in SubEstimates select sub.Name;
+        //    return fields.ToArray();
+        //}
 
-        public void LoadPhasing(Excel.Range xlRow)
-        {
-            var phasingDistributionParameters = new Dictionary<string, object>() {
-                { "Type", "Normal" },
-                { "Param1", 1 },
-                { "Param2", 1 },
-                { "Param3", 1 },
-                { "Param4", 0 },
-                { "Param5", 0 } };
-            this.PhasingDistribution = new SpecifiedDistribution(phasingDistributionParameters);
-            this.Periods = GetPeriods();
-        }
+        //public override void LoadPhasing(Excel.Range xlRow)
+        //{
+
+        //    this.PhasingDistribution = Distribution.ConstructForExpansion(xlRow, CorrelationType.Phasing);       //distribution cost and schedule distributions need differentiated
+        //    this.Periods = GetPeriods();
+        //}
         private Period[] GetPeriods()
         {
             double[] dollars = LoadDollars();
@@ -90,12 +77,12 @@ namespace CorrelationTest
             return dollars;
         }
 
-        public void LoadSubEstimates()
-        {
-            this.SubEstimates = GetSubs();
-        }
+        //public void LoadSubEstimates()
+        //{
+        //    this.SubEstimates = GetSubs();
+        //}
         
-        private List<ISub> GetSubs()
+        protected override List<ISub> GetSubs()
         {
             List<ISub> subEstimates = new List<ISub>();
             //Get the number of inputs
@@ -107,7 +94,7 @@ namespace CorrelationTest
             return subEstimates;
         }
 
-        public void LoadCostCorrelString()
+        public override void LoadCostCorrelString()
         {
             if (!this.SubEstimates.Any())
                 return;
@@ -134,30 +121,30 @@ namespace CorrelationTest
             //this.CostCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.CostPair);
         }
 
-        public void PrintCostCorrelString()
+        public override void PrintCostCorrelString()
         {
             IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates select sub.xlCorrelCell_Cost;
             if (this.CostCorrelationString != null)
                 this.CostCorrelationString.PrintToSheet(xlFragments.ToArray());
         }
 
-        public void LoadPhasingCorrelString()
+        public override void LoadPhasingCorrelString()
         {
             this.PhasingCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.PhasingPair);
         }
 
-        public void PrintPhasingCorrelString()
+        public override void PrintPhasingCorrelString()
         {
             if (this.PhasingCorrelationString != null)
                 this.PhasingCorrelationString.PrintToSheet(xlCorrelCell_Phasing);
         }
 
-        public void LoadDurationCorrelString()
+        public override void LoadDurationCorrelString()
         {
             this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
         }
 
-        public void PrintDurationCorrelString()
+        public override void PrintDurationCorrelString()
         {
             IEnumerable<Excel.Range> xlFragments = from ISub sub in this.SubEstimates
                                                    select sub.xlCorrelCell_Duration;
@@ -165,7 +152,7 @@ namespace CorrelationTest
                 this.DurationCorrelationString.PrintToSheet(xlFragments.ToArray());
         }
 
-        public void Expand(CorrelationType correlType)
+        public override void Expand(CorrelationType correlType)
         {
             switch (correlType)
             {

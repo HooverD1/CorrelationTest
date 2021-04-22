@@ -55,20 +55,20 @@ namespace CorrelationTest
                 {
                     case SheetType.Correlation_CM:
                         matrixRow = 4;
-                        matrixCol = 4;
+                        matrixCol = 7;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";
                         idRow = 4;
                         idCol = 1;
                         subIdRow = 5;
-                        subIdCol = 2;
+                        subIdCol = 5;
                         distRow = 5;
-                        distCol = 1;
+                        distCol = 4;
                         stringRow = 2;
                         stringCol = 1;
                         btnConvertRow = matrixRow;
-                        btnConvertCol = matrixCol - 7;
+                        btnConvertCol = 1;
                         btnCollapseRow = btnConvertRow + 2;
                         btnCollapseCol = btnConvertCol;
                         btnVisualizeRow = btnCollapseRow + 2;
@@ -87,13 +87,13 @@ namespace CorrelationTest
                         subIdRow = 5;
                         subIdCol = 5;
                         distRow = 5;
-                        distCol = 1;
+                        distCol = 4;
                         stringRow = 2;
                         stringCol = 1;
                         pairsRow = 5;
                         pairsCol = 6;       //Requires a 2 cell width
                         btnConvertRow = matrixRow;
-                        btnConvertCol = matrixCol-7;
+                        btnConvertCol = 1;
                         btnCollapseRow = btnConvertRow+2;
                         btnCollapseCol = btnConvertCol;
                         btnVisualizeRow = btnCollapseRow + 2;
@@ -112,15 +112,13 @@ namespace CorrelationTest
                         subIdRow = 5;
                         subIdCol = 5;
                         distRow = 5;
-                        distCol = 1;
+                        distCol = 5;
                         stringRow = 2;
                         stringCol = 1;
                         pairsRow = 5;
                         pairsCol = 6;       //Requires a 2 cell width
-                        btnConvertRow = matrixRow;
-                        btnConvertCol = matrixCol - 7;
-                        btnCollapseRow = btnConvertRow + 2;
-                        btnCollapseCol = btnConvertCol;
+                        btnCollapseRow = matrixRow;
+                        btnCollapseCol = 1;
                         btnVisualizeRow = btnCollapseRow + 2;
                         btnVisualizeCol = btnCollapseCol;
                         btnCancelRow = btnVisualizeRow + 2;
@@ -128,7 +126,7 @@ namespace CorrelationTest
                         break;
                     case SheetType.Correlation_DM:
                         matrixRow = 4;
-                        matrixCol = 4;
+                        matrixCol = 8;
                         linkRow = 3;
                         linkCol = 1;
                         linkFormat = "\"Correl\";;;\"CORREL\"";

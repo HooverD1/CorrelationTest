@@ -13,7 +13,15 @@ namespace CorrelationTest
         public ScheduleCostEstimate(Excel.Range xlRow, CostSheet ContainingSheetObject) : base(xlRow, ContainingSheetObject)
         {
             //This is a joint estimate
-            //It needs to pull in a Cost sub-estimate
+            this.ValueDistributionParameters = new Dictionary<string, object>() {
+                { "Type", xlDistributionCell.Offset[0,0].Value },
+                { "Mean", xlDistributionCell.Offset[0,1].Value },
+                { "Stdev", xlDistributionCell.Offset[0,2].Value },
+                { "Param1", xlDistributionCell.Offset[0,3].Value },
+                { "Param2", xlDistributionCell.Offset[0,4].Value },
+                { "Param3", xlDistributionCell.Offset[0,5].Value } };
+
+
             ScheduleEstimate scheduleTemplate = new ScheduleEstimate(xlRow, ContainingSheetObject);
             this.DurationCorrelationString = scheduleTemplate.DurationCorrelationString;
             this.SubEstimates = scheduleTemplate.SubEstimates;

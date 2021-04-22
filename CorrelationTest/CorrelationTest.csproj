@@ -208,6 +208,7 @@
     <Compile Include="CostScheduleEstimate.cs" />
     <Compile Include="CustomDistribution.cs" />
     <Compile Include="Diagnostics.cs" />
+    <Compile Include="Distribution.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="IEstimateDistribution.cs" />
     <Compile Include="MyGlobals.cs" />

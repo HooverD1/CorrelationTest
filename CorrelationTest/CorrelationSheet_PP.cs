@@ -116,7 +116,7 @@ namespace CorrelationTest
             protected override string GetDistributionString(IHasCorrelations est)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{((IHasPhasingCorrelations)est).PhasingDistribution.Name}");
+                sb.Append($"{((IHasPhasingCorrelations)est).PhasingDistribution.DistributionParameters["Type"]}");
                 for (int i = 1; i < ((IHasPhasingCorrelations)est).PhasingDistribution.DistributionParameters.Count(); i++)
                 {
                     string param = $"Param{i}";
@@ -138,7 +138,7 @@ namespace CorrelationTest
                     return;
                 //Find the distributions to use
                 //Create distribution objects
-                SpecifiedDistribution d1 = new SpecifiedDistribution(xlDistCell.Value);
+                IEstimateDistribution d1 = Distribution.ConstructForVisualization(xlDistCell.EntireRow, this);
                 //Create the form
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d1);
                 CorrelVisual.Show();
@@ -164,11 +164,17 @@ namespace CorrelationTest
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 CorrelString.PrintToSheet(xlHeaderCell);
-                this.xlDistCell.Value = GetDistributionString(parentEstimate);
+
+                this.xlDistCell.Value = ((Estimate_Item)parentEstimate).GetPhasingDistributionString();
                 this.xlDistCell.NumberFormat = "\"DIST\";;;\"DIST\"";
+
                 int subCount = parentEstimate.Periods.Count();
                 Excel.Range xlPairsRange = xlPairsCell.Resize[subCount - 1, 2];
                 xlPairsRange.Value = this.PairSpec.GetValuesString_Split(); //((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;
+
+                this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
+                this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";
+                this.xlDistCell.Offset[-1, 0].Value = "Distribution";
 
                 FormatSheet();
                 AddUserControls();

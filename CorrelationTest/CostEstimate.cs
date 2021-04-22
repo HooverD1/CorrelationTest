@@ -11,14 +11,18 @@ namespace CorrelationTest
     {
         public CostEstimate(Excel.Range itemRow, CostSheet ContainingSheetObject) : base(itemRow, ContainingSheetObject)
         {
+            //Only inputs have specified distributions -- right?
+            //The cost estimate would have a custom distribution based on its inputs
             this.ValueDistributionParameters = new Dictionary<string, object>() {
                 { "Type", xlDistributionCell.Offset[0,0].Value },
-                { "Param1", xlDistributionCell.Offset[0,1].Value },
-                { "Param2", xlDistributionCell.Offset[0,2].Value },
-                { "Param3", xlDistributionCell.Offset[0,3].Value },
-                { "Param4", xlDistributionCell.Offset[0,4].Value },
-                { "Param5", xlDistributionCell.Offset[0,5].Value } };
-            this.CostDistribution = new SpecifiedDistribution(ValueDistributionParameters);       //Is this useless? //This should hold the aggregated version of the inputs
+                { "Mean", xlDistributionCell.Offset[0,1].Value },
+                { "Stdev", xlDistributionCell.Offset[0,2].Value },
+                { "Param1", xlDistributionCell.Offset[0,3].Value },
+                { "Param2", xlDistributionCell.Offset[0,4].Value },
+                { "Param3", xlDistributionCell.Offset[0,5].Value } };
+            this.CostDistribution = Distribution.ConstructForExpansion(itemRow, CorrelationType.Cost);
+            this.DurationDistribution = null;
+            this.PhasingDistribution = Distribution.ConstructForExpansion(itemRow, CorrelationType.Phasing);
                                                                                         //But if it can contain a custom distribution, this parameter list isn't sufficient
                                                                                           //Should all the parameters be stored as a string in a single cell?
 

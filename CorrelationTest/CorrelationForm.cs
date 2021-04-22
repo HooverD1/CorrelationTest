@@ -28,8 +28,7 @@ namespace CorrelationTest
             //Create & set example points
             for (int i = 0; i < 20; i++)
             {
-                double input = ((double)i + 
-                    1) / 100;
+                double input = ((double)i + 1) / 100;
                 double x = CorrelDist1.GetInverse(input);
                 double y = CorrelDist2.GetInverse(input);
                 this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(x, y);
