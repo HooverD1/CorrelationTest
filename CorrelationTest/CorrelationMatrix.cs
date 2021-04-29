@@ -354,6 +354,11 @@ namespace CorrelationTest
             {
                 Matrix[FieldDict[id1], FieldDict[id2]] = correlation.ToString();
             }
+
+            public void SetCorrelation(int index1, int index2, double correlation)
+            {
+                Matrix[index1, index2] = correlation.ToString();
+            }
          
             public void PrintToSheet(Excel.Range xlRange)
             {
@@ -420,6 +425,26 @@ namespace CorrelationTest
                     return false;
                 else
                     return true;
+            }
+
+            public Tuple<double, double> GetTransitivityBounds(int row, int col)
+            {
+                this.DoubleMatrix = GetDoubleMatrix(this.Matrix);
+                double max_lower = -1;
+                double min_upper = 1;
+                for (int via = 0; via < this.Matrix.GetLength(0); via++)
+                {
+                    if (row == via || col == via)
+                        continue;
+                    double lowerBound = GetTransLowerBound(row, via, col);
+                    double upperBound = GetTransUpperBound(row, via, col);
+                    if (lowerBound > max_lower)
+                        max_lower = lowerBound;
+                    if (upperBound < min_upper)
+                        min_upper = upperBound;
+
+                }
+                return new Tuple<double, double>(max_lower, min_upper);
             }
 
             public MatrixErrors[,] CheckMatrixForTransitivity()

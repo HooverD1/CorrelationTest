@@ -10,7 +10,7 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_DM : CorrelationSheet
+        public class CorrelationSheet_DM : CorrelationSheet, IMatrixSpec
         {
             public Data.CorrelationString_DM CorrelString { get; set; }
             public Excel.Range xlButton_ConvertCorrel { get; set; }

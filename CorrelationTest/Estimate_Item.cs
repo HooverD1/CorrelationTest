@@ -31,6 +31,7 @@ namespace CorrelationTest
         public Excel.Range xlDollarCell { get; set; }
         public Excel.Range xlIDCell { get; set; }
         public Excel.Range xlDistributionCell { get; set; }
+        public Excel.Range xlPhasingCell { get; set; }
         public string WBS_String { get; set; }
         public Dictionary<Estimate_Item, double> CorrelPairs { get; set; }      //store non-zero correlations by unique id
 
@@ -47,6 +48,7 @@ namespace CorrelationTest
             this.xlNameCell = itemRow.Cells[1, dispCoords.Name_Offset];
             this.xlIDCell = itemRow.Cells[1, dispCoords.ID_Offset];
             this.xlDistributionCell = itemRow.Cells[1, dispCoords.Distribution_Offset];
+            this.xlPhasingCell = itemRow.Cells[1, dispCoords.Phasing_Offset];
             this.xlLevelCell = itemRow.Cells[1, dispCoords.Level_Offset];
             this.ContainingSheetObject = ContainingSheetObject;
        
@@ -108,7 +110,17 @@ namespace CorrelationTest
             double[] dollars = new double[5];
             for (int d = 0; d < dollars.Length; d++)
             {
-                dollars[d] = xlDollarCell.Offset[0, d].Value ?? 0;
+                if(xlDollarCell.Offset[0, d].Value != null)
+                {
+                    string dollarString = Convert.ToString(xlDollarCell.Offset[0, d].Value);
+                    dynamic[] dollarValues = dollarString.Split(',');
+                    dollars[d] = Convert.ToDouble(dollarValues[0] ?? 0);
+                }
+                else
+                {
+                    //No value given for the mean/variance double for the phasing period
+                    dollars[d] = 0;
+                }
             }
             return dollars;
         }
@@ -323,10 +335,16 @@ namespace CorrelationTest
             correlSheet.PrintToSheet();
         }
 
-        public virtual string GetPhasingDistributionString()
+        public virtual string[,] GetPhasingDistributionStrings()
         {
             //This needs to pull the parameters for the phasing distribution together into a string 
-            return "Normal,0,1";
+            //Return the distribution strings for phasing
+            string[,] phasingStrings = new string[this.Periods.Count(),1];
+            for(int i = 0; i < this.Periods.Count(); i++)
+            {
+                phasingStrings[i,0] = $"Normal,{Convert.ToString(xlPhasingCell.Offset[0, i].Value)}";
+            }
+            return phasingStrings;
         }
 
         public virtual string GetDistributionString(int subIndex)

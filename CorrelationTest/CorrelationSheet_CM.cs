@@ -10,7 +10,7 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_CM : CorrelationSheet
+        public class CorrelationSheet_CM : CorrelationSheet, IMatrixSpec
         {
             public Data.CorrelationString_CM CorrelString { get; set; }
             public Excel.Range xlButton_ConvertCorrel { get; set; }
@@ -218,7 +218,7 @@ namespace CorrelationTest
             {
                 Vsto.Worksheet vstoSheet = Globals.Factory.GetVstoObject(this.xlSheet);
                 System.Windows.Forms.Button btn_ConvertToCP = new System.Windows.Forms.Button();
-                btn_ConvertToCP.Text = "Convert to Pairwise Specification";
+                btn_ConvertToCP.Text = "Fit to Pairwise Specification";
                 btn_ConvertToCP.Click += ConversionFormClicked;
                 vstoSheet.Controls.AddControl(btn_ConvertToCP, this.xlButton_ConvertCorrel.Resize[2, 3], "ConvertToCP");
 
@@ -262,6 +262,9 @@ namespace CorrelationTest
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
 
                 this.xlHeaderCell.Value = this.Header;
+                this.xlHeaderCell.NumberFormat = "\"CORREL\";;;\"CORREL\"";
+                this.xlHeaderCell.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
                 Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
                 object[,] xlDistValues = new object[subCount, subCount];
                 Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];

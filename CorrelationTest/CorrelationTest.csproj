@@ -211,6 +211,8 @@
     <Compile Include="Distribution.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="IEstimateDistribution.cs" />
+    <Compile Include="IMatrixSpec.cs" />
+    <Compile Include="IPairwiseSpec.cs" />
     <Compile Include="MyGlobals.cs" />
     <Compile Include="IJointEstimate.cs" />
     <Compile Include="ISub.cs" />

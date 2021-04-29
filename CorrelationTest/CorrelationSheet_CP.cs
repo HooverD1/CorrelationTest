@@ -10,7 +10,7 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_CP : CorrelationSheet
+        public class CorrelationSheet_CP : CorrelationSheet, IPairwiseSpec
         {
             public PairSpecification PairSpec { get; set; }
             public Data.CorrelationString_CP CorrelString { get; set; }
@@ -22,7 +22,6 @@ namespace CorrelationTest
                 this.CorrelString = (Data.CorrelationString_CP)ParentItem.CostCorrelationString;
                 this.Specs = new Data.CorrelSheetSpecs(SheetType.Correlation_CP);
                 this.xlSheet = GetXlSheet();
-
                 this.LinkToOrigin = new Data.Link(ParentItem.xlCorrelCell_Cost);
                 this.xlLinkCell = xlSheet.Cells[Specs.LinkCoords.Item1, Specs.LinkCoords.Item2];
                 this.xlHeaderCell = xlSheet.Cells[Specs.StringCoords.Item1, Specs.StringCoords.Item2];
@@ -172,6 +171,8 @@ namespace CorrelationTest
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 this.xlHeaderCell.Value = this.Header;
+                this.xlHeaderCell.NumberFormat = "\"CORREL\";;;\"CORREL\"";
+                this.xlHeaderCell.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
                 this.xlPairsCell.Resize[subCount - 1, 2].Value = this.PairSpec.GetValuesString_Split();
 
                 Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
@@ -206,6 +207,8 @@ namespace CorrelationTest
                 FormatSheet();
 
                 AddUserControls();
+
+                this.xlSheet.Cells.Columns.AutoFit();
             }
 
             private void AddUserControls()

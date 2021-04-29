@@ -52,5 +52,31 @@ namespace CorrelationTest
             this.scheduleEstimate.PrintDurationCorrelString();
         }
 
+        public override bool CanExpand(CorrelationType correlType)
+        {
+            if (correlType == CorrelationType.Cost)
+            {
+                if (this.SubEstimates.Count() > 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (correlType == CorrelationType.Phasing)
+            {
+                if (this.Periods.Count() > 1)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                throw new Exception("Unexpected correlation type");
+            }
+        }
+
     }
 }

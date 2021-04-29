@@ -71,7 +71,60 @@ namespace CorrelationTest
                 return UniqueID.ConstructFromExisting(Convert.ToString(idCellValue));
             }
         }
-        
+
+        public virtual bool CanExpand(CorrelationType correlType)
+        {
+            //!!!!!!!!!!! 
+            //This needs refactored as overridden by subclasses to avoid all this switching and casting code
+            //!!!!!!!!!!!
+
+            /*
+             * This method checks whether the given item has anything to expand into a correlation sheet
+             */
+
+            if (correlType == CorrelationType.Cost || correlType == CorrelationType.Duration)
+            {
+                if (this is IHasSubs)
+                {
+                    if (((IHasSubs)this).SubEstimates.Count <= 1)
+                    {
+                        return false;
+                    }
+                    if (this is ISub)
+                    {
+                        if (((ISub)this).Parent is IJointEstimate)
+                        {
+                            ExtensionMethods.TurnOnUpdating();
+                            return false;
+                        }
+                    }
+                    //Invalid selection
+                    //Don't throw an error, just don't do anything.
+                    return true;
+                }
+                else
+                {
+                    ExtensionMethods.TurnOnUpdating();
+                    return false;
+                }
+            }
+            else if (correlType == CorrelationType.Phasing)
+            {
+                if (this is Input_Item)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static Item ConstructFromRow(Excel.Range xlRow, CostSheet containing_sheet_object)
         {
             //What kind of sheet object is constructing it?

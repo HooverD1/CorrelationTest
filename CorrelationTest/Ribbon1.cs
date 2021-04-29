@@ -22,106 +22,10 @@ namespace CorrelationTest
 
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
-            //SendKeys.Send("{ESC}");
-            
-            Excel.Range selection = ThisAddIn.MyApp.Selection;
-            SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
-            if (sheetType == SheetType.Unknown) { ExtensionMethods.TurnOnUpdating(); return; }
-            CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
-            IEnumerable<Item> items = from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item;
-            if (!items.Any()) { return; }
-            Item selectedItem = items.First();
-            CorrelationType correlType;
-
-            //This needs done in the class so that I can know what type it is... Loading inputs with no subs doesn't work
-            if (selection.Column == sheetObj.Specs.CostCorrel_Offset && selectedItem is IHasCostCorrelations)
-            {
-                correlType = CorrelationType.Cost;
-            }
-            else if (selection.Column == sheetObj.Specs.DurationCorrel_Offset && selectedItem is IHasDurationCorrelations)
-            {
-                correlType = CorrelationType.Duration;
-            }            
-            else if (selection.Column == sheetObj.Specs.PhasingCorrel_Offset && selectedItem is IHasPhasingCorrelations)
-            {
-                correlType = CorrelationType.Phasing;
-            }
-            else
-            {
-                //Probably a misclick
-                return;
-                //correlType = CorrelationType.Null;
-                //throw new Exception("Unknown Correlation Type");
-            }
-
             ExtensionMethods.TurnOffUpdating();
-            switch (correlType)
-            {
-                case CorrelationType.Cost:
-                    if(CanExpand(selectedItem, correlType))
-                        ((IHasSubs)selectedItem).Expand(correlType);
-                    break;
-                case CorrelationType.Duration:
-                    if (CanExpand(selectedItem, correlType))
-                        ((IHasSubs)selectedItem).Expand(correlType);
-                    break;
-                case CorrelationType.Phasing:
-                    if (CanExpand(selectedItem, correlType))
-                        ((IHasSubs)selectedItem).Expand(correlType);
-                    break;
-                case CorrelationType.Null:      //Not selecting a correlation column
-                    return;     
-                default:
-                    throw new Exception("Unknown correlation expand issue");
-            }
+            Sheets.CorrelationSheet.Expand();
             ExtensionMethods.TurnOnUpdating();
-        }
-
-        private bool CanExpand(Item selectedItem, CorrelationType correlType)
-        {
-            if(correlType == CorrelationType.Cost || correlType == CorrelationType.Duration)
-            {
-                if (selectedItem is IHasSubs)
-                {
-                    if (((IHasSubs)selectedItem).SubEstimates.Count <= 1)
-                    {
-                        ExtensionMethods.TurnOnUpdating();
-                        return false;
-                    }
-                    if (selectedItem is ISub)
-                    {
-                        if (((ISub)selectedItem).Parent is IJointEstimate)
-                        {
-                            ExtensionMethods.TurnOnUpdating();
-                            return false;
-                        }
-                    }
-                    //Invalid selection
-                    //Don't throw an error, just don't do anything.
-                    return true;
-                }
-                else
-                {
-                    ExtensionMethods.TurnOnUpdating();
-                    return false;
-                }
-            }
-            else if(correlType == CorrelationType.Phasing)
-            {
-                if(selectedItem is Input_Item)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
+        }        
 
         private void CollapseCorrel_Click(object sender, RibbonControlEventArgs e)
         {
@@ -148,6 +52,10 @@ namespace CorrelationTest
             est_1.Cells[4, edc.Distribution_Offset+3] = "Param1";
             est_1.Cells[4, edc.Distribution_Offset + 4] = "Param2";
             est_1.Cells[4, edc.Distribution_Offset + 5] = "Param3";
+            for (int i = 0; i < 50; i++)
+            {
+                est_1.Cells[4, edc.Phasing_Offset + i] = $"Period {i+1}";    //Doubles -- "mean, stdev" ... if a single value, it's the mean
+            }
 
             est_1.Cells[5, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[5, edc.Type_Offset] = "CE";
@@ -155,6 +63,10 @@ namespace CorrelationTest
             est_1.Cells[5, edc.Level_Offset] = 4;
             est_1.Cells[5, edc.Distribution_Offset] = "Custom";
             est_1.Cells[5, edc.Distribution_Offset + 1].value = "1,1,1,1,1,1,1";
+            for (int i = 0; i < 50; i++)
+            {
+                est_1.Cells[5, edc.Phasing_Offset + i] = "0,1";    //Doubles -- "mean, stdev" ... if a single value, it's the mean
+            }
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[6, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -164,15 +76,7 @@ namespace CorrelationTest
             est_1.Cells[6, edc.Distribution_Offset] = "Normal";
             est_1.Cells[6, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[6, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[6, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[6, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[6, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[6, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[6, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[6, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[6, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[6, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[6, edc.Distribution_Offset + 11].value = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[7, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -181,15 +85,7 @@ namespace CorrelationTest
             est_1.Cells[7, edc.Distribution_Offset] = "Normal";
             est_1.Cells[7, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[7, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[7, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[7, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[7, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[7, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[7, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[7, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[7, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[7, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[7, edc.Distribution_Offset + 11].value = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[8, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -198,15 +94,7 @@ namespace CorrelationTest
             est_1.Cells[8, edc.Distribution_Offset] = "Normal";
             est_1.Cells[8, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[8, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[8, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[8, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[8, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[8, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[8, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[8, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[8, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[8, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[8, edc.Distribution_Offset + 11].value = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[9, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -215,15 +103,7 @@ namespace CorrelationTest
             est_1.Cells[9, edc.Distribution_Offset] = "Normal";
             est_1.Cells[9, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[9, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[9, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[9, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[9, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[9, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[9, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[9, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[9, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[9, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[9, edc.Distribution_Offset + 11].value = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[10, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -233,15 +113,10 @@ namespace CorrelationTest
             est_1.Cells[10, edc.Distribution_Offset] = "Normal";
             est_1.Cells[10, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[10, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[10, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[10, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[10, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[10, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[10, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[10, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[10, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[10, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[10, edc.Distribution_Offset + 11].value = 1;
+            for (int i = 0; i < 50; i++)
+            {
+                est_1.Cells[10, edc.Phasing_Offset + i] = "0,1";    //Doubles -- "mean, stdev" ... if a single value, it's the mean
+            }
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[11, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -250,15 +125,7 @@ namespace CorrelationTest
             est_1.Cells[11, edc.Distribution_Offset] = "Normal";
             est_1.Cells[11, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[11, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[11, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[11, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[11, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[11, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[11, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[11, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[11, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[11, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[11, edc.Distribution_Offset + 11].value = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[12, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -267,15 +134,7 @@ namespace CorrelationTest
             est_1.Cells[12, edc.Distribution_Offset] = "Normal";
             est_1.Cells[12, edc.Distribution_Offset + 1].value = 0;
             est_1.Cells[12, edc.Distribution_Offset + 2].value = 1;
-            //est_1.Cells[12, edc.Distribution_Offset + 3].value = 1;
-            //est_1.Cells[12, edc.Distribution_Offset + 4].value = 1;
-            //est_1.Cells[12, edc.Distribution_Offset + 5].value = 1;
-            est_1.Cells[12, edc.Distribution_Offset + 6].value = "Normal";
-            est_1.Cells[12, edc.Distribution_Offset + 7].value = 1;
-            est_1.Cells[12, edc.Distribution_Offset + 8].value = 1;
-            //est_1.Cells[12, edc.Distribution_Offset + 9].value = 1;
-            //est_1.Cells[12, edc.Distribution_Offset + 10].value = 1;
-            //est_1.Cells[12, edc.Distribution_Offset + 11].value = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[13, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -285,6 +144,7 @@ namespace CorrelationTest
             est_1.Cells[13, edc.Distribution_Offset + 1] = 0;
             est_1.Cells[13, edc.Distribution_Offset + 2] = 1;
 
+
             System.Threading.Thread.Sleep(1);
             est_1.Cells[14, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[14, edc.Type_Offset] = "I";
@@ -292,6 +152,7 @@ namespace CorrelationTest
             est_1.Cells[14, edc.Distribution_Offset] = "Lognormal";
             est_1.Cells[14, edc.Distribution_Offset + 1] = 0;
             est_1.Cells[14, edc.Distribution_Offset + 2] = 1;
+
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[15, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
@@ -301,7 +162,10 @@ namespace CorrelationTest
             est_1.Cells[15, edc.Distribution_Offset] = "Normal";
             est_1.Cells[15, edc.Distribution_Offset + 1] = 0;
             est_1.Cells[15, edc.Distribution_Offset + 2] = 1;
-
+            for (int i = 0; i < 50; i++)
+            {
+                est_1.Cells[15, edc.Phasing_Offset + i] = "0,1";    //Doubles -- "mean, stdev" ... if a single value, it's the mean
+            }
 
             for (int i = 0; i < 50; i++)
             {
@@ -449,6 +313,7 @@ namespace CorrelationTest
                 return;
 
             correlSheet.VisualizeCorrel();
+
         }
 
         private void DebugModeToggle_Click(object sender, RibbonControlEventArgs e)

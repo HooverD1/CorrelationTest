@@ -165,8 +165,9 @@ namespace CorrelationTest
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 CorrelString.PrintToSheet(xlHeaderCell);
 
-                this.xlDistCell.Value = ((Estimate_Item)parentEstimate).GetPhasingDistributionString();
-                this.xlDistCell.NumberFormat = "\"DIST\";;;\"DIST\"";
+                string[,] phasingDistributions = ((Estimate_Item)parentEstimate).GetPhasingDistributionStrings();
+                this.xlDistCell.Resize[parentEstimate.Periods.Count(), 1].Value = phasingDistributions;
+                this.xlDistCell.Resize[parentEstimate.Periods.Count(), 1].NumberFormat = "\"DIST\";;;\"DIST\"";
 
                 int subCount = parentEstimate.Periods.Count();
                 Excel.Range xlPairsRange = xlPairsCell.Resize[subCount - 1, 2];

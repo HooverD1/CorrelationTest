@@ -9,7 +9,7 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_PP : CorrelationString
+        public class CorrelationString_PP : CorrelationString, IPairwiseSpec
         {
             public PairSpecification Pairs { get; set; }
             public CorrelationString_PP(PairSpecification pairs, string[] start_dates, string parent_id)        //build a triple string out of a triple

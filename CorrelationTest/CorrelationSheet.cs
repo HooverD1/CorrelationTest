@@ -24,7 +24,7 @@ namespace CorrelationTest
             public readonly static Tuple<int, int> param_ColDist = new Tuple<int, int>(1, 11);    //where to find the last col param for the Distribution
 
             //public Data.CorrelationString CorrelString { get; set; }
-            protected Data.CorrelationMatrix CorrelMatrix { get; set; }
+            public Data.CorrelationMatrix CorrelMatrix { get; set; }
             public Excel.Range xlMatrixCell { get; set; }
             public Data.Link LinkToOrigin { get; set; }
             public Excel.Range xlLinkCell { get; set; }
@@ -264,6 +264,63 @@ namespace CorrelationTest
                 return returnSheet;
             }
 
+            public static void Expand()
+            {
+                Excel.Range selection = ThisAddIn.MyApp.Selection;
+                SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
+                if (sheetType != SheetType.Estimate && sheetType != SheetType.WBS) { ExtensionMethods.TurnOnUpdating(); return; }
+                CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
+                IEnumerable<Item> items = from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item;
+                if (!items.Any()) { return; }
+                Item selectedItem = items.First();
+                CorrelationType correlType;
+
+                //This needs done in the class so that I can know what type it is... Loading inputs with no subs doesn't work
+                if (selection.Column == sheetObj.Specs.CostCorrel_Offset && selectedItem is IHasCostCorrelations)
+                {
+                    correlType = CorrelationType.Cost;
+                }
+                else if (selection.Column == sheetObj.Specs.DurationCorrel_Offset && selectedItem is IHasDurationCorrelations)
+                {
+                    correlType = CorrelationType.Duration;
+                }
+                else if (selection.Column == sheetObj.Specs.PhasingCorrel_Offset && selectedItem is IHasPhasingCorrelations)
+                {
+                    correlType = CorrelationType.Phasing;
+                }
+                else
+                {
+                    //Probably a misclick
+                    return;
+                    //correlType = CorrelationType.Null;
+                    //throw new Exception("Unknown Correlation Type");
+                }
+
+                ExtensionMethods.TurnOffUpdating();
+                switch (correlType)
+                {
+                    case CorrelationType.Cost:
+                        if (selectedItem.CanExpand(correlType))
+                            ((IHasSubs)selectedItem).Expand(correlType);
+                        break;
+                    case CorrelationType.Duration:
+                        if (selectedItem.CanExpand(correlType))
+                            ((IHasSubs)selectedItem).Expand(correlType);
+                        break;
+                    case CorrelationType.Phasing:
+                        if (selectedItem.CanExpand(correlType))
+                            ((IHasSubs)selectedItem).Expand(correlType);
+                        break;
+                    case CorrelationType.Null:      //Not selecting a correlation column
+                        return;
+                    default:
+                        throw new Exception("Unknown correlation expand issue");
+                }
+                ExtensionMethods.TurnOnUpdating();
+            }
+
+            
+
             private Data.CorrelStringType GetCorrelType(string correlStringValue)
             {
                 switch (correlStringValue)
@@ -342,39 +399,45 @@ namespace CorrelationTest
                     else
                         throw new Exception("Unknown parent type");
 
-                    bool psd_errors = false;
-                    if (!correlSheet.CorrelMatrix.CheckForPSD())
+                    if (!CheckMatrixForErrors(correlSheet))
                     {
-                        psd_errors = true;
-                        DialogResult dialog_fixPSD = MessageBox.Show("Would you like to adjust this matrix to be positive semi-definite?", "Matrix is not PSD", MessageBoxButtons.YesNoCancel);
-                        if(dialog_fixPSD == DialogResult.Cancel)
-                        {
-                            //Do nothing
-                        }
-                        else if (dialog_fixPSD == DialogResult.No)
-                        {
-                            MessageBox.Show("Matrix cannot be saved.");
-                        }
-                        else if (dialog_fixPSD == DialogResult.Yes)
-                        {
-                            correlSheet.CorrelMatrix.FixMatrixForPSD();
-                        }
-                        //Launch form to correct PSD
-                    }
-                    bool trans_errors = correlSheet.PaintMatrixErrors(correlSheet.CorrelMatrix.CheckMatrixForTransitivity());         //This is stalling out a large matrix
-                    if (!trans_errors && !psd_errors)
-                    {
-                        ThisAddIn.MyApp.DisplayAlerts = false; 
+                        ThisAddIn.MyApp.DisplayAlerts = false;
                         correlSheet.xlSheet.Delete();
                         correlSheet.LinkToOrigin.LinkSource.Worksheet.Activate();
                         correlSheet = null;
                         ThisAddIn.MyApp.DisplayAlerts = true;
-                    }                    
+                    }
                 }                    
                 else
                     MessageBox.Show("ID not found");
                 
                 ExtensionMethods.TurnOnUpdating();
+            }
+
+            public static bool CheckMatrixForErrors(CorrelationSheet correlSheet)
+            {
+                bool psd_errors = false;
+                if (!correlSheet.CorrelMatrix.CheckForPSD())
+                {
+                    psd_errors = true;
+                    DialogResult dialog_fixPSD = MessageBox.Show("Would you like to adjust this matrix to be positive semi-definite?", "Matrix is not PSD", MessageBoxButtons.YesNoCancel);
+                    if (dialog_fixPSD == DialogResult.Cancel)
+                    {
+                        //Do nothing
+                    }
+                    else if (dialog_fixPSD == DialogResult.No)
+                    {
+                        MessageBox.Show("Matrix cannot be saved.");
+                    }
+                    else if (dialog_fixPSD == DialogResult.Yes)
+                    {
+                        correlSheet.CorrelMatrix.FixMatrixForPSD();
+                    }
+                    //Launch form to correct PSD
+                }
+                bool trans_errors = correlSheet.PaintMatrixErrors(correlSheet.CorrelMatrix.CheckMatrixForTransitivity());         //This is stalling out a large matrix
+                
+                return psd_errors || trans_errors;
             }
 
             protected virtual object[,] GetDistributionParamStrings()
@@ -397,7 +460,7 @@ namespace CorrelationTest
                 //Find the distributions to use
                 object[,] distParams = GetDistributionParamStrings();
                 int distRow = selectionRow - xlMatrixCell.Row;
-                int distCol = selectionCol - xlMatrixCell.Column+1;
+                int distCol = selectionCol - xlMatrixCell.Column;
                 //Create distribution objects
                 IEstimateDistribution d1 = Distribution.ConstructForVisualization(ThisAddIn.MyApp.Selection.Cells[1,1].EntireRow, this);
                 //Need to load the row corresponding to the column selected (distCol)
@@ -405,7 +468,14 @@ namespace CorrelationTest
                 IEstimateDistribution d2 = Distribution.ConstructForVisualization(columnRow, this);
                 //Create the form
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
-                CorrelVisual.Show();
+                if(this is IPairwiseSpec)
+                {
+                    NumericUpDown upDown = (NumericUpDown)CorrelVisual.Controls.Find("numericUpDown_CorrelValue", true).First();
+                    upDown.Enabled = false;
+                    CorrelVisual.Controls.Add(upDown);
+                }
+                CorrelVisual.ShowDialog();
+                CorrelVisual.Focus();
             }
 
             public virtual void FormatSheet() { throw new Exception("Failed override"); }
@@ -437,7 +507,7 @@ namespace CorrelationTest
 
             protected void VisualizeCorrelationClicked(object sender, EventArgs e)
             {
-                Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
+                Sheets.CorrelationSheet correlSheet = ConstructFromXlCorrelationSheet();
                 if (correlSheet == null)
                     return;
 

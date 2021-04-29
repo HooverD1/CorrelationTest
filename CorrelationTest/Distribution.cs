@@ -13,7 +13,7 @@ namespace CorrelationTest
         {
             DisplayCoords specs = DisplayCoords.ConstructDisplayCoords(ExtensionMethods.GetSheetType(xlRow.Worksheet));
             //Need to get the name from the xlRow and return the appropriate type
-            string distName = xlRow.Cells[1, specs.Distribution_Offset].value;
+            string distName = xlRow.EntireRow.Cells[1, specs.Distribution_Offset].value;
             switch (distName)
             {
                 case "Custom":

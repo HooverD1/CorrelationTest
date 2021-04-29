@@ -29,5 +29,36 @@ namespace CorrelationTest
             //this.CorrelStringObj_Cost = Data.CorrelationString.ConstructFromParentItem_Cost(this);
             this.CorrelStringObj_Phasing = Data.CorrelationString.ConstructFromParentItem_Phasing(this);
         }
+
+        public override bool CanExpand(CorrelationType correlType)
+        {
+            if (correlType == CorrelationType.Cost)
+            {
+                if (this.Parent is IJointEstimate)
+                {
+                    //This is a subestimate and its correlation is stored against the joint estimate parent instead
+                    return false;
+                }
+                else if (this.SubEstimates.Count() > 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if(correlType == CorrelationType.Phasing)
+            {
+                if (this.Periods.Count() > 1)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                throw new Exception("Unexpected correlation type");
+            }
+        }
     }
 }

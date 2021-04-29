@@ -9,7 +9,7 @@ namespace CorrelationTest
 {
     namespace Data
     {
-        public class CorrelationString_DP : CorrelationString
+        public class CorrelationString_DP : CorrelationString, IPairwiseSpec
         {
             public PairSpecification Pairs { get; set; }
 
