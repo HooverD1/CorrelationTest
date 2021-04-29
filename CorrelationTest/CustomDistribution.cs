@@ -39,20 +39,17 @@ namespace CorrelationTest
         }
 
         //VISUALIZATION
-        public static IEstimateDistribution ConstructForVisualization(Excel.Range xlRow, Sheets.CorrelationSheet cs)
+        public static IEstimateDistribution ConstructForVisualization(Excel.Range xlSelection, Sheets.CorrelationSheet cs)
         {
-            //Need to know which item on the correlsheet we're talking about (the xlRow of the selection)
-            //Need to know the xlSheet and specs off the CorrelationSheet (pass the sheet object)
+            //Load the distribution object off a given row of the Correlation Sheet such that it can be leveraged for display purposes
             IEstimateDistribution returnObject = new CustomDistribution();
 
-            returnObject.Name = xlRow.Cells[1, cs.Specs.DistributionCoords.Item2];
-            returnObject.DistributionString = xlRow.Cells[1, cs.Specs.DistributionCoords.Item2].Value;
+            returnObject.Name = Convert.ToString(xlSelection.EntireRow.Cells[1, cs.Specs.DistributionCoords.Item2].value);
+            returnObject.DistributionString = Convert.ToString(xlSelection.EntireRow.Cells[1, cs.Specs.DistributionCoords.Item2].Value);
             returnObject.DistributionParameters = ParseStringIntoParameters(returnObject.DistributionString);
 
             return returnObject;
         }
-
-        //
 
         public double GetInverse(double percentile)
         {
@@ -61,7 +58,17 @@ namespace CorrelationTest
 
         private static Dictionary<string, object> ParseStringIntoParameters(string distributionString)
         {
-            throw new NotImplementedException();
+            string[] distributionStringValues = distributionString.Split(',');
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("Type", distributionStringValues[0]);
+            if (Double.TryParse(distributionStringValues[1], out double mean))
+                parameters.Add("Mean", mean);
+            if (Double.TryParse(distributionStringValues[2], out double stdev))
+                parameters.Add("Stdev", stdev);
+            
+            //Need to add the lookup table as an additional parameter here///////////
+
+            return parameters;
         }
     }
 }

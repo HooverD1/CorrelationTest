@@ -71,7 +71,12 @@ namespace CorrelationTest
                         break;
                     case SheetType.Correlation_PP:
                         matrix = new Data.CorrelationMatrix_Phasing();
-                        matrix.Fields = (from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
+                        string[] fields = new string[((IHasPhasingCorrelations)ParentItem).Periods.Count()];
+                        for(int i = 0; i < fields.Length; i++)
+                        {
+                            fields[i] = $"Period {i + 1}";
+                        }
+                        matrix.Fields = fields; //(from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
                         matrix.Matrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix_Formulas(CorrelSheet);
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();

@@ -160,6 +160,9 @@ namespace CorrelationTest
 
                 matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
                 matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+
+                this.xlSheet.Cells.Columns.AutoFit();
+                this.xlSheet.Columns[1].ColumnWidth = 25;
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -220,25 +223,25 @@ namespace CorrelationTest
                 System.Windows.Forms.Button btn_ConvertToCP = new System.Windows.Forms.Button();
                 btn_ConvertToCP.Text = "Fit to Pairwise Specification";
                 btn_ConvertToCP.Click += ConversionFormClicked;
-                vstoSheet.Controls.AddControl(btn_ConvertToCP, this.xlButton_ConvertCorrel.Resize[2, 3], "ConvertToCP");
+                vstoSheet.Controls.AddControl(btn_ConvertToCP, this.xlButton_ConvertCorrel.Resize[2, 1], "ConvertToCP");
 
                 //COLLAPSE
                 System.Windows.Forms.Button btn_CollapseCorrelation = new System.Windows.Forms.Button();
                 btn_CollapseCorrelation.Text = "Save Correlation";
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 1], "CollapseToCostSheet");
 
                 //VISUALIZE
                 System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
                 btn_VisualizeCorrelation.Text = "Visualize";
                 btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 1], "VisualizeCorrelation");
 
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
                 btn_Cancel.Text = "Cancel Changes";
                 btn_Cancel.Click += CancelChangesClicked;
-                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 3], "CancelCorrelationChanges");
+                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 1], "CancelCorrelationChanges");
 
             }
 

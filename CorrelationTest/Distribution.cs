@@ -31,21 +31,19 @@ namespace CorrelationTest
             }
         }
 
-        public static IEstimateDistribution ConstructForVisualization(Excel.Range xlRow, Sheets.CorrelationSheet cs)
+        public static IEstimateDistribution ConstructForVisualization(Excel.Range xlSelection, Sheets.CorrelationSheet cs)
         {
             //Need to get the name from the xlRow and return the appropriate type
-            string distString = xlRow.Cells[1, cs.Specs.DistributionCoords.Item2].value;
+            string distString = xlSelection.EntireRow.Cells[1, cs.Specs.DistributionCoords.Item2].value;
             if (distString is null)
                 return null;
             string[] distSplit = distString.Split(',');
             switch (distSplit[0])
             {
                 case "Custom":
-                    return CustomDistribution.ConstructForVisualization(xlRow, cs);
-                case "Normal":
-                    return SpecifiedDistribution.ConstructForVisualization(xlRow, cs);
+                    return CustomDistribution.ConstructForVisualization(xlSelection, cs);
                 default:
-                    throw new Exception("Unknown distribution type");
+                    return SpecifiedDistribution.ConstructForVisualization(xlSelection, cs);
             }
         }
 

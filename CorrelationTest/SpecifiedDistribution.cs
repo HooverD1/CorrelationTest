@@ -68,17 +68,16 @@ namespace CorrelationTest
         }
 
         //VISUALIZATION
-        public static IEstimateDistribution ConstructForVisualization(Excel.Range xlRow, Sheets.CorrelationSheet cs)
+        public static IEstimateDistribution ConstructForVisualization(Excel.Range xlSelection, Sheets.CorrelationSheet cs)
         {
             //Need to know which item on the correlsheet we're talking about (the xlRow of the selection)
             //Need to know the xlSheet and specs off the CorrelationSheet (pass the sheet object)
             SpecifiedDistribution returnObject = new SpecifiedDistribution();
-            string distString = xlRow.Cells[1, cs.Specs.DistributionCoords.Item2].value;
+            string distString = xlSelection.EntireRow.Cells[1, cs.Specs.DistributionCoords.Item2].value;
             returnObject.Name = distString.Split(',')[0];
             returnObject.DistributionString = distString;
             returnObject.DistributionParameters = ParseStringIntoParameters(returnObject.DistributionString);
             returnObject.Distribution = BuildDistribution(returnObject.DistributionParameters);
-
             return returnObject;
         }
 
@@ -90,20 +89,34 @@ namespace CorrelationTest
             switch (stringItems["Type"])
             {
                 case "Normal":
+                    if (splitString.Length != 3)
+                        throw new Exception("Malformed distribution string");
                     stringItems.Add("Mean", splitString[1]);
                     stringItems.Add("Stdev", splitString[2]);
                     break;
                 case "Lognormal":
+                    if (splitString.Length != 3)
+                        throw new Exception("Malformed distribution string");
                     stringItems.Add("Mean", splitString[1]);
                     stringItems.Add("Stdev", splitString[2]);
                     break;
                 case "Triangular":
+                    if (splitString.Length != 4)
+                        throw new Exception("Malformed distribution string");
                     stringItems.Add("Min", splitString[1]);
                     stringItems.Add("Mode", splitString[2]);
                     stringItems.Add("Max", splitString[3]);
                     break;
-                default:
+                case "Beta":
+                    if (splitString.Length != 5)
+                        throw new Exception("Malformed distribution string");
+                    stringItems.Add("Mean", splitString[1]);
+                    stringItems.Add("Stdev", splitString[2]);
+                    stringItems.Add("Alpha", splitString[3]);
+                    stringItems.Add("Beta", splitString[4]);
                     break;
+                default:
+                    throw new Exception("Unknown distribution type");
             }
             return stringItems;
         }

@@ -15,68 +15,6 @@ namespace CorrelationTest
 
             public EstimateSheet(Excel.Worksheet xlSheet) : base(xlSheet) { }
 
-            //public override void BuildCorrelations()
-            //{
-            //    BuildCorrelations_Cost();
-            //    BuildCorrelations_Phasing();
-            //}
-
-            //private void BuildCorrelations_Cost()
-            //{
-            //    //Input correlation
-            //    //var correlTemp = BuildCorrelTemp(this.Items);
-            //    if (Items.Any())
-            //        Items[0].xlCorrelCell_Cost.EntireColumn.Clear();
-            //    foreach (IHasCostCorrelations est in this.Items)
-            //    {
-            //        est.ContainingSheetObject.GetSubEstimates(est.xlRow); 
-            //        PrintCorrel_Cost(est, correlTemp);  //recursively build out children
-            //    }
-            //}
-
-            //private void BuildCorrelations_Phasing()
-            //{
-            //    //Period correlation
-            //    foreach (IHasPhasingCorrelations est in this.Items)
-            //    {
-            //        PrintCorrel_Phasing(est);
-            //    }
-            //}
-
-            //private Dictionary<Tuple<string, string>, double> BuildCorrelTemp(List<Item> Estimates)
-            //{
-            //    var correlTemp = new Dictionary<Tuple<string, string>, double>();   //<ID, ID>, correl_value
-            //    if (this.Items.Any())
-            //    {
-            //        //Save off existing correlations
-            //        //Create a correl string from the column
-            //        foreach (Estimate_Item estimate in this.Items)
-            //        {
-            //            if (estimate.SubEstimates.Count == 0)
-            //                continue;
-            //            Data.CorrelationString_CM correlString;
-            //            if (estimate.xlCorrelCell_Cost.Value == null)        //No correlation string exists
-            //                correlString = Data.CorrelationString_CM.ConstructString(estimate.uID.ID, estimate.GetSubEstimateIDs(), estimate.SubEstimates.Select(x=>x.Name).ToArray(), this.xlSheet.Name);     //construct zero string
-            //            else
-            //                correlString = new Data.CorrelationString_CM(estimate.xlCorrelCell_Cost.Value);       //construct from string
-            //            var correlMatrix = Data.CorrelationMatrix.ConstructNew(correlString);
-            //            string[] ids = Estimates.Select(x => x.uID.ID).ToArray();
-            //            foreach (string id1 in ids)
-            //            {
-            //                foreach (string id2 in ids)
-            //                {
-            //                    var newKey = new Tuple<string, string>(id1, id2);
-            //                    if (!correlTemp.ContainsKey(newKey))
-            //                        correlTemp.Add(newKey, correlMatrix.AccessArray(id1, id2));
-            //                }
-            //            }
-            //        }
-            //        if (OverwriteRepeatedIDs == DialogResult.Yes)       //rebuild correlations
-            //            this.BuildCorrelations();
-            //    }
-            //    return correlTemp;
-            //}
-
             public override object[] Get_xlFields()
             {
                 throw new NotImplementedException();

@@ -62,7 +62,9 @@ namespace CorrelationTest
             est_1.Cells[5, edc.Name_Offset] = "Est1";
             est_1.Cells[5, edc.Level_Offset] = 4;
             est_1.Cells[5, edc.Distribution_Offset] = "Custom";
-            est_1.Cells[5, edc.Distribution_Offset + 1].value = "1,1,1,1,1,1,1";
+            est_1.Cells[5, edc.Distribution_Offset + 1].value = "100";
+            est_1.Cells[5, edc.Distribution_Offset + 2].value = "20";
+            est_1.Cells[5, edc.Distribution_Offset + 3].value = "1,1,1,1,1";
             for (int i = 0; i < 50; i++)
             {
                 est_1.Cells[5, edc.Phasing_Offset + i] = "0,1";    //Doubles -- "mean, stdev" ... if a single value, it's the mean
@@ -73,9 +75,10 @@ namespace CorrelationTest
             est_1.Cells[6, edc.Level_Offset] = 3;  //# of inputs
             est_1.Cells[6, edc.Type_Offset] = "I";
             est_1.Cells[6, edc.Name_Offset] = "Est1";
-            est_1.Cells[6, edc.Distribution_Offset] = "Normal";
-            est_1.Cells[6, edc.Distribution_Offset + 1].value = 0;
-            est_1.Cells[6, edc.Distribution_Offset + 2].value = 1;
+            est_1.Cells[6, edc.Distribution_Offset] = "Custom";
+            est_1.Cells[6, edc.Distribution_Offset + 1].value = "100";
+            est_1.Cells[6, edc.Distribution_Offset + 2].value = "20";
+            est_1.Cells[6, edc.Distribution_Offset + 3].value = "1,1,1,1,1";
 
 
             System.Threading.Thread.Sleep(1);
@@ -184,9 +187,15 @@ namespace CorrelationTest
             wbs_1.Cells[4, wdc.Level_Offset] = "Level";
             wbs_1.Cells[4, wdc.Name_Offset] = "Name";
             wbs_1.Cells[4, wdc.Distribution_Offset] = "Distribution";
-            wbs_1.Cells[4, wdc.Distribution_Offset + 1] = "Param1";
-            wbs_1.Cells[4, wdc.Distribution_Offset + 2] = "Param2";
-            wbs_1.Cells[4, wdc.Distribution_Offset + 3] = "Param3";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 1] = "Mean";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 2] = "Stdev";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 3] = "Param1";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 4] = "Param2";
+            wbs_1.Cells[4, wdc.Distribution_Offset + 5] = "Param3";
+            for(int i = 0; i < 50; i++)
+            {
+                wbs_1.Cells[4, wdc.Phasing_Offset + i] = $"Period {i+1}";
+            }            
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[5, wdc.ID_Offset] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
@@ -202,6 +211,10 @@ namespace CorrelationTest
             wbs_1.Cells[6, wdc.Distribution_Offset + 1] = 10;
             wbs_1.Cells[6, wdc.Distribution_Offset + 2] = 30;
             wbs_1.Cells[6, wdc.Distribution_Offset + 3] = 20;
+            for (int i = 0; i < 50; i++)
+            {
+                wbs_1.Cells[6, wdc.Phasing_Offset + i] = "0,1";
+            }
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[7, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
@@ -212,7 +225,11 @@ namespace CorrelationTest
             wbs_1.Cells[7, wdc.Distribution_Offset + 1] = 10;
             wbs_1.Cells[7, wdc.Distribution_Offset + 2] = 30;
             wbs_1.Cells[7, wdc.Distribution_Offset + 3] = 20;
- 
+            for (int i = 0; i < 50; i++)
+            {
+                wbs_1.Cells[7, wdc.Phasing_Offset + i] = "0,1";
+            }
+
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[8, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
             wbs_1.Cells[8, wdc.Level_Offset] = 2;
@@ -222,6 +239,10 @@ namespace CorrelationTest
             wbs_1.Cells[8, wdc.Distribution_Offset + 1] = 10;
             wbs_1.Cells[8, wdc.Distribution_Offset + 2] = 30;
             wbs_1.Cells[8, wdc.Distribution_Offset + 3] = 20;
+            for (int i = 0; i < 50; i++)
+            {
+                wbs_1.Cells[8, wdc.Phasing_Offset + i] = "0,1";
+            }
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[9, wdc.ID_Offset] = $"DH|W|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";
@@ -231,6 +252,10 @@ namespace CorrelationTest
             wbs_1.Cells[9, wdc.Distribution_Offset] = "Normal";
             wbs_1.Cells[9, wdc.Distribution_Offset + 1] = 0;
             wbs_1.Cells[9, wdc.Distribution_Offset + 2] = 1;
+            for (int i = 0; i < 50; i++)
+            {
+                wbs_1.Cells[9, wdc.Phasing_Offset + i] = "0,1";
+            }
 
             System.Threading.Thread.Sleep(1);
             wbs_1.Cells[10, wdc.ID_Offset] = $"DH|S|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{DateTime.Now.ToUniversalTime().ToString("HH: mm:ss.fff")}";

@@ -454,25 +454,36 @@ namespace CorrelationTest
                 int selectionCol = ThisAddIn.MyApp.Selection.Column;       //dependency..
                 //Make sure the row and column are within the matrix range
                 if (selectionRow < this.Specs.MatrixCoords.Item1 + 1 || selectionRow > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item1)
+                {
+                    MessageBox.Show("Must select a matrix cell to visualize");
                     return;
-                if (selectionCol < this.Specs.MatrixCoords.Item2 || selectionCol > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item2-1)
+                }
+                if (selectionCol < this.Specs.MatrixCoords.Item2 || selectionCol > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item2 - 1)
+                {
+                    MessageBox.Show("Must select a matrix cell to visualize");
                     return;
+                }
                 //Find the distributions to use
                 object[,] distParams = GetDistributionParamStrings();
                 int distRow = selectionRow - xlMatrixCell.Row;
                 int distCol = selectionCol - xlMatrixCell.Column;
                 //Create distribution objects
-                IEstimateDistribution d1 = Distribution.ConstructForVisualization(ThisAddIn.MyApp.Selection.Cells[1,1].EntireRow, this);
+                IEstimateDistribution d1 = Distribution.ConstructForVisualization(ThisAddIn.MyApp.Selection, this);
                 //Need to load the row corresponding to the column selected (distCol)
-                Excel.Range columnRow = this.xlDistCell.Offset[distCol, 0].EntireRow;
-                IEstimateDistribution d2 = Distribution.ConstructForVisualization(columnRow, this);
+                Excel.Range columnRowCell = this.xlDistCell.Offset[distCol, 0];
+                IEstimateDistribution d2 = Distribution.ConstructForVisualization(columnRowCell, this);
                 //Create the form
+                if(d1==null || d2==null)
+                {
+                    //No distribution for one of these items -- cannot load the visual
+                    MessageBox.Show("Selected correlation lacks distribution information.");
+                    return;
+                }
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
                 if(this is IPairwiseSpec)
                 {
                     NumericUpDown upDown = (NumericUpDown)CorrelVisual.Controls.Find("numericUpDown_CorrelValue", true).First();
                     upDown.Enabled = false;
-                    CorrelVisual.Controls.Add(upDown);
                 }
                 CorrelVisual.ShowDialog();
                 CorrelVisual.Focus();

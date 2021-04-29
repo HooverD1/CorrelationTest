@@ -123,6 +123,9 @@ namespace CorrelationTest
 
                 diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
                 diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
+
+                this.xlSheet.Cells.Columns.AutoFit();
+                this.xlSheet.Columns[1].ColumnWidth = 25;
             }
 
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
@@ -170,6 +173,7 @@ namespace CorrelationTest
                 int subCount = parentEstimate.SubEstimates.Count();
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
+
                 this.xlHeaderCell.Value = this.Header;
                 this.xlHeaderCell.NumberFormat = "\"CORREL\";;;\"CORREL\"";
                 this.xlHeaderCell.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
@@ -177,6 +181,7 @@ namespace CorrelationTest
 
                 Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
                 object[,] xlDistValues = new object[subCount, subCount];
+
                 Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];
                 object[,] xlSubIdValues = new object[subCount, subCount];
 
@@ -208,7 +213,7 @@ namespace CorrelationTest
 
                 AddUserControls();
 
-                this.xlSheet.Cells.Columns.AutoFit();
+                
             }
 
             private void AddUserControls()
@@ -219,25 +224,25 @@ namespace CorrelationTest
                 System.Windows.Forms.Button btn_ConvertToCM = new System.Windows.Forms.Button();
                 btn_ConvertToCM.Text = "Convert to Matrix Specification";
                 btn_ConvertToCM.Click += ConversionFormClicked;
-                vstoSheet.Controls.AddControl(btn_ConvertToCM, this.xlButton_ConvertCorrel.Resize[2, 3], "ConvertToCM");
+                vstoSheet.Controls.AddControl(btn_ConvertToCM, this.xlButton_ConvertCorrel.Resize[2, 1], "ConvertToCM");
 
                 //COLLAPSE
                 System.Windows.Forms.Button btn_CollapseCorrelation = new System.Windows.Forms.Button();
                 btn_CollapseCorrelation.Text = "Save Correlation";
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 1], "CollapseToCostSheet");
 
                 //VISUALIZE
                 System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
                 btn_VisualizeCorrelation.Text = "Visualize";
                 btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 1], "VisualizeCorrelation");
 
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
                 btn_Cancel.Text = "Cancel Changes";
                 btn_Cancel.Click += CancelChangesClicked;
-                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 3], "CancelCorrelationChanges");
+                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 1], "CancelCorrelationChanges");
 
             }
 

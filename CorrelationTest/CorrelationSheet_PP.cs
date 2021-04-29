@@ -10,7 +10,7 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_PP : CorrelationSheet
+        public class CorrelationSheet_PP : CorrelationSheet, IPairwiseSpec
         {
             public Data.CorrelationString_PP CorrelString { get; set; }
             public PairSpecification PairSpec { get; set; }
@@ -126,24 +126,24 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            public override void VisualizeCorrel()
-            {
-                //Select a correlation
-                int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
-                int selectionCol = ThisAddIn.MyApp.Selection.Column;       //dependency..
-                //Make sure the row and column are within the matrix range
-                if (selectionRow < this.Specs.MatrixCoords.Item1 + 1 || selectionRow > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item1)
-                    return;
-                if (selectionCol < this.Specs.MatrixCoords.Item2 || selectionCol > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item2 - 1)
-                    return;
-                //Find the distributions to use
-                //Create distribution objects
-                IEstimateDistribution d1 = Distribution.ConstructForVisualization(xlDistCell.EntireRow, this);
-                //Create the form
-                CorrelationForm CorrelVisual = new CorrelationForm(d1, d1);
-                CorrelVisual.Show();
-                CorrelVisual.Focus();
-            }
+            //public override void VisualizeCorrel()
+            //{
+            //    //Select a correlation
+            //    int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
+            //    int selectionCol = ThisAddIn.MyApp.Selection.Column;       //dependency..
+            //    //Make sure the row and column are within the matrix range
+            //    if (selectionRow < this.Specs.MatrixCoords.Item1 + 1 || selectionRow > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item1)
+            //        return;
+            //    if (selectionCol < this.Specs.MatrixCoords.Item2 || selectionCol > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item2 - 1)
+            //        return;
+            //    //Find the distributions to use
+            //    //Create distribution objects
+            //    IEstimateDistribution d1 = Distribution.ConstructForVisualization(xlDistCell.EntireRow, this);
+            //    //Create the form
+            //    CorrelationForm CorrelVisual = new CorrelationForm(d1, d1);
+            //    CorrelVisual.Show();
+            //    CorrelVisual.Focus();
+            //}
 
             public override void PrintToSheet()  //expanding from string
             {
@@ -164,6 +164,7 @@ namespace CorrelationTest
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
                 CorrelString.PrintToSheet(xlHeaderCell);
+                xlHeaderCell.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
 
                 string[,] phasingDistributions = ((Estimate_Item)parentEstimate).GetPhasingDistributionStrings();
                 this.xlDistCell.Resize[parentEstimate.Periods.Count(), 1].Value = phasingDistributions;
@@ -203,6 +204,9 @@ namespace CorrelationTest
 
                 diagonal.Interior.Color = System.Drawing.Color.FromArgb(0, 0, 0);
                 diagonal.Font.Color = System.Drawing.Color.FromArgb(255, 255, 255);
+
+                this.xlSheet.Cells.Columns.AutoFit();
+                this.xlSheet.Columns[1].ColumnWidth = 25;
             }
 
             public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
@@ -221,19 +225,19 @@ namespace CorrelationTest
                 System.Windows.Forms.Button btn_CollapseCorrelation = new System.Windows.Forms.Button();
                 btn_CollapseCorrelation.Text = "Save Correlation";
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 1], "CollapseToCostSheet");
 
                 //VISUALIZE
                 System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
                 btn_VisualizeCorrelation.Text = "Visualize";
                 btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 1], "VisualizeCorrelation");
 
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
                 btn_Cancel.Text = "Cancel Changes";
                 btn_Cancel.Click += CancelChangesClicked;
-                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 3], "CancelCorrelationChanges");
+                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 1], "CancelCorrelationChanges");
 
             }
         }

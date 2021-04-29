@@ -105,7 +105,7 @@ namespace CorrelationTest
 
                 this.Value = ExtensionMethods.CleanStringLinebreaks(this.Value);
                 xlPhasingCorrelCell.Value = this.Value;
-                xlPhasingCorrelCell.NumberFormat = "\"Ph Correl\";;;\"PH_CORREL\"";
+                xlPhasingCorrelCell.NumberFormat = "\"Correl\";;;\"CORREL\"";
                 //string[] lines = this.Value.Split('&');
                 //int min;
                 //if (lines.Count() <= xlFragments.Count())

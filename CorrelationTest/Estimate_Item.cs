@@ -342,7 +342,41 @@ namespace CorrelationTest
             string[,] phasingStrings = new string[this.Periods.Count(),1];
             for(int i = 0; i < this.Periods.Count(); i++)
             {
-                phasingStrings[i,0] = $"Normal,{Convert.ToString(xlPhasingCell.Offset[0, i].Value)}";
+                if (xlPhasingCell.Offset[0, i].Value == null)
+                {
+                    phasingStrings[i, 0] = "";
+                }
+                else
+                {
+                    string phasingString = Convert.ToString(xlPhasingCell.Offset[0,i].Value);
+                    string[] phasingStringValues = phasingString.Split(',');
+                    bool validateMean = Double.TryParse(phasingStringValues[0], out double mean);
+                    bool validateStdev = false;
+                    if (phasingStringValues.Length == 2)
+                    {
+                        validateStdev = Double.TryParse(phasingStringValues[1], out double stdev);
+                        if (validateMean && validateStdev)
+                        {
+                            phasingStrings[i, 0] = $"Normal,{mean},{stdev}";
+                        }
+                        else
+                        {
+                            phasingStrings[i, 0] = "";
+                        }
+                    }
+                    else if (phasingStringValues.Length == 1)
+                    {
+                        if (validateMean)
+                            phasingStrings[i, 0] = $"Normal,{mean}";
+                        else
+                            phasingStrings[i, 0] = "";
+                    }
+                    else
+                    {
+                        phasingStrings[i, 0] = "";
+                    }
+                }               
+
             }
             return phasingStrings;
         }

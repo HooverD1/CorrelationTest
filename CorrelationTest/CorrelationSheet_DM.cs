@@ -167,29 +167,30 @@ namespace CorrelationTest
                 int subCount = parentEstimate.SubEstimates.Count();
                 this.CorrelMatrix.PrintToSheet(xlMatrixCell);                                   //Print the matrix
                 this.LinkToOrigin.PrintToSheet(xlLinkCell);                                     //Print the link
-                this.xlHeaderCell.Value = this.Header;
 
-                Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
+                this.xlHeaderCell.Value = this.Header;
+                this.xlHeaderCell.NumberFormat = "\"CORREL\";;;\"CORREL\"";
+                this.xlHeaderCell.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
                 object[,] xlDistValues = new object[subCount, 1];
-                Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];
+                Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
+
                 object[,] xlSubIdValues = new object[subCount, 1];
+                Excel.Range xlSubIdRange = xlSubIdCell.Resize[subCount, 1];
 
                 for (int subIndex = 0; subIndex < subCount; subIndex++)      //Print the Distribution strings
                 {
-                    if (parentEstimate.SubEstimates[subIndex] is IHasDurationCorrelations)
-                        xlDistValues[subIndex, 0] = GetDistributionString(parentEstimate, subIndex);
+                    xlDistValues[subIndex, 0] = ((Estimate_Item)parentEstimate).GetDistributionString(subIndex);
                     xlSubIdValues[subIndex, 0] = GetSubIdString(parentEstimate, subIndex);
                 }
+
                 xlDistRange.Value = xlDistValues;
+                xlDistRange.NumberFormat = "\"DIST\";;;\"DIST\"";
                 xlSubIdRange.Value = xlSubIdValues;
                 xlSubIdRange.NumberFormat = "\"ID\";;;\"ID\"";
 
-                //I don't think these are necessary
-                //this.Specs.PrintMatrixCoords(xlSheet);                                          //Print the matrix start coords
-                //this.Specs.PrintLinkCoords(xlSheet);                                            //Print the link coords
-                //this.Specs.PrintIdCoords(xlSheet);                                              //Print the ID coords
-                //this.Specs.PrintDistCoords(xlSheet);                                            //Print the Distribution coords
-                //this.PrintMatrixEndCoords(xlSheet);                                             //Print the matrix end coords
+                this.xlSubIdCell.Offset[-1, 0].Value = "Unique ID";
+                this.xlDistCell.Offset[-1, 0].Value = "Distribution";
 
                 AddUserControls();
                 FormatSheet();
@@ -201,25 +202,25 @@ namespace CorrelationTest
                 System.Windows.Forms.Button btn_ConvertToDP = new System.Windows.Forms.Button();
                 btn_ConvertToDP.Text = "Convert to Pairwise Specification";
                 btn_ConvertToDP.Click += ConversionFormClicked;
-                vstoSheet.Controls.AddControl(btn_ConvertToDP, this.xlButton_ConvertCorrel.Resize[2, 3], "ConvertToDP");
+                vstoSheet.Controls.AddControl(btn_ConvertToDP, this.xlButton_ConvertCorrel.Resize[2, 1], "ConvertToDP");
 
                 //COLLAPSE
                 System.Windows.Forms.Button btn_CollapseCorrelation = new System.Windows.Forms.Button();
                 btn_CollapseCorrelation.Text = "Save Correlation";
                 btn_CollapseCorrelation.Click += CollapseCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 3], "CollapseToCostSheet");
+                vstoSheet.Controls.AddControl(btn_CollapseCorrelation, this.xlButton_CollapseCorrel.Resize[2, 1], "CollapseToCostSheet");
 
                 //VISUALIZE
                 System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
                 btn_VisualizeCorrelation.Text = "Visualize";
                 btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
-                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 3], "VisualizeCorrelation");
+                vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 1], "VisualizeCorrelation");
 
                 //CANCEL
                 System.Windows.Forms.Button btn_Cancel = new System.Windows.Forms.Button();
                 btn_Cancel.Text = "Cancel Changes";
                 btn_Cancel.Click += CancelChangesClicked;
-                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 3], "CancelCorrelationChanges");
+                vstoSheet.Controls.AddControl(btn_Cancel, this.xlButton_Cancel.Resize[2, 1], "CancelCorrelationChanges");
 
             }
 
@@ -249,6 +250,9 @@ namespace CorrelationTest
 
                 matrixRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
                 matrixRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+
+                this.xlSheet.Cells.Columns.AutoFit();
+                this.xlSheet.Columns[1].ColumnWidth = 25;
             }
 
             public override void ConvertCorrelation(bool PreserveOffDiagonal=false) //Convert DP --> DM (fit matrix)
