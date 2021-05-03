@@ -107,6 +107,11 @@ namespace CorrelationTest
                 return UniqueID.ConstructFromExisting(lines[0]);
             }
 
+            public override double[,] GetMatrix_Doubles()
+            {
+                return this.Pairs.GetCorrelationMatrix_Values();
+            }
+
             public override void PrintToSheet(Excel.Range[] xlFragments)
             {
                 //Clean the string

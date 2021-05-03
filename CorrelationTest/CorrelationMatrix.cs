@@ -80,6 +80,7 @@ namespace CorrelationTest
                         }
                         matrix.Fields = fields; //(from Period period in ((IHasPhasingCorrelations)ParentItem).Periods select period.pID.ID).ToArray();
                         matrix.Matrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix_Formulas(CorrelSheet);
+                        matrix.DoubleMatrix = ((IHasPhasingCorrelations)ParentItem).PhasingCorrelationString.GetMatrix_Doubles();
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.IDs = (from Period sub in ((IHasPhasingCorrelations)ParentItem).Periods select sub.pID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
@@ -88,6 +89,7 @@ namespace CorrelationTest
                         matrix = new Data.CorrelationMatrix_Duration();
                         matrix.Fields = ParentItem.GetFields();
                         matrix.Matrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix_Formulas(CorrelSheet);
+                        matrix.DoubleMatrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix_Doubles();
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.IDs = (from ISub sub in ((IHasDurationCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
@@ -96,6 +98,7 @@ namespace CorrelationTest
                         matrix = new Data.CorrelationMatrix_Duration();
                         matrix.Fields = ParentItem.GetFields();
                         matrix.Matrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix_Values();
+                        matrix.DoubleMatrix = ((IHasDurationCorrelations)ParentItem).DurationCorrelationString.GetMatrix_Doubles();
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.IDs = (from ISub sub in ((IHasDurationCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);

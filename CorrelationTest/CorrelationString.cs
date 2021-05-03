@@ -114,52 +114,8 @@ namespace CorrelationTest
 
             public virtual string[,] GetMatrix_Formulas(Sheets.CorrelationSheet CorrelSheet) { throw new Exception("Failed override"); }
 
-            public virtual double[,] GetMatrix_Doubles()
-            {
-                string myValue = ExtensionMethods.CleanStringLinebreaks(this.Value);
-                string[] lines = DelimitString(myValue);
-                string[] header = lines[0].Split(',');
-                int length = Convert.ToInt32(header[0]);
-                double[,] matrix = new double[length, length];
-
-                for (int row = 0; row < length; row++)
-                {
-                    string[] values;
-                    if (row + 1 < length)
-                        values = lines[row + 1].Split(',');       //broken by entry
-                    else
-                        values = null;
-
-                    for (int col = row; col < length; col++)
-                    {
-                        if (col == row)
-                            matrix[row, col] = 1;
-                        else if (col > row && values != null)
-                        {
-                            if (Double.TryParse(values[(col - row) - 1], out double conversion))
-                            {
-                                matrix[row, col] = conversion;
-                            }
-                            else
-                            {
-                                throw new Exception("Malformed correlation string");
-                            }
-                        }
-
-                    }
-                }
-
-                //Fill in lower triangular
-                for (int row = 0; row < length; row++)
-                {
-                    for (int col = 0; col < row; col++)
-                    {
-                        matrix[row, col] = matrix[col,row];
-                    }
-                }
-
-                return matrix;
-            }
+            //Gets the double matrix for a matrix spec'ed correl string
+            public virtual double[,] GetMatrix_Doubles() { throw new Exception("Failed override"); }
 
             public virtual string[,] GetMatrix_Values()     //What is this for? Displaying matrix specs?
             {

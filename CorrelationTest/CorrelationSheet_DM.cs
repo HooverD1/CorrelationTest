@@ -271,6 +271,8 @@ namespace CorrelationTest
                 convertedSheet.PrintToSheet();
             }
 
+
+
             public override bool Validate() //This needs moved to subclass because the CorrelString implementation was moved to subclass
             {
                 bool validateMatrix_to_String = this.CorrelString.ValidateAgainstMatrix(this.CorrelMatrix.Fields);
