@@ -261,63 +261,11 @@ namespace CorrelationTest
                     default:
                         throw new Exception("Unknown correlation type");
                 }
+                returnSheet.CorrelMatrix.ContainingSheet = returnSheet;
                 return returnSheet;
             }
 
-            public static void Expand()
-            {
-                Excel.Range selection = ThisAddIn.MyApp.Selection;
-                SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
-                if (sheetType != SheetType.Estimate && sheetType != SheetType.WBS) { ExtensionMethods.TurnOnUpdating(); return; }
-                CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
-                IEnumerable<Item> items = from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item;
-                if (!items.Any()) { return; }
-                Item selectedItem = items.First();
-                CorrelationType correlType;
-
-                //This needs done in the class so that I can know what type it is... Loading inputs with no subs doesn't work
-                if (selection.Column == sheetObj.Specs.CostCorrel_Offset && selectedItem is IHasCostCorrelations)
-                {
-                    correlType = CorrelationType.Cost;
-                }
-                else if (selection.Column == sheetObj.Specs.DurationCorrel_Offset && selectedItem is IHasDurationCorrelations)
-                {
-                    correlType = CorrelationType.Duration;
-                }
-                else if (selection.Column == sheetObj.Specs.PhasingCorrel_Offset && selectedItem is IHasPhasingCorrelations)
-                {
-                    correlType = CorrelationType.Phasing;
-                }
-                else
-                {
-                    //Probably a misclick
-                    return;
-                    //correlType = CorrelationType.Null;
-                    //throw new Exception("Unknown Correlation Type");
-                }
-
-                ExtensionMethods.TurnOffUpdating();
-                switch (correlType)
-                {
-                    case CorrelationType.Cost:
-                        if (selectedItem.CanExpand(correlType))
-                            ((IHasSubs)selectedItem).Expand(correlType);
-                        break;
-                    case CorrelationType.Duration:
-                        if (selectedItem.CanExpand(correlType))
-                            ((IHasSubs)selectedItem).Expand(correlType);
-                        break;
-                    case CorrelationType.Phasing:
-                        if (selectedItem.CanExpand(correlType))
-                            ((IHasSubs)selectedItem).Expand(correlType);
-                        break;
-                    case CorrelationType.Null:      //Not selecting a correlation column
-                        return;
-                    default:
-                        throw new Exception("Unknown correlation expand issue");
-                }
-                ExtensionMethods.TurnOnUpdating();
-            }
+            
 
             
 
@@ -356,7 +304,13 @@ namespace CorrelationTest
                 CostSheet originSheet = CostSheet.ConstructFromXlCostSheet(correlSheet.LinkToOrigin.LinkSource.Worksheet);
                 string id_followLink = Convert.ToString(correlSheet.LinkToOrigin.LinkSource.EntireRow.Cells[1, originSheet.Specs.ID_Offset].value);
                 string id_correlSheet = Data.CorrelationString.GetParentIDFromCorrelStringValue(correlSheet.xlHeaderCell.Value);
-                
+                if (CheckMatrixForErrors(correlSheet))
+                {
+                    //If matrix errors exist, kill the process.
+                    ExtensionMethods.TurnOnUpdating();
+                    return;
+                }
+
                 if (id_followLink.ToString() == id_correlSheet)
                 {
                     Item sourceParent = (from Item item in originSheet.Items where item.uID.ID == id_correlSheet.ToString() select item).First();
@@ -399,14 +353,11 @@ namespace CorrelationTest
                     else
                         throw new Exception("Unknown parent type");
 
-                    if (!CheckMatrixForErrors(correlSheet))
-                    {
-                        ThisAddIn.MyApp.DisplayAlerts = false;
-                        correlSheet.xlSheet.Delete();
-                        correlSheet.LinkToOrigin.LinkSource.Worksheet.Activate();
-                        correlSheet = null;
-                        ThisAddIn.MyApp.DisplayAlerts = true;
-                    }
+                    ThisAddIn.MyApp.DisplayAlerts = false;
+                    correlSheet.xlSheet.Delete();
+                    correlSheet.LinkToOrigin.LinkSource.Worksheet.Activate();
+                    correlSheet = null;
+                    ThisAddIn.MyApp.DisplayAlerts = true;
                 }                    
                 else
                     MessageBox.Show("ID not found");
@@ -427,7 +378,7 @@ namespace CorrelationTest
                     }
                     else if (dialog_fixPSD == DialogResult.No)
                     {
-                        MessageBox.Show("Matrix cannot be saved.");
+                        //MessageBox.Show("Matrix cannot be saved.");
                     }
                     else if (dialog_fixPSD == DialogResult.Yes)
                     {

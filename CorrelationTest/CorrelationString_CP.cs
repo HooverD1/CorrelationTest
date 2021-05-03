@@ -124,6 +124,11 @@ namespace CorrelationTest
                 return this.Pairs.GetCorrelationMatrix_Formulas(CorrelSheet);
             }
 
+            public override double[,] GetMatrix_Doubles()
+            {
+                return this.Pairs.GetCorrelationMatrix_Values();
+            }
+
             public override string[] GetIDs()
             {
                 //HEADER: # INPUTS, TYPE, PARENT_ID, SUB_ID1 ... SUB_IDn

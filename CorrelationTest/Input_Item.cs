@@ -60,11 +60,11 @@ namespace CorrelationTest
 
         public void LoadPhasing(Excel.Range xlRow)
         {
-            this.Periods = GetPeriods();
+            this.Periods = GetPeriods(5);
         }
-        private Period[] GetPeriods()       //should these be constructed as a static under Period?
+        private Period[] GetPeriods(int numberOfPeriods)       //should these be constructed as a static under Period?
         {
-            Period[] periods = new Period[5];
+            Period[] periods = new Period[numberOfPeriods];
             for (int i = 0; i < periods.Length; i++)
                 periods[i] = new Period(uID, $"P{i + 1}");
             return periods;

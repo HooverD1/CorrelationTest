@@ -141,7 +141,29 @@ namespace CorrelationTest
 
         public override void LoadDurationCorrelString()
         {
-            this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
+            //this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
+            if (!this.SubEstimates.Any())
+                return;
+            var firstChild = this.SubEstimates.First();
+            if (firstChild.xlCorrelCell_Duration.Value == null)
+            {
+                //This should check the correl type to split pairwise from matrix
+                this.DurationCorrelationString = Data.CorrelationString.ConstructDefaultFromCostSheet(this, Data.CorrelStringType.DurationPair);
+            }
+            else
+            {
+                //Something in the cell that can either be resolved into a correl string or not
+                try
+                {
+                    string durationString = Data.CorrelationString.ConstructStringFromRange(from ISub sub in this.SubEstimates select sub.xlCorrelCell_Duration);
+                    this.DurationCorrelationString = Data.CorrelationString.ConstructFromStringValue(durationString);
+                }
+                catch
+                {
+                    if (MyGlobals.DebugMode)
+                        throw new Exception("Malformed correl string");
+                }
+            }
         }
 
         public override void PrintDurationCorrelString()

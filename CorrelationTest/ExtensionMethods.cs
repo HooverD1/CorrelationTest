@@ -591,6 +591,20 @@ namespace CorrelationTest
             return slicedArray;
         }
 
+        public static T[,] ConvertObjectArray<T>(object[,] inputArray)      //Works for object --> double.. not tested on much else
+        {
+            inputArray = ExtensionMethods.ReIndexArray(inputArray);
+            T[,] returnArray = new T[inputArray.GetLength(0), inputArray.GetLength(1)];
+            for(int r = 0; r<inputArray.GetLength(0); r++)
+            {
+                for(int c=0; c<inputArray.GetLength(1); c++)
+                {
+                    try { returnArray[r, c] = (T)inputArray[r, c]; }
+                    catch { throw new Exception("Failed conversion"); }
+                }
+            }
+            return returnArray;
+        }
 
         public static void TurnOffUpdating()
         {

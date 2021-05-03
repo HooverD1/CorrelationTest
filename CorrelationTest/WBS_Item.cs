@@ -62,12 +62,12 @@ namespace CorrelationTest
 
         public void LoadPhasing(Excel.Range xlRow)
         {
-            this.Periods = GetPeriods();
+            this.Periods = GetPeriods(5);
         }
-        private Period[] GetPeriods()
+        private Period[] GetPeriods(int numberOfPeriods)
         {
             double[] dollars = LoadDollars();
-            Period[] periods = new Period[this.Periods.Count()];
+            Period[] periods = new Period[numberOfPeriods];
             for (int i = 0; i < periods.Length; i++)
             {
                 periods[i] = new Period(this.uID, $"P{i + 1}", dollars[i]);

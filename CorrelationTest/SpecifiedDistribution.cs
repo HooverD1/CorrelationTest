@@ -104,8 +104,8 @@ namespace CorrelationTest
                     if (splitString.Length != 4)
                         throw new Exception("Malformed distribution string");
                     stringItems.Add("Min", splitString[1]);
-                    stringItems.Add("Mode", splitString[2]);
-                    stringItems.Add("Max", splitString[3]);
+                    stringItems.Add("Max", splitString[2]);
+                    stringItems.Add("Mode", splitString[3]);
                     break;
                 case "Beta":
                     if (splitString.Length != 5)
@@ -131,7 +131,7 @@ namespace CorrelationTest
             switch (distParameters["Type"])
             {
                 case (DistributionType.Triangular): //Min, Max, Mode
-                    return new TriangularDistribution(Convert.ToDouble(distParameters["Param1"]), Convert.ToDouble(distParameters["Param2"]), Convert.ToDouble(distParameters["Param3"]));
+                    return new TriangularDistribution(Convert.ToDouble(distParameters["Min"]), Convert.ToDouble(distParameters["Max"]), Convert.ToDouble(distParameters["Mode"]));
                 case (DistributionType.Normal):
                     return new NormalDistribution(Convert.ToDouble(distParameters["Mean"]), Convert.ToDouble(distParameters["Stdev"]));      //mean, stdev
                 case (DistributionType.Lognormal):

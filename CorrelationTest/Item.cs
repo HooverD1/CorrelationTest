@@ -164,6 +164,61 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
+        public static void ExpandCorrelation()
+        {
+            Excel.Range selection = ThisAddIn.MyApp.Selection;
+            SheetType sheetType = ExtensionMethods.GetSheetType(selection.Worksheet);
+            if (sheetType != SheetType.Estimate && sheetType != SheetType.WBS) { ExtensionMethods.TurnOnUpdating(); return; }
+            CostSheet sheetObj = CostSheet.ConstructFromXlCostSheet(selection.Worksheet);
+            IEnumerable<Item> items = from Item item in sheetObj.Items where item.xlRow.Row == selection.Row select item;
+            if (!items.Any()) { return; }
+            Item selectedItem = items.First();
+            CorrelationType correlType;
+
+            //This needs done in the class so that I can know what type it is... Loading inputs with no subs doesn't work
+            if (selection.Column == sheetObj.Specs.CostCorrel_Offset && selectedItem is IHasCostCorrelations)
+            {
+                correlType = CorrelationType.Cost;
+            }
+            else if (selection.Column == sheetObj.Specs.DurationCorrel_Offset && selectedItem is IHasDurationCorrelations)
+            {
+                correlType = CorrelationType.Duration;
+            }
+            else if (selection.Column == sheetObj.Specs.PhasingCorrel_Offset && selectedItem is IHasPhasingCorrelations)
+            {
+                correlType = CorrelationType.Phasing;
+            }
+            else
+            {
+                //Probably a misclick
+                return;
+                //correlType = CorrelationType.Null;
+                //throw new Exception("Unknown Correlation Type");
+            }
+
+            ExtensionMethods.TurnOffUpdating();
+            switch (correlType)
+            {
+                case CorrelationType.Cost:
+                    if (selectedItem.CanExpand(correlType))
+                        ((IHasSubs)selectedItem).Expand(correlType);
+                    break;
+                case CorrelationType.Duration:
+                    if (selectedItem.CanExpand(correlType))
+                        ((IHasSubs)selectedItem).Expand(correlType);
+                    break;
+                case CorrelationType.Phasing:
+                    if (selectedItem.CanExpand(correlType))
+                        ((IHasSubs)selectedItem).Expand(correlType);
+                    break;
+                case CorrelationType.Null:      //Not selecting a correlation column
+                    return;
+                default:
+                    throw new Exception("Unknown correlation expand issue");
+            }
+
+            ExtensionMethods.TurnOnUpdating();
+        }
 
     }
 }

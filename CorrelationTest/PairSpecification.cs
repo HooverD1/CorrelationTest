@@ -96,10 +96,10 @@ namespace CorrelationTest
             return sb.ToString();
         }
 
-        public object[,] GetCorrelationMatrix_Values()
+        public double[,] GetCorrelationMatrix_Values()
         {
             int size = this.Pairs.Count() + 1;
-            object[,] matrix = new object[size, size];
+            double[,] matrix = new double[size, size];
             matrix[size - 1, size - 1] = 1;
             for(int row = 0; row < size; row++)
             {

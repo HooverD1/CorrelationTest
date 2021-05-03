@@ -93,12 +93,12 @@ namespace CorrelationTest
 
         public void LoadPhasing(Excel.Range xlRow)
         {
-            this.Periods = GetPeriods();
+            this.Periods = GetPeriods(5);
         }
-        private Period[] GetPeriods()
+        private Period[] GetPeriods(int numberOfPeriods)
         {
             double[] dollars = LoadDollars();
-            Period[] periods = new Period[5];
+            Period[] periods = new Period[numberOfPeriods];
             for (int i = 1; i <= periods.Length; i++)
             {
                 periods[i-1] = new Period(this.uID, $"P{i}", dollars[i-1]);     //Need to be able to pull the dates off the sheet here.
@@ -318,6 +318,7 @@ namespace CorrelationTest
         {
             SheetType typeOfCost = this.CostCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            Sheets.CorrelationSheet.CheckMatrixForErrors(correlSheet);
             correlSheet.PrintToSheet();
         }
 
@@ -325,13 +326,15 @@ namespace CorrelationTest
         {
             SheetType typeOfCost = this.PhasingCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
-            correlSheet.PrintToSheet();
+            if (!Sheets.CorrelationSheet.CheckMatrixForErrors(correlSheet))
+                correlSheet.PrintToSheet();
         }
 
         private void Expand_Duration()      //Inefficiency: I believe all the items are already loaded when creationg correlSheet - .PrintToSheet() reloads the cost sheet, which reloads the items.
         {
             SheetType typeOfCost = this.DurationCorrelationString.GetCorrelType();
             Sheets.CorrelationSheet correlSheet = Sheets.CorrelationSheet.ConstructFromParentItem(this, typeOfCost);
+            Sheets.CorrelationSheet.CheckMatrixForErrors(correlSheet);
             correlSheet.PrintToSheet();
         }
 

@@ -23,7 +23,7 @@ namespace CorrelationTest
         private void ExpandCorrel_Click(object sender, RibbonControlEventArgs e)
         {
             ExtensionMethods.TurnOffUpdating();
-            Sheets.CorrelationSheet.Expand();
+            Item.ExpandCorrelation();
             ExtensionMethods.TurnOnUpdating();
         }        
 

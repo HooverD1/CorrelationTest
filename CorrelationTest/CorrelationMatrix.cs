@@ -58,6 +58,7 @@ namespace CorrelationTest
                         matrix.IDs = (from ISub sub in ((IHasCostCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.Fields = ParentItem.GetFields();
                         matrix.Matrix = ((IHasCostCorrelations)ParentItem).CostCorrelationString.GetMatrix_Formulas(CorrelSheet);
+                        matrix.DoubleMatrix = ((IHasCostCorrelations)ParentItem).CostCorrelationString.GetMatrix_Doubles();
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
                         break;
@@ -65,6 +66,7 @@ namespace CorrelationTest
                         matrix = new Data.CorrelationMatrix_Inputs();
                         matrix.Fields = ParentItem.GetFields();
                         matrix.Matrix = ((IHasCostCorrelations)ParentItem).CostCorrelationString.GetMatrix_Values();
+                        matrix.DoubleMatrix = ((IHasCostCorrelations)ParentItem).CostCorrelationString.GetMatrix_Doubles();
                         matrix.FieldCount = matrix.Fields.Count();
                         matrix.IDs = (from ISub sub in ((IHasCostCorrelations)ParentItem).SubEstimates select sub.uID.ID).ToArray();
                         matrix.FieldDict = matrix.GetFieldDict(matrix.IDs);
@@ -101,6 +103,7 @@ namespace CorrelationTest
                     default:
                         throw new Exception("Invalid CorrelationString type.");
                 }
+                matrix.ContainingSheet = CorrelSheet;
                 return matrix;
             }
 
@@ -127,6 +130,7 @@ namespace CorrelationTest
                         matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = CorrelSheet.GetMatrix();
+                        matrix_obj.DoubleMatrix = ExtensionMethods.ConvertObjectArray<double>(matrix_obj.Matrix);
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     case SheetType.Correlation_CP:
@@ -135,6 +139,7 @@ namespace CorrelationTest
                         matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = CorrelSheet.GetMatrix();
+                        matrix_obj.DoubleMatrix = ExtensionMethods.ConvertObjectArray<double>(matrix_obj.Matrix);
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     case SheetType.Correlation_PM:
@@ -144,6 +149,7 @@ namespace CorrelationTest
                         matrix_obj.IDs = pids.Select(x => x.ID).ToArray();
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = CorrelSheet.GetMatrix();
+                        matrix_obj.DoubleMatrix = ExtensionMethods.ConvertObjectArray<double>(matrix_obj.Matrix);
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     case SheetType.Correlation_PP:
@@ -153,6 +159,7 @@ namespace CorrelationTest
                         matrix_obj.IDs = pids2.Select(x => x.ID).ToArray();
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = CorrelSheet.GetMatrix();
+                        matrix_obj.DoubleMatrix = ExtensionMethods.ConvertObjectArray<double>(matrix_obj.Matrix);
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     case SheetType.Correlation_DM:
@@ -161,6 +168,7 @@ namespace CorrelationTest
                         matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = CorrelSheet.GetMatrix();
+                        matrix_obj.DoubleMatrix = ExtensionMethods.ConvertObjectArray<double>(matrix_obj.Matrix);
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     case SheetType.Correlation_DP:
@@ -169,6 +177,7 @@ namespace CorrelationTest
                         matrix_obj.IDs = sub_IDs;
                         matrix_obj.Fields = sub_fields;
                         matrix_obj.Matrix = CorrelSheet.GetMatrix();
+                        matrix_obj.DoubleMatrix = ExtensionMethods.ConvertObjectArray<double>(matrix_obj.Matrix);
                         matrix_obj.FieldDict = matrix_obj.GetFieldDict(matrix_obj.IDs);
                         break;
                     default:
@@ -176,7 +185,7 @@ namespace CorrelationTest
                 }
                 matrix_obj.Matrix = ExtensionMethods.ReIndexArray(matrix_obj.Matrix);
                 matrix_obj.FieldCount = matrix_obj.Fields.Count();
-
+                matrix_obj.ContainingSheet = CorrelSheet;
                 return matrix_obj;
             }
 
@@ -404,18 +413,44 @@ namespace CorrelationTest
                 }
                 return true;
             }
-            private double[,] GetDoubleMatrix(object[,] objectMatrix)
+
+            //EXPAND
+            private double[,] GetDoubleMatrix(dynamic[,] objectMatrix)
             {
+
                 objectMatrix = ExtensionMethods.ReIndexArray<object>(objectMatrix);
-                objectMatrix = ExtensionMethods.AddLowerTriangular(objectMatrix);
+                //objectMatrix = ExtensionMethods.AddLowerTriangular(objectMatrix);
                 if (this.DoubleMatrix == null)
                 {
                     this.DoubleMatrix = new double[objectMatrix.GetLength(0), objectMatrix.GetLength(1)];
-                    for (int row = 0; row < objectMatrix.GetLength(0); row++)
+                    //DIAGONAL
+                    for(int diag = 0; diag < objectMatrix.GetLength(0); diag++)
                     {
-                        for (int col = 0; col < objectMatrix.GetLength(1); col++)
+                        DoubleMatrix[diag, diag] = 1;
+                    }
+                    //UPPER TRIANGULAR
+                    for (int row = 0; row < objectMatrix.GetLength(0)-1; row++)
+                    {
+                        for (int col = row+1; col < objectMatrix.GetLength(1); col++)
                         {
-                            DoubleMatrix[row, col] = Convert.ToDouble(objectMatrix[row, col]);
+                            if(objectMatrix[row, col] is string)
+                            {
+                                //Need to evaluate the excel cell here.. somehow
+                                DoubleMatrix[row, col] = Convert.ToDouble(this.ContainingSheet.xlSheet.Evaluate(objectMatrix[row, col]));
+                            }
+                            else if(objectMatrix[row, col] is double)
+                            {
+                                DoubleMatrix[row, col] = objectMatrix[row, col];
+                            }
+                            else if(Double.TryParse(Convert.ToString(objectMatrix[row, col]), out double doubleValue))
+                            {                                
+                                DoubleMatrix[row, col] = doubleValue;
+                            }
+                            else
+                            {
+                                throw new Exception("Unreadable matrix value");
+                            }
+                            DoubleMatrix[col, row] = DoubleMatrix[row, col];
                         }
                     }
                 }
@@ -424,8 +459,8 @@ namespace CorrelationTest
             
             public bool CheckForPSD()
             {
-                double[,] doubleMatrix = GetDoubleMatrix(this.Matrix);
-                var eigens = new Accord.Math.Decompositions.EigenvalueDecomposition(doubleMatrix, false, true);
+                //double[,] doubleMatrix = GetDoubleMatrix(this.Matrix);
+                var eigens = new Accord.Math.Decompositions.EigenvalueDecomposition(this.DoubleMatrix, false, true);
                 if (eigens.RealEigenvalues.Min() < 0)
                     return false;
                 else
@@ -434,7 +469,6 @@ namespace CorrelationTest
 
             public Tuple<double, double> GetTransitivityBounds(int row, int col)
             {
-                this.DoubleMatrix = GetDoubleMatrix(this.Matrix);
                 double max_lower = -1;
                 double min_upper = 1;
                 for (int via = 0; via < this.Matrix.GetLength(0); via++)
@@ -454,7 +488,6 @@ namespace CorrelationTest
 
             public MatrixErrors[,] CheckMatrixForTransitivity()
             {
-                this.DoubleMatrix = GetDoubleMatrix(this.Matrix);
                 MatrixErrors[,] errorMatrix = new MatrixErrors[this.Matrix.GetLength(0), this.Matrix.GetLength(1)];
 
                 for(int row = 0; row < Matrix.GetLength(0); row++)
@@ -541,8 +574,11 @@ namespace CorrelationTest
 
             public bool ValidateAgainstPairs(PairSpecification pairs)
             {
-                object[,] pairsMatrix = pairs.GetCorrelationMatrix_Values();
-                return this.Equals(pairsMatrix);
+                return true;
+
+                //I think this is entirely outdated
+                //object[,] pairsMatrix = pairs.GetCorrelationMatrix_Values();
+                //return this.Equals(pairsMatrix);
             }
 
             public void FixMatrixForPSD()
