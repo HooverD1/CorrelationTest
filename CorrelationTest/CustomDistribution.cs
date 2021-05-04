@@ -65,8 +65,12 @@ namespace CorrelationTest
                 parameters.Add("Mean", mean);
             if (Double.TryParse(distributionStringValues[2], out double stdev))
                 parameters.Add("Stdev", stdev);
+
+            var lookupDictionary = new Dictionary<string, object>();
             
-            //Need to add the lookup table as an additional parameter here///////////
+            //Add look-up values to the dictionary here
+
+            parameters.Add("LookUp", lookupDictionary);
 
             return parameters;
         }
