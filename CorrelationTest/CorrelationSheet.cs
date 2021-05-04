@@ -402,7 +402,7 @@ namespace CorrelationTest
             {
                 //Select a correlation
                 int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
-                int selectionCol = ThisAddIn.MyApp.Selection.Column;       //dependency..
+                int selectionCol = ThisAddIn.MyApp.Selection.Column;    //dependency..
                 //Make sure the row and column are within the matrix range
                 if (selectionRow < this.Specs.MatrixCoords.Item1 + 1 || selectionRow > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item1)
                 {

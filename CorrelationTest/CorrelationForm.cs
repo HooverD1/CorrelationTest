@@ -15,6 +15,15 @@ namespace CorrelationTest
 {
     public partial class CorrelationForm : Form
     {
+        public enum CoefficientBox_ErrorType
+        {
+            Transitivity,
+            PSD,
+            Conformal
+        }
+        private Label label_coefErrors { get; set; }
+        private decimal lastValue { get; set; }
+        private bool errorState_CoefficientBox { get; set; }
         private IEstimateDistribution CorrelDist1 { get; set; }
         private IEstimateDistribution CorrelDist2 { get; set; }
         public CorrelationForm(IEstimateDistribution correlDist1, IEstimateDistribution correlDist2)
@@ -62,17 +71,78 @@ namespace CorrelationTest
             numericUpDown_CorrelValue.DecimalPlaces = 2;
             numericUpDown_CorrelValue.Minimum = Convert.ToDecimal(trans_bounds.Item1);
             numericUpDown_CorrelValue.Maximum = Convert.ToDecimal(trans_bounds.Item2);
-            numericUpDown_CorrelValue.Increment = Convert.ToDecimal(0.05);
+            numericUpDown_CorrelValue.Increment = Convert.ToDecimal(0.01);
 
-            
+            this.label_coefErrors = new Label();
+            label_coefErrors.AutoSize = false;
+            label_coefErrors.Width = this.groupBox_CorrelCoef.Width - 4;
+            this.groupBox_CorrelCoef.Controls.Add(label_coefErrors);
+            label_coefErrors.Top = numericUpDown_CorrelValue.Bottom;
+            label_coefErrors.Height = this.groupBox_CorrelCoef.Height - label_coefErrors.Top - 2;
+            label_coefErrors.Left = 2;
+            label_coefErrors.Padding = new Padding(6);
+
             double existingValue = Convert.ToDouble(ThisAddIn.MyApp.Selection.value);
             if (existingValue >= trans_bounds.Item1 && existingValue <= trans_bounds.Item2)
+            {
                 numericUpDown_CorrelValue.Value = Convert.ToDecimal(existingValue); //Keep existing matrix value
-            else if(existingValue < trans_bounds.Item1)
+                CoefficientBox_Reset();
+                lastValue = numericUpDown_CorrelValue.Value;
+            }
+            else if (existingValue < trans_bounds.Item1)
+            {
                 numericUpDown_CorrelValue.Value = Convert.ToDecimal(trans_bounds.Item1);  //Set to min
-            else if(existingValue > trans_bounds.Item2)
+                if(trans_bounds.Item1 == -1)
+                    CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
+                else
+                    CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                lastValue = numericUpDown_CorrelValue.Value;
+            }
+            else if (existingValue > trans_bounds.Item2)
+            {
                 numericUpDown_CorrelValue.Value = Convert.ToDecimal(trans_bounds.Item2);  //Set to max
+                if (trans_bounds.Item1 == 1)
+                    CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
+                else
+                    CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                lastValue = numericUpDown_CorrelValue.Value;
+            }
+            else
+            {
+                throw new Exception("Unhandled initial condition");
+            }
         }
+
+        public void CoefficientBox_Reset()
+        {
+            //DEFAULT "Info" yellow
+            groupBox_CorrelCoef.BackColor = Color.FromArgb(255, 255, 225);
+            this.label_coefErrors.Text = "No Errors";
+            errorState_CoefficientBox = false;
+        }
+
+        public void CoefficientBox_FlagError(CoefficientBox_ErrorType errorType)
+        {
+            //ERROR red
+            errorState_CoefficientBox = true;
+            groupBox_CorrelCoef.BackColor = Color.FromArgb(255, 124, 128);
+
+            switch (errorType)
+            {
+                case CoefficientBox_ErrorType.Conformal:
+                    this.label_coefErrors.Text = "More extreme values violate conformality";
+                    break;
+                case CoefficientBox_ErrorType.Transitivity:
+                    this.label_coefErrors.Text = "More extreme values violate transitivity";
+                    break;
+                case CoefficientBox_ErrorType.PSD:
+                    this.label_coefErrors.Text = "Value makes matrix fail PSD check";
+                    break;
+                default:
+                    throw new Exception("Unknown error type");
+            }
+        }
+        
 
         private void CorrelScatter_Click(object sender, EventArgs e)
         {
@@ -109,6 +179,39 @@ namespace CorrelationTest
                 throw new Exception("Matrix errors");
             }
             this.Close();
+        }
+
+        private void groupBox_CorrelCoef_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void numericUpDown_CorrelValue_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (lastValue == numericUpDown_CorrelValue.Value)
+            {
+                if (numericUpDown_CorrelValue.Value >= numericUpDown_CorrelValue.Maximum)
+                {
+                    if (numericUpDown_CorrelValue.Maximum == 1)
+                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
+                    else
+                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                }
+                else if (numericUpDown_CorrelValue.Value <= numericUpDown_CorrelValue.Minimum)
+                {
+                    if (numericUpDown_CorrelValue.Minimum == -1)
+                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
+                    else
+                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                }
+            }
+            lastValue = numericUpDown_CorrelValue.Value;
+        }
+
+        private void numericUpDown_CorrelValue_ValueChanged(object sender, EventArgs e)
+        {
+            //Save the old value
+            CoefficientBox_Reset();
         }
     }
 }
