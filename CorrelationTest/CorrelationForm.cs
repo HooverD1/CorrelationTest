@@ -11,6 +11,7 @@ using Accord.Statistics.Distributions.Univariate;
 using System.Windows.Forms.DataVisualization.Charting;
 using Excel = Microsoft.Office.Interop.Excel;
 
+
 namespace CorrelationTest
 {
     public partial class CorrelationForm : Form
@@ -38,28 +39,39 @@ namespace CorrelationTest
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
 
             //Create & set example points
-            for (int i = 0; i < 20; i++)
+            Random rando = new Random();
+            for (int i = 1; i < 500; i++)
             {
-                double input = ((double)i + 1) / 100;
-                double x = CorrelDist1.GetInverse(input);
-                double y = CorrelDist2.GetInverse(input);
+                //double input = ((double)i) / 100;
+                double x = CorrelDist1.GetInverse(rando.NextDouble());
+                double y = CorrelDist2.GetInverse(rando.NextDouble());
                 this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(x, y);
             }
+
+            this.CorrelScatter.Series["CorrelSeries"].MarkerStyle = MarkerStyle.Circle;
             //Set the axis scale
-            this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.00";
-            this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.00";
+            //this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.00";
+            //this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.00";
+            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.False;
+            this.CorrelScatter.ChartAreas[0].AxisY2.Enabled = AxisEnabled.True;
             this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
-            this.CorrelScatter.ChartAreas[0].AxisY.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum_X();
+            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum_X();
+            this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum_X();
+            this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum_X();
 
-            double xMin = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.XValue).Min();
-            double xMax = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.XValue).Max();
-            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = Math.Floor(xMin);
-            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = Math.Ceiling(xMax);
+            
 
-            double yMin = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.YValues.First()).Min();
-            double yMax = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.YValues.First()).Max();
-            this.CorrelScatter.ChartAreas[0].AxisY.Minimum = Math.Floor(yMin);
-            this.CorrelScatter.ChartAreas[0].AxisY.Maximum = Math.Ceiling(yMax);
+            //double xMin = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.XValue).Min();
+            //double xMax = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.XValue).Max();
+            //this.CorrelScatter.ChartAreas[0].AxisX.Minimum = Math.Floor(xMin);
+            //this.CorrelScatter.ChartAreas[0].AxisX.Maximum = Math.Ceiling(xMax);
+
+            //double yMin = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.YValues.First()).Min();
+            //double yMax = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.YValues.First()).Max();
+            //this.CorrelScatter.ChartAreas[0].AxisY.Minimum = Math.Floor(yMin);
+            //this.CorrelScatter.ChartAreas[0].AxisY.Maximum = Math.Ceiling(yMax);
 
             Excel.Range xlSelection = ThisAddIn.MyApp.Selection;
             int index1 = xlSelection.Row - (CorrelSheet.xlMatrixCell.Row + 1);
@@ -111,6 +123,83 @@ namespace CorrelationTest
             {
                 throw new Exception("Unhandled initial condition");
             }
+
+            LoadXAxisDistribution();
+            LoadYAxisDistribution();
+
+        }
+
+        private void LoadYAxisDistribution()
+        {
+            //Build a series off the distribution
+            System.IO.MemoryStream myStream = new System.IO.MemoryStream();
+            Chart yAxisChart = new Chart();
+            xAxisChart.Serializer.Save(myStream);
+            yAxisChart.Serializer.Load(myStream);
+
+            yAxisChart.Series.Clear();
+            Series Series1 = new Series();
+            yAxisChart.Series.Add(Series1);
+            yAxisChart.Series["Series1"].ChartType = SeriesChartType.Bar;
+            yAxisChart.Width = xAxisChart.Height - 25;
+            yAxisChart.Left = CorrelScatter.Left - yAxisChart.Width;
+            yAxisChart.Top = CorrelScatter.Top + 12;
+            yAxisChart.Height = CorrelScatter.Height - 20;
+            yAxisChart.Series["Series1"].YValuesPerPoint = 1;
+            yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
+            //yAxisChart.ChartAreas[0].AxisY.LabelStyle.Enabled = false;
+            yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
+
+            yAxisChart.Series["Series1"].IsVisibleInLegend = false;
+            yAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
+
+            int steps = 1000;
+            double minimum = CorrelDist2.GetMinimum_X();
+            double maximum = CorrelDist2.GetMaximum_X();
+            double step = (maximum - minimum) / steps;
+
+            yAxisChart.ChartAreas[0].AxisX.Minimum = minimum;
+            yAxisChart.ChartAreas[0].AxisX.Maximum = maximum;
+
+            for (int i = 0; i < steps; i++)
+            {                
+                double x = minimum + step * i;
+                double y = CorrelDist2.GetPDF_Value(x);
+                yAxisChart.Series["Series1"].Points.AddXY(x, y);
+            }
+            //yAxisChart.ChartAreas["ChartArea1"].Area3DStyle.Rotation = 45;
+            //yAxisChart.ChartAreas["ChartArea1"].Area3DStyle.Inclination = 45;
+            yAxisChart.ChartAreas[0].AxisY.IsReversed = true;
+            //yAxisChart.ChartAreas[0].AxisY.LabelStyle.Enabled = false;
+            
+            this.Controls.Add(yAxisChart);
+        }
+
+        private void LoadXAxisDistribution()
+        {
+            //Build a series off the distribution
+            this.xAxisChart.Left = CorrelScatter.Left - 40;
+            this.xAxisChart.Top = CorrelScatter.Top - 150;
+            this.xAxisChart.Height = 150;
+            this.xAxisChart.Width = CorrelScatter.Width - 64;
+            this.xAxisChart.Series["Series1"].YValuesPerPoint = 1;
+            this.xAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
+
+            int steps = 100;
+            double minimum = CorrelDist1.GetMinimum_X();
+            double maximum = CorrelDist1.GetMaximum_X();
+            double step = (maximum - minimum) / steps;
+
+            this.xAxisChart.ChartAreas[0].AxisX.Minimum = minimum;
+            this.xAxisChart.ChartAreas[0].AxisX.Maximum = maximum;
+
+            for (int i = 0; i < steps; i++)
+            {
+                double x = minimum + step * i;
+                double y = CorrelDist1.GetPDF_Value(x);
+                xAxisChart.Series["Series1"].Points.AddXY(x, y);
+            }
+            xAxisChart.ChartAreas[0].AxisX.LabelStyle.Enabled = false;
         }
 
         public void CoefficientBox_Reset()
@@ -143,12 +232,6 @@ namespace CorrelationTest
             }
         }
         
-
-        private void CorrelScatter_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void btn_Cancel_Click(object sender, EventArgs e)
         {
             this.Close();

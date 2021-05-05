@@ -51,7 +51,37 @@ namespace CorrelationTest
             return returnObject;
         }
 
+        public double GetMaximum_X()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetMinimum_X()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetMaximum_Y()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetMinimum_Y()
+        {
+            throw new NotImplementedException();
+        }
+
         public double GetInverse(double percentile)
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetPDF_Value(double xValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetCDF_Value(double xValue)
         {
             throw new NotImplementedException();
         }

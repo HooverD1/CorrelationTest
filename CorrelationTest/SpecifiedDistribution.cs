@@ -126,6 +126,49 @@ namespace CorrelationTest
             return Distribution.InverseDistributionFunction(percentile);
         }
 
+        public double GetMaximum_X()
+        {
+            double stdev = Math.Sqrt(Distribution.Variance);
+            return Distribution.Mean + stdev * 4;
+        }
+
+        public double GetMinimum_X()
+        {
+            if (Distribution is LognormalDistribution)
+            {
+                return 0;
+            }
+            else
+            {
+                double stdev = Math.Sqrt(Distribution.Variance);
+                return Distribution.Mean - stdev * 4;
+            }
+        }
+
+        public double GetMaximum_Y()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetMinimum_Y()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetPDF_Value(double xValue)
+        {
+            //Get the Y value from the X value
+            if (Distribution is LognormalDistribution && xValue == 0)
+                return 0;
+            return Distribution.ProbabilityFunction(xValue);
+        }
+
+        public double GetCDF_Value(double xValue)
+        {
+            //Get the Y value from the X value
+            return Distribution.DistributionFunction(xValue);
+        }
+
         private static IUnivariateDistribution BuildDistribution(Dictionary<string, object> distParameters)
         {
             switch (distParameters["Type"])

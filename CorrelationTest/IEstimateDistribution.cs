@@ -18,6 +18,12 @@ namespace CorrelationTest
         Dictionary<string, object> DistributionParameters { get; set; }
 
         double GetInverse(double percentile);
+        double GetPDF_Value(double xValue);
+        double GetCDF_Value(double xValue);
+        double GetMaximum_X();
+        double GetMinimum_X();
+        double GetMaximum_Y();
+        double GetMinimum_Y();
         //Dictionary<string, object> ParseStringIntoParameters { get; set; }
     }
 
