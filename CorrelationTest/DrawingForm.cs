@@ -34,10 +34,12 @@ namespace CorrelationTest
 
         private void DrawingForm_MouseClick(object sender, MouseEventArgs e)
         {
-            NewSegment.AddPoint(e.Location);
-            if(NewSegment.Points.Count() > 1)
+            if (NewSegment.AddPoint(e.Location))
             {
-                Refresh();
+                if (NewSegment.Points.Count() > 1)
+                {
+                    Refresh();
+                }
             }
         }
     }
