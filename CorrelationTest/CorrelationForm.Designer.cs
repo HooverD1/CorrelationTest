@@ -29,10 +29,8 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.CorrelScatter = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.btn_saveClose = new System.Windows.Forms.Button();
@@ -52,19 +50,16 @@
             // 
             chartArea1.Name = "ChartArea1";
             this.CorrelScatter.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.CorrelScatter.Legends.Add(legend1);
             this.CorrelScatter.Location = new System.Drawing.Point(197, 182);
-            this.CorrelScatter.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.CorrelScatter.Margin = new System.Windows.Forms.Padding(0);
             this.CorrelScatter.Name = "CorrelScatter";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series1.Legend = "Legend1";
             series1.Name = "CorrelSeries";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             this.CorrelScatter.Series.Add(series1);
-            this.CorrelScatter.Size = new System.Drawing.Size(1075, 642);
+            this.CorrelScatter.Size = new System.Drawing.Size(750, 750);
             this.CorrelScatter.TabIndex = 0;
             this.CorrelScatter.Text = "Scatterplot";
             this.CorrelScatter.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelScatter_Paint);
@@ -72,7 +67,7 @@
             // 
             // btn_saveClose
             // 
-            this.btn_saveClose.Location = new System.Drawing.Point(1072, 679);
+            this.btn_saveClose.Location = new System.Drawing.Point(968, 790);
             this.btn_saveClose.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_saveClose.Name = "btn_saveClose";
             this.btn_saveClose.Size = new System.Drawing.Size(184, 38);
@@ -83,7 +78,7 @@
             // 
             // btn_Cancel
             // 
-            this.btn_Cancel.Location = new System.Drawing.Point(1072, 722);
+            this.btn_Cancel.Location = new System.Drawing.Point(968, 833);
             this.btn_Cancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_Cancel.Name = "btn_Cancel";
             this.btn_Cancel.Size = new System.Drawing.Size(184, 38);
@@ -107,7 +102,7 @@
             // 
             this.groupBox_CorrelCoef.BackColor = System.Drawing.SystemColors.Info;
             this.groupBox_CorrelCoef.Controls.Add(this.numericUpDown_CorrelValue);
-            this.groupBox_CorrelCoef.Location = new System.Drawing.Point(1072, 567);
+            this.groupBox_CorrelCoef.Location = new System.Drawing.Point(968, 678);
             this.groupBox_CorrelCoef.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox_CorrelCoef.Name = "groupBox_CorrelCoef";
             this.groupBox_CorrelCoef.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -121,14 +116,11 @@
             // 
             chartArea2.Name = "ChartArea1";
             this.xAxisChart.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.xAxisChart.Legends.Add(legend2);
             this.xAxisChart.Location = new System.Drawing.Point(296, 69);
-            this.xAxisChart.Margin = new System.Windows.Forms.Padding(4);
+            this.xAxisChart.Margin = new System.Windows.Forms.Padding(0);
             this.xAxisChart.Name = "xAxisChart";
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-            series2.Legend = "Legend1";
             series2.Name = "Series1";
             this.xAxisChart.Series.Add(series2);
             this.xAxisChart.Size = new System.Drawing.Size(752, 129);
@@ -137,7 +129,7 @@
             // 
             // btn_LaunchHelper
             // 
-            this.btn_LaunchHelper.Location = new System.Drawing.Point(1072, 502);
+            this.btn_LaunchHelper.Location = new System.Drawing.Point(968, 613);
             this.btn_LaunchHelper.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_LaunchHelper.Name = "btn_LaunchHelper";
             this.btn_LaunchHelper.Size = new System.Drawing.Size(184, 38);
@@ -148,7 +140,7 @@
             // 
             // btn_LaunchDrawCorrelation
             // 
-            this.btn_LaunchDrawCorrelation.Location = new System.Drawing.Point(1072, 460);
+            this.btn_LaunchDrawCorrelation.Location = new System.Drawing.Point(968, 571);
             this.btn_LaunchDrawCorrelation.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_LaunchDrawCorrelation.Name = "btn_LaunchDrawCorrelation";
             this.btn_LaunchDrawCorrelation.Size = new System.Drawing.Size(184, 38);
@@ -162,7 +154,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(1291, 838);
+            this.ClientSize = new System.Drawing.Size(1175, 932);
             this.Controls.Add(this.btn_LaunchDrawCorrelation);
             this.Controls.Add(this.btn_LaunchHelper);
             this.Controls.Add(this.xAxisChart);

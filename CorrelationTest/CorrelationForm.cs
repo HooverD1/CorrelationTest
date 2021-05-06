@@ -29,7 +29,7 @@ namespace CorrelationTest
         private TextBox textboxMinimum = new TextBox();
         private TextBox textboxMidpoint = new TextBox();
         private TextBox textboxMaximum = new TextBox();
-        private LineSegment DrawnCorrel { get; set; }
+        private DrawnCorrelation DrawnCorrel { get; set; }
         private bool DrawingMode = false;
         private bool UpDownEnabled { get; set; }
         private Label labelHelper = new Label();
@@ -82,6 +82,7 @@ namespace CorrelationTest
             }
 
             this.CorrelScatter.Series["CorrelSeries"].MarkerStyle = MarkerStyle.Circle;
+            this.CorrelScatter.Series["CorrelSeries"].IsVisibleInLegend = false;
             //Set the axis scale
             //this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.00";
             //this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.00";
@@ -174,15 +175,12 @@ namespace CorrelationTest
             Series Series1 = new Series();
             yAxisChart.Series.Add(Series1);
             yAxisChart.Series["Series1"].ChartType = SeriesChartType.Bar;
-            yAxisChart.Width = xAxisChart.Height - 25;
+            yAxisChart.Width = xAxisChart.Height;
             yAxisChart.Left = CorrelScatter.Left - yAxisChart.Width;
             yAxisChart.Top = CorrelScatter.Top + 12;
-            yAxisChart.Height = CorrelScatter.Height - 20;
+            yAxisChart.Height = CorrelScatter.Height - 10;
             yAxisChart.Series["Series1"].YValuesPerPoint = 1;
             yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
-            //yAxisChart.ChartAreas[0].AxisY.LabelStyle.Enabled = false;
-            yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
-
             yAxisChart.Series["Series1"].IsVisibleInLegend = false;
             yAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
 
@@ -202,8 +200,10 @@ namespace CorrelationTest
             }
             //yAxisChart.ChartAreas["ChartArea1"].Area3DStyle.Rotation = 45;
             //yAxisChart.ChartAreas["ChartArea1"].Area3DStyle.Inclination = 45;
+            yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
+            yAxisChart.ChartAreas[0].AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
+            yAxisChart.ChartAreas[0].AxisY.Interval = 0.1;
             yAxisChart.ChartAreas[0].AxisY.IsReversed = true;
-            //yAxisChart.ChartAreas[0].AxisY.LabelStyle.Enabled = false;
             
             this.Controls.Add(yAxisChart);
         }
@@ -214,7 +214,7 @@ namespace CorrelationTest
             this.xAxisChart.Left = CorrelScatter.Left - 40;
             this.xAxisChart.Top = CorrelScatter.Top - 150;
             this.xAxisChart.Height = 150;
-            this.xAxisChart.Width = CorrelScatter.Width - 64;
+            this.xAxisChart.Width = CorrelScatter.Width - 15;
             this.xAxisChart.Series["Series1"].YValuesPerPoint = 1;
             this.xAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
 
@@ -232,6 +232,8 @@ namespace CorrelationTest
                 double y = CorrelDist1.GetPDF_Value(x);
                 xAxisChart.Series["Series1"].Points.AddXY(x, y);
             }
+            xAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
+            xAxisChart.ChartAreas[0].AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
             xAxisChart.ChartAreas[0].AxisX.LabelStyle.Enabled = false;
         }
 
@@ -427,7 +429,7 @@ namespace CorrelationTest
             {
                 //Turn on DrawingMode
                 DrawingMode = true;
-                this.DrawnCorrel = new LineSegment();
+                this.DrawnCorrel = new DrawnCorrelation();
                 //Disable the other buttons
                 this.btn_LaunchHelper.Enabled = false;
                 this.btn_saveClose.Enabled = false;

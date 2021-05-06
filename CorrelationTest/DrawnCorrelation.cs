@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace CorrelationTest
 {
-    class LineSegment
+    class DrawnCorrelation
     {
         public List<Point> Points { get; set; } = new List<Point>();
         private bool leftRestricted = false;
         private bool rightRestricted = false;
 
-        public LineSegment() { }
+        public DrawnCorrelation() { }
 
         public bool AddPoint(Point newPoint)
         {

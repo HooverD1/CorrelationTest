@@ -51,7 +51,6 @@
             this.TestDoubles = this.Factory.CreateRibbonButton();
             this.TestStrings = this.Factory.CreateRibbonButton();
             this.TestFormulas = this.Factory.CreateRibbonButton();
-            this.btn_LaunchDraw = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -132,7 +131,6 @@
             // 
             this.DeveloperTools.Items.Add(this.DebugModeToggle);
             this.DeveloperTools.Items.Add(this.testPrint);
-            this.DeveloperTools.Items.Add(this.btn_LaunchDraw);
             this.DeveloperTools.Label = "DeveloperTools";
             this.DeveloperTools.Name = "DeveloperTools";
             // 
@@ -173,12 +171,6 @@
             this.TestFormulas.Label = "Test 1M Formulas";
             this.TestFormulas.Name = "TestFormulas";
             this.TestFormulas.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TestFormulas_Click);
-            // 
-            // btn_LaunchDraw
-            // 
-            this.btn_LaunchDraw.Label = "Drawing Form";
-            this.btn_LaunchDraw.Name = "btn_LaunchDraw";
-            this.btn_LaunchDraw.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btn_LaunchDraw_Click);
             // 
             // Ribbon1
             // 
@@ -221,7 +213,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton TestDoubles;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton TestStrings;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton TestFormulas;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton btn_LaunchDraw;
     }
 
     partial class ThisRibbonCollection
