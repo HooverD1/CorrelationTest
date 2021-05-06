@@ -40,6 +40,7 @@
             this.numericUpDown_CorrelValue = new System.Windows.Forms.NumericUpDown();
             this.groupBox_CorrelCoef = new System.Windows.Forms.GroupBox();
             this.xAxisChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.btn_LaunchHelper = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.CorrelScatter)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_CorrelValue)).BeginInit();
             this.groupBox_CorrelCoef.SuspendLayout();
@@ -52,8 +53,8 @@
             this.CorrelScatter.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.CorrelScatter.Legends.Add(legend1);
-            this.CorrelScatter.Location = new System.Drawing.Point(148, 148);
-            this.CorrelScatter.Margin = new System.Windows.Forms.Padding(2);
+            this.CorrelScatter.Location = new System.Drawing.Point(197, 182);
+            this.CorrelScatter.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CorrelScatter.Name = "CorrelScatter";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
@@ -62,16 +63,16 @@
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             this.CorrelScatter.Series.Add(series1);
-            this.CorrelScatter.Size = new System.Drawing.Size(806, 522);
+            this.CorrelScatter.Size = new System.Drawing.Size(1075, 642);
             this.CorrelScatter.TabIndex = 0;
             this.CorrelScatter.Text = "Scatterplot";
             // 
             // btn_saveClose
             // 
-            this.btn_saveClose.Location = new System.Drawing.Point(804, 552);
-            this.btn_saveClose.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_saveClose.Location = new System.Drawing.Point(1072, 679);
+            this.btn_saveClose.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_saveClose.Name = "btn_saveClose";
-            this.btn_saveClose.Size = new System.Drawing.Size(138, 31);
+            this.btn_saveClose.Size = new System.Drawing.Size(184, 38);
             this.btn_saveClose.TabIndex = 1;
             this.btn_saveClose.Text = "Save";
             this.btn_saveClose.UseVisualStyleBackColor = true;
@@ -79,10 +80,10 @@
             // 
             // btn_Cancel
             // 
-            this.btn_Cancel.Location = new System.Drawing.Point(804, 587);
-            this.btn_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_Cancel.Location = new System.Drawing.Point(1072, 722);
+            this.btn_Cancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_Cancel.Name = "btn_Cancel";
-            this.btn_Cancel.Size = new System.Drawing.Size(138, 31);
+            this.btn_Cancel.Size = new System.Drawing.Size(184, 38);
             this.btn_Cancel.TabIndex = 2;
             this.btn_Cancel.Text = "Cancel";
             this.btn_Cancel.UseVisualStyleBackColor = true;
@@ -91,10 +92,10 @@
             // numericUpDown_CorrelValue
             // 
             this.numericUpDown_CorrelValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numericUpDown_CorrelValue.Location = new System.Drawing.Point(15, 17);
-            this.numericUpDown_CorrelValue.Margin = new System.Windows.Forms.Padding(2);
+            this.numericUpDown_CorrelValue.Location = new System.Drawing.Point(20, 21);
+            this.numericUpDown_CorrelValue.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.numericUpDown_CorrelValue.Name = "numericUpDown_CorrelValue";
-            this.numericUpDown_CorrelValue.Size = new System.Drawing.Size(107, 28);
+            this.numericUpDown_CorrelValue.Size = new System.Drawing.Size(143, 34);
             this.numericUpDown_CorrelValue.TabIndex = 3;
             this.numericUpDown_CorrelValue.ValueChanged += new System.EventHandler(this.numericUpDown_CorrelValue_ValueChanged);
             this.numericUpDown_CorrelValue.MouseDown += new System.Windows.Forms.MouseEventHandler(this.numericUpDown_CorrelValue_MouseDown);
@@ -103,11 +104,11 @@
             // 
             this.groupBox_CorrelCoef.BackColor = System.Drawing.SystemColors.Info;
             this.groupBox_CorrelCoef.Controls.Add(this.numericUpDown_CorrelValue);
-            this.groupBox_CorrelCoef.Location = new System.Drawing.Point(804, 461);
-            this.groupBox_CorrelCoef.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox_CorrelCoef.Location = new System.Drawing.Point(1072, 567);
+            this.groupBox_CorrelCoef.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox_CorrelCoef.Name = "groupBox_CorrelCoef";
-            this.groupBox_CorrelCoef.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox_CorrelCoef.Size = new System.Drawing.Size(138, 86);
+            this.groupBox_CorrelCoef.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox_CorrelCoef.Size = new System.Drawing.Size(184, 106);
             this.groupBox_CorrelCoef.TabIndex = 5;
             this.groupBox_CorrelCoef.TabStop = false;
             this.groupBox_CorrelCoef.Text = "Correlation Coefficient";
@@ -119,29 +120,42 @@
             this.xAxisChart.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
             this.xAxisChart.Legends.Add(legend2);
-            this.xAxisChart.Location = new System.Drawing.Point(222, 56);
+            this.xAxisChart.Location = new System.Drawing.Point(296, 69);
+            this.xAxisChart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.xAxisChart.Name = "xAxisChart";
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series2.Legend = "Legend1";
             series2.Name = "Series1";
             this.xAxisChart.Series.Add(series2);
-            this.xAxisChart.Size = new System.Drawing.Size(564, 105);
+            this.xAxisChart.Size = new System.Drawing.Size(752, 129);
             this.xAxisChart.TabIndex = 6;
             this.xAxisChart.Text = "chart1";
             // 
+            // btn_LaunchHelper
+            // 
+            this.btn_LaunchHelper.Location = new System.Drawing.Point(1072, 502);
+            this.btn_LaunchHelper.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btn_LaunchHelper.Name = "btn_LaunchHelper";
+            this.btn_LaunchHelper.Size = new System.Drawing.Size(184, 38);
+            this.btn_LaunchHelper.TabIndex = 7;
+            this.btn_LaunchHelper.Text = "Use Guided Correlation";
+            this.btn_LaunchHelper.UseVisualStyleBackColor = true;
+            this.btn_LaunchHelper.Click += new System.EventHandler(this.btn_LaunchHelper_Click);
+            // 
             // CorrelationForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(968, 681);
+            this.ClientSize = new System.Drawing.Size(1291, 838);
+            this.Controls.Add(this.btn_LaunchHelper);
             this.Controls.Add(this.xAxisChart);
             this.Controls.Add(this.groupBox_CorrelCoef);
             this.Controls.Add(this.btn_Cancel);
             this.Controls.Add(this.btn_saveClose);
             this.Controls.Add(this.CorrelScatter);
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "CorrelationForm";
             this.Text = "CorrelationForm";
             this.Load += new System.EventHandler(this.CorrelationForm_Load);
@@ -161,5 +175,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDown_CorrelValue;
         private System.Windows.Forms.GroupBox groupBox_CorrelCoef;
         private System.Windows.Forms.DataVisualization.Charting.Chart xAxisChart;
+        private System.Windows.Forms.Button btn_LaunchHelper;
     }
 }

@@ -22,6 +22,13 @@ namespace CorrelationTest
             PSD,
             Conformal
         }
+        private Color existingColor { get; set; }
+        private int helperStage { get; set; }
+        private TextBox textboxMinimum = new TextBox();
+        private TextBox textboxMidpoint = new TextBox();
+        private TextBox textboxMaximum = new TextBox();
+
+        private Label labelHelper = new Label();
         private Label label_coefErrors { get; set; }
         private decimal lastValue { get; set; }
         private bool errorState_CoefficientBox { get; set; }
@@ -37,7 +44,6 @@ namespace CorrelationTest
         private void CorrelationForm_Load(object sender, EventArgs e)
         {
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
-
             //Create & set example points
             Random rando = new Random();
             for (int i = 1; i < 500; i++)
@@ -126,7 +132,7 @@ namespace CorrelationTest
 
             LoadXAxisDistribution();
             LoadYAxisDistribution();
-
+            SetupHelper();
         }
 
         private void LoadYAxisDistribution()
@@ -295,6 +301,98 @@ namespace CorrelationTest
         {
             //Save the old value
             CoefficientBox_Reset();
+        }
+
+        private void SetupHelper()
+        {
+            int vertical = CorrelScatter.Height / 2;
+            int min = CorrelScatter.Width / 4;
+            int mid = min * 2;
+            int max = min * 3;
+
+            textboxMinimum.Top = vertical;
+            textboxMinimum.Left = min;
+            textboxMinimum.Height = 50;
+            textboxMinimum.Width = 50;
+            textboxMidpoint.Top = vertical;
+            textboxMidpoint.Left = mid;
+            textboxMidpoint.Height = 50;
+            textboxMidpoint.Width = 50;
+            textboxMaximum.Top = vertical;
+            textboxMaximum.Left = max;
+            textboxMaximum.Height = 50;
+            textboxMaximum.Width = 50;
+
+        }
+
+        private void btn_LaunchHelper_Click(object sender, EventArgs e)
+        {
+            if(helperStage == 0)
+            {
+                //Load minimum
+                existingColor = CorrelScatter.ChartAreas[0].BackColor;
+                CorrelScatter.ChartAreas[0].BackColor = Color.FromArgb(195, 195, 195);
+                this.btn_LaunchHelper.Text = ">> Next >>";
+                this.Controls.Add(textboxMinimum);
+                labelHelper.AutoSize = true;
+                labelHelper.Top = textboxMinimum.Top - 50;
+                labelHelper.Left = textboxMinimum.Left;
+                labelHelper.Text = $"If X is {CorrelDist1.GetMinimum_X()}, what do you expect Y to be?";
+                this.Controls.Add(labelHelper);
+                labelHelper.BringToFront();
+                helperStage++;
+            }
+            else if(helperStage == 1)
+            {
+                textboxMinimum.Enabled = false;
+                Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
+                this.Controls.Add(textboxMidpoint);
+                labelHelper.Top = textboxMidpoint.Top - 50;
+                labelHelper.Left = textboxMidpoint.Left;
+                labelHelper.Text = $"If X is {(CorrelDist1.GetMaximum_X() - CorrelDist1.GetMinimum_X()) / 2}, what do you expect Y to be?";
+                labelHelper.BringToFront();
+                helperStage++;
+            }
+            else if (helperStage == 2)
+            {
+                textboxMidpoint.Enabled = false;
+                Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
+                this.Controls.Add(textboxMaximum);
+                labelHelper.Top = textboxMaximum.Top - 50;
+                labelHelper.Left = textboxMaximum.Left;
+                labelHelper.Text = $"If X is {CorrelDist1.GetMaximum_X()}, what do you expect Y to be?";
+                labelHelper.BringToFront();
+                helperStage++;
+            }
+            else if (helperStage == 3)
+            {
+                //Save the values
+                double minVal = Convert.ToDouble(textboxMinimum.Text);
+                double midVal = Convert.ToDouble(textboxMidpoint.Text);
+                double maxVal = Convert.ToDouble(textboxMaximum.Text);
+                //Remove the textboxes
+                this.Controls.Remove(textboxMinimum);
+                this.Controls.Remove(textboxMidpoint);
+                this.Controls.Remove(textboxMaximum);
+                //Return the color to normal
+                CorrelScatter.ChartAreas[0].BackColor = existingColor;
+                //Compute the line?
+                //But the slope != the correlation...
+                //So what am I doing here?
+
+                helperStage = 0;
+            }
+            //Set up correlations via a step-by-step answering of questions
+
+            //Load text boxes on the scatterplot to enter the expected value
+            
+            textboxMinimum.BringToFront();
+
+            this.Controls.Add(textboxMidpoint);
+            textboxMidpoint.BringToFront();
+            this.Controls.Add(textboxMaximum);
+            textboxMaximum.BringToFront();
+            //Un-enable everything else and change this button to a next button?
         }
     }
 }

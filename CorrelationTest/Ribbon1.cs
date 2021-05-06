@@ -492,5 +492,11 @@ namespace CorrelationTest
             ThisAddIn.MyApp.ScreenUpdating = true;
             ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
         }
+
+        private void btn_LaunchDraw_Click(object sender, RibbonControlEventArgs e)
+        {
+            DrawingForm drawForm = new DrawingForm();
+            drawForm.ShowDialog();
+        }
     }
 }
