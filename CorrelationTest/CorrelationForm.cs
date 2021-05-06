@@ -22,12 +22,16 @@ namespace CorrelationTest
             PSD,
             Conformal
         }
+        private List<DataPoint> CorrelScatterPoints { get; set; } = new List<DataPoint>();
         private Color existingColor { get; set; }
+        private Color existingColor_Markers { get; set; }
         private int helperStage { get; set; }
         private TextBox textboxMinimum = new TextBox();
         private TextBox textboxMidpoint = new TextBox();
         private TextBox textboxMaximum = new TextBox();
-
+        private LineSegment DrawnCorrel { get; set; }
+        private bool DrawingMode = false;
+        private bool UpDownEnabled { get; set; }
         private Label labelHelper = new Label();
         private Label label_coefErrors { get; set; }
         private decimal lastValue { get; set; }
@@ -41,6 +45,28 @@ namespace CorrelationTest
             InitializeComponent();
         }
 
+        private void ReloadCorrelScatter()
+        {
+            this.CorrelScatter = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.CorrelScatter.Series["CorrelSeries"].MarkerStyle = MarkerStyle.Circle;
+            //Set the axis scale
+            //this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.00";
+            //this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.00";
+            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.False;
+            this.CorrelScatter.ChartAreas[0].AxisY2.Enabled = AxisEnabled.True;
+            this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum_X();
+            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum_X();
+            this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum_X();
+            this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum_X();
+
+            foreach(DataPoint dp in CorrelScatterPoints)
+            {
+                this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(dp.XValue, dp.YValues[0]);
+            }
+        }
+
         private void CorrelationForm_Load(object sender, EventArgs e)
         {
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
@@ -51,6 +77,7 @@ namespace CorrelationTest
                 //double input = ((double)i) / 100;
                 double x = CorrelDist1.GetInverse(rando.NextDouble());
                 double y = CorrelDist2.GetInverse(rando.NextDouble());
+                CorrelScatterPoints.Add(new DataPoint(x, y));
                 this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(x, y);
             }
 
@@ -334,6 +361,7 @@ namespace CorrelationTest
                 CorrelScatter.ChartAreas[0].BackColor = Color.FromArgb(195, 195, 195);
                 this.btn_LaunchHelper.Text = ">> Next >>";
                 this.Controls.Add(textboxMinimum);
+                textboxMinimum.BringToFront();
                 labelHelper.AutoSize = true;
                 labelHelper.Top = textboxMinimum.Top - 50;
                 labelHelper.Left = textboxMinimum.Left;
@@ -347,6 +375,7 @@ namespace CorrelationTest
                 textboxMinimum.Enabled = false;
                 Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
                 this.Controls.Add(textboxMidpoint);
+                textboxMidpoint.BringToFront();
                 labelHelper.Top = textboxMidpoint.Top - 50;
                 labelHelper.Left = textboxMidpoint.Left;
                 labelHelper.Text = $"If X is {(CorrelDist1.GetMaximum_X() - CorrelDist1.GetMinimum_X()) / 2}, what do you expect Y to be?";
@@ -358,6 +387,7 @@ namespace CorrelationTest
                 textboxMidpoint.Enabled = false;
                 Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
                 this.Controls.Add(textboxMaximum);
+                textboxMaximum.BringToFront();
                 labelHelper.Top = textboxMaximum.Top - 50;
                 labelHelper.Left = textboxMaximum.Left;
                 labelHelper.Text = $"If X is {CorrelDist1.GetMaximum_X()}, what do you expect Y to be?";
@@ -367,13 +397,20 @@ namespace CorrelationTest
             else if (helperStage == 3)
             {
                 //Save the values
-                double minVal = Convert.ToDouble(textboxMinimum.Text);
-                double midVal = Convert.ToDouble(textboxMidpoint.Text);
-                double maxVal = Convert.ToDouble(textboxMaximum.Text);
+                bool t1 = Double.TryParse(textboxMinimum.Text, out double minVal);
+                bool t2 = Double.TryParse(textboxMidpoint.Text, out double midVal);
+                bool t3 = Double.TryParse(textboxMaximum.Text, out double maxVal);
+                
+                if(t1&&t2&&t3)
+                {
+                    //all three contain convertible values
+                }
                 //Remove the textboxes
                 this.Controls.Remove(textboxMinimum);
                 this.Controls.Remove(textboxMidpoint);
                 this.Controls.Remove(textboxMaximum);
+                this.Controls.Remove(labelHelper);
+                this.btn_LaunchHelper.Text = "Use Guided Correlation";
                 //Return the color to normal
                 CorrelScatter.ChartAreas[0].BackColor = existingColor;
                 //Compute the line?
@@ -382,17 +419,68 @@ namespace CorrelationTest
 
                 helperStage = 0;
             }
-            //Set up correlations via a step-by-step answering of questions
+        }
 
-            //Load text boxes on the scatterplot to enter the expected value
-            
-            textboxMinimum.BringToFront();
+        private void btn_LaunchDrawCorrelation_Click(object sender, EventArgs e)
+        {
+            if (!DrawingMode)
+            {
+                //Turn on DrawingMode
+                DrawingMode = true;
+                this.DrawnCorrel = new LineSegment();
+                //Disable the other buttons
+                this.btn_LaunchHelper.Enabled = false;
+                this.btn_saveClose.Enabled = false;
+                this.UpDownEnabled = this.numericUpDown_CorrelValue.Enabled;
+                if(this.UpDownEnabled)
+                    this.numericUpDown_CorrelValue.Enabled = false;
+                btn_LaunchDrawCorrelation.Text = "Done Drawing";
+                existingColor = CorrelScatter.ChartAreas[0].BackColor;
+                CorrelScatter.ChartAreas[0].BackColor = Color.FromArgb(195, 195, 195);
+                existingColor_Markers = CorrelScatter.Series["CorrelSeries"].Color;
+                CorrelScatter.Series["CorrelSeries"].Color = Color.FromArgb(0, 195, 195, 195);
+            }
+            else
+            {
+                //Turn off DrawingMode
+                this.DrawnCorrel = null;
+                this.btn_LaunchHelper.Enabled = true;
+                this.btn_saveClose.Enabled = true;
+                this.numericUpDown_CorrelValue.Enabled = this.UpDownEnabled;    //Reset to original state
+                btn_LaunchDrawCorrelation.Text = "Draw Correlation";
+                CorrelScatter.ChartAreas[0].BackColor = existingColor;
+                CorrelScatter.Series["CorrelSeries"].Color = existingColor_Markers;
+                DrawingMode = false;
+            }
+        }
 
-            this.Controls.Add(textboxMidpoint);
-            textboxMidpoint.BringToFront();
-            this.Controls.Add(textboxMaximum);
-            textboxMaximum.BringToFront();
-            //Un-enable everything else and change this button to a next button?
+        private void CorrelScatter_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (!DrawingMode)
+                return;
+            if (DrawnCorrel.AddPoint(e.Location))
+            {
+                if (DrawnCorrel.Points.Count() > 1)
+                {
+                    Refresh();
+                }
+            }
+        }
+
+        private void CorrelScatter_Paint(object sender, PaintEventArgs e)
+        {
+            if (DrawingMode)
+            {
+                if (DrawnCorrel.Points.Count() > 1)
+                {
+                    Pen pen = new Pen(Color.FromArgb(255, 0, 0, 0));
+                    e.Graphics.DrawLines(pen, DrawnCorrel.GetPoints());
+                }
+                else if(DrawnCorrel == null)
+                {
+                    this.ReloadCorrelScatter();
+                }
+            }
         }
     }
 }

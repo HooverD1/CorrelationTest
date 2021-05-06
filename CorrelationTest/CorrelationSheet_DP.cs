@@ -10,7 +10,7 @@ namespace CorrelationTest
 {
     namespace Sheets
     {
-        public class CorrelationSheet_DP : CorrelationSheet
+        public class CorrelationSheet_DP : CorrelationSheet, IPairwiseSpec
         {
             public PairSpecification PairSpec { get; set; }
             public Data.CorrelationString_DP CorrelString { get; set; }

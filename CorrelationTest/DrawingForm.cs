@@ -12,7 +12,6 @@ namespace CorrelationTest
 {
     public partial class DrawingForm : Form
     {
-        Point StartDrawPoint { get; set; }
         LineSegment NewSegment { get; set; } = new LineSegment();
 
         public DrawingForm()
@@ -41,6 +40,12 @@ namespace CorrelationTest
                     Refresh();
                 }
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this.NewSegment.GetSlope().ToString());
+            MessageBox.Show(this.NewSegment.GetCorrelation().ToString());
         }
     }
 }
