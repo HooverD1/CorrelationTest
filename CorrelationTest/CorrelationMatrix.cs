@@ -470,6 +470,44 @@ namespace CorrelationTest
                     return true;
             }
 
+            public Tuple<double, double> GetFeasibilityBounds(IEstimateDistribution dist1, IEstimateDistribution dist2)
+            {
+                //Run a Monte Carlo for data, sort it & reverse sort to get bounds
+                int iterations = 1000;
+                double[] xValues = new double[iterations];
+                double[] yValues = new double[iterations];
+                Random rando = new Random();
+                for(int i=0; i<iterations; i++)
+                {
+                    xValues[i] = dist1.GetInverse(rando.NextDouble());
+                    yValues[i] = dist2.GetInverse(rando.NextDouble());
+                }
+                double[,] data = new double[iterations, 2];
+                double[,] correlMatrix = new double[2, 2];
+                //Sort X and Y ascending
+                xValues = xValues.OrderBy(x => x).ToArray();
+                yValues = yValues.OrderBy(x => x).ToArray();
+                data = ZipData(xValues, yValues);
+                correlMatrix = Accord.Statistics.Measures.Correlation(data);
+                double upperBound = correlMatrix[0,1];
+                yValues = yValues.OrderByDescending(x => x).ToArray();
+                data = ZipData(xValues, yValues);
+                correlMatrix = Accord.Statistics.Measures.Correlation(data);
+                double lowerBound = correlMatrix[0,1];
+                return new Tuple<double, double>(lowerBound, upperBound);
+            }
+
+            private double[,] ZipData(double[] xValues, double[] yValues)
+            {
+                double[,] data = new double[xValues.Length, 2];
+                for(int i = 0; i < xValues.Length; i++)
+                {
+                    data[i, 0] = xValues[i];
+                    data[i, 1] = yValues[i];
+                }
+                return data;
+            }
+
             public Tuple<double, double> GetTransitivityBounds(int row, int col)
             {
                 double max_lower = -1;

@@ -181,6 +181,23 @@ namespace CorrelationTest
                 est_1.Cells[16 + i, edc.Distribution_Offset + 2] = 1;
             }
 
+
+            System.Threading.Thread.Sleep(1);
+            est_1.Cells[16, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[16, edc.Type_Offset] = "I";
+            est_1.Cells[16, edc.Name_Offset] = $"Est{12}";
+            est_1.Cells[16, edc.Distribution_Offset] = "Lognormal";
+            est_1.Cells[16, edc.Distribution_Offset + 1] = 1;
+            est_1.Cells[16, edc.Distribution_Offset + 2] = .5;
+
+            System.Threading.Thread.Sleep(1);
+            est_1.Cells[17, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
+            est_1.Cells[17, edc.Type_Offset] = "I";
+            est_1.Cells[17, edc.Name_Offset] = $"Est{12}";
+            est_1.Cells[17, edc.Distribution_Offset] = "Lognormal";
+            est_1.Cells[17, edc.Distribution_Offset + 1] = 2;
+            est_1.Cells[17, edc.Distribution_Offset + 2] = 1;
+
             est_1.Activate();
 
             wbs_1.Cells[4, wdc.ID_Offset] = "ID";
@@ -493,5 +510,9 @@ namespace CorrelationTest
             ThisAddIn.MyApp.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
         }
 
+        private void button1_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
     }
 }

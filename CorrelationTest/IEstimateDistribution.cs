@@ -20,10 +20,9 @@ namespace CorrelationTest
         double GetInverse(double percentile);
         double GetPDF_Value(double xValue);
         double GetCDF_Value(double xValue);
-        double GetMaximum_X();
-        double GetMinimum_X();
-        double GetMaximum_Y();
-        double GetMinimum_Y();
+        double GetMaximum();
+        double GetMinimum();
+        double GetMean();
         //Dictionary<string, object> ParseStringIntoParameters { get; set; }
     }
 

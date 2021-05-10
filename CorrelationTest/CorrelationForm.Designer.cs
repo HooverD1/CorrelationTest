@@ -120,7 +120,6 @@
             this.xAxisChart.Margin = new System.Windows.Forms.Padding(0);
             this.xAxisChart.Name = "xAxisChart";
             series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series2.Name = "Series1";
             this.xAxisChart.Series.Add(series2);
             this.xAxisChart.Size = new System.Drawing.Size(752, 129);

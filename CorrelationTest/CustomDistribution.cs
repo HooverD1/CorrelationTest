@@ -51,22 +51,12 @@ namespace CorrelationTest
             return returnObject;
         }
 
-        public double GetMaximum_X()
+        public double GetMaximum()
         {
             throw new NotImplementedException();
         }
 
-        public double GetMinimum_X()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double GetMaximum_Y()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double GetMinimum_Y()
+        public double GetMinimum()
         {
             throw new NotImplementedException();
         }
@@ -82,6 +72,11 @@ namespace CorrelationTest
         }
 
         public double GetCDF_Value(double xValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetMean()
         {
             throw new NotImplementedException();
         }

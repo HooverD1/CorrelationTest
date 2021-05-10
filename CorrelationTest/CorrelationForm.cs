@@ -18,10 +18,15 @@ namespace CorrelationTest
     {
         public enum CoefficientBox_ErrorType
         {
+            Feasibility,
             Transitivity,
             PSD,
             Conformal
         }
+        private CoefficientBox_ErrorType maxConstraint { get; set; }
+        private CoefficientBox_ErrorType minConstraint { get; set; }
+        private Tuple<double, double> trans_bounds { get; set; }
+        private Tuple<double, double> feasibility_bounds { get; set; }
         private List<DataPoint> CorrelScatterPoints { get; set; } = new List<DataPoint>();
         private Color existingColor { get; set; }
         private Color existingColor_Markers { get; set; }
@@ -50,18 +55,19 @@ namespace CorrelationTest
             this.CorrelScatter = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.CorrelScatter.Series["CorrelSeries"].MarkerStyle = MarkerStyle.Circle;
             //Set the axis scale
-            //this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.00";
-            //this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.00";
+            this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
+            this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
             this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.False;
-            this.CorrelScatter.ChartAreas[0].AxisY2.Enabled = AxisEnabled.True;
-            this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
-            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum_X();
-            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum_X();
-            this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
-            this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum_X();
-            this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum_X();
+            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
+            //this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum();
+            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum();
+            //this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisY.Minimum = CorrelDist2.GetMinimum();
+            this.CorrelScatter.ChartAreas[0].AxisY.Maximum = CorrelDist2.GetMaximum();
 
-            foreach(DataPoint dp in CorrelScatterPoints)
+
+            foreach (DataPoint dp in CorrelScatterPoints)
             {
                 this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(dp.XValue, dp.YValues[0]);
             }
@@ -84,16 +90,17 @@ namespace CorrelationTest
             this.CorrelScatter.Series["CorrelSeries"].MarkerStyle = MarkerStyle.Circle;
             this.CorrelScatter.Series["CorrelSeries"].IsVisibleInLegend = false;
             //Set the axis scale
-            //this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.00";
-            //this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.00";
-            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.False;
-            this.CorrelScatter.ChartAreas[0].AxisY2.Enabled = AxisEnabled.True;
-            this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
-            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum_X();
-            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum_X();
-            this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
-            this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum_X();
-            this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum_X();
+            this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
+            this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
+            
+            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
+            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
+            //this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum();
+            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum();
+            //this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisY.Minimum = CorrelDist2.GetMinimum();
+            this.CorrelScatter.ChartAreas[0].AxisY.Maximum = CorrelDist2.GetMaximum();
 
             
 
@@ -112,11 +119,32 @@ namespace CorrelationTest
             int index2 = xlSelection.Column - CorrelSheet.xlMatrixCell.Column;
 
 
-            Tuple<double, double> trans_bounds = CorrelSheet.CorrelMatrix.GetTransitivityBounds(index1, index2);  //<min, max>
+            trans_bounds = CorrelSheet.CorrelMatrix.GetTransitivityBounds(index1, index2);  //<min, max>
+            feasibility_bounds = CorrelSheet.CorrelMatrix.GetFeasibilityBounds(CorrelDist1, CorrelDist2);
             numericUpDown_CorrelValue.TextAlign = HorizontalAlignment.Center;
             numericUpDown_CorrelValue.DecimalPlaces = 2;
-            numericUpDown_CorrelValue.Minimum = Convert.ToDecimal(trans_bounds.Item1);
-            numericUpDown_CorrelValue.Maximum = Convert.ToDecimal(trans_bounds.Item2);
+
+            double bindingMin = Math.Max(feasibility_bounds.Item1, trans_bounds.Item1);
+            if (bindingMin == -1)
+                minConstraint = CoefficientBox_ErrorType.Conformal;
+            else if (bindingMin == feasibility_bounds.Item1)
+                minConstraint = CoefficientBox_ErrorType.Feasibility;
+            else
+                minConstraint = CoefficientBox_ErrorType.Transitivity;
+
+            double bindingMax = Math.Min(feasibility_bounds.Item2, trans_bounds.Item2);
+            if (bindingMax == 1)
+                maxConstraint = CoefficientBox_ErrorType.Conformal;
+            else if (bindingMax == feasibility_bounds.Item2)
+                maxConstraint = CoefficientBox_ErrorType.Feasibility;
+            else
+                maxConstraint = CoefficientBox_ErrorType.Transitivity;
+
+            //NumericUpDown numericUpDown_CorrelValue = new NumericUpDown();
+            numericUpDown_CorrelValue.Minimum = Decimal.Ceiling((Convert.ToDecimal(bindingMin) * 100)) / 100;
+            numericUpDown_CorrelValue.Maximum = Decimal.Floor((Convert.ToDecimal(bindingMax) * 100)) / 100;
+            //groupBox_CorrelCoef.Controls.Add(numericUpDown_CorrelValue);
+
             numericUpDown_CorrelValue.Increment = Convert.ToDecimal(0.01);
 
             this.label_coefErrors = new Label();
@@ -135,21 +163,25 @@ namespace CorrelationTest
                 CoefficientBox_Reset();
                 lastValue = numericUpDown_CorrelValue.Value;
             }
-            else if (existingValue < trans_bounds.Item1)
+            else if (existingValue < trans_bounds.Item1 || existingValue < feasibility_bounds.Item1)
             {
                 numericUpDown_CorrelValue.Value = Convert.ToDecimal(trans_bounds.Item1);  //Set to min
-                if(trans_bounds.Item1 == -1)
+                if(existingValue <= -1)
                     CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
-                else
+                else if(existingValue <= feasibility_bounds.Item1)
+                    CoefficientBox_FlagError(CoefficientBox_ErrorType.Feasibility);
+                else if(existingValue <= trans_bounds.Item1)
                     CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
                 lastValue = numericUpDown_CorrelValue.Value;
             }
-            else if (existingValue > trans_bounds.Item2)
+            else if (existingValue > trans_bounds.Item2 || existingValue > feasibility_bounds.Item2)
             {
                 numericUpDown_CorrelValue.Value = Convert.ToDecimal(trans_bounds.Item2);  //Set to max
-                if (trans_bounds.Item1 == 1)
+                if (existingValue >= 1)
                     CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
-                else
+                else if(existingValue >= feasibility_bounds.Item2)
+                    CoefficientBox_FlagError(CoefficientBox_ErrorType.Feasibility);
+                else if(existingValue >= trans_bounds.Item2)
                     CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
                 lastValue = numericUpDown_CorrelValue.Value;
             }
@@ -182,15 +214,15 @@ namespace CorrelationTest
             yAxisChart.Series["Series1"].YValuesPerPoint = 1;
             yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
             yAxisChart.Series["Series1"].IsVisibleInLegend = false;
-            yAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
+            yAxisChart.Series["Series1"]["PixelPointWidth"] = "3";
 
-            int steps = 1000;
-            double minimum = CorrelDist2.GetMinimum_X();
-            double maximum = CorrelDist2.GetMaximum_X();
+            int steps = 400;
+            double minimum = CorrelDist2.GetMinimum();
+            double maximum = CorrelDist2.GetMaximum();
             double step = (maximum - minimum) / steps;
 
-            yAxisChart.ChartAreas[0].AxisX.Minimum = minimum;
-            yAxisChart.ChartAreas[0].AxisX.Maximum = maximum;
+            yAxisChart.ChartAreas[0].AxisX.Minimum = CorrelScatter.ChartAreas[0].AxisY2.Minimum;
+            yAxisChart.ChartAreas[0].AxisX.Maximum = CorrelScatter.ChartAreas[0].AxisY2.Maximum;
 
             for (int i = 0; i < steps; i++)
             {                
@@ -198,11 +230,20 @@ namespace CorrelationTest
                 double y = CorrelDist2.GetPDF_Value(x);
                 yAxisChart.Series["Series1"].Points.AddXY(x, y);
             }
-            //yAxisChart.ChartAreas["ChartArea1"].Area3DStyle.Rotation = 45;
-            //yAxisChart.ChartAreas["ChartArea1"].Area3DStyle.Inclination = 45;
+
+            double meanValue = CorrelDist2.GetMean();
+            //Find the point in the series that is closest to the mean.
+            var distances = from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue));
+            var ordered = distances.OrderBy(t => t.Item2);
+            DataPoint closestPoint = ordered.First().Item1;
+            closestPoint.Color = Color.FromArgb(0, 0, 0);
+            closestPoint.BackSecondaryColor = Color.FromArgb(0, 0, 0);
+
             yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
-            yAxisChart.ChartAreas[0].AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
-            yAxisChart.ChartAreas[0].AxisY.Interval = 0.1;
+            yAxisChart.ChartAreas[0].AxisX.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
+
+            yAxisChart.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
+            yAxisChart.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
             yAxisChart.ChartAreas[0].AxisY.IsReversed = true;
             
             this.Controls.Add(yAxisChart);
@@ -216,11 +257,11 @@ namespace CorrelationTest
             this.xAxisChart.Height = 150;
             this.xAxisChart.Width = CorrelScatter.Width - 15;
             this.xAxisChart.Series["Series1"].YValuesPerPoint = 1;
-            this.xAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
+            xAxisChart.Series["Series1"]["PixelPointWidth"] = "3";
 
-            int steps = 100;
-            double minimum = CorrelDist1.GetMinimum_X();
-            double maximum = CorrelDist1.GetMaximum_X();
+            int steps = 400;
+            double minimum = CorrelDist1.GetMinimum();
+            double maximum = CorrelDist1.GetMaximum();
             double step = (maximum - minimum) / steps;
 
             this.xAxisChart.ChartAreas[0].AxisX.Minimum = minimum;
@@ -232,8 +273,16 @@ namespace CorrelationTest
                 double y = CorrelDist1.GetPDF_Value(x);
                 xAxisChart.Series["Series1"].Points.AddXY(x, y);
             }
+            double meanValue = CorrelDist1.GetMean();
+            //Find the point in the series that is closest to the mean.
+            var distances = from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue));
+            DataPoint closestPoint = distances.OrderBy(t => t.Item2).First().Item1;
+            closestPoint.Color = Color.FromArgb(0, 0, 0);
+            closestPoint.BackSecondaryColor = Color.FromArgb(0, 0, 0);
             xAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
-            xAxisChart.ChartAreas[0].AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
+            this.xAxisChart.ChartAreas[0].AxisX.Interval = CorrelScatter.ChartAreas[0].AxisX.Interval;
+            xAxisChart.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
+            xAxisChart.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
             xAxisChart.ChartAreas[0].AxisX.LabelStyle.Enabled = false;
         }
 
@@ -241,7 +290,7 @@ namespace CorrelationTest
         {
             //DEFAULT "Info" yellow
             groupBox_CorrelCoef.BackColor = Color.FromArgb(255, 255, 225);
-            this.label_coefErrors.Text = "No Errors";
+            this.label_coefErrors.Text = "";
             errorState_CoefficientBox = false;
         }
 
@@ -258,6 +307,9 @@ namespace CorrelationTest
                     break;
                 case CoefficientBox_ErrorType.Transitivity:
                     this.label_coefErrors.Text = "More extreme values violate transitivity";
+                    break;
+                case CoefficientBox_ErrorType.Feasibility:
+                    this.label_coefErrors.Text = "More extreme values violate feasibility";
                     break;
                 case CoefficientBox_ErrorType.PSD:
                     this.label_coefErrors.Text = "Value makes matrix fail PSD check";
@@ -306,22 +358,22 @@ namespace CorrelationTest
 
         private void numericUpDown_CorrelValue_MouseDown(object sender, MouseEventArgs e)
         {
-            if (lastValue == numericUpDown_CorrelValue.Value)
+            //Instead of doing this big comparison song and dance, I should just bool save what the constraints are...
+            Decimal.TryParse(Convert.ToString(numericUpDown_CorrelValue.Value), out decimal currentValue);
+            if (lastValue == currentValue)
             {
-                if (numericUpDown_CorrelValue.Value >= numericUpDown_CorrelValue.Maximum)
+                if (currentValue >= numericUpDown_CorrelValue.Maximum)
                 {
-                    if (numericUpDown_CorrelValue.Maximum == 1)
-                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
-                    else
-                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                    CoefficientBox_FlagError(maxConstraint);
                 }
                 else if (numericUpDown_CorrelValue.Value <= numericUpDown_CorrelValue.Minimum)
                 {
-                    if (numericUpDown_CorrelValue.Minimum == -1)
-                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
-                    else
-                        CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                    CoefficientBox_FlagError(minConstraint);
                 }
+            }
+            else
+            {
+                CoefficientBox_Reset();
             }
             lastValue = numericUpDown_CorrelValue.Value;
         }
@@ -329,26 +381,26 @@ namespace CorrelationTest
         private void numericUpDown_CorrelValue_ValueChanged(object sender, EventArgs e)
         {
             //Save the old value
-            CoefficientBox_Reset();
+            //CoefficientBox_Reset();
         }
 
         private void SetupHelper()
         {
             int vertical = CorrelScatter.Height / 2;
-            int min = CorrelScatter.Width / 4;
+            int min = CorrelScatter.Width / 5;
             int mid = min * 2;
             int max = min * 3;
 
             textboxMinimum.Top = vertical;
-            textboxMinimum.Left = min;
+            textboxMinimum.Left = CorrelScatter.Left + min;
             textboxMinimum.Height = 50;
             textboxMinimum.Width = 50;
             textboxMidpoint.Top = vertical;
-            textboxMidpoint.Left = mid;
+            textboxMidpoint.Left = CorrelScatter.Left + mid + 30;
             textboxMidpoint.Height = 50;
             textboxMidpoint.Width = 50;
             textboxMaximum.Top = vertical;
-            textboxMaximum.Left = max;
+            textboxMaximum.Left = CorrelScatter.Left + max + 60;
             textboxMaximum.Height = 50;
             textboxMaximum.Width = 50;
 
@@ -358,6 +410,12 @@ namespace CorrelationTest
         {
             if(helperStage == 0)
             {
+                //Dis-enable the other controls
+                this.btn_LaunchDrawCorrelation.Enabled = false;
+                this.btn_saveClose.Enabled = false;
+                this.UpDownEnabled = this.numericUpDown_CorrelValue.Enabled;
+                if (this.UpDownEnabled)
+                    this.numericUpDown_CorrelValue.Enabled = false;
                 //Load minimum
                 existingColor = CorrelScatter.ChartAreas[0].BackColor;
                 CorrelScatter.ChartAreas[0].BackColor = Color.FromArgb(195, 195, 195);
@@ -367,7 +425,7 @@ namespace CorrelationTest
                 labelHelper.AutoSize = true;
                 labelHelper.Top = textboxMinimum.Top - 50;
                 labelHelper.Left = textboxMinimum.Left;
-                labelHelper.Text = $"If X is {CorrelDist1.GetMinimum_X()}, what do you expect Y to be?";
+                labelHelper.Text = $"If X is {CorrelDist1.GetMinimum()}, what do you expect Y to be?";
                 this.Controls.Add(labelHelper);
                 labelHelper.BringToFront();
                 helperStage++;
@@ -380,7 +438,7 @@ namespace CorrelationTest
                 textboxMidpoint.BringToFront();
                 labelHelper.Top = textboxMidpoint.Top - 50;
                 labelHelper.Left = textboxMidpoint.Left;
-                labelHelper.Text = $"If X is {(CorrelDist1.GetMaximum_X() - CorrelDist1.GetMinimum_X()) / 2}, what do you expect Y to be?";
+                labelHelper.Text = $"If X is {(CorrelDist1.GetMaximum() - CorrelDist1.GetMinimum()) / 2}, what do you expect Y to be?";
                 labelHelper.BringToFront();
                 helperStage++;
             }
@@ -392,7 +450,7 @@ namespace CorrelationTest
                 textboxMaximum.BringToFront();
                 labelHelper.Top = textboxMaximum.Top - 50;
                 labelHelper.Left = textboxMaximum.Left;
-                labelHelper.Text = $"If X is {CorrelDist1.GetMaximum_X()}, what do you expect Y to be?";
+                labelHelper.Text = $"If X is {CorrelDist1.GetMaximum()}, what do you expect Y to be?";
                 labelHelper.BringToFront();
                 helperStage++;
             }
@@ -406,6 +464,9 @@ namespace CorrelationTest
                 if(t1&&t2&&t3)
                 {
                     //all three contain convertible values
+                    
+                    //COMPUTE THE CORRELATION HERE
+
                 }
                 //Remove the textboxes
                 this.Controls.Remove(textboxMinimum);
@@ -419,6 +480,11 @@ namespace CorrelationTest
                 //But the slope != the correlation...
                 //So what am I doing here?
 
+                this.btn_LaunchDrawCorrelation.Enabled = true;
+                this.btn_saveClose.Enabled = true;
+                this.numericUpDown_CorrelValue.Enabled = UpDownEnabled;
+
+                
                 helperStage = 0;
             }
         }

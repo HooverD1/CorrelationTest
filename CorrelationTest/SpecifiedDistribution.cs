@@ -103,8 +103,8 @@ namespace CorrelationTest
                 case "Triangular":
                     if (splitString.Length != 4)
                         throw new Exception("Malformed distribution string");
-                    stringItems.Add("Min", splitString[1]);
-                    stringItems.Add("Max", splitString[2]);
+                    stringItems.Add("Minimum", splitString[1]);
+                    stringItems.Add("Maximum", splitString[2]);
                     stringItems.Add("Mode", splitString[3]);
                     break;
                 case "Beta":
@@ -126,33 +126,28 @@ namespace CorrelationTest
             return Distribution.InverseDistributionFunction(percentile);
         }
 
-        public double GetMaximum_X()
+        public double GetMaximum()
         {
-            double stdev = Math.Sqrt(Distribution.Variance);
-            return Distribution.Mean + stdev * 4;
+            if (DistributionParameters.ContainsKey("Maximum"))
+                return Convert.ToDouble(DistributionParameters["Maximum"]);
+            else
+            {
+                double stdev = Math.Sqrt(Distribution.Variance);
+                return Distribution.Mean + stdev * 4;
+            }
         }
 
-        public double GetMinimum_X()
+        public double GetMinimum()
         {
-            if (Distribution is LognormalDistribution)
-            {
+            if (DistributionParameters.ContainsKey("Minimum"))
+                return Convert.ToDouble(DistributionParameters["Minimum"]);
+            else if (Distribution is LognormalDistribution)
                 return 0;
-            }
             else
             {
                 double stdev = Math.Sqrt(Distribution.Variance);
                 return Distribution.Mean - stdev * 4;
             }
-        }
-
-        public double GetMaximum_Y()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double GetMinimum_Y()
-        {
-            throw new NotImplementedException();
         }
 
         public double GetPDF_Value(double xValue)
@@ -169,12 +164,17 @@ namespace CorrelationTest
             return Distribution.DistributionFunction(xValue);
         }
 
+        public double GetMean()
+        {
+            return Distribution.Mean;
+        }
+
         private static IUnivariateDistribution BuildDistribution(Dictionary<string, object> distParameters)
         {
             switch (distParameters["Type"])
             {
                 case (DistributionType.Triangular): //Min, Max, Mode
-                    return new TriangularDistribution(Convert.ToDouble(distParameters["Min"]), Convert.ToDouble(distParameters["Max"]), Convert.ToDouble(distParameters["Mode"]));
+                    return new TriangularDistribution(Convert.ToDouble(distParameters["Minimum"]), Convert.ToDouble(distParameters["Maximum"]), Convert.ToDouble(distParameters["Mode"]));
                 case (DistributionType.Normal):
                     return new NormalDistribution(Convert.ToDouble(distParameters["Mean"]), Convert.ToDouble(distParameters["Stdev"]));      //mean, stdev
                 case (DistributionType.Lognormal):

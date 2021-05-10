@@ -431,6 +431,8 @@ namespace CorrelationTest
                     return;
                 }
                 CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
+                CorrelVisual.StartPosition = FormStartPosition.Manual;
+                CorrelVisual.Location = new System.Drawing.Point(0, 0);
                 if(this is IPairwiseSpec)
                 {
                     NumericUpDown upDown = (NumericUpDown)CorrelVisual.Controls.Find("numericUpDown_CorrelValue", true).First();
