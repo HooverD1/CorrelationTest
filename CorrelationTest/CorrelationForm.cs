@@ -23,6 +23,17 @@ namespace CorrelationTest
             PSD,
             Conformal
         }
+        private Tuple<Point, Point>[] hoverPoints { get; set; } = new Tuple<Point, Point>[10];
+        private Label HoverLabel_H1 { get; set; }
+        private Label HoverLabel_H2 { get; set; }
+        private Label HoverLabel_H3 { get; set; }
+        private Label HoverLabel_H4 { get; set; }
+        private Label HoverLabel_H5 { get; set; }
+        private Label HoverLabel_V1 { get; set; }
+        private Label HoverLabel_V2 { get; set; }
+        private Label HoverLabel_V3 { get; set; }
+        private Label HoverLabel_V4 { get; set; }
+        private Label HoverLabel_V5 { get; set; }
         private CoefficientBox_ErrorType maxConstraint { get; set; }
         private CoefficientBox_ErrorType minConstraint { get; set; }
         private Tuple<double, double> trans_bounds { get; set; }
@@ -43,10 +54,14 @@ namespace CorrelationTest
         private bool errorState_CoefficientBox { get; set; }
         private IEstimateDistribution CorrelDist1 { get; set; }
         private IEstimateDistribution CorrelDist2 { get; set; }
+
         public CorrelationForm(IEstimateDistribution correlDist1, IEstimateDistribution correlDist2)
         {
             this.CorrelDist1 = correlDist1;
             this.CorrelDist2 = correlDist2;
+
+        
+
             InitializeComponent();
         }
 
@@ -76,6 +91,10 @@ namespace CorrelationTest
         private void CorrelationForm_Load(object sender, EventArgs e)
         {
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
+            CorrelScatter.Height = 750;
+            CorrelScatter.Width = 750;
+            CorrelScatter.ChartAreas[0].Position = new ElementPosition(4, 4,92,92);
+            CorrelScatter.ChartAreas[0].InnerPlotPosition = new ElementPosition(4, 4, 92, 92);
             //Create & set example points
             Random rando = new Random();
             for (int i = 1; i < 500; i++)
@@ -91,28 +110,15 @@ namespace CorrelationTest
             this.CorrelScatter.Series["CorrelSeries"].IsVisibleInLegend = false;
             //Set the axis scale
             this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
-            this.CorrelScatter.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
+            this.CorrelScatter.ChartAreas[0].AxisY2.LabelStyle.Format = "0.0";
             
-            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
-            this.CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
             //this.CorrelScatter.ChartAreas[0].AxisX.Interval = .5;
             this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum();
             this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum();
             //this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
-            this.CorrelScatter.ChartAreas[0].AxisY.Minimum = CorrelDist2.GetMinimum();
-            this.CorrelScatter.ChartAreas[0].AxisY.Maximum = CorrelDist2.GetMaximum();
-
-            
-
-            //double xMin = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.XValue).Min();
-            //double xMax = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.XValue).Max();
-            //this.CorrelScatter.ChartAreas[0].AxisX.Minimum = Math.Floor(xMin);
-            //this.CorrelScatter.ChartAreas[0].AxisX.Maximum = Math.Ceiling(xMax);
-
-            //double yMin = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.YValues.First()).Min();
-            //double yMax = (from DataPoint dp in this.CorrelScatter.Series["CorrelSeries"].Points select dp.YValues.First()).Max();
-            //this.CorrelScatter.ChartAreas[0].AxisY.Minimum = Math.Floor(yMin);
-            //this.CorrelScatter.ChartAreas[0].AxisY.Maximum = Math.Ceiling(yMax);
+            this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum();
+            this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum();
+            //this.CorrelScatter.ChartAreas[0].AxisY2.MajorGrid.Interval = 
 
             Excel.Range xlSelection = ThisAddIn.MyApp.Selection;
             int index1 = xlSelection.Row - (CorrelSheet.xlMatrixCell.Row + 1);
@@ -193,6 +199,7 @@ namespace CorrelationTest
             LoadXAxisDistribution();
             LoadYAxisDistribution();
             SetupHelper();
+            SetupHoverPoints();
         }
 
         private void LoadYAxisDistribution()
@@ -200,8 +207,11 @@ namespace CorrelationTest
             //Build a series off the distribution
             System.IO.MemoryStream myStream = new System.IO.MemoryStream();
             Chart yAxisChart = new Chart();
+            
             xAxisChart.Serializer.Save(myStream);
             yAxisChart.Serializer.Load(myStream);
+
+            yAxisChart.ChartAreas[0].Position = new ElementPosition(0, 0, 100, 100);
 
             yAxisChart.Series.Clear();
             Series Series1 = new Series();
@@ -239,10 +249,12 @@ namespace CorrelationTest
             closestPoint.Color = Color.FromArgb(0, 0, 0);
             closestPoint.BackSecondaryColor = Color.FromArgb(0, 0, 0);
 
-            yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
-            yAxisChart.ChartAreas[0].AxisX.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
+            //yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.FixedCount;
+            yAxisChart.ChartAreas[0].AxisY.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
+            //yAxisChart.ChartAreas[0].AxisY.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
 
             yAxisChart.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
+            yAxisChart.ChartAreas[0].AxisX.LabelStyle.Enabled = true;
             yAxisChart.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
             yAxisChart.ChartAreas[0].AxisY.IsReversed = true;
             
@@ -252,7 +264,8 @@ namespace CorrelationTest
         private void LoadXAxisDistribution()
         {
             //Build a series off the distribution
-            this.xAxisChart.Left = CorrelScatter.Left - 40;
+            this.xAxisChart.ChartAreas[0].Position = new ElementPosition(0, 0, 100, 100);
+            this.xAxisChart.Left = CorrelScatter.Left;
             this.xAxisChart.Top = CorrelScatter.Top - 150;
             this.xAxisChart.Height = 150;
             this.xAxisChart.Width = CorrelScatter.Width - 15;
@@ -550,5 +563,320 @@ namespace CorrelationTest
                 }
             }
         }
+
+        private Label ConstructLabel(int labelNumber, QuintantOrientation orientation, Dictionary<string, dynamic> spacing)
+        {
+            Label HoverLabel = new Label();
+            HoverLabel.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel.Text = "";
+
+            if(orientation == QuintantOrientation.Horizontal)
+            {
+                HoverLabel.Height = 50;
+                HoverLabel.Width = spacing["chartInnerPlot_Abs_Width"] / 5;
+                HoverLabel.Left = spacing["chartInnerPlot_Abs_Left"] + HoverLabel.Width * (labelNumber-1);
+                HoverLabel.Top = spacing["chartInnerPlot_Abs_Bottom"] - HoverLabel.Height;
+            }
+            else if(orientation == QuintantOrientation.Vertical)
+            {
+                HoverLabel.Height = spacing["chartInnerPlot_Abs_Height"] / 5;
+                HoverLabel.Width = 50;
+                HoverLabel.Left = spacing["chartInnerPlot_Abs_Right"] - HoverLabel.Width;
+                HoverLabel.Top = spacing["chartInnerPlot_Abs_Top"] + HoverLabel.Height * (labelNumber-1);
+                
+            }
+            else
+            {
+                throw new Exception("Unknown orientation");
+            }
+
+            CorrelScatter.Controls.Add(HoverLabel);
+            HoverLabel.BringToFront();
+
+            return HoverLabel;
+        }
+        private void ConstructLabels(Dictionary<string, dynamic> spacing)
+        {
+            HoverLabel_H1 = ConstructLabel(1, QuintantOrientation.Horizontal, spacing);
+            HoverLabel_H2 = ConstructLabel(2, QuintantOrientation.Horizontal, spacing);
+            HoverLabel_H3 = ConstructLabel(3, QuintantOrientation.Horizontal, spacing);
+            HoverLabel_H4 = ConstructLabel(4, QuintantOrientation.Horizontal, spacing);
+            HoverLabel_H5 = ConstructLabel(5, QuintantOrientation.Horizontal, spacing);
+
+            HoverLabel_V1 = ConstructLabel(1, QuintantOrientation.Vertical, spacing);
+            HoverLabel_V2 = ConstructLabel(2, QuintantOrientation.Vertical, spacing);
+            HoverLabel_V3 = ConstructLabel(3, QuintantOrientation.Vertical, spacing);
+            HoverLabel_V4 = ConstructLabel(4, QuintantOrientation.Vertical, spacing);
+            HoverLabel_V5 = ConstructLabel(5, QuintantOrientation.Vertical, spacing);
+        }
+
+        private void SetupHoverPoints()
+        {
+            //Use transparent labels that appear when you hover over a hoverPoint.
+            //Hovering over any given hoverPoint puts a border around that point
+            Dictionary<string, dynamic> spacing = new Dictionary<string, dynamic>();
+
+            spacing.Add("chart_Abs_Width", CorrelScatter.Width);
+
+            spacing.Add("chartArea_Abs_Width", Convert.ToInt32(spacing["chart_Abs_Width"] * (CorrelScatter.ChartAreas[0].Position.Width / 100)));
+            spacing.Add("chartArea_Rel_Left", CorrelScatter.ChartAreas[0].Position.X);
+            spacing.Add("chartArea_Abs_Left", Convert.ToInt32(spacing["chart_Abs_Width"] * (spacing["chartArea_Rel_Left"] / 100)));
+            spacing.Add("chartArea_Rel_Right", CorrelScatter.ChartAreas[0].Position.Right);
+            spacing.Add("chartArea_Abs_Right", Convert.ToInt32(spacing["chart_Abs_Width"] * (spacing["chartArea_Rel_Right"] / 100)));
+
+            spacing.Add("chartInnerPlot_Abs_Width", Convert.ToInt32(spacing["chartArea_Abs_Width"] * (CorrelScatter.ChartAreas[0].InnerPlotPosition.Width / 100)));
+            spacing.Add("chartInnerPlot_Rel_Left", CorrelScatter.ChartAreas[0].InnerPlotPosition.X);
+            spacing.Add("chartInnerPlot_Abs_Left", Convert.ToInt32(spacing["chartArea_Abs_Width"] * (spacing["chartInnerPlot_Rel_Left"] / 100)) + spacing["chartArea_Abs_Left"]);
+            spacing.Add("chartInnerPlot_Rel_Right", CorrelScatter.ChartAreas[0].InnerPlotPosition.Right);
+            spacing.Add("chartInnerPlot_Abs_Right", Convert.ToInt32(spacing["chartArea_Abs_Width"] * (spacing["chartInnerPlot_Rel_Right"] / 100)) + spacing["chartArea_Abs_Left"]);
+
+
+            spacing.Add("chart_Abs_Height", CorrelScatter.Height);
+
+            spacing.Add("chartArea_Abs_Height", Convert.ToInt32(spacing["chart_Abs_Height"] * (CorrelScatter.ChartAreas[0].Position.Height / 100)));
+            spacing.Add("chartArea_Rel_Top", CorrelScatter.ChartAreas[0].Position.Y);
+            spacing.Add("chartArea_Abs_Top", Convert.ToInt32(spacing["chart_Abs_Height"] * (spacing["chartArea_Rel_Top"] / 100)));
+            spacing.Add("chartArea_Rel_Bottom", CorrelScatter.ChartAreas[0].Position.Bottom);
+            spacing.Add("chartArea_Abs_Bottom", Convert.ToInt32(spacing["chart_Abs_Height"] * (spacing["chartArea_Rel_Bottom"] / 100)));
+
+            spacing.Add("chartInnerPlot_Abs_Height", Convert.ToInt32(spacing["chartArea_Abs_Height"] * (CorrelScatter.ChartAreas[0].InnerPlotPosition.Height / 100)));
+            spacing.Add("chartInnerPlot_Rel_Top", CorrelScatter.ChartAreas[0].InnerPlotPosition.Y);
+            spacing.Add("chartInnerPlot_Abs_Top", Convert.ToInt32(spacing["chartArea_Abs_Height"] * (spacing["chartInnerPlot_Rel_Top"] / 100)) + spacing["chartArea_Abs_Top"]);
+            spacing.Add("chartInnerPlot_Rel_Bottom", CorrelScatter.ChartAreas[0].InnerPlotPosition.Bottom);
+            spacing.Add("chartInnerPlot_Abs_Bottom", Convert.ToInt32(spacing["chartArea_Abs_Height"] * (spacing["chartInnerPlot_Rel_Bottom"] / 100)) + spacing["chartArea_Abs_Top"]);
+
+            ConstructLabels(spacing);
+
+            HoverLabel_H1.MouseHover += HoverLabel_MouseHoverEvent_H1;
+            HoverLabel_H1.MouseLeave += HoverLabel_MouseLeaveEvent_H1;
+
+            HoverLabel_H2.MouseHover += HoverLabel_MouseHoverEvent_H2;
+            HoverLabel_H2.MouseLeave += HoverLabel_MouseLeaveEvent_H2;
+
+            HoverLabel_H3.MouseHover += HoverLabel_MouseHoverEvent_H3;
+            HoverLabel_H3.MouseLeave += HoverLabel_MouseLeaveEvent_H3;
+
+            HoverLabel_H4.MouseHover += HoverLabel_MouseHoverEvent_H4;
+            HoverLabel_H4.MouseLeave += HoverLabel_MouseLeaveEvent_H4;
+
+            HoverLabel_H5.MouseHover += HoverLabel_MouseHoverEvent_H5;
+            HoverLabel_H5.MouseLeave += HoverLabel_MouseLeaveEvent_H5;
+
+
+            HoverLabel_V1.MouseHover += HoverLabel_MouseHoverEvent_V1;
+            HoverLabel_V1.MouseLeave += HoverLabel_MouseLeaveEvent_V1;
+
+            HoverLabel_V2.MouseHover += HoverLabel_MouseHoverEvent_V2;
+            HoverLabel_V2.MouseLeave += HoverLabel_MouseLeaveEvent_V2;
+
+            HoverLabel_V3.MouseHover += HoverLabel_MouseHoverEvent_V3;
+            HoverLabel_V3.MouseLeave += HoverLabel_MouseLeaveEvent_V3;
+
+            HoverLabel_V4.MouseHover += HoverLabel_MouseHoverEvent_V4;
+            HoverLabel_V4.MouseLeave += HoverLabel_MouseLeaveEvent_V4;
+
+            HoverLabel_V5.MouseHover += HoverLabel_MouseHoverEvent_V5;
+            HoverLabel_V5.MouseLeave += HoverLabel_MouseLeaveEvent_V5;
+        }
+
+        private enum QuintantOrientation
+        {
+            Vertical,
+            Horizontal
+        }
+
+        private Tuple<double?, double?> GetSubStats(int quintant, QuintantOrientation orientation)
+        {
+            IEnumerable<DataPoint> pertinentPoints;
+            double minBound;
+            double maxBound;
+            double width;
+            double? mean;
+            double? stdev;
+            if (orientation == QuintantOrientation.Horizontal)
+            {
+                width = (CorrelDist1.GetMaximum() - CorrelDist1.GetMinimum()) / 5;
+                minBound = (quintant - 1) * width + CorrelDist1.GetMinimum();
+                maxBound = (quintant) * width + CorrelDist1.GetMinimum();
+                pertinentPoints = from DataPoint dp in this.CorrelScatterPoints
+                                  where dp.XValue >= minBound && dp.XValue < maxBound
+                                  select dp;
+                IEnumerable<double> pertinentY = from DataPoint dp in pertinentPoints select dp.YValues.First();
+                if (pertinentY.Any())
+                {
+                    mean = pertinentY.Average();
+                    stdev = ExtensionMethods.CalculateStandardDeviation(pertinentY);
+                    return new Tuple<double?, double?>(Math.Round((double)mean, 2), Math.Round((double)stdev, 2));
+                }
+                else
+                {
+                    return new Tuple<double?, double?>(null, null);
+                }
+            }
+            else if(orientation == QuintantOrientation.Vertical)
+            {
+                width = (CorrelDist2.GetMaximum() - CorrelDist2.GetMinimum()) / 5;
+                minBound = (quintant - 1) * width + CorrelDist2.GetMinimum();
+                maxBound = (quintant) * width + CorrelDist2.GetMinimum();
+                pertinentPoints = from DataPoint dp in this.CorrelScatterPoints
+                                  where dp.XValue >= minBound && dp.YValues.First() < maxBound
+                                  select dp;
+                IEnumerable<double> pertinentX = from DataPoint dp in pertinentPoints select dp.XValue;
+                if (pertinentX.Any())
+                {
+                    mean = pertinentX.Average();
+                    stdev = ExtensionMethods.CalculateStandardDeviation(pertinentX);
+                    return new Tuple<double?, double?>(Math.Round((double)mean, 2), Math.Round((double)stdev, 2));
+                }
+                else
+                {
+                    mean = null;
+                    stdev = null;
+                    return new Tuple<double?, double?>(null, null);
+                }
+            }
+            else
+            {
+                throw new Exception("Unexpected orientation value");
+            }
+        }
+
+
+        #region HoverLabel Events
+
+        private void HoverLabel_MouseHoverEvent_H1(object sender, EventArgs e)
+        {
+            HoverLabel_H1.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(1, QuintantOrientation.Horizontal);
+            HoverLabel_H1.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_H1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_H1(object sender, EventArgs e)
+        {
+            HoverLabel_H1.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_H1.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_H2(object sender, EventArgs e)
+        {
+            HoverLabel_H2.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(2, QuintantOrientation.Horizontal);
+            HoverLabel_H2.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_H2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_H2(object sender, EventArgs e)
+        {
+            HoverLabel_H2.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_H2.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_H3(object sender, EventArgs e)
+        {
+            HoverLabel_H3.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(3, QuintantOrientation.Horizontal);
+            HoverLabel_H3.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_H3.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_H3(object sender, EventArgs e)
+        {
+            HoverLabel_H3.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_H3.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_H4(object sender, EventArgs e)
+        {
+            HoverLabel_H4.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(4, QuintantOrientation.Horizontal);
+            HoverLabel_H4.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_H4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_H4(object sender, EventArgs e)
+        {
+            HoverLabel_H4.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_H4.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_H5(object sender, EventArgs e)
+        {
+            HoverLabel_H5.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(5, QuintantOrientation.Horizontal);
+            HoverLabel_H5.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_H5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_H5.BringToFront();
+        }
+        private void HoverLabel_MouseLeaveEvent_H5(object sender, EventArgs e)
+        {
+            HoverLabel_H5.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_H5.Text = "";
+        }
+
+
+        private void HoverLabel_MouseHoverEvent_V1(object sender, EventArgs e)
+        {
+            HoverLabel_V1.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(1, QuintantOrientation.Vertical);
+            HoverLabel_V1.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_V1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_V1(object sender, EventArgs e)
+        {
+            HoverLabel_V1.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_V1.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_V2(object sender, EventArgs e)
+        {
+            HoverLabel_V2.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(2, QuintantOrientation.Vertical);
+            HoverLabel_V2.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_V2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_V2(object sender, EventArgs e)
+        {
+            HoverLabel_V2.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_V2.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_V3(object sender, EventArgs e)
+        {
+            HoverLabel_V3.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(3, QuintantOrientation.Vertical);
+            HoverLabel_V3.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_V3.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_V3(object sender, EventArgs e)
+        {
+            HoverLabel_V3.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_V3.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_V4(object sender, EventArgs e)
+        {
+            HoverLabel_V4.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(4, QuintantOrientation.Vertical);
+            HoverLabel_V4.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_V4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+        }
+        private void HoverLabel_MouseLeaveEvent_V4(object sender, EventArgs e)
+        {
+            HoverLabel_V4.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_V4.Text = "";
+        }
+
+        private void HoverLabel_MouseHoverEvent_V5(object sender, EventArgs e)
+        {
+            HoverLabel_V5.BackColor = Color.FromArgb(175, 125, 125, 125);
+            Tuple<double?, double?> stats = GetSubStats(5, QuintantOrientation.Vertical);
+            HoverLabel_V5.TextAlign = ContentAlignment.MiddleCenter;
+            HoverLabel_V5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_V5.BringToFront();
+        }
+        private void HoverLabel_MouseLeaveEvent_V5(object sender, EventArgs e)
+        {
+            HoverLabel_V5.BackColor = Color.FromArgb(25, 125, 125, 125);
+            HoverLabel_V5.Text = "";
+        }
+
+        #endregion  
     }
 }

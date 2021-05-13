@@ -186,9 +186,10 @@ namespace CorrelationTest
             est_1.Cells[16, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";
             est_1.Cells[16, edc.Type_Offset] = "I";
             est_1.Cells[16, edc.Name_Offset] = $"Est{12}";
-            est_1.Cells[16, edc.Distribution_Offset] = "Lognormal";
-            est_1.Cells[16, edc.Distribution_Offset + 1] = 1;
-            est_1.Cells[16, edc.Distribution_Offset + 2] = .5;
+            est_1.Cells[16, edc.Distribution_Offset] = "Triangular";
+            est_1.Cells[16, edc.Distribution_Offset + 1] = 0;
+            est_1.Cells[16, edc.Distribution_Offset + 2] = 4;
+            est_1.Cells[16, edc.Distribution_Offset + 3] = 2;
 
             System.Threading.Thread.Sleep(1);
             est_1.Cells[17, edc.ID_Offset] = $"DH|E|{ThisAddIn.MyApp.UserName}|{DateTime.Now.ToUniversalTime().ToString("ddMMyy")}{ DateTime.Now.ToUniversalTime().ToString("HH:mm:ss.fff")}";

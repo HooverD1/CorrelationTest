@@ -48,7 +48,14 @@
             // 
             // CorrelScatter
             // 
+            chartArea1.AxisY.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
+            chartArea1.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
             chartArea1.Name = "ChartArea1";
+            chartArea1.Position.Auto = false;
+            chartArea1.Position.Height = 94F;
+            chartArea1.Position.Width = 94F;
+            chartArea1.Position.X = 3F;
+            chartArea1.Position.Y = 3F;
             this.CorrelScatter.ChartAreas.Add(chartArea1);
             this.CorrelScatter.Location = new System.Drawing.Point(197, 182);
             this.CorrelScatter.Margin = new System.Windows.Forms.Padding(0);
