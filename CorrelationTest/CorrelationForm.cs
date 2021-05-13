@@ -34,6 +34,7 @@ namespace CorrelationTest
         private Label HoverLabel_V3 { get; set; }
         private Label HoverLabel_V4 { get; set; }
         private Label HoverLabel_V5 { get; set; }
+        Dictionary<string, dynamic> Spacing { get; set; } = new Dictionary<string, dynamic>();
         private CoefficientBox_ErrorType maxConstraint { get; set; }
         private CoefficientBox_ErrorType minConstraint { get; set; }
         private Tuple<double, double> trans_bounds { get; set; }
@@ -93,8 +94,8 @@ namespace CorrelationTest
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
             CorrelScatter.Height = 750;
             CorrelScatter.Width = 750;
-            CorrelScatter.ChartAreas[0].Position = new ElementPosition(4, 4,92,92);
-            CorrelScatter.ChartAreas[0].InnerPlotPosition = new ElementPosition(4, 4, 92, 92);
+            CorrelScatter.ChartAreas[0].Position = new ElementPosition(5, 3, 90, 90);
+            CorrelScatter.ChartAreas[0].InnerPlotPosition = new ElementPosition(5, 3, 90, 90);
             //Create & set example points
             Random rando = new Random();
             for (int i = 1; i < 500; i++)
@@ -116,6 +117,9 @@ namespace CorrelationTest
             this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetMinimum();
             this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetMaximum();
             //this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisY.Minimum = CorrelDist2.GetMinimum();
+            this.CorrelScatter.ChartAreas[0].AxisY.Maximum = CorrelDist2.GetMaximum();
+
             this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum();
             this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum();
             //this.CorrelScatter.ChartAreas[0].AxisY2.MajorGrid.Interval = 
@@ -211,18 +215,28 @@ namespace CorrelationTest
             xAxisChart.Serializer.Save(myStream);
             yAxisChart.Serializer.Load(myStream);
 
-            yAxisChart.ChartAreas[0].Position = new ElementPosition(0, 0, 100, 100);
-
             yAxisChart.Series.Clear();
             Series Series1 = new Series();
             yAxisChart.Series.Add(Series1);
             yAxisChart.Series["Series1"].ChartType = SeriesChartType.Bar;
             yAxisChart.Width = xAxisChart.Height;
             yAxisChart.Left = CorrelScatter.Left - yAxisChart.Width;
-            yAxisChart.Top = CorrelScatter.Top + 12;
-            yAxisChart.Height = CorrelScatter.Height - 10;
+            
+            yAxisChart.Top = CorrelScatter.Top;
+            yAxisChart.Height = CorrelScatter.Height;
+
+            //yAxisChart.ChartAreas[0].Position.X = 0;
+            yAxisChart.ChartAreas[0].Position = new ElementPosition(5, 3, 90, 90);
+            yAxisChart.ChartAreas[0].InnerPlotPosition = new ElementPosition(5, 3, 90, 90);
+            //yAxisChart.ChartAreas[0].InnerPlotPosition.X = 0;
+            //yAxisChart.ChartAreas[0].InnerPlotPosition.Width = 100; //xAxisChart.ChartAreas[0].InnerPlotPosition.Height;
+
+            //yAxisChart.ChartAreas[0].Position.Y = CorrelScatter.ChartAreas[0].Position.Y;
+            //yAxisChart.ChartAreas[0].InnerPlotPosition.Y = CorrelScatter.ChartAreas[0].InnerPlotPosition.Y;
+            //yAxisChart.ChartAreas[0].InnerPlotPosition.Height = CorrelScatter.ChartAreas[0].InnerPlotPosition.Height;
+
             yAxisChart.Series["Series1"].YValuesPerPoint = 1;
-            yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
+            //yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
             yAxisChart.Series["Series1"].IsVisibleInLegend = false;
             yAxisChart.Series["Series1"]["PixelPointWidth"] = "3";
 
@@ -249,12 +263,10 @@ namespace CorrelationTest
             closestPoint.Color = Color.FromArgb(0, 0, 0);
             closestPoint.BackSecondaryColor = Color.FromArgb(0, 0, 0);
 
-            //yAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.FixedCount;
-            yAxisChart.ChartAreas[0].AxisY.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
-            //yAxisChart.ChartAreas[0].AxisY.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
+            yAxisChart.ChartAreas[0].AxisX.Interval = CorrelScatter.ChartAreas[0].AxisY.Interval;
 
             yAxisChart.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
-            yAxisChart.ChartAreas[0].AxisX.LabelStyle.Enabled = true;
+            yAxisChart.ChartAreas[0].AxisX.LabelStyle.Enabled = false;
             yAxisChart.ChartAreas[0].AxisY.LabelStyle.Format = "0.0";
             yAxisChart.ChartAreas[0].AxisY.IsReversed = true;
             
@@ -264,11 +276,14 @@ namespace CorrelationTest
         private void LoadXAxisDistribution()
         {
             //Build a series off the distribution
-            this.xAxisChart.ChartAreas[0].Position = new ElementPosition(0, 0, 100, 100);
             this.xAxisChart.Left = CorrelScatter.Left;
             this.xAxisChart.Top = CorrelScatter.Top - 150;
             this.xAxisChart.Height = 150;
-            this.xAxisChart.Width = CorrelScatter.Width - 15;
+            this.xAxisChart.Width = CorrelScatter.Width;
+
+            xAxisChart.ChartAreas[0].Position = new ElementPosition(5, 3, 90, 90);
+            xAxisChart.ChartAreas[0].InnerPlotPosition = new ElementPosition(5, 3, 90, 90);
+
             this.xAxisChart.Series["Series1"].YValuesPerPoint = 1;
             xAxisChart.Series["Series1"]["PixelPointWidth"] = "3";
 
@@ -564,7 +579,7 @@ namespace CorrelationTest
             }
         }
 
-        private Label ConstructLabel(int labelNumber, QuintantOrientation orientation, Dictionary<string, dynamic> spacing)
+        private Label ConstructLabel(int labelNumber, QuintantOrientation orientation)
         {
             Label HoverLabel = new Label();
             HoverLabel.BackColor = Color.FromArgb(25, 125, 125, 125);
@@ -573,16 +588,16 @@ namespace CorrelationTest
             if(orientation == QuintantOrientation.Horizontal)
             {
                 HoverLabel.Height = 50;
-                HoverLabel.Width = spacing["chartInnerPlot_Abs_Width"] / 5;
-                HoverLabel.Left = spacing["chartInnerPlot_Abs_Left"] + HoverLabel.Width * (labelNumber-1);
-                HoverLabel.Top = spacing["chartInnerPlot_Abs_Bottom"] - HoverLabel.Height;
+                HoverLabel.Width = Spacing["chartInnerPlot_Abs_Width"] / 5;
+                HoverLabel.Left = Spacing["chartInnerPlot_Abs_Left"] + HoverLabel.Width * (labelNumber-1);
+                HoverLabel.Top = Spacing["chartInnerPlot_Abs_Bottom"] - HoverLabel.Height;
             }
             else if(orientation == QuintantOrientation.Vertical)
             {
-                HoverLabel.Height = spacing["chartInnerPlot_Abs_Height"] / 5;
+                HoverLabel.Height = Spacing["chartInnerPlot_Abs_Height"] / 5;
                 HoverLabel.Width = 50;
-                HoverLabel.Left = spacing["chartInnerPlot_Abs_Right"] - HoverLabel.Width;
-                HoverLabel.Top = spacing["chartInnerPlot_Abs_Top"] + HoverLabel.Height * (labelNumber-1);
+                HoverLabel.Left = Spacing["chartInnerPlot_Abs_Right"] - HoverLabel.Width;
+                HoverLabel.Top = Spacing["chartInnerPlot_Abs_Top"] + HoverLabel.Height * (labelNumber-1);
                 
             }
             else
@@ -595,57 +610,56 @@ namespace CorrelationTest
 
             return HoverLabel;
         }
-        private void ConstructLabels(Dictionary<string, dynamic> spacing)
+        private void ConstructLabels()
         {
-            HoverLabel_H1 = ConstructLabel(1, QuintantOrientation.Horizontal, spacing);
-            HoverLabel_H2 = ConstructLabel(2, QuintantOrientation.Horizontal, spacing);
-            HoverLabel_H3 = ConstructLabel(3, QuintantOrientation.Horizontal, spacing);
-            HoverLabel_H4 = ConstructLabel(4, QuintantOrientation.Horizontal, spacing);
-            HoverLabel_H5 = ConstructLabel(5, QuintantOrientation.Horizontal, spacing);
+            HoverLabel_H1 = ConstructLabel(1, QuintantOrientation.Horizontal);
+            HoverLabel_H2 = ConstructLabel(2, QuintantOrientation.Horizontal);
+            HoverLabel_H3 = ConstructLabel(3, QuintantOrientation.Horizontal);
+            HoverLabel_H4 = ConstructLabel(4, QuintantOrientation.Horizontal);
+            HoverLabel_H5 = ConstructLabel(5, QuintantOrientation.Horizontal);
 
-            HoverLabel_V1 = ConstructLabel(1, QuintantOrientation.Vertical, spacing);
-            HoverLabel_V2 = ConstructLabel(2, QuintantOrientation.Vertical, spacing);
-            HoverLabel_V3 = ConstructLabel(3, QuintantOrientation.Vertical, spacing);
-            HoverLabel_V4 = ConstructLabel(4, QuintantOrientation.Vertical, spacing);
-            HoverLabel_V5 = ConstructLabel(5, QuintantOrientation.Vertical, spacing);
+            HoverLabel_V1 = ConstructLabel(1, QuintantOrientation.Vertical);
+            HoverLabel_V2 = ConstructLabel(2, QuintantOrientation.Vertical);
+            HoverLabel_V3 = ConstructLabel(3, QuintantOrientation.Vertical);
+            HoverLabel_V4 = ConstructLabel(4, QuintantOrientation.Vertical);
+            HoverLabel_V5 = ConstructLabel(5, QuintantOrientation.Vertical);
         }
 
         private void SetupHoverPoints()
         {
             //Use transparent labels that appear when you hover over a hoverPoint.
             //Hovering over any given hoverPoint puts a border around that point
-            Dictionary<string, dynamic> spacing = new Dictionary<string, dynamic>();
+            
+            Spacing.Add("chart_Abs_Width", CorrelScatter.Width);
 
-            spacing.Add("chart_Abs_Width", CorrelScatter.Width);
+            Spacing.Add("chartArea_Abs_Width", Convert.ToInt32(Spacing["chart_Abs_Width"] * (CorrelScatter.ChartAreas[0].Position.Width / 100)));
+            Spacing.Add("chartArea_Rel_Left", CorrelScatter.ChartAreas[0].Position.X);
+            Spacing.Add("chartArea_Abs_Left", Convert.ToInt32(Spacing["chart_Abs_Width"] * (Spacing["chartArea_Rel_Left"] / 100)));
+            Spacing.Add("chartArea_Rel_Right", CorrelScatter.ChartAreas[0].Position.Right);
+            Spacing.Add("chartArea_Abs_Right", Convert.ToInt32(Spacing["chart_Abs_Width"] * (Spacing["chartArea_Rel_Right"] / 100)));
 
-            spacing.Add("chartArea_Abs_Width", Convert.ToInt32(spacing["chart_Abs_Width"] * (CorrelScatter.ChartAreas[0].Position.Width / 100)));
-            spacing.Add("chartArea_Rel_Left", CorrelScatter.ChartAreas[0].Position.X);
-            spacing.Add("chartArea_Abs_Left", Convert.ToInt32(spacing["chart_Abs_Width"] * (spacing["chartArea_Rel_Left"] / 100)));
-            spacing.Add("chartArea_Rel_Right", CorrelScatter.ChartAreas[0].Position.Right);
-            spacing.Add("chartArea_Abs_Right", Convert.ToInt32(spacing["chart_Abs_Width"] * (spacing["chartArea_Rel_Right"] / 100)));
-
-            spacing.Add("chartInnerPlot_Abs_Width", Convert.ToInt32(spacing["chartArea_Abs_Width"] * (CorrelScatter.ChartAreas[0].InnerPlotPosition.Width / 100)));
-            spacing.Add("chartInnerPlot_Rel_Left", CorrelScatter.ChartAreas[0].InnerPlotPosition.X);
-            spacing.Add("chartInnerPlot_Abs_Left", Convert.ToInt32(spacing["chartArea_Abs_Width"] * (spacing["chartInnerPlot_Rel_Left"] / 100)) + spacing["chartArea_Abs_Left"]);
-            spacing.Add("chartInnerPlot_Rel_Right", CorrelScatter.ChartAreas[0].InnerPlotPosition.Right);
-            spacing.Add("chartInnerPlot_Abs_Right", Convert.ToInt32(spacing["chartArea_Abs_Width"] * (spacing["chartInnerPlot_Rel_Right"] / 100)) + spacing["chartArea_Abs_Left"]);
+            Spacing.Add("chartInnerPlot_Abs_Width", Convert.ToInt32(Spacing["chartArea_Abs_Width"] * (CorrelScatter.ChartAreas[0].InnerPlotPosition.Width / 100)));
+            Spacing.Add("chartInnerPlot_Rel_Left", CorrelScatter.ChartAreas[0].InnerPlotPosition.X);
+            Spacing.Add("chartInnerPlot_Abs_Left", Convert.ToInt32(Spacing["chartArea_Abs_Width"] * (Spacing["chartInnerPlot_Rel_Left"] / 100)) + Spacing["chartArea_Abs_Left"]);
+            Spacing.Add("chartInnerPlot_Rel_Right", CorrelScatter.ChartAreas[0].InnerPlotPosition.Right);
+            Spacing.Add("chartInnerPlot_Abs_Right", Convert.ToInt32(Spacing["chartArea_Abs_Width"] * (Spacing["chartInnerPlot_Rel_Right"] / 100)) + Spacing["chartArea_Abs_Left"]);
 
 
-            spacing.Add("chart_Abs_Height", CorrelScatter.Height);
+            Spacing.Add("chart_Abs_Height", CorrelScatter.Height);
 
-            spacing.Add("chartArea_Abs_Height", Convert.ToInt32(spacing["chart_Abs_Height"] * (CorrelScatter.ChartAreas[0].Position.Height / 100)));
-            spacing.Add("chartArea_Rel_Top", CorrelScatter.ChartAreas[0].Position.Y);
-            spacing.Add("chartArea_Abs_Top", Convert.ToInt32(spacing["chart_Abs_Height"] * (spacing["chartArea_Rel_Top"] / 100)));
-            spacing.Add("chartArea_Rel_Bottom", CorrelScatter.ChartAreas[0].Position.Bottom);
-            spacing.Add("chartArea_Abs_Bottom", Convert.ToInt32(spacing["chart_Abs_Height"] * (spacing["chartArea_Rel_Bottom"] / 100)));
+            Spacing.Add("chartArea_Abs_Height", Convert.ToInt32(Spacing["chart_Abs_Height"] * (CorrelScatter.ChartAreas[0].Position.Height / 100)));
+            Spacing.Add("chartArea_Rel_Top", CorrelScatter.ChartAreas[0].Position.Y);
+            Spacing.Add("chartArea_Abs_Top", Convert.ToInt32(Spacing["chart_Abs_Height"] * (Spacing["chartArea_Rel_Top"] / 100)));
+            Spacing.Add("chartArea_Rel_Bottom", CorrelScatter.ChartAreas[0].Position.Bottom);
+            Spacing.Add("chartArea_Abs_Bottom", Convert.ToInt32(Spacing["chart_Abs_Height"] * (Spacing["chartArea_Rel_Bottom"] / 100)));
 
-            spacing.Add("chartInnerPlot_Abs_Height", Convert.ToInt32(spacing["chartArea_Abs_Height"] * (CorrelScatter.ChartAreas[0].InnerPlotPosition.Height / 100)));
-            spacing.Add("chartInnerPlot_Rel_Top", CorrelScatter.ChartAreas[0].InnerPlotPosition.Y);
-            spacing.Add("chartInnerPlot_Abs_Top", Convert.ToInt32(spacing["chartArea_Abs_Height"] * (spacing["chartInnerPlot_Rel_Top"] / 100)) + spacing["chartArea_Abs_Top"]);
-            spacing.Add("chartInnerPlot_Rel_Bottom", CorrelScatter.ChartAreas[0].InnerPlotPosition.Bottom);
-            spacing.Add("chartInnerPlot_Abs_Bottom", Convert.ToInt32(spacing["chartArea_Abs_Height"] * (spacing["chartInnerPlot_Rel_Bottom"] / 100)) + spacing["chartArea_Abs_Top"]);
+            Spacing.Add("chartInnerPlot_Abs_Height", Convert.ToInt32(Spacing["chartArea_Abs_Height"] * (CorrelScatter.ChartAreas[0].InnerPlotPosition.Height / 100)));
+            Spacing.Add("chartInnerPlot_Rel_Top", CorrelScatter.ChartAreas[0].InnerPlotPosition.Y);
+            Spacing.Add("chartInnerPlot_Abs_Top", Convert.ToInt32(Spacing["chartArea_Abs_Height"] * (Spacing["chartInnerPlot_Rel_Top"] / 100)) + Spacing["chartArea_Abs_Top"]);
+            Spacing.Add("chartInnerPlot_Rel_Bottom", CorrelScatter.ChartAreas[0].InnerPlotPosition.Bottom);
+            Spacing.Add("chartInnerPlot_Abs_Bottom", Convert.ToInt32(Spacing["chartArea_Abs_Height"] * (Spacing["chartInnerPlot_Rel_Bottom"] / 100)) + Spacing["chartArea_Abs_Top"]);
 
-            ConstructLabels(spacing);
+            ConstructLabels();
 
             HoverLabel_H1.MouseHover += HoverLabel_MouseHoverEvent_H1;
             HoverLabel_H1.MouseLeave += HoverLabel_MouseLeaveEvent_H1;
@@ -719,7 +733,7 @@ namespace CorrelationTest
                 minBound = (quintant - 1) * width + CorrelDist2.GetMinimum();
                 maxBound = (quintant) * width + CorrelDist2.GetMinimum();
                 pertinentPoints = from DataPoint dp in this.CorrelScatterPoints
-                                  where dp.XValue >= minBound && dp.YValues.First() < maxBound
+                                  where dp.YValues.First() >= minBound && dp.YValues.First() < maxBound
                                   select dp;
                 IEnumerable<double> pertinentX = from DataPoint dp in pertinentPoints select dp.XValue;
                 if (pertinentX.Any())
@@ -814,7 +828,7 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V1(object sender, EventArgs e)
         {
             HoverLabel_V1.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(1, QuintantOrientation.Vertical);
+            Tuple<double?, double?> stats = GetSubStats(5, QuintantOrientation.Vertical);
             HoverLabel_V1.TextAlign = ContentAlignment.MiddleCenter;
             HoverLabel_V1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
         }
@@ -827,7 +841,7 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V2(object sender, EventArgs e)
         {
             HoverLabel_V2.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(2, QuintantOrientation.Vertical);
+            Tuple<double?, double?> stats = GetSubStats(4, QuintantOrientation.Vertical);
             HoverLabel_V2.TextAlign = ContentAlignment.MiddleCenter;
             HoverLabel_V2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
         }
@@ -853,7 +867,7 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V4(object sender, EventArgs e)
         {
             HoverLabel_V4.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(4, QuintantOrientation.Vertical);
+            Tuple<double?, double?> stats = GetSubStats(2, QuintantOrientation.Vertical);
             HoverLabel_V4.TextAlign = ContentAlignment.MiddleCenter;
             HoverLabel_V4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
         }
@@ -866,7 +880,7 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V5(object sender, EventArgs e)
         {
             HoverLabel_V5.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(5, QuintantOrientation.Vertical);
+            Tuple<double?, double?> stats = GetSubStats(1, QuintantOrientation.Vertical);
             HoverLabel_V5.TextAlign = ContentAlignment.MiddleCenter;
             HoverLabel_V5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
             HoverLabel_V5.BringToFront();

@@ -133,7 +133,7 @@ namespace CorrelationTest
             else
             {
                 double stdev = Math.Sqrt(Distribution.Variance);
-                return Distribution.Mean + stdev * 4;
+                return GetInverse(0.99);
             }
         }
 
@@ -146,7 +146,7 @@ namespace CorrelationTest
             else
             {
                 double stdev = Math.Sqrt(Distribution.Variance);
-                return Distribution.Mean - stdev * 4;
+                return GetInverse(0.01);
             }
         }
 
