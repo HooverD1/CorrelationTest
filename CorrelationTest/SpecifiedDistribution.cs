@@ -149,7 +149,7 @@ namespace CorrelationTest
                 return GetInverse(0.01);
             }
         }
-
+        
         public double GetPDF_Value(double xValue)
         {
             //Get the Y value from the X value

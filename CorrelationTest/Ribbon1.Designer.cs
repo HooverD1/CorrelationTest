@@ -47,11 +47,11 @@
             this.DeveloperTools = this.Factory.CreateRibbonGroup();
             this.DebugModeToggle = this.Factory.CreateRibbonButton();
             this.testPrint = this.Factory.CreateRibbonButton();
+            this.button1 = this.Factory.CreateRibbonButton();
             this.TimingTests = this.Factory.CreateRibbonGroup();
             this.TestDoubles = this.Factory.CreateRibbonButton();
             this.TestStrings = this.Factory.CreateRibbonButton();
             this.TestFormulas = this.Factory.CreateRibbonButton();
-            this.button1 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -148,6 +148,12 @@
             this.testPrint.Name = "testPrint";
             this.testPrint.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.testPrint_Click);
             // 
+            // button1
+            // 
+            this.button1.Label = "Test Correl";
+            this.button1.Name = "button1";
+            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
+            // 
             // TimingTests
             // 
             this.TimingTests.Items.Add(this.TestDoubles);
@@ -173,12 +179,6 @@
             this.TestFormulas.Label = "Test 1M Formulas";
             this.TestFormulas.Name = "TestFormulas";
             this.TestFormulas.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TestFormulas_Click);
-            // 
-            // button1
-            // 
-            this.button1.Label = "Test Correl";
-            this.button1.Name = "button1";
-            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
             // 
             // Ribbon1
             // 

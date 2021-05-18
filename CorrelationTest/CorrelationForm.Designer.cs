@@ -62,6 +62,8 @@
             this.CorrelScatter.Name = "CorrelScatter";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series1.Color = System.Drawing.SystemColors.MenuHighlight;
+            series1.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
             series1.Name = "CorrelSeries";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
@@ -71,6 +73,8 @@
             this.CorrelScatter.Text = "Scatterplot";
             this.CorrelScatter.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelScatter_Paint);
             this.CorrelScatter.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseClick);
+            this.CorrelScatter.MouseEnter += new System.EventHandler(this.CorrelScatter_MouseEnter);
+            this.CorrelScatter.MouseLeave += new System.EventHandler(this.CorrelScatter_MouseLeave);
             // 
             // btn_saveClose
             // 
@@ -172,6 +176,7 @@
             this.Name = "CorrelationForm";
             this.Text = "CorrelationForm";
             this.Load += new System.EventHandler(this.CorrelationForm_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelationForm_Paint);
             ((System.ComponentModel.ISupportInitialize)(this.CorrelScatter)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_CorrelValue)).EndInit();
             this.groupBox_CorrelCoef.ResumeLayout(false);
