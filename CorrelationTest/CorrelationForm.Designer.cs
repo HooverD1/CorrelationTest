@@ -48,8 +48,12 @@
             // 
             // CorrelScatter
             // 
+            chartArea1.AxisX.ScaleView.Zoomable = false;
+            chartArea1.AxisX2.ScaleView.Zoomable = false;
             chartArea1.AxisY.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
+            chartArea1.AxisY.ScaleView.Zoomable = false;
             chartArea1.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
+            chartArea1.AxisY2.ScaleView.Zoomable = false;
             chartArea1.Name = "ChartArea1";
             chartArea1.Position.Auto = false;
             chartArea1.Position.Height = 94F;
@@ -71,6 +75,7 @@
             this.CorrelScatter.Size = new System.Drawing.Size(750, 750);
             this.CorrelScatter.TabIndex = 0;
             this.CorrelScatter.Text = "Scatterplot";
+            this.CorrelScatter.CursorPositionChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.CursorEventArgs>(this.CorrelScatter_CursorPositionChanged);
             this.CorrelScatter.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelScatter_Paint);
             this.CorrelScatter.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseClick);
             this.CorrelScatter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseDown);

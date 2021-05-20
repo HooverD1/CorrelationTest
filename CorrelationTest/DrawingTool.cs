@@ -17,6 +17,9 @@ namespace CorrelationTest
 
     class DrawingTool
     {
+        public Winforms.Button btn_ToolSwap { get; set; }
+        public bool DrawPointsMode { get; set; } = true;
+
         private double XAxis_Min_Pixels { get; set; }
         private double YAxis_Min_Pixels { get; set; }
         private double XAxis_Max_Pixels { get; set; }
@@ -62,17 +65,55 @@ namespace CorrelationTest
             {
                 DrawOn.Series.Add(DrawSeries);
             }
+            
+        }
+
+        public void ResetSeriesColor()
+        {
+            foreach(DataPoint dp in DrawSeries.Points)
+            {
+                dp.Color = Color.FromArgb(255, 0, 162, 232);
+            }
+        }
+
+        public void EnableSelectionMode()
+        {
+            DrawPointsMode = false;
+            DrawArea.CursorX.IsUserEnabled = true;
+            DrawArea.CursorY.IsUserEnabled = true;
+            DrawArea.CursorX.IsUserSelectionEnabled = true;
+            DrawArea.CursorY.IsUserSelectionEnabled = true;
+            DrawArea.CursorX.Interval = 0.01;
+            DrawArea.CursorY.Interval = 0.01;
+            DrawArea.CursorX.AxisType = AxisType.Primary;
+            DrawArea.CursorY.AxisType = AxisType.Primary;
+            DrawArea.CursorX.LineColor = System.Drawing.Color.Transparent;
+            DrawArea.CursorY.LineColor = System.Drawing.Color.Transparent;
+            DrawArea.CursorX.SelectionColor = System.Drawing.Color.Transparent;
+            DrawArea.CursorY.SelectionColor = System.Drawing.Color.Transparent;
+            
+        }
+
+        public void EnableDrawPointsMode()
+        {
+            DrawPointsMode = true;
+            DrawArea.CursorX.IsUserEnabled = false;
+            DrawArea.CursorY.IsUserEnabled = false;
+            DrawArea.CursorX.IsUserSelectionEnabled = false;
+            DrawArea.CursorY.IsUserSelectionEnabled = false;
         }
 
         public void EnableCursor()
         {
-            ExistingCursor = Winforms.Cursor.Current;
+            if(ExistingCursor == null)
+                ExistingCursor = Winforms.Cursor.Current;
             DrawOn.Cursor = this.OverrideCursor;
 
         }
         public void ResetCursor()
         {
             DrawOn.Cursor = ExistingCursor;
+            
         }
 
         public void FormatChartForDrawing()
@@ -101,6 +142,11 @@ namespace CorrelationTest
                 s.Color = Color.FromArgb(255, s.Color);
             }
             DrawSeries.Color = Color.FromArgb(0, DrawSeries.Color);
+
+            DrawArea.CursorX.IsUserEnabled = false;
+            //DrawArea.CursorX.IsUserSelectionEnabled = false;
+            DrawArea.CursorY.IsUserEnabled = false;
+            //DrawArea.CursorY.IsUserSelectionEnabled = false;
         }
 
         public void GetXAxisMinMax()
@@ -205,7 +251,28 @@ namespace CorrelationTest
 
             ////PLAN: NEED TO CONVERT the Point's coords to axis values (axisToValue inside paint event?), create a DataPoint off the derived x & y
             //Check if you are within the InnerPlot area - if so, add and return true. If not, return false.
-            
+        }
+
+        public DataPoint GetDataPointNearToXY(double x, double y)
+        {
+            var distances = (from DataPoint dp in DrawSeries.Points select new Tuple<DataPoint, double>(dp, GetDistance(dp, x, y))).OrderBy(t => t.Item2);
+            DataPoint closestDataPoint = distances.First().Item1;
+            double nearestDistance = distances.First().Item2;
+            if (nearestDistance <= 0.1)
+                return closestDataPoint;
+            else
+                return null;
+        }
+
+        private double GetDistance(DataPoint dp, double x, double y)
+        {
+            double dp_x = dp.XValue;
+            double dp_y = dp.YValues.First();
+
+            double distance_x = x - dp_x;
+            double distance_y = y - dp_y;
+
+            return Math.Sqrt(distance_x * distance_x + distance_y * distance_y); //Pythagorean theorem!
         }
     }
 }

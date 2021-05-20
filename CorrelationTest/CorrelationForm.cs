@@ -632,7 +632,18 @@ namespace CorrelationTest
                 {
                     qLab.Hide();
                 }
-                //this.DrawnCorrel = new DrawnCorrelation();
+                //Turn on additional buttons
+
+                DrawTool.btn_ToolSwap = new Button();
+                DrawTool.btn_ToolSwap.Left = btn_LaunchDrawCorrelation.Location.X;
+                DrawTool.btn_ToolSwap.Height = btn_LaunchDrawCorrelation.Height;
+                DrawTool.btn_ToolSwap.Width = btn_LaunchDrawCorrelation.Width;
+                DrawTool.btn_ToolSwap.BackColor = btn_LaunchDrawCorrelation.BackColor;
+                DrawTool.btn_ToolSwap.Top = btn_LaunchDrawCorrelation.Location.Y - DrawTool.btn_ToolSwap.Height;
+                DrawTool.btn_ToolSwap.Text = "Select Points";
+                DrawTool.btn_ToolSwap.Click += SwapTools_Click;
+                this.Controls.Add(DrawTool.btn_ToolSwap);
+
                 //Disable the other buttons
                 this.btn_LaunchHelper.Enabled = false;
                 this.btn_saveClose.Enabled = false;
@@ -645,6 +656,7 @@ namespace CorrelationTest
             {
                 //Turn off DrawingMode
                 DrawTool.ResetChartFormat();
+                this.Controls.Remove(DrawTool.btn_ToolSwap);
                 CorrelScatter.Series.Remove(DrawTool.DrawSeries);
                 decimal drawingCorrelation = DrawTool.GetCorrelationFromPoints();
                 if(drawingCorrelation != -2)
@@ -661,11 +673,13 @@ namespace CorrelationTest
                 {
                     qLab.Show();
                 }
+                
                 this.DrawTool = null;                
                 this.btn_LaunchHelper.Enabled = true;
                 this.btn_saveClose.Enabled = true;
                 this.numericUpDown_CorrelValue.Enabled = this.UpDownEnabled;    //Reset to original state
                 btn_LaunchDrawCorrelation.Text = "Draw Correlation";
+                
                 DrawingMode = false;
             }
         }
@@ -1119,7 +1133,8 @@ namespace CorrelationTest
         {
             if (DrawingMode)
             {
-                DrawTool.ResetCursor();
+                if(DrawTool.DrawPointsMode)
+                    DrawTool.ResetCursor();
             }
         }
 
@@ -1127,9 +1142,10 @@ namespace CorrelationTest
         {
             if (DrawingMode)
             {
+                if (DrawTool.DrawPointsMode)
+                    DrawTool.EnableCursor();
                 //DrawingTool object set up when you click the button
-                DrawTool.EnableCursor();
-
+                
             }
         }
 
@@ -1138,9 +1154,18 @@ namespace CorrelationTest
             MouseIsDown = true;
             if (DrawingMode)
             {
-                DrawTool.PaintPoint();      //Immediately paint the first point so that users can simply click instead of hold.
-                DrawTool.PaintTimer.Enabled = true;
-                DrawTool.PaintTimer.Start();
+                if (DrawTool.DrawPointsMode)
+                {
+                    
+                    DrawTool.PaintPoint();      //Immediately paint the first point so that users can simply click instead of hold.
+                    DrawTool.PaintTimer.Enabled = true;
+                    DrawTool.PaintTimer.Start();
+                }
+                else
+                {
+                    //Select points mode
+                    DrawTool.EnableSelectionMode();
+                }
             }
         }
 
@@ -1148,11 +1173,55 @@ namespace CorrelationTest
         {
             if (DrawingMode)
             {
-                DrawTool.PaintTimer.Stop();
-                DrawTool.PaintTimer.Enabled = false;
-                
+                if (DrawTool.DrawPointsMode)
+                {
+                    DrawTool.PaintTimer.Stop();
+                    DrawTool.PaintTimer.Enabled = false;
+                }
             }
                 
+        }
+
+        private void SwapTools_Click(object sender, EventArgs e)
+        {
+            if(!DrawTool.DrawPointsMode)
+            {
+                DrawTool.EnableDrawPointsMode();
+                DrawTool.btn_ToolSwap.Text = "Select Points";
+                //Turn on the circle cursor.
+                DrawTool.EnableCursor();
+                //Turn on DrawPointsMode
+                
+            }
+            else
+            {
+                DrawTool.EnableSelectionMode();
+                DrawTool.btn_ToolSwap.Text = "Place Points";
+                //Turn on the arrow cursor
+                DrawTool.ResetCursor();
+                //Turn off DrawPointsMode
+                
+            } 
+        }
+
+        private void CorrelScatter_CursorPositionChanged(object sender, CursorEventArgs e)
+        {
+            if (DrawingMode)
+            {
+                if(DrawTool.DrawPointsMode == false)
+                {
+                    double x = e.ChartArea.CursorX.Position;
+                    double y = e.ChartArea.CursorY.Position;
+                    //Get the point closest to (x, y)
+                    DataPoint selectedPoint = DrawTool.GetDataPointNearToXY(x, y);
+                    if(selectedPoint != null)
+                    {
+                        DrawTool.ResetSeriesColor();
+                        selectedPoint.Color = Color.Orange;
+                    }
+                }
+                
+            }            
         }
     }
 }
