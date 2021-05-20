@@ -7,10 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Winforms = System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Threading;
 //using System.Windows.Forms.DataVisualization.Charting;
 
 namespace CorrelationTest
 {
+    public delegate Point ConvertToFormPoint(Point screenPoint);
+    public delegate void PointAdder(DataPoint windowPoint);
+
     class DrawingTool
     {
         private double XAxis_Min_Pixels { get; set; }
@@ -23,8 +27,7 @@ namespace CorrelationTest
         private double XAxis_Max_Value { get; set; }
         private double YAxis_Max_Value { get; set; }
 
-        private bool leftRestricted = false;
-        private bool rightRestricted = false;
+        private Dictionary<string, dynamic> Spacing { get; set; }
 
         public Series DrawSeries { get; set; } = new Series();  //The tool adds points to this series which is displayed in the DrawArea
 
@@ -33,19 +36,28 @@ namespace CorrelationTest
 
         public Winforms.Cursor OverrideCursor { get; set; } = new Winforms.Cursor(new MemoryStream(Properties.Resources.CircleCursor1));
         public Winforms.Cursor ExistingCursor { get; set; }
+
+        public System.Timers.Timer PaintTimer { get; set; } = new System.Timers.Timer();
         
         public Chart DrawOn { get; set; }
         public ChartArea DrawArea { get; set; }
 
-        public DrawingTool(ref Chart DrawOn, ref ChartArea DrawArea)
+        public DrawingTool(ref Chart DrawOn, ref ChartArea DrawArea, Dictionary<string, dynamic> Spacing)
         {
             this.DrawOn = DrawOn;
             this.DrawArea = DrawArea;
+            this.Spacing = Spacing;
             this.ExistingCanvasColor = DrawArea.BackColor;
             DrawSeries.ChartType = SeriesChartType.Point;
             DrawSeries.Name = "DrawSeries";
-            DrawSeries.Color = Color.FromArgb(255, 1, 1, 1);
-            
+            DrawSeries.Color = Color.FromArgb(255, 0, 162, 232);
+            DrawSeries.MarkerBorderColor = Color.FromArgb(255, 0, 0, 0);
+            DrawSeries.MarkerStyle = MarkerStyle.Circle;
+            DrawSeries.MarkerSize = 8;
+            this.PaintTimer.Interval = 200;     //ms
+            PaintTimer.Enabled = false;
+            PaintTimer.AutoReset = true;
+            PaintTimer.Elapsed += AttemptPaint;
             if (!(from Series s in DrawOn.Series where s.Name == "DrawSeries" select s).Any())
             {
                 DrawOn.Series.Add(DrawSeries);
@@ -120,61 +132,80 @@ namespace CorrelationTest
             return new DataPoint(x_value, y_value);
         }
 
-        public bool AddPoint(Point newPoint)
+        public void PaintPoint()
         {
-            DataPoint newDataPoint = ConvertPointToDataPoint(newPoint);
+            int x = System.Windows.Forms.Cursor.Position.X;
+            int y = System.Windows.Forms.Cursor.Position.Y;
+            Accord.Statistics.Distributions.Univariate.NormalDistribution offsetDist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 9);
+            Random rando = new Random();
+            int x_offset = Convert.ToInt32(offsetDist.InverseDistributionFunction(rando.NextDouble()));
+            int y_offset = Convert.ToInt32(offsetDist.InverseDistributionFunction(rando.NextDouble()));
+            Point screenPoint = new Point(x + x_offset, y + y_offset);
+            Point newPoint;
+
+            if (DrawOn.InvokeRequired)
+            {
+                ConvertToFormPoint cfp = DrawOn.PointToClient;
+                newPoint = (Point)DrawOn.Invoke(cfp, screenPoint);
+            }
+            else
+            {
+                newPoint = DrawOn.PointToClient(screenPoint);
+            }
+            AddPoint(newPoint);
+        }
+
+        private void AttemptPaint(object sender, EventArgs e)   //This event fires from the timer elapsed event.
+        {            
+            PaintPoint();
+        }
+
+        public decimal GetCorrelationFromPoints()
+        {
+            if(this.DrawSeries.Points.Count() < 3)
+            {
+                return -2;      //Not enough points
+            }
+            else
+            {
+                double[,] matrix = new double[DrawSeries.Points.Count(), 2];
+                var xVals = (from DataPoint dp in DrawSeries.Points select dp.XValue).ToArray();
+                var yVals = (from DataPoint dp in DrawSeries.Points select dp.YValues.First()).ToArray();
+                for(int i = 0; i < matrix.GetLength(0); i++)
+                {
+                    matrix[i, 0] = xVals[i];
+                    matrix[i, 1] = yVals[i];
+                }
+                double[,] corMatrix = Accord.Statistics.Measures.Correlation(matrix);
+                return Convert.ToDecimal(corMatrix[0, 1]);
+            }
+        }
+
+        public void AddPoint(Point newPoint)
+        {
+            //Need to check boundaries still. Points aren't showing outside the innerplot area, but are being added to the series regardless
+            double leftBound = Spacing["chartInnerPlot_Abs_Left"];
+            double topBound = Spacing["chartInnerPlot_Abs_Top"];
+            double rightBound = Spacing["chartInnerPlot_Abs_Right"];
+            double bottomBound = Spacing["chartInnerPlot_Abs_Bottom"]; ;
+            if(newPoint.X >= leftBound && newPoint.X <= rightBound && newPoint.Y <= bottomBound && newPoint.Y >= topBound)
+            {
+
+                DataPoint newDataPoint = ConvertPointToDataPoint(newPoint);
+                if (DrawOn.InvokeRequired)
+                {
+                    PointAdder pa = DrawSeries.Points.Add;
+                    DrawOn.Invoke(pa, newDataPoint);
+                }
+                else
+                {
+                    DrawSeries.Points.Add(newDataPoint);
+                }
+            }
+
             ////PLAN: NEED TO CONVERT the Point's coords to axis values (axisToValue inside paint event?), create a DataPoint off the derived x & y
             //Check if you are within the InnerPlot area - if so, add and return true. If not, return false.
-            DrawSeries.Points.Add(newDataPoint);
-            return true;
-            //if (DrawSeries.Points.Count == 0)   //If this is the first point, it can go anywhere
-            //{
-
-            //    return true;
-            //}
-            //else if (DrawSeries.Points.Count == 1)  //Second point chooses which direction you are drawing
-            //{
-            //    //Check if X is equal.
-            //    if (newDataPoint.XValue == DrawSeries.Points.First().XValue)
-            //    {
-            //        return false;
-            //    }
-            //    else if (newDataPoint.XValue > DrawSeries.Points.First().XValue)  //moving right
-            //    {
-            //        leftRestricted = true;
-            //        DrawSeries.Points.Add(newDataPoint);
-            //        return true;
-            //    }
-            //    else //if(newPoint.X < Points.First().X)  //moving left
-            //    {
-            //        rightRestricted = true;
-            //        DrawSeries.Points.Add(newDataPoint);
-            //        return true;
-            //    }
-            //}
-            //else   //Additional points must go in the same direction
-            //{
-            //    //Check if the point violates the restriction
-            //    if (newDataPoint.XValue == DrawSeries.Points.Last().XValue)
-            //    {
-            //        return false;
-            //    }
-            //    else if (newDataPoint.XValue > DrawSeries.Points.Last().XValue && rightRestricted == false)
-            //    {
-            //        DrawSeries.Points.Add(newDataPoint);
-            //        return true;
-            //    }
-            //    else if (newDataPoint.XValue < DrawSeries.Points.Last().XValue && leftRestricted == false)
-            //    {
-            //        DrawSeries.Points.Add(newDataPoint);
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        return false;
-            //    }
-            //}
-
+            
         }
     }
 }

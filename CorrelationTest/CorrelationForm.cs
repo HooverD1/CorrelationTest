@@ -23,6 +23,7 @@ namespace CorrelationTest
             PSD,
             Conformal
         }
+        private bool MouseIsDown { get; set; } = false;
         private bool RefreshBreak { get; set; } = false;
         private Chart yAxisChart {get;set;}
         private Tuple<Point, Point>[] hoverPoints { get; set; } = new Tuple<Point, Point>[10];
@@ -625,7 +626,7 @@ namespace CorrelationTest
                 //Turn on DrawingMode
                 DrawingMode = true;
                 ChartArea correlScatterArea = CorrelScatter.ChartAreas[0];
-                this.DrawTool = new DrawingTool(ref CorrelScatter, ref correlScatterArea);
+                this.DrawTool = new DrawingTool(ref CorrelScatter, ref correlScatterArea, Spacing);
                 DrawTool.FormatChartForDrawing();
                 foreach(Label qLab in CorrelScatter.Controls)
                 {
@@ -645,6 +646,17 @@ namespace CorrelationTest
                 //Turn off DrawingMode
                 DrawTool.ResetChartFormat();
                 CorrelScatter.Series.Remove(DrawTool.DrawSeries);
+                decimal drawingCorrelation = DrawTool.GetCorrelationFromPoints();
+                if(drawingCorrelation != -2)
+                {
+                    this.numericUpDown_CorrelValue.Value = drawingCorrelation;
+                }
+                else
+                {
+                    //Not enough points, set to zero.
+                    this.numericUpDown_CorrelValue.Value = 0;   
+                }
+                
                 foreach (Label qLab in CorrelScatter.Controls)
                 {
                     qLab.Show();
@@ -660,10 +672,6 @@ namespace CorrelationTest
 
         private void CorrelScatter_MouseClick(object sender, MouseEventArgs e)
         {
-            if (DrawingMode)
-            {
-                DrawTool.AddPoint(e.Location);
-            }
             
         }
 
@@ -1123,6 +1131,28 @@ namespace CorrelationTest
                 DrawTool.EnableCursor();
 
             }
+        }
+
+        private void CorrelScatter_MouseDown(object sender, MouseEventArgs e)
+        {
+            MouseIsDown = true;
+            if (DrawingMode)
+            {
+                DrawTool.PaintPoint();      //Immediately paint the first point so that users can simply click instead of hold.
+                DrawTool.PaintTimer.Enabled = true;
+                DrawTool.PaintTimer.Start();
+            }
+        }
+
+        private void CorrelScatter_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (DrawingMode)
+            {
+                DrawTool.PaintTimer.Stop();
+                DrawTool.PaintTimer.Enabled = false;
+                
+            }
+                
         }
     }
 }

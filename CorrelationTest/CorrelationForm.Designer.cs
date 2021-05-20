@@ -73,8 +73,10 @@
             this.CorrelScatter.Text = "Scatterplot";
             this.CorrelScatter.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelScatter_Paint);
             this.CorrelScatter.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseClick);
+            this.CorrelScatter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseDown);
             this.CorrelScatter.MouseEnter += new System.EventHandler(this.CorrelScatter_MouseEnter);
             this.CorrelScatter.MouseLeave += new System.EventHandler(this.CorrelScatter_MouseLeave);
+            this.CorrelScatter.MouseUp += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseUp);
             // 
             // btn_saveClose
             // 
