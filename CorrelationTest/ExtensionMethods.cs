@@ -108,7 +108,7 @@ namespace CorrelationTest
 
         public static SheetType GetSheetType(Excel.Worksheet xlSheet)
         {
-            string sheetIdent = xlSheet.Cells[1, 1].Value;
+            string sheetIdent = Convert.ToString(xlSheet.Cells[1, 1].Value);
             switch (sheetIdent)
             {
                 case "$CORRELATION_CP":

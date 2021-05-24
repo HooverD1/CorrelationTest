@@ -175,6 +175,7 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="ChartUtilities.cs" />
     <Compile Include="CorrelationConversionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -221,6 +222,7 @@
     <Compile Include="Item.cs" />
     <Compile Include="CostSheet.cs" />
     <Compile Include="DisplayCoords.cs" />
+    <Compile Include="SelectedPoint.cs" />
     <Compile Include="SpecifiedDistribution.cs" />
     <Compile Include="Estimate_Item.cs" />
     <Compile Include="EstimateSheet.cs" />

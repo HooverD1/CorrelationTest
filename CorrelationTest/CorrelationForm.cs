@@ -23,6 +23,7 @@ namespace CorrelationTest
             PSD,
             Conformal
         }
+        private SelectedPoint selectedPoint { get; set; }
         private bool MouseIsDown { get; set; } = false;
         private bool RefreshBreak { get; set; } = false;
         private Chart yAxisChart {get;set;}
@@ -132,19 +133,24 @@ namespace CorrelationTest
 
             //Mean marker series
             Series meanMarker = new Series();
+            meanMarker.Name = "MeanMarker";
             meanMarker.ChartType = SeriesChartType.Point;
             meanMarker.Points.AddXY(CorrelDist1.GetMean(), CorrelDist2.GetMean());
             meanMarker.Color = Color.FromArgb(255, 0, 0, 0);
             meanMarker.MarkerStyle = MarkerStyle.Square;
             meanMarker.MarkerSize = 10;
-            
+            meanMarker.SmartLabelStyle.Enabled = false;
+            meanMarker.LabelBackColor = Color.White;
+            DataPoint dp = meanMarker.Points.First();
+            dp.Label = $"({Math.Round(dp.XValue, 2)}, {Math.Round(dp.YValues.First(), 2)})";
+            dp.LabelForeColor = Color.Black;
+
             CorrelScatter.Series.Add(meanMarker);
-            
+
             Excel.Range xlSelection = ThisAddIn.MyApp.Selection;
             int index1 = xlSelection.Row - (CorrelSheet.xlMatrixCell.Row + 1);
             int index2 = xlSelection.Column - CorrelSheet.xlMatrixCell.Column;
-
-
+            
             trans_bounds = CorrelSheet.CorrelMatrix.GetTransitivityBounds(index1, index2);  //<min, max>
             feasibility_bounds = CorrelSheet.CorrelMatrix.GetFeasibilityBounds(CorrelDist1, CorrelDist2);
             numericUpDown_CorrelValue.TextAlign = HorizontalAlignment.Center;
@@ -255,7 +261,7 @@ namespace CorrelationTest
             yAxisChart.Series["Series1"].YValuesPerPoint = 1;
             //yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
             yAxisChart.Series["Series1"].IsVisibleInLegend = false;
-            yAxisChart.Series["Series1"]["PixelPointWidth"] = "3";
+            yAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
 
             int steps = 400;
             double minimum = CorrelDist2.GetMinimum();
@@ -274,20 +280,36 @@ namespace CorrelationTest
 
             double meanValue = CorrelDist2.GetMean();
             //Find the point in the series that is closest to the mean.
-            var meanDistances = from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue));
-            DataPoint meanPoint = meanDistances.OrderBy(t => t.Item2).First().Item1;
+            var meanDistances = (from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue))).OrderBy(t => t.Item2).ToArray();
+            DataPoint meanPoint = meanDistances.First().Item1;
+            for(int i=0; i<5; i++)
+            {
+                //Set the points near the mean to display the mean value
+                meanDistances[i].Item1.ToolTip = $"Mean: {Math.Round(meanPoint.XValue, 2)}";
+            }
+            //yAxisChart.Series["Series1"].ToolTip = "Hi #VAL";
             PercentilePoints.Add("Y_MeanPoint", meanPoint);
             meanPoint.Color = Color.FromArgb(0, 0, 0);
 
             double lowValue = CorrelDist2.GetInverse(0.25);
-            var lowDistances = from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - lowValue));
-            DataPoint lowPoint = lowDistances.OrderBy(t => t.Item2).First().Item1;
+            var lowDistances = (from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - lowValue))).OrderBy(t => t.Item2).ToArray() ;
+            DataPoint lowPoint = lowDistances.First().Item1;
+            for (int i = 0; i < 5; i++)
+            {
+                //Set the points near the mean to display the mean value
+                lowDistances[i].Item1.ToolTip = $"25th Percentile: {Math.Round(lowPoint.XValue, 2)}";
+            }
             PercentilePoints.Add("Y_LowPoint", lowPoint);
             lowPoint.Color = Color.FromArgb(50, 50, 50);
 
             double highValue = CorrelDist2.GetInverse(0.75);
-            var highDistances = from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - highValue));
-            DataPoint highPoint = highDistances.OrderBy(t => t.Item2).First().Item1;
+            var highDistances = (from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - highValue))).OrderBy(t => t.Item2).ToArray();
+            DataPoint highPoint = highDistances.First().Item1;
+            for (int i = 0; i < 5; i++)
+            {
+                //Set the points near the mean to display the mean value
+                highDistances[i].Item1.ToolTip = $"75th Percentile: {Math.Round(highPoint.XValue, 2)}";
+            }
             PercentilePoints.Add("Y_HighPoint", highPoint);
             highPoint.Color = Color.FromArgb(50, 50, 50);
 
@@ -322,7 +344,7 @@ namespace CorrelationTest
             xAxisChart.ChartAreas[0].InnerPlotPosition = new ElementPosition(5, 3, 90, 90);
 
             this.xAxisChart.Series["Series1"].YValuesPerPoint = 1;
-            xAxisChart.Series["Series1"]["PixelPointWidth"] = "3";
+            xAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
 
             int steps = 400;
             double minimum = CorrelDist1.GetMinimum();
@@ -340,20 +362,35 @@ namespace CorrelationTest
             }
             double meanValue = CorrelDist1.GetMean();
             //Find the point in the series that is closest to the mean.
-            var meanDistances = from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue));
-            DataPoint meanPoint = meanDistances.OrderBy(t => t.Item2).First().Item1;
+            var meanDistances = (from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue))).OrderBy(t => t.Item2).ToArray();
+            DataPoint meanPoint = meanDistances.First().Item1;
+            for (int i = 0; i < 5; i++)
+            {
+                //Set the points near the mean to display the mean value
+                meanDistances[i].Item1.ToolTip = $"Mean: {Math.Round(meanPoint.XValue, 2)}";
+            }
             PercentilePoints.Add("X_MeanPoint", meanPoint);
             meanPoint.Color = Color.FromArgb(0, 0, 0);
 
             double lowValue = CorrelDist1.GetInverse(0.25);
-            var lowDistances = from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - lowValue));
-            DataPoint lowPoint = lowDistances.OrderBy(t => t.Item2).First().Item1;
+            var lowDistances = (from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - lowValue))).OrderBy(t => t.Item2).ToArray();
+            DataPoint lowPoint = lowDistances.First().Item1;
+            for (int i = 0; i < 5; i++)
+            {
+                //Set the points near the mean to display the mean value
+                lowDistances[i].Item1.ToolTip = $"25th Percentile: {Math.Round(lowPoint.XValue, 2)}";
+            }
             PercentilePoints.Add("X_LowPoint", lowPoint);
             lowPoint.Color = Color.FromArgb(50, 50, 50);
 
             double highValue = CorrelDist1.GetInverse(0.75);
-            var highDistances = from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - highValue));
-            DataPoint highPoint = highDistances.OrderBy(t => t.Item2).First().Item1;
+            var highDistances = (from DataPoint dp in xAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - highValue))).OrderBy(t => t.Item2).ToArray();
+            DataPoint highPoint = highDistances.First().Item1;
+            for (int i = 0; i < 5; i++)
+            {
+                //Set the points near the mean to display the mean value
+                highDistances[i].Item1.ToolTip = $"75th Percentile: {Math.Round(highPoint.XValue, 2)}";
+            }
             PercentilePoints.Add("X_HighPoint", highPoint);
             highPoint.Color = Color.FromArgb(50, 50, 50);
             
@@ -632,6 +669,7 @@ namespace CorrelationTest
                 {
                     qLab.Hide();
                 }
+                CorrelScatter.Series["MeanMarker"].Points.First().Label = "";
                 //Turn on additional buttons
 
                 DrawTool.btn_ToolSwap = new Button();
@@ -661,19 +699,25 @@ namespace CorrelationTest
                 decimal drawingCorrelation = DrawTool.GetCorrelationFromPoints();
                 if(drawingCorrelation != -2)
                 {
-                    this.numericUpDown_CorrelValue.Value = drawingCorrelation;
+                    //Question: What if this is outside the min/max bounds?
+                    //My thought: Set it up against the min or the max
+                    if (drawingCorrelation > this.numericUpDown_CorrelValue.Maximum)
+                        this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Maximum;
+                    else if (drawingCorrelation < this.numericUpDown_CorrelValue.Minimum)
+                        this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Minimum;
+                    else
+                        this.numericUpDown_CorrelValue.Value = drawingCorrelation;
                 }
                 else
                 {
-                    //Not enough points, set to zero.
-                    this.numericUpDown_CorrelValue.Value = 0;   
+                    //Not enough points, do nothing
                 }
                 
                 foreach (Label qLab in CorrelScatter.Controls)
                 {
                     qLab.Show();
                 }
-                
+                CorrelScatter.Series["MeanMarker"].Points.First().Label = $"({Math.Round(PercentilePoints["X_MeanPoint"].XValue, 2)}, {Math.Round(PercentilePoints["Y_MeanPoint"].XValue, 2)})";
                 this.DrawTool = null;                
                 this.btn_LaunchHelper.Enabled = true;
                 this.btn_saveClose.Enabled = true;
@@ -1212,16 +1256,36 @@ namespace CorrelationTest
                 {
                     double x = e.ChartArea.CursorX.Position;
                     double y = e.ChartArea.CursorY.Position;
-                    //Get the point closest to (x, y)
-                    DataPoint selectedPoint = DrawTool.GetDataPointNearToXY(x, y);
-                    if(selectedPoint != null)
+                    selectedPoint = ChartUtilities.SelectDataPointNearToXY(x, y, DrawTool.DrawSeries);
+                    if (selectedPoint != null)
                     {
-                        DrawTool.ResetSeriesColor();
-                        selectedPoint.Color = Color.Orange;
+                        selectedPoint.FormatSelection();
                     }
                 }
-                
-            }            
+            }
+        }
+
+
+        private void CorrelScatter_KeyDown(object sender, KeyEventArgs e)
+        {
+            
+        }
+
+        private void CorrelationForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Delete:
+                    if (selectedPoint != null)
+                    {
+                        Series parentSeries = selectedPoint.parent;
+                        parentSeries.Points.Remove(selectedPoint.datapoint);
+                        selectedPoint = null;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

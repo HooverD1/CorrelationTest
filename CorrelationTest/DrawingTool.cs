@@ -57,6 +57,7 @@ namespace CorrelationTest
             DrawSeries.MarkerBorderColor = Color.FromArgb(255, 0, 0, 0);
             DrawSeries.MarkerStyle = MarkerStyle.Circle;
             DrawSeries.MarkerSize = 8;
+            DrawSeries.SmartLabelStyle.Enabled = false;
             this.PaintTimer.Interval = 200;     //ms
             PaintTimer.Enabled = false;
             PaintTimer.AutoReset = true;
@@ -68,13 +69,7 @@ namespace CorrelationTest
             
         }
 
-        public void ResetSeriesColor()
-        {
-            foreach(DataPoint dp in DrawSeries.Points)
-            {
-                dp.Color = Color.FromArgb(255, 0, 162, 232);
-            }
-        }
+        
 
         public void EnableSelectionMode()
         {
@@ -124,11 +119,15 @@ namespace CorrelationTest
             DrawOn.BringToFront();
             DrawArea.BackColor = CanvasColor;
             //Hide the markers
-            foreach (Series s in DrawOn.Series)
-            {
-                s.Color = Color.FromArgb(0, s.Color);
-            }
+            DrawOn.Series[0].Color = Color.FromArgb(0, DrawOn.Series[0].Color);
+            DrawOn.Series[0].LabelBackColor = Color.FromArgb(0, DrawOn.Series[0].LabelBackColor);
+            DrawOn.Series[0].LabelForeColor = Color.FromArgb(0, DrawOn.Series[0].LabelForeColor);
+            DrawOn.Series[1].Color = Color.FromArgb(0, DrawOn.Series[1].Color);
+            DrawOn.Series[1].LabelBackColor = Color.FromArgb(0, DrawOn.Series[1].LabelBackColor);
+            DrawOn.Series[1].LabelForeColor = Color.FromArgb(0, DrawOn.Series[1].LabelForeColor);
+
             DrawSeries.Color = Color.FromArgb(255, DrawSeries.Color);
+            DrawOn.Series["CorrelSeries"].Label = "";
         }
 
         public void ResetChartFormat()
@@ -137,10 +136,13 @@ namespace CorrelationTest
             DrawOn.SendToBack();
             DrawArea.BackColor = ExistingCanvasColor;
             //Reset the marker colors
-            foreach(Series s in DrawOn.Series)
-            {
-                s.Color = Color.FromArgb(255, s.Color);
-            }
+            DrawOn.Series[0].Color = Color.FromArgb(255, DrawOn.Series[0].Color);
+            DrawOn.Series[0].LabelBackColor = Color.FromArgb(255, DrawOn.Series[0].LabelBackColor);
+            DrawOn.Series[0].LabelForeColor = Color.FromArgb(255, DrawOn.Series[0].LabelForeColor);
+            DrawOn.Series[1].Color = Color.FromArgb(255, DrawOn.Series[1].Color);
+            DrawOn.Series[1].LabelBackColor = Color.FromArgb(255, DrawOn.Series[1].LabelBackColor);
+            DrawOn.Series[1].LabelForeColor = Color.FromArgb(255, DrawOn.Series[1].LabelForeColor);
+
             DrawSeries.Color = Color.FromArgb(0, DrawSeries.Color);
 
             DrawArea.CursorX.IsUserEnabled = false;
@@ -253,26 +255,6 @@ namespace CorrelationTest
             //Check if you are within the InnerPlot area - if so, add and return true. If not, return false.
         }
 
-        public DataPoint GetDataPointNearToXY(double x, double y)
-        {
-            var distances = (from DataPoint dp in DrawSeries.Points select new Tuple<DataPoint, double>(dp, GetDistance(dp, x, y))).OrderBy(t => t.Item2);
-            DataPoint closestDataPoint = distances.First().Item1;
-            double nearestDistance = distances.First().Item2;
-            if (nearestDistance <= 0.1)
-                return closestDataPoint;
-            else
-                return null;
-        }
-
-        private double GetDistance(DataPoint dp, double x, double y)
-        {
-            double dp_x = dp.XValue;
-            double dp_y = dp.YValues.First();
-
-            double distance_x = x - dp_x;
-            double distance_y = y - dp_y;
-
-            return Math.Sqrt(distance_x * distance_x + distance_y * distance_y); //Pythagorean theorem!
-        }
+        
     }
 }
