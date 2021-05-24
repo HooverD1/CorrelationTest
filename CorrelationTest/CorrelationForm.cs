@@ -312,6 +312,7 @@ namespace CorrelationTest
             }
             PercentilePoints.Add("Y_HighPoint", highPoint);
             highPoint.Color = Color.FromArgb(50, 50, 50);
+            yAxisChart.Series["Series1"].ToolTip = "#VALX";
 
             //Find the point in the series that is closest to the mean.
             var distances = from DataPoint dp in yAxisChart.Series["Series1"].Points select new Tuple<DataPoint, double>(dp, Math.Abs(dp.XValue - meanValue));
@@ -393,7 +394,7 @@ namespace CorrelationTest
             }
             PercentilePoints.Add("X_HighPoint", highPoint);
             highPoint.Color = Color.FromArgb(50, 50, 50);
-            
+            xAxisChart.Series["Series1"].ToolTip = "#VALX";
 
             xAxisChart.ChartAreas[0].AxisY.IntervalAutoMode = IntervalAutoMode.VariableCount;
             this.xAxisChart.ChartAreas[0].AxisX.Interval = CorrelScatter.ChartAreas[0].AxisX.Interval;
