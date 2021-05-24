@@ -296,10 +296,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CircleCursor.png" />
+    <None Include="Resources\CircleCursor.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CircleCursor.jpg" />
+    <None Include="Resources\CircleCursor.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\CircleCursor.cur" />

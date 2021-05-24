@@ -79,5 +79,15 @@ namespace CorrelationTest.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap CircleCursor2 {
+            get {
+                object obj = ResourceManager.GetObject("CircleCursor2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
