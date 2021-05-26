@@ -59,8 +59,8 @@ namespace CorrelationTest
         private Label label_coefErrors { get; set; }
         private decimal lastValue { get; set; }
         private bool errorState_CoefficientBox { get; set; }
-        private IEstimateDistribution CorrelDist1 { get; set; }
-        private IEstimateDistribution CorrelDist2 { get; set; }
+        public IEstimateDistribution CorrelDist1 { get; set; }
+        public IEstimateDistribution CorrelDist2 { get; set; }
 
         public CorrelationForm(IEstimateDistribution correlDist1, IEstimateDistribution correlDist2)
         {
@@ -237,6 +237,7 @@ namespace CorrelationTest
             
             xAxisChart.Serializer.Save(myStream);
             yAxisChart.Serializer.Load(myStream);
+            yAxisChart.Name = "yAxisChart";
 
             yAxisChart.Series.Clear();
             Series Series1 = new Series();
@@ -697,23 +698,9 @@ namespace CorrelationTest
                 DrawTool.ResetChartFormat();
                 this.Controls.Remove(DrawTool.btn_ToolSwap);
                 CorrelScatter.Series.Remove(DrawTool.DrawSeries);
-                decimal drawingCorrelation = DrawTool.GetCorrelationFromPoints();
-                if(drawingCorrelation != -2)
-                {
-                    //Question: What if this is outside the min/max bounds?
-                    //My thought: Set it up against the min or the max
-                    if (drawingCorrelation > this.numericUpDown_CorrelValue.Maximum)
-                        this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Maximum;
-                    else if (drawingCorrelation < this.numericUpDown_CorrelValue.Minimum)
-                        this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Minimum;
-                    else
-                        this.numericUpDown_CorrelValue.Value = drawingCorrelation;
-                }
-                else
-                {
-                    //Not enough points, do nothing
-                }
                 
+                //Reconfigure the correlScatter to match the given correlation
+
                 foreach (Label qLab in CorrelScatter.Controls)
                 {
                     qLab.Show();
@@ -1201,7 +1188,6 @@ namespace CorrelationTest
             {
                 if (DrawTool.DrawPointsMode)
                 {
-                    
                     DrawTool.PaintPoint();      //Immediately paint the first point so that users can simply click instead of hold.
                     DrawTool.PaintTimer.Enabled = true;
                     DrawTool.PaintTimer.Start();
@@ -1222,6 +1208,20 @@ namespace CorrelationTest
                 {
                     DrawTool.PaintTimer.Stop();
                     DrawTool.PaintTimer.Enabled = false;
+
+                    //Update the 
+                    decimal drawingCorrelation = DrawTool.GetCorrelationFromPoints();
+                    if (drawingCorrelation != -2)
+                    {
+                        //Question: What if this is outside the min/max bounds?
+                        //My thought: Set it up against the min or the max
+                        if (drawingCorrelation > this.numericUpDown_CorrelValue.Maximum)
+                            this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Maximum;
+                        else if (drawingCorrelation < this.numericUpDown_CorrelValue.Minimum)
+                            this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Minimum;
+                        else
+                            this.numericUpDown_CorrelValue.Value = drawingCorrelation;
+                    }
                 }
             }
                 

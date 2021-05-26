@@ -24,6 +24,7 @@ namespace CorrelationTest
                 return null;
         }
 
+
         private static double GetDistance(DataPoint dp, double x, double y)
         {
             double dp_x = dp.XValue;

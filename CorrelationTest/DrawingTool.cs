@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Winforms = System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Threading;
+using System.Windows.Forms;
 //using System.Windows.Forms.DataVisualization.Charting;
 
 namespace CorrelationTest
@@ -40,7 +41,9 @@ namespace CorrelationTest
         public Winforms.Cursor OverrideCursor { get; set; } = new Winforms.Cursor(new MemoryStream(Properties.Resources.CircleCursor1));
         public Winforms.Cursor ExistingCursor { get; set; }
 
+        private const double PaintTimerDefaultRate = 150;       //The slowest the points ever drop is 5x per second.
         public System.Timers.Timer PaintTimer { get; set; } = new System.Timers.Timer();
+        public int PointsPerTimer { get; set; } = 1; //default to 1
         
         public Chart DrawOn { get; set; }
         public ChartArea DrawArea { get; set; }
@@ -58,13 +61,14 @@ namespace CorrelationTest
             DrawSeries.MarkerStyle = MarkerStyle.Circle;
             DrawSeries.MarkerSize = 8;
             DrawSeries.SmartLabelStyle.Enabled = false;
-            this.PaintTimer.Interval = 200;     //ms
+            this.PaintTimer.Interval = 200;     //default
             PaintTimer.Enabled = false;
             PaintTimer.AutoReset = true;
             PaintTimer.Elapsed += AttemptPaint;
             if (!(from Series s in DrawOn.Series where s.Name == "DrawSeries" select s).Any())
             {
                 DrawOn.Series.Add(DrawSeries);
+
             }
             
         }
@@ -182,9 +186,10 @@ namespace CorrelationTest
 
         public void PaintPoint()
         {
+            
             int x = System.Windows.Forms.Cursor.Position.X;
             int y = System.Windows.Forms.Cursor.Position.Y;
-            Accord.Statistics.Distributions.Univariate.NormalDistribution offsetDist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 9);
+            Accord.Statistics.Distributions.Univariate.NormalDistribution offsetDist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 15);
             Random rando = new Random();
             int x_offset = Convert.ToInt32(offsetDist.InverseDistributionFunction(rando.NextDouble()));
             int y_offset = Convert.ToInt32(offsetDist.InverseDistributionFunction(rando.NextDouble()));
@@ -201,6 +206,17 @@ namespace CorrelationTest
                 newPoint = DrawOn.PointToClient(screenPoint);
             }
             AddPoint(newPoint);
+        }
+
+        private double GetPaintTimerInterval(DataPoint dp)
+        {
+            //Get the height of the x-axis chart at this point.
+            CorrelationForm chartParent = (CorrelationForm)DrawOn.Parent;
+            Chart xChart = (Chart)chartParent.Controls.Find("xAxisChart", false).First();
+            Chart yChart = (Chart)chartParent.Controls.Find("yAxisChart", false).First();
+            double xChart_Value = chartParent.CorrelDist1.GetPDF_Value(dp.XValue) / 2;
+            double yChart_Value = chartParent.CorrelDist2.GetPDF_Value(dp.YValues.First()) / 2;
+            return (1 - (xChart_Value + yChart_Value)) * PaintTimerDefaultRate;
         }
 
         private void AttemptPaint(object sender, EventArgs e)   //This event fires from the timer elapsed event.
@@ -249,6 +265,7 @@ namespace CorrelationTest
                 {
                     DrawSeries.Points.Add(newDataPoint);
                 }
+                PaintTimer.Interval = GetPaintTimerInterval(newDataPoint);
             }
 
             ////PLAN: NEED TO CONVERT the Point's coords to axis values (axisToValue inside paint event?), create a DataPoint off the derived x & y

@@ -135,7 +135,7 @@
             // 
             chartArea2.Name = "ChartArea1";
             this.xAxisChart.ChartAreas.Add(chartArea2);
-            this.xAxisChart.Location = new System.Drawing.Point(296, 69);
+            this.xAxisChart.Location = new System.Drawing.Point(226, 63);
             this.xAxisChart.Margin = new System.Windows.Forms.Padding(0);
             this.xAxisChart.Name = "xAxisChart";
             series2.ChartArea = "ChartArea1";
