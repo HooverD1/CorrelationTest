@@ -132,7 +132,6 @@ namespace CorrelationTest
                 return Convert.ToDouble(DistributionParameters["Maximum"]);
             else
             {
-                double stdev = Math.Sqrt(Distribution.Variance);
                 return GetInverse(0.99);
             }
         }
@@ -145,9 +144,13 @@ namespace CorrelationTest
                 return 0;
             else
             {
-                double stdev = Math.Sqrt(Distribution.Variance);
                 return GetInverse(0.01);
             }
+        }
+
+        public double GetStdev()
+        {
+            return Math.Sqrt(Distribution.Variance);
         }
         
         public double GetPDF_Value(double xValue)

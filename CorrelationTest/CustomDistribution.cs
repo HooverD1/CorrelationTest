@@ -81,6 +81,11 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
+        public double GetStdev()
+        {
+            throw new NotImplementedException();
+        }
+
         private static Dictionary<string, object> ParseStringIntoParameters(string distributionString)
         {
             string[] distributionStringValues = distributionString.Split(',');

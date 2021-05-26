@@ -186,26 +186,36 @@ namespace CorrelationTest
 
         public void PaintPoint()
         {
-            
-            int x = System.Windows.Forms.Cursor.Position.X;
-            int y = System.Windows.Forms.Cursor.Position.Y;
-            Accord.Statistics.Distributions.Univariate.NormalDistribution offsetDist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 15);
-            Random rando = new Random();
-            int x_offset = Convert.ToInt32(offsetDist.InverseDistributionFunction(rando.NextDouble()));
-            int y_offset = Convert.ToInt32(offsetDist.InverseDistributionFunction(rando.NextDouble()));
-            Point screenPoint = new Point(x + x_offset, y + y_offset);
-            Point newPoint;
+            for (int i = 0; i < 3; i++)
+            {
+                //Drop 3x points at once
+                int x = System.Windows.Forms.Cursor.Position.X;
+                int y = System.Windows.Forms.Cursor.Position.Y;
+                //Make the standard deviation for the offset based on the axis chart stdev?
 
-            if (DrawOn.InvokeRequired)
-            {
-                ConvertToFormPoint cfp = DrawOn.PointToClient;
-                newPoint = (Point)DrawOn.Invoke(cfp, screenPoint);
+                CorrelationForm chartParent = (CorrelationForm)DrawOn.Parent;
+                Chart xChart = (Chart)chartParent.Controls.Find("xAxisChart", false).First();
+                Chart yChart = (Chart)chartParent.Controls.Find("yAxisChart", false).First();
+                //Pixel offsets for the "paint can" look
+                Accord.Statistics.Distributions.Univariate.NormalDistribution offset_x_Dist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 25);
+                Accord.Statistics.Distributions.Univariate.NormalDistribution offset_y_Dist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 25);
+                Random rando = new Random();
+                int x_offset = Convert.ToInt32(offset_x_Dist.InverseDistributionFunction(rando.NextDouble()));
+                int y_offset = Convert.ToInt32(offset_y_Dist.InverseDistributionFunction(rando.NextDouble()));
+                Point screenPoint = new Point(x + x_offset, y + y_offset);
+                Point newPoint;
+
+                if (DrawOn.InvokeRequired)
+                {
+                    ConvertToFormPoint cfp = DrawOn.PointToClient;
+                    newPoint = (Point)DrawOn.Invoke(cfp, screenPoint);
+                }
+                else
+                {
+                    newPoint = DrawOn.PointToClient(screenPoint);
+                }
+                AddPoint(newPoint);
             }
-            else
-            {
-                newPoint = DrawOn.PointToClient(screenPoint);
-            }
-            AddPoint(newPoint);
         }
 
         private double GetPaintTimerInterval(DataPoint dp)
@@ -216,7 +226,7 @@ namespace CorrelationTest
             Chart yChart = (Chart)chartParent.Controls.Find("yAxisChart", false).First();
             double xChart_Value = chartParent.CorrelDist1.GetPDF_Value(dp.XValue) / 2;
             double yChart_Value = chartParent.CorrelDist2.GetPDF_Value(dp.YValues.First()) / 2;
-            return (1 - (xChart_Value + yChart_Value)) * PaintTimerDefaultRate;
+            return (1 - Math.Sqrt(xChart_Value + yChart_Value)) * PaintTimerDefaultRate;
         }
 
         private void AttemptPaint(object sender, EventArgs e)   //This event fires from the timer elapsed event.

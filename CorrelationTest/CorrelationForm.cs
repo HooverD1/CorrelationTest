@@ -698,8 +698,10 @@ namespace CorrelationTest
                 DrawTool.ResetChartFormat();
                 this.Controls.Remove(DrawTool.btn_ToolSwap);
                 CorrelScatter.Series.Remove(DrawTool.DrawSeries);
-                
+
                 //Reconfigure the correlScatter to match the given correlation
+                CorrelScatter.Series.Remove(CorrelSeries);
+                CorrelScatter.Series.Add(ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries));
 
                 foreach (Label qLab in CorrelScatter.Controls)
                 {
@@ -1287,6 +1289,21 @@ namespace CorrelationTest
                 default:
                     break;
             }
+        }
+
+        private Series ReworkPointsForCorrelation(double correlCoefficient, Series independentSeries)
+        {
+            Series newSeries = new Series();
+            newSeries.ChartType = SeriesChartType.Point;
+            
+            foreach(DataPoint dp in independentSeries.Points)
+            {
+                double x = dp.XValue;
+                double y = dp.YValues.First();
+                double new_y = x * correlCoefficient + y * Math.Sqrt(1 - Math.Pow(correlCoefficient, 2));
+                newSeries.Points.AddXY(x, new_y);
+            }
+            return newSeries;
         }
     }
 }

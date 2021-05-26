@@ -23,6 +23,7 @@ namespace CorrelationTest
         double GetMaximum();
         double GetMinimum();
         double GetMean();
+        double GetStdev();
         //Dictionary<string, object> ParseStringIntoParameters { get; set; }
     }
 

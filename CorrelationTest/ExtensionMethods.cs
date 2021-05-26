@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
+using Accord.Math.Decompositions;
+using Accord.Math;
 
 namespace CorrelationTest
 {
@@ -642,5 +644,13 @@ namespace CorrelationTest
             App.DisplayStatusBar = true;
             App.Calculation = Excel.XlCalculation.xlCalculationAutomatic;
         }
+
+        public static double[,] GetCholeskyDecomposition(double[,] matrix)
+        {
+            //Matrix must be symmetrical and PSD
+            CholeskyDecomposition cholesky = new CholeskyDecomposition(matrix);
+            return cholesky.DiagonalMatrix;
+        }
+
     }
 }
