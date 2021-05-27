@@ -1215,18 +1215,42 @@ namespace CorrelationTest
                     DrawTool.PaintTimer.Stop();
                     DrawTool.PaintTimer.Enabled = false;
 
-                    //Update the 
                     decimal drawingCorrelation = DrawTool.GetCorrelationFromPoints();
                     if (drawingCorrelation != -2)
                     {
-                        //Question: What if this is outside the min/max bounds?
-                        //My thought: Set it up against the min or the max
                         if (drawingCorrelation > this.numericUpDown_CorrelValue.Maximum)
+                        {
+                            CoefficientBox_Reset();
                             this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Maximum;
+
+                            double maxValue = Math.Min(1, Math.Min(trans_bounds.Item2, feasibility_bounds.Item2));
+                            if (maxValue == 1)
+                                CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
+                            else if (maxValue == trans_bounds.Item2)
+                                CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                            else
+                                CoefficientBox_FlagError(CoefficientBox_ErrorType.Feasibility);
+                        }
                         else if (drawingCorrelation < this.numericUpDown_CorrelValue.Minimum)
+                        {
+                            CoefficientBox_Reset();
                             this.numericUpDown_CorrelValue.Value = this.numericUpDown_CorrelValue.Minimum;
+
+                            double minValue = Math.Max(-1, Math.Max(trans_bounds.Item1, feasibility_bounds.Item1));
+                            if(minValue == -1)
+                                CoefficientBox_FlagError(CoefficientBox_ErrorType.Conformal);
+                            else if(minValue == trans_bounds.Item1)
+                                CoefficientBox_FlagError(CoefficientBox_ErrorType.Transitivity);
+                            else
+                                CoefficientBox_FlagError(CoefficientBox_ErrorType.Feasibility);
+                        }
+                            
                         else
+                        {
                             this.numericUpDown_CorrelValue.Value = drawingCorrelation;
+                            CoefficientBox_Reset();
+                        }
+                            
                     }
                 }
             }
