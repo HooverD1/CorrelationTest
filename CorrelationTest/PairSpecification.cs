@@ -169,8 +169,10 @@ namespace CorrelationTest
             //This does the off-diagonal
             for (int row = 0; row < size - 1; row++)
             {
+                string minBound = $"IF(R{startRow + row}C{startCol}>0,0,-1)";
+                string maxBound = $"IF(R{startRow + row}C{startCol}<0,0,1)";
                 matrix[row, row] = "=1";
-                matrix[row, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol}))";
+                matrix[row, row + 1] = $"=MIN({maxBound},MAX({minBound},R{startRow + row}C{startCol}))";
             }
             void LoadUpperTriangular()
             {
@@ -178,7 +180,9 @@ namespace CorrelationTest
                 {
                     for (int rightIndex = 1; rightIndex <= size - row - 2; rightIndex++)        //Getting the .Address off the cell is slowing it down... and probably causing conflicts w threading
                     {
-                        matrix[row, row + rightIndex + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow + row}C{startCol + 1} * {rightIndex}))";
+                        string minBound = $"IF(R{startRow + row}C{startCol}>0,0,-1)";
+                        string maxBound = $"IF(R{startRow + row}C{startCol}<0,0,1)";
+                        matrix[row, row + rightIndex + 1] = $"=MIN({maxBound},MAX({minBound},R{startRow + row}C{startCol} - R{startRow + row}C{startCol + 1} * {rightIndex}))";
                     }
                 }
             }
