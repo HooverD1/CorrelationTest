@@ -23,6 +23,8 @@ namespace CorrelationTest
             PSD,
             Conformal
         }
+        private Series CorrelSeries { get; set; } = new Series();
+
         private SelectedPoint selectedPoint { get; set; }
         private bool MouseIsDown { get; set; } = false;
         private bool RefreshBreak { get; set; } = false;
@@ -67,8 +69,6 @@ namespace CorrelationTest
             this.CorrelDist1 = correlDist1;
             this.CorrelDist2 = correlDist2;
 
-        
-
             InitializeComponent();
         }
 
@@ -89,7 +89,7 @@ namespace CorrelationTest
             this.CorrelScatter.ChartAreas[0].AxisY.Minimum = CorrelDist2.GetMinimum();
             this.CorrelScatter.ChartAreas[0].AxisY.Maximum = CorrelDist2.GetMaximum();
 
-
+            
             foreach (DataPoint dp in CorrelScatterPoints)
             {
                 this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(dp.XValue, dp.YValues[0]);
@@ -103,6 +103,9 @@ namespace CorrelationTest
             CorrelScatter.Width = 750;
             CorrelScatter.ChartAreas[0].Position = new ElementPosition(5, 3, 90, 90);
             CorrelScatter.ChartAreas[0].InnerPlotPosition = new ElementPosition(5, 3, 90, 90);
+            CorrelSeries.ChartType = SeriesChartType.Point;
+            CorrelSeries.Name = "CorrelSeries";
+            CorrelScatter.Series.Add(CorrelSeries);
             //Create & set example points
             Random rando = new Random();
             for (int i = 1; i < 500; i++)
@@ -111,11 +114,11 @@ namespace CorrelationTest
                 double x = CorrelDist1.GetInverse(rando.NextDouble());
                 double y = CorrelDist2.GetInverse(rando.NextDouble());
                 CorrelScatterPoints.Add(new DataPoint(x, y));
-                this.CorrelScatter.Series["CorrelSeries"].Points.AddXY(x, y);
+                CorrelSeries.Points.AddXY(x, y);
             }
 
-            this.CorrelScatter.Series["CorrelSeries"].MarkerStyle = MarkerStyle.Circle;
-            this.CorrelScatter.Series["CorrelSeries"].IsVisibleInLegend = false;
+            CorrelSeries.MarkerStyle = MarkerStyle.Circle;
+            CorrelSeries.IsVisibleInLegend = false;
             //Set the axis scale
             this.CorrelScatter.ChartAreas[0].AxisX.LabelStyle.Format = "0.0";
             this.CorrelScatter.ChartAreas[0].AxisY2.LabelStyle.Format = "0.0";
@@ -700,7 +703,8 @@ namespace CorrelationTest
                 CorrelScatter.Series.Remove(DrawTool.DrawSeries);
 
                 //Reconfigure the correlScatter to match the given correlation
-                CorrelScatter.Series.Remove(CorrelSeries);
+                CorrelScatter.Series.Remove(CorrelScatter.Series["CorrelSeries"]);
+                //Leave the CorrelSeries object as the 0 coefficient points, then rework that each time into what you need
                 CorrelScatter.Series.Add(ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries));
 
                 foreach (Label qLab in CorrelScatter.Controls)
@@ -1291,19 +1295,29 @@ namespace CorrelationTest
             }
         }
 
-        private Series ReworkPointsForCorrelation(double correlCoefficient, Series independentSeries)
+        private Series ReworkPointsForCorrelation(double correlCoefficient, Series CorrelSeries)
         {
-            Series newSeries = new Series();
-            newSeries.ChartType = SeriesChartType.Point;
-            
-            foreach(DataPoint dp in independentSeries.Points)
+            Series reworkSeries = new Series();
+            reworkSeries.ChartType = SeriesChartType.Point;
+            reworkSeries.MarkerStyle = MarkerStyle.Circle;
+            reworkSeries.Name = "CorrelSeries";
+
+            foreach(DataPoint dp in CorrelSeries.Points)
             {
                 double x = dp.XValue;
                 double y = dp.YValues.First();
                 double new_y = x * correlCoefficient + y * Math.Sqrt(1 - Math.Pow(correlCoefficient, 2));
-                newSeries.Points.AddXY(x, new_y);
+                reworkSeries.Points.AddXY(x, new_y);
             }
-            return newSeries;
+            return reworkSeries;
+        }
+
+        private void numericUpDown_CorrelValue_MouseUp(object sender, MouseEventArgs e)
+        {
+            //Redraw the scatter for the new value
+            CorrelScatter.Series.Remove(CorrelScatter.Series["CorrelSeries"]);
+            //Leave the CorrelSeries object as the 0 coefficient points, then rework that each time into what you need
+            CorrelScatter.Series.Add(ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries));
         }
     }
 }

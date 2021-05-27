@@ -29,9 +29,8 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            CorrelSeries = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.CorrelScatter = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.btn_saveClose = new System.Windows.Forms.Button();
             this.btn_Cancel = new System.Windows.Forms.Button();
@@ -64,14 +63,6 @@
             this.CorrelScatter.Location = new System.Drawing.Point(197, 182);
             this.CorrelScatter.Margin = new System.Windows.Forms.Padding(0);
             this.CorrelScatter.Name = "CorrelScatter";
-            CorrelSeries.ChartArea = "ChartArea1";
-            CorrelSeries.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            CorrelSeries.Color = System.Drawing.SystemColors.MenuHighlight;
-            CorrelSeries.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-            CorrelSeries.Name = "CorrelSeries";
-            CorrelSeries.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
-            CorrelSeries.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
-            this.CorrelScatter.Series.Add(CorrelSeries);
             this.CorrelScatter.Size = new System.Drawing.Size(750, 750);
             this.CorrelScatter.TabIndex = 0;
             this.CorrelScatter.Text = "Scatterplot";
@@ -116,6 +107,7 @@
             this.numericUpDown_CorrelValue.TabIndex = 3;
             this.numericUpDown_CorrelValue.ValueChanged += new System.EventHandler(this.numericUpDown_CorrelValue_ValueChanged);
             this.numericUpDown_CorrelValue.MouseDown += new System.Windows.Forms.MouseEventHandler(this.numericUpDown_CorrelValue_MouseDown);
+            this.numericUpDown_CorrelValue.MouseUp += new System.Windows.Forms.MouseEventHandler(this.numericUpDown_CorrelValue_MouseUp);
             // 
             // groupBox_CorrelCoef
             // 
@@ -138,9 +130,9 @@
             this.xAxisChart.Location = new System.Drawing.Point(226, 63);
             this.xAxisChart.Margin = new System.Windows.Forms.Padding(0);
             this.xAxisChart.Name = "xAxisChart";
-            series2.ChartArea = "ChartArea1";
-            series2.Name = "Series1";
-            this.xAxisChart.Series.Add(series2);
+            series1.ChartArea = "ChartArea1";
+            series1.Name = "Series1";
+            this.xAxisChart.Series.Add(series1);
             this.xAxisChart.Size = new System.Drawing.Size(752, 129);
             this.xAxisChart.TabIndex = 6;
             this.xAxisChart.Text = "chart1";
@@ -198,8 +190,6 @@
         #endregion
 
         private System.Windows.Forms.DataVisualization.Charting.Chart CorrelScatter;
-        private System.Windows.Forms.DataVisualization.Charting.Series CorrelSeries;
-        private System.Windows.Forms.DataVisualization.Charting.Series IndependentSeries;
         private System.Windows.Forms.Button btn_saveClose;
         private System.Windows.Forms.Button btn_Cancel;
         private System.Windows.Forms.NumericUpDown numericUpDown_CorrelValue;
