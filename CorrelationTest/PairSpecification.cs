@@ -166,6 +166,7 @@ namespace CorrelationTest
             int startRow = pairsRange.Row;
             int startCol = pairsRange.Column;
             
+            //This does the off-diagonal
             for (int row = 0; row < size - 1; row++)
             {
                 matrix[row, row] = "=1";
@@ -175,9 +176,9 @@ namespace CorrelationTest
             {
                 for (int row = 0; row < size - 1; row++)
                 {
-                    for (int upIndex = 1; upIndex <= row; upIndex++)        //Getting the .Address off the cell is slowing it down... and probably causing conflicts w threading
+                    for (int rightIndex = 1; rightIndex <= size - row - 2; rightIndex++)        //Getting the .Address off the cell is slowing it down... and probably causing conflicts w threading
                     {
-                        matrix[row - upIndex, row + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow + row}C{startCol + 1} * {upIndex}))";
+                        matrix[row, row + rightIndex + 1] = $"=MIN(1,MAX(-1,R{startRow + row}C{startCol} - R{startRow + row}C{startCol + 1} * {rightIndex}))";
                     }
                 }
             }
