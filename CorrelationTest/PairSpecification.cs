@@ -251,16 +251,38 @@ namespace CorrelationTest
             Tuple<double, double>[] pairs = new Tuple<double, double>[matrixRange.GetLength(0) - 1];
             object[][] jaggedMatrix = ExtensionMethods.ToJaggedArray(matrixRange, true);
 
-            for (int i = 1; i < matrixRange.GetLength(0); i++)
+            for(int row = 1; row < matrixRange.GetLength(0); row++)
             {
                 //yVals needs populated by the values above the i'th position
-                double[] yVals = new double[i];
-                double[] xVals = new double[i];
-                for (int x = 0; x < i; x++)
+                double[] yVals = new double[matrixRange.GetLength(0) - row];
+                double[] xVals = new double[matrixRange.GetLength(0) - row];
+                int lastZeroIndex = 0;
+                for (int x = 0; x < matrixRange.GetLength(0) - row; x++)
                 {
-                    xVals[x] = i - x - 1;
-                    yVals[x] = Convert.ToDouble(jaggedMatrix[i][x]);
+                    xVals[x] = row - x - 1;
+                    yVals[x] = Convert.ToDouble(jaggedMatrix[row-1][row + x]);
+                    if(yVals[x] == 0)
+                    {
+                        lastZeroIndex = x;
+                    }
                 }
+                //for(int z = matrixRange.GetLength(0) - row; z > 0 ; z--)
+                int z = matrixRange.GetLength(0) - row - 1;     //z is the index of the last non-zero
+                while (yVals[z] == 0)
+                {
+                    z--;
+                    if (z < 0)
+                        break;
+                }
+                double[] yVals_stripped = new double[z + 2];        // + 2 - one because z is the final index and one for the last zero
+                double[] xVals_stripped = new double[z + 2];
+                for (int index = 0; index <= z + 1; index++)        //Remake the values to strip the trailing zeroes
+                {
+                    yVals_stripped[index] = yVals[index];
+                    xVals_stripped[index] = xVals[index];
+                }
+                yVals = yVals_stripped;
+                xVals = xVals_stripped;
                     
                 SimpleLinearRegression slr;
                 var ols = new OrdinaryLeastSquares();
@@ -270,20 +292,24 @@ namespace CorrelationTest
                     ols.UseIntercept = false;
                     //Have to shift the y values down by fx(0) so that fx(0) = 0.
                     //Then run with .UseIntercept = false and add fx(0) to each slr.Intercept value
-                    verticalShift = yVals[yVals.Length - 1];
+                    verticalShift = yVals[0];
+                    if(verticalShift != 0)
+                    {
+
+                    }
                     for (int j = 0; j < yVals.Length; j++)
                     {
                         yVals[j] -= verticalShift;
                     }
                 }
-                if (i < 2)
-                    pairs[i-1] = new Tuple<double, double>(yVals[i - 1], 0);
+                if (row == matrixRange.GetLength(0) - 1)        //Last row has only the off diagonal, no reduction
+                    pairs[row-1] = new Tuple<double, double>(yVals[0], 0);
                 else
                 {
                     try
                     {
                         slr = ols.Learn(xVals, yVals);
-                        pairs[i-1] = new Tuple<double, double>(slr.Intercept + verticalShift, (-1)*slr.Slope);  //Invert the slope because it stores as the "decrease"
+                        pairs[row-1] = new Tuple<double, double>(slr.Intercept + verticalShift, slr.Slope);  //Invert the slope because it stores as the "decrease"
                     }
                     catch
                     {
