@@ -652,5 +652,11 @@ namespace CorrelationTest
             return cholesky.DiagonalMatrix;
         }
 
+        public static double GetStandardDeviation(double[] data)
+        {
+            double mean = data.Average();
+            double variance = (from double d in data select Math.Pow(d - mean, 2)).Sum() / data.Length;
+            return Math.Sqrt(variance);
+        }
     }
 }

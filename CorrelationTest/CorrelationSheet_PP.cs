@@ -126,25 +126,6 @@ namespace CorrelationTest
                 return sb.ToString();
             }
 
-            //public override void VisualizeCorrel()
-            //{
-            //    //Select a correlation
-            //    int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
-            //    int selectionCol = ThisAddIn.MyApp.Selection.Column;       //dependency..
-            //    //Make sure the row and column are within the matrix range
-            //    if (selectionRow < this.Specs.MatrixCoords.Item1 + 1 || selectionRow > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item1)
-            //        return;
-            //    if (selectionCol < this.Specs.MatrixCoords.Item2 || selectionCol > this.CorrelMatrix.FieldCount + this.Specs.MatrixCoords.Item2 - 1)
-            //        return;
-            //    //Find the distributions to use
-            //    //Create distribution objects
-            //    IEstimateDistribution d1 = Distribution.ConstructForVisualization(xlDistCell.EntireRow, this);
-            //    //Create the form
-            //    CorrelationForm CorrelVisual = new CorrelationForm(d1, d1);
-            //    CorrelVisual.Show();
-            //    CorrelVisual.Focus();
-            //}
-
             public override void PrintToSheet()  //expanding from string
             {
                 CostSheet costSheet = CostSheet.ConstructFromXlCostSheet(this.LinkToOrigin.LinkSource.Worksheet);
@@ -173,6 +154,17 @@ namespace CorrelationTest
                 int subCount = parentEstimate.Periods.Count();
                 Excel.Range xlPairsRange = xlPairsCell.Resize[subCount - 1, 2];
                 xlPairsRange.Value = this.PairSpec.GetValuesString_Split(); //((Data.CorrelationString_PP)CorrelString).GetPairwise().Value;
+
+                Excel.Range xlDistRange = xlDistCell.Resize[subCount, 1];
+                object[,] xlDistValues = new object[subCount, 1];
+                for (int subIndex = 0; subIndex < subCount; subIndex++)      //Print the Distribution strings
+                {
+                    //PHASING DISTRIBUTIONS
+                    //How are the periods ..distributed?
+                    xlDistValues[subIndex, 0] = "Normal,0,1";
+                }
+                xlDistRange.Value = xlDistValues;
+                xlDistRange.NumberFormat = "\"DIST\";;;\"DIST\"";
 
                 this.xlPairsCell.Offset[-1, 0].Value = "Off-diagonal Values";
                 this.xlPairsCell.Offset[-1, 1].Value = "Linear reduction";

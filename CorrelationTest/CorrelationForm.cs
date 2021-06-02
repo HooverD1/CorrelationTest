@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using Accord.Statistics.Distributions.Univariate;
 using System.Windows.Forms.DataVisualization.Charting;
 using Excel = Microsoft.Office.Interop.Excel;
-
+using Accord.Statistics.Models.Regression.Linear;
 
 namespace CorrelationTest
 {
@@ -94,7 +94,7 @@ namespace CorrelationTest
             CorrelSeries.MarkerStyle = MarkerStyle.Circle;
             CorrelSeries.IsVisibleInLegend = false;
 
-            //Create & set example points
+            //Create & set example points for the correlation-free CorrelSeries
             Random rando = new Random();
             for (int i = 1; i < 500; i++)
             {
@@ -104,7 +104,8 @@ namespace CorrelationTest
                 CorrelScatterPoints.Add(new DataPoint(x, y));
                 CorrelSeries.Points.AddXY(x, y);
             }
-            
+            //Standardize CorrelSeries to remove any happenstance correlation
+            CorrelSeries = StandardizeSampleCorrelation(CorrelSeries);  //Rework our values to bring correlation of the sample to r = 0
 
             //Set the axis scale
             LabelStyle ls = new LabelStyle();
@@ -229,6 +230,10 @@ namespace CorrelationTest
 
             Series CorrelSeries_Adjusted = ReworkPointsForCorrelation(Convert.ToDouble(numericUpDown_CorrelValue.Value), CorrelSeries);
             CorrelScatter.Series.Add(CorrelSeries_Adjusted);
+
+            //Add a trendline series for the CorrelScatter_Adjusted series
+            Series Trendline = GetTrendline(CorrelSeries_Adjusted);
+            CorrelScatter.Series.Add(Trendline);
 
             LoadXAxisDistribution();
             LoadYAxisDistribution();
@@ -718,8 +723,11 @@ namespace CorrelationTest
 
                 //Reconfigure the correlScatter to match the given correlation
                 CorrelScatter.Series.Remove(CorrelScatter.Series["CorrelSeries"]);
+                CorrelScatter.Series.Remove(CorrelScatter.Series["Trendline"]);
                 //Leave the CorrelSeries object as the 0 coefficient points, then rework that each time into what you need
-                CorrelScatter.Series.Add(ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries));
+                Series Adjusted_Series = ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries);
+                CorrelScatter.Series.Add(Adjusted_Series);
+                CorrelScatter.Series.Add(GetTrendline(Adjusted_Series));
 
                 foreach (Label qLab in CorrelScatter.Controls)
                 {
@@ -951,7 +959,7 @@ namespace CorrelationTest
             Horizontal
         }
 
-        private Tuple<double?, double?> GetSubStats(int quintant, QuintantOrientation orientation)
+        private Tuple<double?, double?, int?> GetSubStats(int quintant, QuintantOrientation orientation)
         {
             IEnumerable<DataPoint> pertinentPoints;
             double minBound;
@@ -959,6 +967,7 @@ namespace CorrelationTest
             double width;
             double? mean;
             double? stdev;
+            int? n;
             if (orientation == QuintantOrientation.Horizontal)
             {
                 width = (CorrelDist1.GetMaximum() - CorrelDist1.GetMinimum()) / 5;
@@ -972,11 +981,12 @@ namespace CorrelationTest
                 {
                     mean = pertinentY.Average();
                     stdev = ExtensionMethods.CalculateStandardDeviation(pertinentY);
-                    return new Tuple<double?, double?>(Math.Round((double)mean, 2), Math.Round((double)stdev, 2));
+                    n = pertinentPoints.Count();
+                    return new Tuple<double?, double?, int?>(Math.Round((double)mean, 2), Math.Round((double)stdev, 2), n);
                 }
                 else
                 {
-                    return new Tuple<double?, double?>(null, null);
+                    return new Tuple<double?, double?, int?>(null, null, null);
                 }
             }
             else if(orientation == QuintantOrientation.Vertical)
@@ -992,13 +1002,14 @@ namespace CorrelationTest
                 {
                     mean = pertinentX.Average();
                     stdev = ExtensionMethods.CalculateStandardDeviation(pertinentX);
-                    return new Tuple<double?, double?>(Math.Round((double)mean, 2), Math.Round((double)stdev, 2));
+                    n = pertinentPoints.Count();
+                    return new Tuple<double?, double?, int?>(Math.Round((double)mean, 2), Math.Round((double)stdev, 2), n);
                 }
                 else
                 {
                     mean = null;
                     stdev = null;
-                    return new Tuple<double?, double?>(null, null);
+                    return new Tuple<double?, double?, int?>(null, null, null);
                 }
             }
             else
@@ -1007,15 +1018,22 @@ namespace CorrelationTest
             }
         }
 
+        private Tuple<double[], double[]> GetArrayXY_FromPointSeries(Series pointSeries)
+        {
+            //Returns xValues[], yValues[]
+            double[] xValues = (from DataPoint dp in pointSeries.Points select dp.XValue).ToArray<double>();
+            double[] yValues = (from DataPoint dp in pointSeries.Points select dp.YValues.First()).ToArray<double>();
+            return new Tuple<double[], double[]>(xValues, yValues);
+        }
 
         #region HoverLabel Events
 
         private void HoverLabel_MouseHoverEvent_H1(object sender, EventArgs e)
         {
             HoverLabel_H1.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(1, QuintantOrientation.Horizontal);
+            Tuple<double?, double?, int?> stats = GetSubStats(1, QuintantOrientation.Horizontal);
             HoverLabel_H1.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_H1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_H1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_H1(object sender, EventArgs e)
         {
@@ -1026,9 +1044,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_H2(object sender, EventArgs e)
         {
             HoverLabel_H2.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(2, QuintantOrientation.Horizontal);
+            Tuple<double?, double?, int?> stats = GetSubStats(2, QuintantOrientation.Horizontal);
             HoverLabel_H2.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_H2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_H2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_H2(object sender, EventArgs e)
         {
@@ -1039,9 +1057,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_H3(object sender, EventArgs e)
         {
             HoverLabel_H3.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(3, QuintantOrientation.Horizontal);
+            Tuple<double?, double?, int?> stats = GetSubStats(3, QuintantOrientation.Horizontal);
             HoverLabel_H3.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_H3.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_H3.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_H3(object sender, EventArgs e)
         {
@@ -1052,9 +1070,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_H4(object sender, EventArgs e)
         {
             HoverLabel_H4.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(4, QuintantOrientation.Horizontal);
+            Tuple<double?, double?, int?> stats = GetSubStats(4, QuintantOrientation.Horizontal);
             HoverLabel_H4.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_H4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_H4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_H4(object sender, EventArgs e)
         {
@@ -1065,9 +1083,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_H5(object sender, EventArgs e)
         {
             HoverLabel_H5.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(5, QuintantOrientation.Horizontal);
+            Tuple<double?, double?, int?> stats = GetSubStats(5, QuintantOrientation.Horizontal);
             HoverLabel_H5.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_H5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_H5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
             HoverLabel_H5.BringToFront();
         }
         private void HoverLabel_MouseLeaveEvent_H5(object sender, EventArgs e)
@@ -1080,9 +1098,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V1(object sender, EventArgs e)
         {
             HoverLabel_V1.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(5, QuintantOrientation.Vertical);
+            Tuple<double?, double?, int?> stats = GetSubStats(5, QuintantOrientation.Vertical);
             HoverLabel_V1.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_V1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_V1.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_V1(object sender, EventArgs e)
         {
@@ -1093,9 +1111,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V2(object sender, EventArgs e)
         {
             HoverLabel_V2.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(4, QuintantOrientation.Vertical);
+            Tuple<double?, double?, int?> stats = GetSubStats(4, QuintantOrientation.Vertical);
             HoverLabel_V2.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_V2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_V2.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_V2(object sender, EventArgs e)
         {
@@ -1106,9 +1124,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V3(object sender, EventArgs e)
         {
             HoverLabel_V3.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(3, QuintantOrientation.Vertical);
+            Tuple<double?, double?, int?> stats = GetSubStats(3, QuintantOrientation.Vertical);
             HoverLabel_V3.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_V3.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_V3.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_V3(object sender, EventArgs e)
         {
@@ -1119,9 +1137,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V4(object sender, EventArgs e)
         {
             HoverLabel_V4.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(2, QuintantOrientation.Vertical);
+            Tuple<double?, double?, int?> stats = GetSubStats(2, QuintantOrientation.Vertical);
             HoverLabel_V4.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_V4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_V4.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
         }
         private void HoverLabel_MouseLeaveEvent_V4(object sender, EventArgs e)
         {
@@ -1132,9 +1150,9 @@ namespace CorrelationTest
         private void HoverLabel_MouseHoverEvent_V5(object sender, EventArgs e)
         {
             HoverLabel_V5.BackColor = Color.FromArgb(175, 125, 125, 125);
-            Tuple<double?, double?> stats = GetSubStats(1, QuintantOrientation.Vertical);
+            Tuple<double?, double?, int?> stats = GetSubStats(1, QuintantOrientation.Vertical);
             HoverLabel_V5.TextAlign = ContentAlignment.MiddleCenter;
-            HoverLabel_V5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}";
+            HoverLabel_V5.Text = $"μ: {stats.Item1}\r\nσ: {stats.Item2}\r\nn: {stats.Item3}";
             HoverLabel_V5.BringToFront();
         }
         private void HoverLabel_MouseLeaveEvent_V5(object sender, EventArgs e)
@@ -1333,6 +1351,73 @@ namespace CorrelationTest
             }
         }
 
+        private Series GetTrendline(Series dataSeries)
+        {
+            if (dataSeries.ChartType != SeriesChartType.Point)
+                throw new Exception("Requires a SeriestChartType.Point dataSeries parameter.");
+            if(dataSeries.Points.Count < 2)
+                throw new Exception("Not enough datapoints in dataSeries.");
+            //Get a series that acts as a trendline for the given dataSeries
+            SimpleLinearRegression slr;
+            var ols = new OrdinaryLeastSquares();
+            IEnumerable<double> xVals = from DataPoint dp in dataSeries.Points select dp.XValue;
+            IEnumerable<double> yVals = from DataPoint dp in dataSeries.Points select dp.YValues.First();
+            double[] xValues = xVals.ToArray();
+            double[] yValues = yVals.ToArray();
+
+            slr = ols.Learn(xValues, yValues);
+            Series trendline = new Series();
+            trendline.Name = "Trendline";
+            trendline.ChartType = SeriesChartType.Line;
+            trendline.Color = Color.Crimson;
+            trendline.BorderWidth = 2;
+
+            double xMin = xValues.Min();
+            double xMax = xValues.Max();
+
+            trendline.Points.AddXY(xMin, slr.Slope * xMin + slr.Intercept);  // y = mx + b
+            trendline.Points.AddXY(xMax, slr.Slope * xMax + slr.Intercept);  // y = mx + b
+
+            trendline.ToolTip = $"Slope: {Math.Round(slr.Slope, 2)}";
+
+            return trendline;
+        }
+
+        private Series StandardizeSampleCorrelation(Series CorrelSeries)
+        {
+            Series standardizedSeries = new Series();
+            standardizedSeries.ChartType = SeriesChartType.Point;
+            standardizedSeries.MarkerStyle = MarkerStyle.Circle;
+            standardizedSeries.Name = "CorrelSeries";
+
+            //Subtract the slope * x from each point
+            SimpleLinearRegression slr;
+            var ols = new OrdinaryLeastSquares();
+            var dataArrays = GetArrayXY_FromPointSeries(CorrelSeries);
+            slr = ols.Learn(dataArrays.Item1, dataArrays.Item2);
+            //if |slope| > 1, this fails..
+            // r * (stdev of y /  stdev of x) = slope
+            // r = slope * stdev x / stdev of y)
+            double mean_x = dataArrays.Item1.Average();
+            double pop_mean_x = CorrelDist1.GetMean();
+            double mean_y = dataArrays.Item2.Average();
+            double pop_mean_y = CorrelDist2.GetMean();
+            double stdev_x = ExtensionMethods.GetStandardDeviation(dataArrays.Item1);
+            double stdev_y = ExtensionMethods.GetStandardDeviation(dataArrays.Item2);
+            double r = slr.Slope * stdev_x / stdev_y;   //Correlation of our sample picked from a population with r = 0
+
+            foreach (DataPoint dp in CorrelSeries.Points)    //Create a replacement series with the slope removed
+            {
+                double yVal = dp.YValues.First() - (dp.XValue * slr.Slope); //remove the slope
+                //reposition to fit y mean
+                yVal -= mean_y - pop_mean_y;
+                //reposition to fit x mean
+                double xVal = dp.XValue - (mean_x - pop_mean_x);
+                standardizedSeries.Points.AddXY(xVal, yVal);
+            }
+            return standardizedSeries;
+        }
+
         private Series ReworkPointsForCorrelation(double correlCoefficient, Series CorrelSeries)
         {
             Series reworkSeries = new Series();
@@ -1354,8 +1439,11 @@ namespace CorrelationTest
         {
             //Redraw the scatter for the new value
             CorrelScatter.Series.Remove(CorrelScatter.Series["CorrelSeries"]);
+            CorrelScatter.Series.Remove(CorrelScatter.Series["Trendline"]);
             //Leave the CorrelSeries object as the 0 coefficient points, then rework that each time into what you need
-            CorrelScatter.Series.Add(ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries));
+            Series Adjusted_Series = ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries);
+            CorrelScatter.Series.Add(Adjusted_Series);
+            CorrelScatter.Series.Add(GetTrendline(Adjusted_Series));
         }
     }
 }
