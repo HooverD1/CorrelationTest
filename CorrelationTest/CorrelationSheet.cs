@@ -401,6 +401,7 @@ namespace CorrelationTest
             public virtual void VisualizeCorrel()
             {
                 //Select a correlation
+                
                 int selectionRow = ThisAddIn.MyApp.Selection.Row;       //dependency..
                 int selectionCol = ThisAddIn.MyApp.Selection.Column;    //dependency..
                 //Make sure the row and column are within the matrix range
@@ -414,6 +415,12 @@ namespace CorrelationTest
                     MessageBox.Show("Must select a matrix cell to visualize");
                     return;
                 }
+                if(selectionRow - (this.Specs.MatrixCoords.Item1 + 1) == selectionCol - (this.Specs.MatrixCoords.Item2))
+                {
+                    //Along the diagonal - do nothing
+                    return;
+                } 
+                //double coefficient = Convert.ToDouble(ThisAddIn.MyApp.Selection);
                 //Find the distributions to use
                 object[,] distParams = GetDistributionParamStrings();
                 int distRow = selectionRow - xlMatrixCell.Row;
@@ -430,13 +437,15 @@ namespace CorrelationTest
                     MessageBox.Show("Selected correlation lacks distribution information.");
                     return;
                 }
-                CorrelationForm CorrelVisual = new CorrelationForm(d1, d2);
+                CorrelationForm CorrelVisual = new CorrelationForm(d1, d2, 0);
                 CorrelVisual.StartPosition = FormStartPosition.Manual;
                 CorrelVisual.Location = new System.Drawing.Point(0, 0);
                 if(this is IPairwiseSpec)
                 {
                     NumericUpDown upDown = (NumericUpDown)CorrelVisual.Controls.Find("numericUpDown_CorrelValue", true).First();
                     upDown.Enabled = false;
+                    Button drawButton = (Button)CorrelVisual.Controls.Find("btn_LaunchDrawCorrelation", true).First();
+                    drawButton.Enabled = false;
                 }
                 CorrelVisual.ShowDialog();
                 CorrelVisual.Focus();
@@ -474,7 +483,6 @@ namespace CorrelationTest
                 Sheets.CorrelationSheet correlSheet = ConstructFromXlCorrelationSheet();
                 if (correlSheet == null)
                     return;
-
                 correlSheet.VisualizeCorrel();
             }
         }

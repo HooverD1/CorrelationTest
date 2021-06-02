@@ -34,6 +34,7 @@ namespace CorrelationTest
         public static IEstimateDistribution ConstructForVisualization(Excel.Range xlSelection, Sheets.CorrelationSheet cs)
         {
             //Need to get the name from the xlRow and return the appropriate type
+            
             string distString = xlSelection.EntireRow.Cells[1, cs.Specs.DistributionCoords.Item2].value;
             if (distString is null)
                 return null;

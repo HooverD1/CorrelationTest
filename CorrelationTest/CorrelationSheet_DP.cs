@@ -215,6 +215,7 @@ namespace CorrelationTest
 
                 //VISUALIZE
                 System.Windows.Forms.Button btn_VisualizeCorrelation = new System.Windows.Forms.Button();
+                btn_VisualizeCorrelation.Name = "btn_VisualizeCorrelation";
                 btn_VisualizeCorrelation.Text = "Visualize";
                 btn_VisualizeCorrelation.Click += VisualizeCorrelationClicked;
                 vstoSheet.Controls.AddControl(btn_VisualizeCorrelation, this.xlButton_Visualize.Resize[2, 1], "VisualizeCorrelation");
