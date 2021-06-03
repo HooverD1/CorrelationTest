@@ -95,17 +95,45 @@ namespace CorrelationTest
             CorrelSeries.IsVisibleInLegend = false;
 
             //Create & set example points for the correlation-free CorrelSeries
+            Dictionary<double, double> y_dict = new Dictionary<double, double>();       // <random, y_val>
+
             Random rando = new Random();
+            double[] xValues = new double[500];
             for (int i = 1; i < 500; i++)
             {
-                //double input = ((double)i) / 100;
-                double x = CorrelDist1.GetInverse(rando.NextDouble());
-                double y = CorrelDist2.GetInverse(rando.NextDouble());
-                CorrelScatterPoints.Add(new DataPoint(x, y));
-                CorrelSeries.Points.AddXY(x, y);
+                //Populate the default scatterplot points
+                double input = ((double)i) / 500;
+                xValues[i-1] = CorrelDist1.GetInverse(input);
+                double y = CorrelDist2.GetInverse(input);
+                double y_rand = rando.NextDouble();
+                while(y_dict.ContainsKey(y_rand))
+                {
+                    //If the dictionary already contains this key, generate a new key
+                    //Exiting this loop implies that y_rand can act as a unique key
+                    y_rand = rando.NextDouble();
+                }
+                y_dict.Add(y_rand, y);
             }
+            //Pull the y_dict keys and sort them
+            List<double> y_keys = y_dict.Keys.ToList<double>();
+            y_keys.Sort();
+            for(int i = 0; i < y_keys.Count; i++)
+            {
+                //Pairs the equally percentile spaced y-values randomly against the equally percentile spaced x-values
+                CorrelScatterPoints.Add(new DataPoint(xValues[i], y_dict[y_keys[i]]));
+                CorrelSeries.Points.AddXY(xValues[i], y_dict[y_keys[i]]);
+            }
+
+            SimpleLinearRegression slr;
+            var ols = new OrdinaryLeastSquares();
+            var dataArrays = GetArrayXY_FromPointSeries(CorrelSeries);
+            slr = ols.Learn(dataArrays.Item1, dataArrays.Item2);
+
             //Standardize CorrelSeries to remove any happenstance correlation
-            CorrelSeries = StandardizeSampleCorrelation(CorrelSeries);  //Rework our values to bring correlation of the sample to r = 0
+            CorrelSeries = StandardizeSampleCorrelation(CorrelSeries);
+            var test = GetArrayXY_FromPointSeries(CorrelSeries);
+            double x_mean_test = test.Item1.Average();
+            double y_mean_test = test.Item2.Average();
 
             //Set the axis scale
             LabelStyle ls = new LabelStyle();
@@ -1360,25 +1388,22 @@ namespace CorrelationTest
             //Get a series that acts as a trendline for the given dataSeries
             SimpleLinearRegression slr;
             var ols = new OrdinaryLeastSquares();
-            IEnumerable<double> xVals = from DataPoint dp in dataSeries.Points select dp.XValue;
-            IEnumerable<double> yVals = from DataPoint dp in dataSeries.Points select dp.YValues.First();
-            double[] xValues = xVals.ToArray();
-            double[] yValues = yVals.ToArray();
-
-            slr = ols.Learn(xValues, yValues);
+            Tuple<double[], double[]> values = GetArrayXY_FromPointSeries(dataSeries);
+            slr = ols.Learn(values.Item1, values.Item2);
             Series trendline = new Series();
             trendline.Name = "Trendline";
             trendline.ChartType = SeriesChartType.Line;
             trendline.Color = Color.Crimson;
             trendline.BorderWidth = 2;
 
-            double xMin = xValues.Min();
-            double xMax = xValues.Max();
+            double xMin = values.Item1.Min();
+            double xMax = values.Item1.Max();
 
+            //Something is wrong here... I've seen non flat lines reporting slr.Slope = 0
             trendline.Points.AddXY(xMin, slr.Slope * xMin + slr.Intercept);  // y = mx + b
             trendline.Points.AddXY(xMax, slr.Slope * xMax + slr.Intercept);  // y = mx + b
 
-            trendline.ToolTip = $"Slope: {Math.Round(slr.Slope, 2)}";
+            trendline.ToolTip = $"Slope: {Math.Round(slr.Slope, 4)}";
 
             return trendline;
         }
@@ -1406,16 +1431,7 @@ namespace CorrelationTest
             double stdev_y = ExtensionMethods.GetStandardDeviation(dataArrays.Item2);
             double r = slr.Slope * stdev_x / stdev_y;   //Correlation of our sample picked from a population with r = 0
 
-            foreach (DataPoint dp in CorrelSeries.Points)    //Create a replacement series with the slope removed
-            {
-                double yVal = dp.YValues.First() - (dp.XValue * slr.Slope); //remove the slope
-                //reposition to fit y mean
-                yVal -= mean_y - pop_mean_y;
-                //reposition to fit x mean
-                double xVal = dp.XValue - (mean_x - pop_mean_x);
-                standardizedSeries.Points.AddXY(xVal, yVal);
-            }
-            return standardizedSeries;
+            return ReworkPointsForCorrelation(-r, CorrelSeries);
         }
 
         private Series ReworkPointsForCorrelation(double correlCoefficient, Series CorrelSeries)
@@ -1424,12 +1440,18 @@ namespace CorrelationTest
             reworkSeries.ChartType = SeriesChartType.Point;
             reworkSeries.MarkerStyle = MarkerStyle.Circle;
             reworkSeries.Name = "CorrelSeries";
+            double x_mean = CorrelDist1.GetMean();
+            double y_mean = CorrelDist2.GetMean();
+            var dataArrays = GetArrayXY_FromPointSeries(CorrelSeries);
+            double stdev_x = ExtensionMethods.GetStandardDeviation(dataArrays.Item1);
+            double stdev_y = ExtensionMethods.GetStandardDeviation(dataArrays.Item2);
+            double ratio = stdev_y / stdev_x;
 
-            foreach(DataPoint dp in CorrelSeries.Points)
+            foreach (DataPoint dp in CorrelSeries.Points)
             {
                 double x = dp.XValue;
                 double y = dp.YValues.First();
-                double new_y = x * correlCoefficient + y * Math.Sqrt(1 - Math.Pow(correlCoefficient, 2));
+                double new_y = ((x - x_mean) * correlCoefficient + (y - y_mean) * Math.Sqrt(1 - Math.Pow(correlCoefficient, 2)) + y_mean);
                 reworkSeries.Points.AddXY(x, new_y);
             }
             return reworkSeries;

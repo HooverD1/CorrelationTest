@@ -256,33 +256,11 @@ namespace CorrelationTest
                 //yVals needs populated by the values above the i'th position
                 double[] yVals = new double[matrixRange.GetLength(0) - row];
                 double[] xVals = new double[matrixRange.GetLength(0) - row];
-                int lastZeroIndex = 0;
                 for (int x = 0; x < matrixRange.GetLength(0) - row; x++)
                 {
                     xVals[x] = row - x - 1;
                     yVals[x] = Convert.ToDouble(jaggedMatrix[row-1][row + x]);
-                    if(yVals[x] == 0)
-                    {
-                        lastZeroIndex = x;
-                    }
                 }
-                //for(int z = matrixRange.GetLength(0) - row; z > 0 ; z--)
-                int z = matrixRange.GetLength(0) - row - 1;     //z is the index of the last non-zero
-                while (yVals[z] == 0)
-                {
-                    z--;
-                    if (z < 0)
-                        break;
-                }
-                double[] yVals_stripped = new double[z + 2];        // + 2 - one because z is the final index and one for the last zero
-                double[] xVals_stripped = new double[z + 2];
-                for (int index = 0; index <= z + 1; index++)        //Remake the values to strip the trailing zeroes
-                {
-                    yVals_stripped[index] = yVals[index];
-                    xVals_stripped[index] = xVals[index];
-                }
-                yVals = yVals_stripped;
-                xVals = xVals_stripped;
                     
                 SimpleLinearRegression slr;
                 var ols = new OrdinaryLeastSquares();
