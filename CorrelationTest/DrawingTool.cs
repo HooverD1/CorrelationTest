@@ -19,6 +19,7 @@ namespace CorrelationTest
     class DrawingTool
     {
         public Winforms.Button btn_ToolSwap { get; set; }
+        public Winforms.Button btn_ClearPoints { get; set; }
         public bool DrawPointsMode { get; set; } = true;
 
         private double XAxis_Min_Pixels { get; set; }
@@ -123,12 +124,27 @@ namespace CorrelationTest
             DrawOn.BringToFront();
             DrawArea.BackColor = CanvasColor;
             //Hide the markers
-            DrawOn.Series[0].Color = Color.FromArgb(0, DrawOn.Series[0].Color);
-            DrawOn.Series[0].LabelBackColor = Color.FromArgb(0, DrawOn.Series[0].LabelBackColor);
-            DrawOn.Series[0].LabelForeColor = Color.FromArgb(0, DrawOn.Series[0].LabelForeColor);
-            DrawOn.Series[1].Color = Color.FromArgb(0, DrawOn.Series[1].Color);
-            DrawOn.Series[1].LabelBackColor = Color.FromArgb(0, DrawOn.Series[1].LabelBackColor);
-            DrawOn.Series[1].LabelForeColor = Color.FromArgb(0, DrawOn.Series[1].LabelForeColor);
+            DrawOn.Series["CorrelSeries"].Color = Color.FromArgb(0, DrawOn.Series["CorrelSeries"].Color);
+            DrawOn.Series["CorrelSeries"].LabelBackColor = Color.FromArgb(0, DrawOn.Series["CorrelSeries"].LabelBackColor);
+            DrawOn.Series["CorrelSeries"].LabelForeColor = Color.FromArgb(0, DrawOn.Series["CorrelSeries"].LabelForeColor);
+            DrawOn.Series["MeanMarker"].Color = Color.FromArgb(0, DrawOn.Series["MeanMarker"].Color);
+            DrawOn.Series["MeanMarker"].LabelBackColor = Color.FromArgb(0, DrawOn.Series["MeanMarker"].LabelBackColor);
+            DrawOn.Series["MeanMarker"].LabelForeColor = Color.FromArgb(0, DrawOn.Series["MeanMarker"].LabelForeColor);
+            DrawOn.Series["Trendline"].Color = Color.FromArgb(0, DrawOn.Series["Trendline"].Color);
+            DrawOn.Series["Trendline"].LabelBackColor = Color.FromArgb(0, DrawOn.Series["Trendline"].LabelBackColor);
+            DrawOn.Series["Trendline"].LabelForeColor = Color.FromArgb(0, DrawOn.Series["Trendline"].LabelForeColor);
+            Series s25x = DrawOn.Series.FindByName("Percentile25_X");
+            s25x.Color = Color.FromArgb(0, s25x.Color);
+            Series s75x = DrawOn.Series.FindByName("Percentile75_X");
+            s75x.Color = Color.FromArgb(0, s75x.Color);
+            Series s25y = DrawOn.Series.FindByName("Percentile25_Y");
+            s25y.Color = Color.FromArgb(0, s25y.Color);
+            Series s75y = DrawOn.Series.FindByName("Percentile75_Y");
+            s75y.Color = Color.FromArgb(0, s75y.Color);
+            Series sMeanx = DrawOn.Series.FindByName("PercentileMean_X");
+            sMeanx.Color = Color.FromArgb(0, sMeanx.Color);
+            Series sMeany = DrawOn.Series.FindByName("PercentileMean_Y");
+            sMeany.Color = Color.FromArgb(0, sMeany.Color);
 
             DrawSeries.Color = Color.FromArgb(255, DrawSeries.Color);
             DrawOn.Series["CorrelSeries"].Label = "";
@@ -140,14 +156,29 @@ namespace CorrelationTest
             DrawOn.SendToBack();
             DrawArea.BackColor = ExistingCanvasColor;
             //Reset the marker colors
-            DrawOn.Series[0].Color = Color.FromArgb(255, DrawOn.Series[0].Color);
-            DrawOn.Series[0].LabelBackColor = Color.FromArgb(255, DrawOn.Series[0].LabelBackColor);
-            DrawOn.Series[0].LabelForeColor = Color.FromArgb(255, DrawOn.Series[0].LabelForeColor);
-            DrawOn.Series[1].Color = Color.FromArgb(255, DrawOn.Series[1].Color);
-            DrawOn.Series[1].LabelBackColor = Color.FromArgb(255, DrawOn.Series[1].LabelBackColor);
-            DrawOn.Series[1].LabelForeColor = Color.FromArgb(255, DrawOn.Series[1].LabelForeColor);
+            DrawOn.Series["CorrelSeries"].Color = Color.FromArgb(255, DrawOn.Series["CorrelSeries"].Color);
+            DrawOn.Series["CorrelSeries"].LabelBackColor = Color.FromArgb(255, DrawOn.Series["CorrelSeries"].LabelBackColor);
+            DrawOn.Series["CorrelSeries"].LabelForeColor = Color.FromArgb(255, DrawOn.Series["CorrelSeries"].LabelForeColor);
+            DrawOn.Series["MeanMarker"].Color = Color.FromArgb(255, DrawOn.Series["MeanMarker"].Color);
+            DrawOn.Series["MeanMarker"].LabelBackColor = Color.FromArgb(255, DrawOn.Series["MeanMarker"].LabelBackColor);
+            DrawOn.Series["MeanMarker"].LabelForeColor = Color.FromArgb(255, DrawOn.Series["MeanMarker"].LabelForeColor);
+            DrawOn.Series["Trendline"].Color = Color.FromArgb(255, DrawOn.Series["Trendline"].Color);
+            DrawOn.Series["Trendline"].LabelBackColor = Color.FromArgb(255, DrawOn.Series["Trendline"].LabelBackColor);
+            DrawOn.Series["Trendline"].LabelForeColor = Color.FromArgb(255, DrawOn.Series["Trendline"].LabelForeColor);
 
             DrawSeries.Color = Color.FromArgb(0, DrawSeries.Color);
+            Series s25x = DrawOn.Series.FindByName("Percentile25_X");
+            s25x.Color = Color.FromArgb(100, s25x.Color);
+            Series s75x = DrawOn.Series.FindByName("Percentile75_X");
+            s75x.Color = Color.FromArgb(100, s75x.Color);
+            Series s25y = DrawOn.Series.FindByName("Percentile25_Y");
+            s25y.Color = Color.FromArgb(100, s25y.Color);
+            Series s75y = DrawOn.Series.FindByName("Percentile75_Y");
+            s75y.Color = Color.FromArgb(100, s75y.Color);
+            Series sMeanx = DrawOn.Series.FindByName("PercentileMean_X");
+            sMeanx.Color = Color.FromArgb(255, sMeanx.Color);
+            Series sMeany = DrawOn.Series.FindByName("PercentileMean_Y");
+            sMeany.Color = Color.FromArgb(255, sMeany.Color);
 
             DrawArea.CursorX.IsUserEnabled = false;
             //DrawArea.CursorX.IsUserSelectionEnabled = false;
@@ -225,8 +256,15 @@ namespace CorrelationTest
             Chart xChart = (Chart)chartParent.Controls.Find("xAxisChart", false).First();
             Chart yChart = (Chart)chartParent.Controls.Find("yAxisChart", false).First();
             double xChart_Value = chartParent.CorrelDist1.GetPDF_Value(dp.XValue) / 2;
+            double xChart_Max = chartParent.CorrelDist1.GetPDF_MaxHeight();
+            double xChart_Ratio = xChart_Value / xChart_Max;
+            
             double yChart_Value = chartParent.CorrelDist2.GetPDF_Value(dp.YValues.First()) / 2;
-            return (1 - Math.Sqrt(xChart_Value + yChart_Value)) * PaintTimerDefaultRate;
+            double yChart_Max = chartParent.CorrelDist2.GetPDF_MaxHeight();
+            double yChart_Ratio = yChart_Value / yChart_Max;
+
+            double returnValue = (1 - (xChart_Ratio + yChart_Ratio)) * PaintTimerDefaultRate;
+            return returnValue;     //A lower number is faster because it is the number of milliseconds between point drops
         }
 
         private void AttemptPaint(object sender, EventArgs e)   //This event fires from the timer elapsed event.

@@ -19,6 +19,7 @@ namespace CorrelationTest
 
         double GetInverse(double percentile);
         double GetPDF_Value(double xValue);
+        double GetPDF_MaxHeight();
         double GetCDF_Value(double xValue);
         double GetMaximum();
         double GetMinimum();

@@ -26,6 +26,7 @@ namespace CorrelationTest
         public string Name { get; set; }
         public string DistributionString { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
+        private double? pdf_maxHeight { get; set; } = null;
 
         private SpecifiedDistribution() { }
         
@@ -132,7 +133,7 @@ namespace CorrelationTest
                 return Convert.ToDouble(DistributionParameters["Maximum"]);
             else
             {
-                return GetInverse(0.99);
+                return GetInverse(0.999);
             }
         }
 
@@ -144,7 +145,7 @@ namespace CorrelationTest
                 return 0;
             else
             {
-                return GetInverse(0.01);
+                return GetInverse(0.001);
             }
         }
 
@@ -159,6 +160,54 @@ namespace CorrelationTest
             if (Distribution is LognormalDistribution && xValue == 0)
                 return 0;
             return Distribution.ProbabilityFunction(xValue);
+        }
+
+        public double GetPDF_MaxHeight()
+        {
+            if(pdf_maxHeight == null)       //Hang onto the number once you have it so that you don't have to run SectorSearch multiple times
+            {
+                //Do a PDF search for an approximation
+                double minx = this.GetMinimum();
+                double maxx = this.GetMaximum();
+                pdf_maxHeight = this.GetPDF_Value(SectorSearch(minx, maxx));       //Search for the highest point in the pdf
+            }
+            return (double)pdf_maxHeight;
+        }
+
+        private double SectorSearch(double lower_bound, double upper_bound)
+        {
+            //Break the given range up into 5x pieces and return a new lower and upper bound around the highest piece
+            double range = upper_bound - lower_bound;
+            double step = range / 5;
+            double tempMax = 0;
+            double tempMax_X = -1;
+            for (int i=0; i <= 5; i++)
+            {
+                double val = GetPDF_Value(lower_bound + step * i);
+                if (val > tempMax)
+                {
+                    tempMax = val;
+                    tempMax_X = lower_bound + step * i;
+                }
+            }
+            //tempMax is the highest value of the steps and tempMax_X is the step it happened on.
+            //Get the range around tempMax_X to focus the search on
+            if(tempMax_X == lower_bound)
+            {
+                return SectorSearch(lower_bound, lower_bound + step);
+            }
+            else if(tempMax_X == upper_bound)
+            {
+                return SectorSearch(upper_bound - step, upper_bound);
+            }
+            else if(step > 0.001)
+            {
+                return SectorSearch(tempMax_X - step, tempMax_X + step);
+            }
+            else
+            {
+                return tempMax_X;
+            }
         }
 
         public double GetCDF_Value(double xValue)

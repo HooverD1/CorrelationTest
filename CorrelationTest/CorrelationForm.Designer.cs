@@ -28,17 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.CorrelScatter = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.btn_saveClose = new System.Windows.Forms.Button();
             this.btn_Cancel = new System.Windows.Forms.Button();
             this.numericUpDown_CorrelValue = new System.Windows.Forms.NumericUpDown();
             this.groupBox_CorrelCoef = new System.Windows.Forms.GroupBox();
             this.xAxisChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.btn_LaunchHelper = new System.Windows.Forms.Button();
             this.btn_LaunchDrawCorrelation = new System.Windows.Forms.Button();
+            this.comboBox_Zoom = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.CorrelScatter)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_CorrelValue)).BeginInit();
             this.groupBox_CorrelCoef.SuspendLayout();
@@ -47,19 +47,19 @@
             // 
             // CorrelScatter
             // 
-            chartArea1.AxisX.ScaleView.Zoomable = false;
-            chartArea1.AxisX2.ScaleView.Zoomable = false;
-            chartArea1.AxisY.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
-            chartArea1.AxisY.ScaleView.Zoomable = false;
-            chartArea1.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
-            chartArea1.AxisY2.ScaleView.Zoomable = false;
-            chartArea1.Name = "ChartArea1";
-            chartArea1.Position.Auto = false;
-            chartArea1.Position.Height = 94F;
-            chartArea1.Position.Width = 94F;
-            chartArea1.Position.X = 3F;
-            chartArea1.Position.Y = 3F;
-            this.CorrelScatter.ChartAreas.Add(chartArea1);
+            chartArea3.AxisX.ScaleView.Zoomable = false;
+            chartArea3.AxisX2.ScaleView.Zoomable = false;
+            chartArea3.AxisY.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
+            chartArea3.AxisY.ScaleView.Zoomable = false;
+            chartArea3.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
+            chartArea3.AxisY2.ScaleView.Zoomable = false;
+            chartArea3.Name = "ChartArea1";
+            chartArea3.Position.Auto = false;
+            chartArea3.Position.Height = 94F;
+            chartArea3.Position.Width = 94F;
+            chartArea3.Position.X = 3F;
+            chartArea3.Position.Y = 3F;
+            this.CorrelScatter.ChartAreas.Add(chartArea3);
             this.CorrelScatter.Location = new System.Drawing.Point(197, 182);
             this.CorrelScatter.Margin = new System.Windows.Forms.Padding(0);
             this.CorrelScatter.Name = "CorrelScatter";
@@ -125,32 +125,21 @@
             // 
             // xAxisChart
             // 
-            chartArea2.Name = "ChartArea1";
-            this.xAxisChart.ChartAreas.Add(chartArea2);
+            chartArea4.Name = "ChartArea1";
+            this.xAxisChart.ChartAreas.Add(chartArea4);
             this.xAxisChart.Location = new System.Drawing.Point(226, 63);
             this.xAxisChart.Margin = new System.Windows.Forms.Padding(0);
             this.xAxisChart.Name = "xAxisChart";
-            series1.ChartArea = "ChartArea1";
-            series1.Name = "Series1";
-            this.xAxisChart.Series.Add(series1);
+            series2.ChartArea = "ChartArea1";
+            series2.Name = "Series1";
+            this.xAxisChart.Series.Add(series2);
             this.xAxisChart.Size = new System.Drawing.Size(752, 129);
             this.xAxisChart.TabIndex = 6;
             this.xAxisChart.Text = "chart1";
             // 
-            // btn_LaunchHelper
-            // 
-            this.btn_LaunchHelper.Location = new System.Drawing.Point(968, 613);
-            this.btn_LaunchHelper.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btn_LaunchHelper.Name = "btn_LaunchHelper";
-            this.btn_LaunchHelper.Size = new System.Drawing.Size(184, 38);
-            this.btn_LaunchHelper.TabIndex = 7;
-            this.btn_LaunchHelper.Text = "Use Guided Correlation";
-            this.btn_LaunchHelper.UseVisualStyleBackColor = true;
-            this.btn_LaunchHelper.Click += new System.EventHandler(this.btn_LaunchHelper_Click);
-            // 
             // btn_LaunchDrawCorrelation
             // 
-            this.btn_LaunchDrawCorrelation.Location = new System.Drawing.Point(968, 571);
+            this.btn_LaunchDrawCorrelation.Location = new System.Drawing.Point(968, 636);
             this.btn_LaunchDrawCorrelation.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_LaunchDrawCorrelation.Name = "btn_LaunchDrawCorrelation";
             this.btn_LaunchDrawCorrelation.Size = new System.Drawing.Size(184, 38);
@@ -159,14 +148,29 @@
             this.btn_LaunchDrawCorrelation.UseVisualStyleBackColor = true;
             this.btn_LaunchDrawCorrelation.Click += new System.EventHandler(this.btn_LaunchDrawCorrelation_Click);
             // 
+            // comboBox_Zoom
+            // 
+            this.comboBox_Zoom.FormattingEnabled = true;
+            this.comboBox_Zoom.Items.AddRange(new object[] {
+            "View Maximum",
+            "View Inner 90%",
+            "View Inner 80%",
+            "View Inner 70%"});
+            this.comboBox_Zoom.Location = new System.Drawing.Point(968, 182);
+            this.comboBox_Zoom.Name = "comboBox_Zoom";
+            this.comboBox_Zoom.Size = new System.Drawing.Size(184, 24);
+            this.comboBox_Zoom.TabIndex = 9;
+            this.comboBox_Zoom.Text = "Zoom Level";
+            this.comboBox_Zoom.SelectedValueChanged += new System.EventHandler(this.comboBox_Zoom_SelectedValueChanged);
+            // 
             // CorrelationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(1175, 932);
+            this.Controls.Add(this.comboBox_Zoom);
             this.Controls.Add(this.btn_LaunchDrawCorrelation);
-            this.Controls.Add(this.btn_LaunchHelper);
             this.Controls.Add(this.xAxisChart);
             this.Controls.Add(this.groupBox_CorrelCoef);
             this.Controls.Add(this.btn_Cancel);
@@ -195,7 +199,7 @@
         private System.Windows.Forms.NumericUpDown numericUpDown_CorrelValue;
         private System.Windows.Forms.GroupBox groupBox_CorrelCoef;
         private System.Windows.Forms.DataVisualization.Charting.Chart xAxisChart;
-        private System.Windows.Forms.Button btn_LaunchHelper;
         private System.Windows.Forms.Button btn_LaunchDrawCorrelation;
+        private System.Windows.Forms.ComboBox comboBox_Zoom;
     }
 }

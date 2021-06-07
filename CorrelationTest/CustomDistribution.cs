@@ -71,6 +71,12 @@ namespace CorrelationTest
             throw new NotImplementedException();
         }
 
+        public double GetPDF_MaxHeight()
+        {
+            //Find the maximum Y value for the PDF function -- implemented as an approx via recursive search function in SpecifiedDistribution
+            throw new NotImplementedException();
+        }
+
         public double GetCDF_Value(double xValue)
         {
             throw new NotImplementedException();

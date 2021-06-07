@@ -29,6 +29,7 @@ namespace CorrelationTest
         private bool MouseIsDown { get; set; } = false;
         private bool RefreshBreak { get; set; } = false;
         private Chart yAxisChart { get; set; }
+        private const int base_steps = 75;
         const int margin = 0;
         const int scale = 93;
         private ElementPosition scatterPosition { get; set; } = new ElementPosition(margin, margin, scale, scale);
@@ -130,7 +131,10 @@ namespace CorrelationTest
             slr = ols.Learn(dataArrays.Item1, dataArrays.Item2);
 
             //Standardize CorrelSeries to remove any happenstance correlation
-            CorrelSeries = StandardizeSampleCorrelation(CorrelSeries);
+            
+            //This line doesn't seem to work
+            CorrelSeries = ReworkPointsForCorrelation(slr.Slope * -1, CorrelSeries);
+
             var test = GetArrayXY_FromPointSeries(CorrelSeries);
             double x_mean_test = test.Item1.Average();
             double y_mean_test = test.Item2.Average();
@@ -178,8 +182,69 @@ namespace CorrelationTest
             DataPoint dp = meanMarker.Points.First();
             dp.Label = $"({Math.Round(dp.XValue, 2)}, {Math.Round(dp.YValues.First(), 2)})";
             dp.LabelForeColor = Color.Black;
-
             CorrelScatter.Series.Add(meanMarker);
+
+            Series Percentile25_X = new Series();
+            Percentile25_X.Name = "Percentile25_X";
+            Percentile25_X.ChartType = SeriesChartType.Line;
+            Percentile25_X.Points.AddXY(CorrelDist1.GetInverse(0.25), CorrelDist2.GetMinimum());
+            Percentile25_X.Points.AddXY(CorrelDist1.GetInverse(0.25), CorrelDist2.GetMaximum());
+            Percentile25_X.Color = Color.FromArgb(100, 155, 0, 0);
+            Percentile25_X.BorderWidth = 5;
+            Percentile25_X.SmartLabelStyle.Enabled = false;
+            CorrelScatter.Series.Add(Percentile25_X);
+
+            Series Percentile75_X = new Series();
+            Percentile75_X.Name = "Percentile75_X";
+            Percentile75_X.ChartType = SeriesChartType.Line;
+            Percentile75_X.Points.AddXY(CorrelDist1.GetInverse(0.75), CorrelDist2.GetMinimum());
+            Percentile75_X.Points.AddXY(CorrelDist1.GetInverse(0.75), CorrelDist2.GetMaximum());
+            Percentile75_X.Color = Color.FromArgb(100, 155, 0, 0);
+            Percentile75_X.BorderWidth = 5;
+            Percentile75_X.SmartLabelStyle.Enabled = false;
+            CorrelScatter.Series.Add(Percentile75_X);
+
+            Series Percentile25_Y = new Series();
+            Percentile25_Y.Name = "Percentile25_Y";
+            Percentile25_Y.ChartType = SeriesChartType.Line;
+            Percentile25_Y.Points.AddXY(CorrelDist1.GetMinimum(), CorrelDist2.GetInverse(0.25));
+            Percentile25_Y.Points.AddXY(CorrelDist1.GetMaximum(), CorrelDist2.GetInverse(0.25));
+            Percentile25_Y.Color = Color.FromArgb(100, 155, 0, 0);
+            Percentile25_Y.BorderWidth = 5;
+            Percentile25_Y.SmartLabelStyle.Enabled = false;
+            CorrelScatter.Series.Add(Percentile25_Y);
+
+            Series Percentile75_Y = new Series();
+            Percentile75_Y.Name = "Percentile75_Y";
+            Percentile75_Y.ChartType = SeriesChartType.Line;
+            Percentile75_Y.Points.AddXY(CorrelDist1.GetMinimum(), CorrelDist2.GetInverse(0.75));
+            Percentile75_Y.Points.AddXY(CorrelDist1.GetMaximum(), CorrelDist2.GetInverse(0.75));
+            Percentile75_Y.Color = Color.FromArgb(100,155,0,0);
+            Percentile75_Y.BorderWidth = 5;
+            Percentile75_Y.SmartLabelStyle.Enabled = false;
+            CorrelScatter.Series.Add(Percentile75_Y);
+
+            Series PercentileMean_X = new Series();
+            PercentileMean_X.Name = "PercentileMean_X";
+            PercentileMean_X.ChartType = SeriesChartType.Line;
+            PercentileMean_X.Points.AddXY(CorrelDist1.GetMean(), CorrelDist2.GetMinimum());
+            PercentileMean_X.Points.AddXY(CorrelDist1.GetMean(), CorrelDist2.GetMaximum());
+            PercentileMean_X.Color = Color.Black;
+            PercentileMean_X.BorderWidth = 3;
+            PercentileMean_X.BorderDashStyle = ChartDashStyle.Dash;
+            PercentileMean_X.SmartLabelStyle.Enabled = false;
+            CorrelScatter.Series.Add(PercentileMean_X);
+
+            Series PercentileMean_Y = new Series();
+            PercentileMean_Y.Name = "PercentileMean_Y";
+            PercentileMean_Y.ChartType = SeriesChartType.Line;
+            PercentileMean_Y.Points.AddXY(CorrelDist1.GetMinimum(), CorrelDist2.GetMean());
+            PercentileMean_Y.Points.AddXY(CorrelDist1.GetMaximum(), CorrelDist2.GetMean());
+            PercentileMean_Y.Color = Color.Black;
+            PercentileMean_Y.BorderWidth = 3;
+            PercentileMean_Y.BorderDashStyle = ChartDashStyle.Dash;
+            PercentileMean_Y.SmartLabelStyle.Enabled = false;
+            CorrelScatter.Series.Add(PercentileMean_Y);
 
             Excel.Range xlSelection = ThisAddIn.MyApp.Selection;
             int index1 = xlSelection.Row - (CorrelSheet.xlMatrixCell.Row + 1);
@@ -305,9 +370,17 @@ namespace CorrelationTest
             yAxisChart.Series["Series1"].IsVisibleInLegend = false;
             yAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
 
-            int steps = 400;
             double minimum = CorrelDist2.GetMinimum();
             double maximum = CorrelDist2.GetMaximum();
+
+            double maxRange_y = maximum - minimum;
+            double shownRange_y = CorrelDist2.GetInverse(0.85) - CorrelDist2.GetInverse(0.15);  //Max zoom setting
+            double y_ratio = shownRange_y / maxRange_y;
+
+            int steps = Convert.ToInt32(base_steps * (1 / y_ratio));     //Scale up the # of bars needed to get that many into the max zoom range
+            double barWidth = 750 / (double)steps;
+            yAxisChart.Series["Series1"]["PixelPointWidth"] = barWidth.ToString();      //Make the bar width dynamic
+
             double step = (maximum - minimum) / steps;
 
             yAxisChart.ChartAreas[0].AxisX.Minimum = CorrelScatter.ChartAreas[0].AxisY2.Minimum;
@@ -391,11 +464,19 @@ namespace CorrelationTest
             xAxisChart.ChartAreas[0].InnerPlotPosition = xChartPosition;
 
             this.xAxisChart.Series["Series1"].YValuesPerPoint = 1;
-            xAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
+            
 
-            int steps = 400;
             double minimum = CorrelDist1.GetMinimum();
             double maximum = CorrelDist1.GetMaximum();
+
+            double maxRange_x = maximum - minimum;
+            double shownRange_x = CorrelDist1.GetInverse(0.85) - CorrelDist1.GetInverse(0.15);  //Max zoom setting
+            double x_ratio = shownRange_x / maxRange_x;
+
+            int steps = Convert.ToInt32(base_steps * (1/x_ratio));     //Scale up the # of bars needed to get that many into the max zoom range
+            double barWidth = 750 / (double)steps;
+            xAxisChart.Series["Series1"]["PixelPointWidth"] = barWidth.ToString();      //Make the bar width dynamic
+
             double step = (maximum - minimum) / steps;
 
             this.xAxisChart.ChartAreas[0].AxisX.Minimum = minimum;
@@ -455,6 +536,41 @@ namespace CorrelationTest
 
             //Load the percentile lines
             xAxisChart.Paint += XAxisChart_Paint;
+        }
+
+        private void SetZoom(double percentile_min, double percentile_max)
+        {
+            this.CorrelScatter.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetInverse(percentile_min);
+            this.CorrelScatter.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetInverse(percentile_max);
+            //this.CorrelScatter.ChartAreas[0].AxisY2.Interval = .5;
+            this.CorrelScatter.ChartAreas[0].AxisY.Minimum = CorrelDist2.GetInverse(percentile_min);
+            this.CorrelScatter.ChartAreas[0].AxisY.Maximum = CorrelDist2.GetInverse(percentile_max);
+
+            this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetInverse(percentile_min);
+            this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetInverse(percentile_max);
+
+            xAxisChart.ChartAreas[0].AxisX.Minimum = CorrelDist1.GetInverse(percentile_min);
+            xAxisChart.ChartAreas[0].AxisX.Maximum = CorrelDist1.GetInverse(percentile_max);
+
+            double maxRange_x = CorrelDist1.GetMaximum() - CorrelDist1.GetMinimum();
+            double maxRange_y = CorrelDist2.GetMaximum() - CorrelDist2.GetMinimum();
+            double shownRange_x = CorrelDist1.GetInverse(percentile_max) - CorrelDist1.GetInverse(percentile_min);
+            double shownRange_y = CorrelDist2.GetInverse(percentile_max) - CorrelDist2.GetInverse(percentile_min);
+            double x_ratio = shownRange_x / maxRange_x;
+            double y_ratio = shownRange_y / maxRange_y;
+
+            int steps_x = xAxisChart.Series["Series1"].Points.Count();
+            double stepsInRange_x = steps_x * x_ratio;
+            double barWidth_x = 750 / stepsInRange_x;       //estimated number of pixels in the inner plot area divided by steps.
+            xAxisChart.Series["Series1"]["PixelPointWidth"] = barWidth_x.ToString();      //Make the bar width dynamic
+
+            yAxisChart.ChartAreas[0].AxisX.Minimum = CorrelDist2.GetInverse(percentile_min);
+            yAxisChart.ChartAreas[0].AxisX.Maximum = CorrelDist2.GetInverse(percentile_max);
+
+            int steps_y = yAxisChart.Series["Series1"].Points.Count();
+            double stepsInRange_y = steps_y * y_ratio;
+            double barWidth_y = 750 / stepsInRange_y;       //estimated number of pixels in the inner plot area divided by steps.
+            yAxisChart.Series["Series1"]["PixelPointWidth"] = barWidth_y.ToString();      //Make the bar width dynamic
         }
 
         private enum Percentile
@@ -625,88 +741,87 @@ namespace CorrelationTest
 
         }
 
-        private void btn_LaunchHelper_Click(object sender, EventArgs e)
-        {
-            if(helperStage == 0)
-            {
-                //Dis-enable the other controls
-                this.btn_LaunchDrawCorrelation.Enabled = false;
-                this.btn_saveClose.Enabled = false;
-                this.UpDownEnabled = this.numericUpDown_CorrelValue.Enabled;
-                if (this.UpDownEnabled)
-                    this.numericUpDown_CorrelValue.Enabled = false;
-                //Load minimum
-                existingColor = CorrelScatter.ChartAreas[0].BackColor;
-                CorrelScatter.ChartAreas[0].BackColor = Color.FromArgb(195, 195, 195);
-                this.btn_LaunchHelper.Text = ">> Next >>";
-                this.Controls.Add(textboxMinimum);
-                textboxMinimum.BringToFront();
-                labelHelper.AutoSize = true;
-                labelHelper.Top = textboxMinimum.Top - 50;
-                labelHelper.Left = textboxMinimum.Left;
-                labelHelper.Text = $"If X is {CorrelDist1.GetMinimum()}, what do you expect Y to be?";
-                this.Controls.Add(labelHelper);
-                labelHelper.BringToFront();
-                helperStage++;
-            }
-            else if(helperStage == 1)
-            {
-                textboxMinimum.Enabled = false;
-                Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
-                this.Controls.Add(textboxMidpoint);
-                textboxMidpoint.BringToFront();
-                labelHelper.Top = textboxMidpoint.Top - 50;
-                labelHelper.Left = textboxMidpoint.Left;
-                labelHelper.Text = $"If X is {(CorrelDist1.GetMaximum() - CorrelDist1.GetMinimum()) / 2}, what do you expect Y to be?";
-                labelHelper.BringToFront();
-                helperStage++;
-            }
-            else if (helperStage == 2)
-            {
-                textboxMidpoint.Enabled = false;
-                Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
-                this.Controls.Add(textboxMaximum);
-                textboxMaximum.BringToFront();
-                labelHelper.Top = textboxMaximum.Top - 50;
-                labelHelper.Left = textboxMaximum.Left;
-                labelHelper.Text = $"If X is {CorrelDist1.GetMaximum()}, what do you expect Y to be?";
-                labelHelper.BringToFront();
-                helperStage++;
-            }
-            else if (helperStage == 3)
-            {
-                //Save the values
-                bool t1 = Double.TryParse(textboxMinimum.Text, out double minVal);
-                bool t2 = Double.TryParse(textboxMidpoint.Text, out double midVal);
-                bool t3 = Double.TryParse(textboxMaximum.Text, out double maxVal);
+        //private void btn_LaunchHelper_Click(object sender, EventArgs e)
+        //{
+        //    if(helperStage == 0)
+        //    {
+        //        //Dis-enable the other controls
+        //        this.btn_LaunchDrawCorrelation.Enabled = false;
+        //        this.btn_saveClose.Enabled = false;
+        //        this.UpDownEnabled = this.numericUpDown_CorrelValue.Enabled;
+        //        if (this.UpDownEnabled)
+        //            this.numericUpDown_CorrelValue.Enabled = false;
+        //        //Load minimum
+        //        existingColor = CorrelScatter.ChartAreas[0].BackColor;
+        //        CorrelScatter.ChartAreas[0].BackColor = Color.FromArgb(195, 195, 195);
+        //        this.btn_LaunchHelper.Text = ">> Next >>";
+        //        this.Controls.Add(textboxMinimum);
+        //        textboxMinimum.BringToFront();
+        //        labelHelper.AutoSize = true;
+        //        labelHelper.Top = textboxMinimum.Top - 50;
+        //        labelHelper.Left = textboxMinimum.Left;
+        //        labelHelper.Text = $"If X is {CorrelDist1.GetMinimum()}, what do you expect Y to be?";
+        //        this.Controls.Add(labelHelper);
+        //        labelHelper.BringToFront();
+        //        helperStage++;
+        //    }
+        //    else if(helperStage == 1)
+        //    {
+        //        textboxMinimum.Enabled = false;
+        //        Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
+        //        this.Controls.Add(textboxMidpoint);
+        //        textboxMidpoint.BringToFront();
+        //        labelHelper.Top = textboxMidpoint.Top - 50;
+        //        labelHelper.Left = textboxMidpoint.Left;
+        //        labelHelper.Text = $"If X is {(CorrelDist1.GetMaximum() - CorrelDist1.GetMinimum()) / 2}, what do you expect Y to be?";
+        //        labelHelper.BringToFront();
+        //        helperStage++;
+        //    }
+        //    else if (helperStage == 2)
+        //    {
+        //        textboxMidpoint.Enabled = false;
+        //        Color existingColor = CorrelScatter.ChartAreas[0].BackColor;
+        //        this.Controls.Add(textboxMaximum);
+        //        textboxMaximum.BringToFront();
+        //        labelHelper.Top = textboxMaximum.Top - 50;
+        //        labelHelper.Left = textboxMaximum.Left;
+        //        labelHelper.Text = $"If X is {CorrelDist1.GetMaximum()}, what do you expect Y to be?";
+        //        labelHelper.BringToFront();
+        //        helperStage++;
+        //    }
+        //    else if (helperStage == 3)
+        //    {
+        //        //Save the values
+        //        bool t1 = Double.TryParse(textboxMinimum.Text, out double minVal);
+        //        bool t2 = Double.TryParse(textboxMidpoint.Text, out double midVal);
+        //        bool t3 = Double.TryParse(textboxMaximum.Text, out double maxVal);
                 
-                if(t1&&t2&&t3)
-                {
-                    //all three contain convertible values
+        //        if(t1&&t2&&t3)
+        //        {
+        //            //all three contain convertible values
                     
-                    //COMPUTE THE CORRELATION HERE
+        //            //COMPUTE THE CORRELATION HERE
 
-                }
-                //Remove the textboxes
-                this.Controls.Remove(textboxMinimum);
-                this.Controls.Remove(textboxMidpoint);
-                this.Controls.Remove(textboxMaximum);
-                this.Controls.Remove(labelHelper);
-                this.btn_LaunchHelper.Text = "Use Guided Correlation";
-                //Return the color to normal
-                CorrelScatter.ChartAreas[0].BackColor = existingColor;
-                //Compute the line?
-                //But the slope != the correlation...
-                //So what am I doing here?
+        //        }
+        //        //Remove the textboxes
+        //        this.Controls.Remove(textboxMinimum);
+        //        this.Controls.Remove(textboxMidpoint);
+        //        this.Controls.Remove(textboxMaximum);
+        //        this.Controls.Remove(labelHelper);
+        //        //Return the color to normal
+        //        CorrelScatter.ChartAreas[0].BackColor = existingColor;
+        //        //Compute the line?
+        //        //But the slope != the correlation...
+        //        //So what am I doing here?
 
-                this.btn_LaunchDrawCorrelation.Enabled = true;
-                this.btn_saveClose.Enabled = true;
-                this.numericUpDown_CorrelValue.Enabled = UpDownEnabled;
+        //        this.btn_LaunchDrawCorrelation.Enabled = true;
+        //        this.btn_saveClose.Enabled = true;
+        //        this.numericUpDown_CorrelValue.Enabled = UpDownEnabled;
 
                 
-                helperStage = 0;
-            }
-        }
+        //        helperStage = 0;
+        //    }
+        //}
 
         private void btn_LaunchDrawCorrelation_Click(object sender, EventArgs e)
         {
@@ -734,8 +849,17 @@ namespace CorrelationTest
                 DrawTool.btn_ToolSwap.Click += SwapTools_Click;
                 this.Controls.Add(DrawTool.btn_ToolSwap);
 
+                DrawTool.btn_ClearPoints = new Button();
+                DrawTool.btn_ClearPoints.Left = btn_LaunchDrawCorrelation.Location.X;
+                DrawTool.btn_ClearPoints.Height = btn_LaunchDrawCorrelation.Height;
+                DrawTool.btn_ClearPoints.Width = btn_LaunchDrawCorrelation.Width;
+                DrawTool.btn_ClearPoints.BackColor = btn_LaunchDrawCorrelation.BackColor;
+                DrawTool.btn_ClearPoints.Top = DrawTool.btn_ToolSwap.Location.Y - DrawTool.btn_ClearPoints.Height;
+                DrawTool.btn_ClearPoints.Text = "Clear Points";
+                DrawTool.btn_ClearPoints.Click += ClearPoints_Click;
+                this.Controls.Add(DrawTool.btn_ClearPoints);
+
                 //Disable the other buttons
-                this.btn_LaunchHelper.Enabled = false;
                 this.btn_saveClose.Enabled = false;
                 this.UpDownEnabled = this.numericUpDown_CorrelValue.Enabled;
                 if(this.UpDownEnabled)
@@ -747,6 +871,7 @@ namespace CorrelationTest
                 //Turn off DrawingMode
                 DrawTool.ResetChartFormat();
                 this.Controls.Remove(DrawTool.btn_ToolSwap);
+                this.Controls.Remove(DrawTool.btn_ClearPoints);
                 CorrelScatter.Series.Remove(DrawTool.DrawSeries);
 
                 //Reconfigure the correlScatter to match the given correlation
@@ -763,7 +888,6 @@ namespace CorrelationTest
                 }
                 CorrelScatter.Series["MeanMarker"].Points.First().Label = $"({Math.Round(PercentilePoints["X_MeanPoint"].XValue, 2)}, {Math.Round(PercentilePoints["Y_MeanPoint"].XValue, 2)})";
                 this.DrawTool = null;                
-                this.btn_LaunchHelper.Enabled = true;
                 this.btn_saveClose.Enabled = true;
                 this.numericUpDown_CorrelValue.Enabled = this.UpDownEnabled;    //Reset to original state
                 btn_LaunchDrawCorrelation.Text = "Draw Correlation";
@@ -794,77 +918,80 @@ namespace CorrelationTest
                 //    this.ReloadCorrelScatter();
                 //}
             }
-            else
-            {
-                if (Spacing.ContainsKey("X_MeanPoint_Abs"))
-                {
-                    double x_mean = Spacing["X_MeanPoint_Abs"];
-                    Point[] points = new Point[2];
-                    points[0] = new Point(Convert.ToInt32(x_mean), Spacing["chartInnerPlot_Abs_Top"]);
-                    points[1] = new Point(Convert.ToInt32(x_mean), Spacing["chartInnerPlot_Abs_Bottom"]);
-                    Pen pen_mean = new Pen(Color.FromArgb(150, 0, 0, 0));
-                    pen_mean.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                    pen_mean.Width = 3;
-                    e.Graphics.DrawLine(pen_mean, points[0], points[1]);
-                    //CorrelScatter.SendToBack();
-                }
-                if (Spacing.ContainsKey("X_LowPoint_Abs"))
-                {
-                    double x_low = Spacing["X_LowPoint_Abs"];
-                    Point[] points = new Point[2];
-                    points[0] = new Point(Convert.ToInt32(x_low), Spacing["chartInnerPlot_Abs_Top"]);
-                    points[1] = new Point(Convert.ToInt32(x_low), Spacing["chartInnerPlot_Abs_Bottom"]);
-                    Pen pen_low = new Pen(Color.FromArgb(150, 255, 99, 71));
-                    pen_low.Width = 3;
-                    e.Graphics.DrawLine(pen_low, points[0], points[1]);
-                    //CorrelScatter.SendToBack();
-                }
-                if (Spacing.ContainsKey("X_HighPoint_Abs"))
-                {
-                    double x_high = Spacing["X_HighPoint_Abs"];
-                    Point[] points = new Point[2];
-                    points[0] = new Point(Convert.ToInt32(x_high), Spacing["chartInnerPlot_Abs_Top"]);
-                    points[1] = new Point(Convert.ToInt32(x_high), Spacing["chartInnerPlot_Abs_Bottom"]);
-                    Pen pen_high = new Pen(Color.FromArgb(150, 255, 99, 71));
-                    pen_high.Width = 3;
-                    e.Graphics.DrawLine(pen_high, points[0], points[1]);
-                    //CorrelScatter.SendToBack();
-                }
-                if (Spacing.ContainsKey("Y_MeanPoint_Abs"))
-                {
-                    double y_mean = Spacing["Y_MeanPoint_Abs"];
-                    Point[] points = new Point[2];
-                    points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_mean));
-                    points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_mean));
-                    Pen pen_mean = new Pen(Color.FromArgb(150, 0, 0, 0));
-                    pen_mean.Width = 3;
-                    pen_mean.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                    e.Graphics.DrawLine(pen_mean, points[0], points[1]);
-                    //CorrelScatter.SendToBack();
-                }
-                if (Spacing.ContainsKey("Y_LowPoint_Abs"))
-                {
-                    double y_low = Spacing["Y_LowPoint_Abs"];
-                    Point[] points = new Point[2];
-                    points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_low));
-                    points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_low));
-                    Pen pen_low = new Pen(Color.FromArgb(150, 255, 99, 71));
-                    pen_low.Width = 3;
-                    e.Graphics.DrawLine(pen_low, points[0], points[1]);
-                    //CorrelScatter.SendToBack();
-                }
-                if (Spacing.ContainsKey("Y_HighPoint_Abs"))
-                {
-                    double y_high = Spacing["Y_HighPoint_Abs"];
-                    Point[] points = new Point[2];
-                    points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_high));
-                    points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_high));
-                    Pen pen_high = new Pen(Color.FromArgb(150, 255, 99, 71));
-                    pen_high.Width = 3;
-                    e.Graphics.DrawLine(pen_high, points[0], points[1]);
-                    //CorrelScatter.SendToBack();
-                }
-            }
+            
+            //Instead of drawing lines, just add series to correlscatter
+
+            //else
+            //{
+            //    if (Spacing.ContainsKey("X_MeanPoint_Abs"))
+            //    {
+            //        double x_mean = Spacing["X_MeanPoint_Abs"];
+            //        Point[] points = new Point[2];
+            //        points[0] = new Point(Convert.ToInt32(x_mean), Spacing["chartInnerPlot_Abs_Top"]);
+            //        points[1] = new Point(Convert.ToInt32(x_mean), Spacing["chartInnerPlot_Abs_Bottom"]);
+            //        Pen pen_mean = new Pen(Color.FromArgb(150, 0, 0, 0));
+            //        pen_mean.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+            //        pen_mean.Width = 3;
+            //        e.Graphics.DrawLine(pen_mean, points[0], points[1]);
+            //        //CorrelScatter.SendToBack();
+            //    }
+            //    if (Spacing.ContainsKey("X_LowPoint_Abs"))
+            //    {
+            //        double x_low = Spacing["X_LowPoint_Abs"];
+            //        Point[] points = new Point[2];
+            //        points[0] = new Point(Convert.ToInt32(x_low), Spacing["chartInnerPlot_Abs_Top"]);
+            //        points[1] = new Point(Convert.ToInt32(x_low), Spacing["chartInnerPlot_Abs_Bottom"]);
+            //        Pen pen_low = new Pen(Color.FromArgb(150, 255, 99, 71));
+            //        pen_low.Width = 3;
+            //        e.Graphics.DrawLine(pen_low, points[0], points[1]);
+            //        //CorrelScatter.SendToBack();
+            //    }
+            //    if (Spacing.ContainsKey("X_HighPoint_Abs"))
+            //    {
+            //        double x_high = Spacing["X_HighPoint_Abs"];
+            //        Point[] points = new Point[2];
+            //        points[0] = new Point(Convert.ToInt32(x_high), Spacing["chartInnerPlot_Abs_Top"]);
+            //        points[1] = new Point(Convert.ToInt32(x_high), Spacing["chartInnerPlot_Abs_Bottom"]);
+            //        Pen pen_high = new Pen(Color.FromArgb(150, 255, 99, 71));
+            //        pen_high.Width = 3;
+            //        e.Graphics.DrawLine(pen_high, points[0], points[1]);
+            //        //CorrelScatter.SendToBack();
+            //    }
+            //    if (Spacing.ContainsKey("Y_MeanPoint_Abs"))
+            //    {
+            //        double y_mean = Spacing["Y_MeanPoint_Abs"];
+            //        Point[] points = new Point[2];
+            //        points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_mean));
+            //        points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_mean));
+            //        Pen pen_mean = new Pen(Color.FromArgb(150, 0, 0, 0));
+            //        pen_mean.Width = 3;
+            //        pen_mean.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+            //        e.Graphics.DrawLine(pen_mean, points[0], points[1]);
+            //        //CorrelScatter.SendToBack();
+            //    }
+            //    if (Spacing.ContainsKey("Y_LowPoint_Abs"))
+            //    {
+            //        double y_low = Spacing["Y_LowPoint_Abs"];
+            //        Point[] points = new Point[2];
+            //        points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_low));
+            //        points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_low));
+            //        Pen pen_low = new Pen(Color.FromArgb(150, 255, 99, 71));
+            //        pen_low.Width = 3;
+            //        e.Graphics.DrawLine(pen_low, points[0], points[1]);
+            //        //CorrelScatter.SendToBack();
+            //    }
+            //    if (Spacing.ContainsKey("Y_HighPoint_Abs"))
+            //    {
+            //        double y_high = Spacing["Y_HighPoint_Abs"];
+            //        Point[] points = new Point[2];
+            //        points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_high));
+            //        points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_high));
+            //        Pen pen_high = new Pen(Color.FromArgb(150, 255, 99, 71));
+            //        pen_high.Width = 3;
+            //        e.Graphics.DrawLine(pen_high, points[0], points[1]);
+            //        //CorrelScatter.SendToBack();
+            //    }
+            //}
         }
 
         private Label ConstructLabel(int labelNumber, QuintantOrientation orientation)
@@ -1317,16 +1444,32 @@ namespace CorrelationTest
                 
         }
 
+        private void ClearPoints_Click(object sender, EventArgs e)
+        {
+            if (DrawingMode)
+            {
+                DrawTool.DrawSeries.Points.Clear();
+                if (DrawTool.DrawPointsMode == false)       //Return to draw points mode if you've cleared all points
+                    SwapTools();
+            }
+            
+        }
+
         private void SwapTools_Click(object sender, EventArgs e)
         {
-            if(!DrawTool.DrawPointsMode)
+            SwapTools();
+        }
+
+        private void SwapTools()
+        {
+            if (!DrawTool.DrawPointsMode)
             {
                 DrawTool.EnableDrawPointsMode();
                 DrawTool.btn_ToolSwap.Text = "Select Points";
                 //Turn on the circle cursor.
                 DrawTool.EnableCursor();
                 //Turn on DrawPointsMode
-                
+
             }
             else
             {
@@ -1335,8 +1478,8 @@ namespace CorrelationTest
                 //Turn on the arrow cursor
                 DrawTool.ResetCursor();
                 //Turn off DrawPointsMode
-                
-            } 
+
+            }
         }
 
         private void CorrelScatter_CursorPositionChanged(object sender, CursorEventArgs e)
@@ -1423,9 +1566,9 @@ namespace CorrelationTest
             //if |slope| > 1, this fails..
             // r * (stdev of y /  stdev of x) = slope
             // r = slope * stdev x / stdev of y)
-            double mean_x = dataArrays.Item1.Average();
+            double x_mean = dataArrays.Item1.Average();
             double pop_mean_x = CorrelDist1.GetMean();
-            double mean_y = dataArrays.Item2.Average();
+            double y_mean = dataArrays.Item2.Average();
             double pop_mean_y = CorrelDist2.GetMean();
             double stdev_x = ExtensionMethods.GetStandardDeviation(dataArrays.Item1);
             double stdev_y = ExtensionMethods.GetStandardDeviation(dataArrays.Item2);
@@ -1466,6 +1609,30 @@ namespace CorrelationTest
             Series Adjusted_Series = ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries);
             CorrelScatter.Series.Add(Adjusted_Series);
             CorrelScatter.Series.Add(GetTrendline(Adjusted_Series));
+        }
+
+        private void comboBox_Zoom_SelectedValueChanged(object sender, EventArgs e)
+        {
+            var newValue = comboBox_Zoom.SelectedItem;
+
+            switch (newValue)
+            {
+                case "View Maximum":
+                    SetZoom(0.001, .999);
+                    break;
+                case "View Inner 90%":
+                    SetZoom(0.05, 0.95);
+                    break;
+                case "View Inner 80%":
+                    SetZoom(0.10, 0.90);
+                    break;
+                case "View Inner 70%":
+                    SetZoom(0.15, 0.85);
+                    break;
+                default:
+                    break;
+            }
+            
         }
     }
 }
