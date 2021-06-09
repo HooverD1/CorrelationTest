@@ -33,8 +33,9 @@ namespace CorrelationTest
         const int margin = 0;
         const int scale = 93;
         private ElementPosition scatterPosition { get; set; } = new ElementPosition(margin, margin, scale, scale);
-        private ElementPosition xChartPosition { get; set; } = new ElementPosition(margin, 0, scale, 100);
-        private ElementPosition yChartPosition { get; set; } = new ElementPosition(0, margin, 100, scale);
+        private ElementPosition scatterPositionCA { get; set; } = new ElementPosition(6, 6, scale, scale);
+        private ElementPosition xChartPosition { get; set; } = new ElementPosition(margin, 0, 100, 100);
+        private ElementPosition yChartPosition { get; set; } = new ElementPosition(0, margin, 100, 100);
         private Tuple<Point, Point>[] hoverPoints { get; set; } = new Tuple<Point, Point>[10];
         private Label HoverLabel_H1 { get; set; }
         private Label HoverLabel_H2 { get; set; }
@@ -85,7 +86,9 @@ namespace CorrelationTest
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
             CorrelScatter.Height = 750;
             CorrelScatter.Width = 750;
-            CorrelScatter.ChartAreas[0].Position = scatterPosition;
+            CorrelScatter.Top -= 45;
+            CorrelScatter.Left -= 45;
+            CorrelScatter.ChartAreas[0].Position = scatterPositionCA;
             CorrelScatter.ChartAreas[0].InnerPlotPosition = scatterPosition;
             //CorrelScatter.ChartAreas[0].AxisX2.Enabled = AxisEnabled.True;
             //CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
@@ -167,7 +170,9 @@ namespace CorrelationTest
 
             this.CorrelScatter.ChartAreas[0].AxisY2.Minimum = CorrelDist2.GetMinimum();
             this.CorrelScatter.ChartAreas[0].AxisY2.Maximum = CorrelDist2.GetMaximum();
-            //this.CorrelScatter.ChartAreas[0].AxisY2.MajorGrid.Interval = 
+
+            //this.CorrelScatter.BorderlineDashStyle = ChartDashStyle.Solid;
+            //this.CorrelScatter.BorderlineColor = Color.Black;
 
             //Mean marker series
             Series meanMarker = new Series();
@@ -330,6 +335,8 @@ namespace CorrelationTest
 
             LoadXAxisDistribution();
             LoadYAxisDistribution();
+            xAxisChart.BringToFront();
+            yAxisChart.BringToFront();
             SetupHelper();
             SetupHoverPoints();
             ReorderSeries();
@@ -346,15 +353,19 @@ namespace CorrelationTest
             Series percentile4 = series["Percentile75_Y"];
             Series percentileMeanX = series["PercentileMean_X"];
             Series percentileMeanY = series["PercentileMean_Y"];
+            Series trendline = series["Trendline"];
             series.Clear();
+            
             series.Add(percentileMeanX);
             series.Add(percentileMeanY);
             series.Add(percentile1);
             series.Add(percentile2);
             series.Add(percentile3);
             series.Add(percentile4);
+            series.Add(trendline);
             series.Add(scatter);
             series.Add(meanPoint);
+            
         }
 
         private void LoadYAxisDistribution()
@@ -367,28 +378,21 @@ namespace CorrelationTest
             yAxisChart.Serializer.Load(myStream);
             yAxisChart.Name = "yAxisChart";
 
+            //yAxisChart.BorderlineDashStyle = ChartDashStyle.Solid;
             yAxisChart.Series.Clear();
             Series Series1 = new Series();
             yAxisChart.Series.Add(Series1);
             yAxisChart.Series["Series1"].ChartType = SeriesChartType.Bar;
             yAxisChart.Width = xAxisChart.Height;
-            yAxisChart.Left = CorrelScatter.Left - yAxisChart.Width;
+            yAxisChart.Left = CorrelScatter.Left - yAxisChart.Width + 45;
             
-            yAxisChart.Top = CorrelScatter.Top;
-            yAxisChart.Height = CorrelScatter.Height;
+            yAxisChart.Top = CorrelScatter.Top + 45;
+            yAxisChart.Height = xAxisChart.Width;
 
-            //yAxisChart.ChartAreas[0].Position.X = 0;
             yAxisChart.ChartAreas[0].Position = yChartPosition;
             yAxisChart.ChartAreas[0].InnerPlotPosition = yChartPosition;
-            //yAxisChart.ChartAreas[0].InnerPlotPosition.X = 0;
-            //yAxisChart.ChartAreas[0].InnerPlotPosition.Width = 100; //xAxisChart.ChartAreas[0].InnerPlotPosition.Height;
-
-            //yAxisChart.ChartAreas[0].Position.Y = CorrelScatter.ChartAreas[0].Position.Y;
-            //yAxisChart.ChartAreas[0].InnerPlotPosition.Y = CorrelScatter.ChartAreas[0].InnerPlotPosition.Y;
-            //yAxisChart.ChartAreas[0].InnerPlotPosition.Height = CorrelScatter.ChartAreas[0].InnerPlotPosition.Height;
 
             yAxisChart.Series["Series1"].YValuesPerPoint = 1;
-            //yAxisChart.ChartAreas[0].AxisX.Interval = 0.5;
             yAxisChart.Series["Series1"].IsVisibleInLegend = false;
             yAxisChart.Series["Series1"]["PixelPointWidth"] = "2";
 
@@ -477,10 +481,11 @@ namespace CorrelationTest
         private void LoadXAxisDistribution()
         {
             //Build a series off the distribution
-            this.xAxisChart.Left = CorrelScatter.Left;
-            this.xAxisChart.Top = CorrelScatter.Top - 150;
+            //this.xAxisChart.BorderlineDashStyle = ChartDashStyle.Solid;
+            this.xAxisChart.Left = CorrelScatter.Left + 45;
+            this.xAxisChart.Top = CorrelScatter.Top - 150 + 45;
             this.xAxisChart.Height = 150;
-            this.xAxisChart.Width = CorrelScatter.Width;
+            this.xAxisChart.Width = Convert.ToInt32(CorrelScatter.Width * 0.93 - 49);
 
             xAxisChart.ChartAreas[0].Position = xChartPosition;
             xAxisChart.ChartAreas[0].InnerPlotPosition = xChartPosition;
@@ -903,6 +908,7 @@ namespace CorrelationTest
                 Series Adjusted_Series = ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries);
                 CorrelScatter.Series.Add(Adjusted_Series);
                 CorrelScatter.Series.Add(GetTrendline(Adjusted_Series));
+                ReorderSeries();
 
                 foreach (Label qLab in CorrelScatter.Controls)
                 {
@@ -1537,6 +1543,7 @@ namespace CorrelationTest
             Series Adjusted_Series = ReworkPointsForCorrelation(Convert.ToDouble(this.numericUpDown_CorrelValue.Value), CorrelSeries);
             CorrelScatter.Series.Add(Adjusted_Series);
             CorrelScatter.Series.Add(GetTrendline(Adjusted_Series));
+            ReorderSeries();
         }
 
         private void comboBox_Zoom_SelectedValueChanged(object sender, EventArgs e)
