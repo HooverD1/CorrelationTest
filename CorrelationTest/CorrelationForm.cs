@@ -896,102 +896,13 @@ namespace CorrelationTest
             }
         }
 
-        private void CorrelScatter_MouseClick(object sender, MouseEventArgs e)
-        {
-            
-        }
-
         private void CorrelScatter_Paint(object sender, PaintEventArgs e)
         {
             if (DrawingMode)
             {
                 DrawTool.GetXAxisMinMax();       //Does this work? Called from paint event, but indirectly...
                 DrawTool.GetYAxisMinMax();       //Does this work? Called from paint event, but indirectly...
-                
-                if (DrawTool.DrawSeries.Points.Count() > 1)
-                {
-                    //PLAN: Create a new series in CorrelScatter, use the drawing tool to add to it, then refresh here
-                    //DrawTool.Refresh();
-                }
-                //else if(DrawTool == null)
-                //{
-                //    this.ReloadCorrelScatter();
-                //}
             }
-            
-            //Instead of drawing lines, just add series to correlscatter
-
-            //else
-            //{
-            //    if (Spacing.ContainsKey("X_MeanPoint_Abs"))
-            //    {
-            //        double x_mean = Spacing["X_MeanPoint_Abs"];
-            //        Point[] points = new Point[2];
-            //        points[0] = new Point(Convert.ToInt32(x_mean), Spacing["chartInnerPlot_Abs_Top"]);
-            //        points[1] = new Point(Convert.ToInt32(x_mean), Spacing["chartInnerPlot_Abs_Bottom"]);
-            //        Pen pen_mean = new Pen(Color.FromArgb(150, 0, 0, 0));
-            //        pen_mean.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-            //        pen_mean.Width = 3;
-            //        e.Graphics.DrawLine(pen_mean, points[0], points[1]);
-            //        //CorrelScatter.SendToBack();
-            //    }
-            //    if (Spacing.ContainsKey("X_LowPoint_Abs"))
-            //    {
-            //        double x_low = Spacing["X_LowPoint_Abs"];
-            //        Point[] points = new Point[2];
-            //        points[0] = new Point(Convert.ToInt32(x_low), Spacing["chartInnerPlot_Abs_Top"]);
-            //        points[1] = new Point(Convert.ToInt32(x_low), Spacing["chartInnerPlot_Abs_Bottom"]);
-            //        Pen pen_low = new Pen(Color.FromArgb(150, 255, 99, 71));
-            //        pen_low.Width = 3;
-            //        e.Graphics.DrawLine(pen_low, points[0], points[1]);
-            //        //CorrelScatter.SendToBack();
-            //    }
-            //    if (Spacing.ContainsKey("X_HighPoint_Abs"))
-            //    {
-            //        double x_high = Spacing["X_HighPoint_Abs"];
-            //        Point[] points = new Point[2];
-            //        points[0] = new Point(Convert.ToInt32(x_high), Spacing["chartInnerPlot_Abs_Top"]);
-            //        points[1] = new Point(Convert.ToInt32(x_high), Spacing["chartInnerPlot_Abs_Bottom"]);
-            //        Pen pen_high = new Pen(Color.FromArgb(150, 255, 99, 71));
-            //        pen_high.Width = 3;
-            //        e.Graphics.DrawLine(pen_high, points[0], points[1]);
-            //        //CorrelScatter.SendToBack();
-            //    }
-            //    if (Spacing.ContainsKey("Y_MeanPoint_Abs"))
-            //    {
-            //        double y_mean = Spacing["Y_MeanPoint_Abs"];
-            //        Point[] points = new Point[2];
-            //        points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_mean));
-            //        points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_mean));
-            //        Pen pen_mean = new Pen(Color.FromArgb(150, 0, 0, 0));
-            //        pen_mean.Width = 3;
-            //        pen_mean.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-            //        e.Graphics.DrawLine(pen_mean, points[0], points[1]);
-            //        //CorrelScatter.SendToBack();
-            //    }
-            //    if (Spacing.ContainsKey("Y_LowPoint_Abs"))
-            //    {
-            //        double y_low = Spacing["Y_LowPoint_Abs"];
-            //        Point[] points = new Point[2];
-            //        points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_low));
-            //        points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_low));
-            //        Pen pen_low = new Pen(Color.FromArgb(150, 255, 99, 71));
-            //        pen_low.Width = 3;
-            //        e.Graphics.DrawLine(pen_low, points[0], points[1]);
-            //        //CorrelScatter.SendToBack();
-            //    }
-            //    if (Spacing.ContainsKey("Y_HighPoint_Abs"))
-            //    {
-            //        double y_high = Spacing["Y_HighPoint_Abs"];
-            //        Point[] points = new Point[2];
-            //        points[0] = new Point(Spacing["chartInnerPlot_Abs_Left"], Convert.ToInt32(y_high));
-            //        points[1] = new Point(Spacing["chartInnerPlot_Abs_Right"], Convert.ToInt32(y_high));
-            //        Pen pen_high = new Pen(Color.FromArgb(150, 255, 99, 71));
-            //        pen_high.Width = 3;
-            //        e.Graphics.DrawLine(pen_high, points[0], points[1]);
-            //        //CorrelScatter.SendToBack();
-            //    }
-            //}
         }
 
         private Label ConstructLabel(int labelNumber, QuintantOrientation orientation)
@@ -1347,11 +1258,6 @@ namespace CorrelationTest
                 RefreshBreak = true;
                 this.Refresh();
             }
-        }
-
-        private void CorrelationForm_Paint(object sender, PaintEventArgs e)
-        {
-            
         }
 
         private void CorrelScatter_MouseLeave(object sender, EventArgs e)

@@ -69,7 +69,6 @@
             this.CorrelScatter.CursorPositionChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.CursorEventArgs>(this.CorrelScatter_CursorPositionChanged);
             this.CorrelScatter.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelScatter_Paint);
             this.CorrelScatter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CorrelScatter_KeyDown);
-            this.CorrelScatter.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseClick);
             this.CorrelScatter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.CorrelScatter_MouseDown);
             this.CorrelScatter.MouseEnter += new System.EventHandler(this.CorrelScatter_MouseEnter);
             this.CorrelScatter.MouseLeave += new System.EventHandler(this.CorrelScatter_MouseLeave);
@@ -181,7 +180,6 @@
             this.Name = "CorrelationForm";
             this.Text = "CorrelationForm";
             this.Load += new System.EventHandler(this.CorrelationForm_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.CorrelationForm_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CorrelationForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.CorrelScatter)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_CorrelValue)).EndInit();

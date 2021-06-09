@@ -217,6 +217,7 @@ namespace CorrelationTest
 
         public void PaintPoint()
         {
+            Random rando = new Random();
             for (int i = 0; i < 3; i++)
             {
                 //Drop 3x points at once
@@ -230,7 +231,7 @@ namespace CorrelationTest
                 //Pixel offsets for the "paint can" look
                 Accord.Statistics.Distributions.Univariate.NormalDistribution offset_x_Dist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 25);
                 Accord.Statistics.Distributions.Univariate.NormalDistribution offset_y_Dist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(0, 25);
-                Random rando = new Random();
+                
                 int x_offset = Convert.ToInt32(offset_x_Dist.InverseDistributionFunction(rando.NextDouble()));
                 int y_offset = Convert.ToInt32(offset_y_Dist.InverseDistributionFunction(rando.NextDouble()));
                 Point screenPoint = new Point(x + x_offset, y + y_offset);
