@@ -178,11 +178,11 @@ namespace CorrelationTest
             meanMarker.MarkerStyle = MarkerStyle.Square;
             meanMarker.MarkerSize = 10;
             meanMarker.SmartLabelStyle.Enabled = false;
-            meanMarker.LabelBackColor = Color.White;
+            meanMarker.LabelBackColor = Color.FromArgb(255,255,255,255);
             DataPoint dp = meanMarker.Points.First();
             dp.Label = $"({Math.Round(dp.XValue, 2)}, {Math.Round(dp.YValues.First(), 2)})";
             dp.LabelForeColor = Color.Black;
-            CorrelScatter.Series.Add(meanMarker);
+            CorrelScatter.Series.Insert(0, meanMarker);
 
             Series Percentile25_X = new Series();
             Percentile25_X.Name = "Percentile25_X";
@@ -192,7 +192,7 @@ namespace CorrelationTest
             Percentile25_X.Color = Color.FromArgb(100, 155, 0, 0);
             Percentile25_X.BorderWidth = 5;
             Percentile25_X.SmartLabelStyle.Enabled = false;
-            CorrelScatter.Series.Add(Percentile25_X);
+            CorrelScatter.Series.Insert(0, Percentile25_X);
 
             Series Percentile75_X = new Series();
             Percentile75_X.Name = "Percentile75_X";
@@ -202,7 +202,7 @@ namespace CorrelationTest
             Percentile75_X.Color = Color.FromArgb(100, 155, 0, 0);
             Percentile75_X.BorderWidth = 5;
             Percentile75_X.SmartLabelStyle.Enabled = false;
-            CorrelScatter.Series.Add(Percentile75_X);
+            CorrelScatter.Series.Insert(0, Percentile75_X);
 
             Series Percentile25_Y = new Series();
             Percentile25_Y.Name = "Percentile25_Y";
@@ -212,7 +212,7 @@ namespace CorrelationTest
             Percentile25_Y.Color = Color.FromArgb(100, 155, 0, 0);
             Percentile25_Y.BorderWidth = 5;
             Percentile25_Y.SmartLabelStyle.Enabled = false;
-            CorrelScatter.Series.Add(Percentile25_Y);
+            CorrelScatter.Series.Insert(0, Percentile25_Y);
 
             Series Percentile75_Y = new Series();
             Percentile75_Y.Name = "Percentile75_Y";
@@ -222,7 +222,7 @@ namespace CorrelationTest
             Percentile75_Y.Color = Color.FromArgb(100,155,0,0);
             Percentile75_Y.BorderWidth = 5;
             Percentile75_Y.SmartLabelStyle.Enabled = false;
-            CorrelScatter.Series.Add(Percentile75_Y);
+            CorrelScatter.Series.Insert(0, Percentile75_Y);
 
             Series PercentileMean_X = new Series();
             PercentileMean_X.Name = "PercentileMean_X";
@@ -233,7 +233,7 @@ namespace CorrelationTest
             PercentileMean_X.BorderWidth = 3;
             PercentileMean_X.BorderDashStyle = ChartDashStyle.Dash;
             PercentileMean_X.SmartLabelStyle.Enabled = false;
-            CorrelScatter.Series.Add(PercentileMean_X);
+            CorrelScatter.Series.Insert(0, PercentileMean_X);
 
             Series PercentileMean_Y = new Series();
             PercentileMean_Y.Name = "PercentileMean_Y";
@@ -244,7 +244,7 @@ namespace CorrelationTest
             PercentileMean_Y.BorderWidth = 3;
             PercentileMean_Y.BorderDashStyle = ChartDashStyle.Dash;
             PercentileMean_Y.SmartLabelStyle.Enabled = false;
-            CorrelScatter.Series.Add(PercentileMean_Y);
+            CorrelScatter.Series.Insert(0, PercentileMean_Y);
 
             Excel.Range xlSelection = ThisAddIn.MyApp.Selection;
             int index1 = xlSelection.Row - (CorrelSheet.xlMatrixCell.Row + 1);
@@ -332,7 +332,29 @@ namespace CorrelationTest
             LoadYAxisDistribution();
             SetupHelper();
             SetupHoverPoints();
+            ReorderSeries();
+        }
 
+        private void ReorderSeries()
+        {
+            SeriesCollection series = CorrelScatter.Series;
+            Series meanPoint = series["MeanMarker"];
+            Series scatter = series["CorrelSeries"];
+            Series percentile1 = series["Percentile25_X"];
+            Series percentile2 = series["Percentile75_X"];
+            Series percentile3 = series["Percentile25_Y"];
+            Series percentile4 = series["Percentile75_Y"];
+            Series percentileMeanX = series["PercentileMean_X"];
+            Series percentileMeanY = series["PercentileMean_Y"];
+            series.Clear();
+            series.Add(percentileMeanX);
+            series.Add(percentileMeanY);
+            series.Add(percentile1);
+            series.Add(percentile2);
+            series.Add(percentile3);
+            series.Add(percentile4);
+            series.Add(scatter);
+            series.Add(meanPoint);
         }
 
         private void LoadYAxisDistribution()
