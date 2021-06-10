@@ -168,7 +168,7 @@ namespace CorrelationTest
             protected override Excel.Worksheet GetXlSheet(bool CreateNew = true)
             {
                 var xlCorrelSheets = from Excel.Worksheet sheet in ThisAddIn.MyApp.Worksheets
-                                     where sheet.Cells[1, 1].Value == "$CORRELATION_CM"
+                                     where Convert.ToString(sheet.Cells[1, 1].Value) == "$CORRELATION_CM"
                                      select sheet;
                 if (xlCorrelSheets.Any())
                     xlSheet = xlCorrelSheets.First();

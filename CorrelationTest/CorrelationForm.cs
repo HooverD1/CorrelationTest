@@ -86,9 +86,12 @@ namespace CorrelationTest
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
 
             Label FormTitle = new Label();
+            FormTitle.AutoSize = true;
             FormTitle.Name = "Title";
+            FormTitle.Font = new Font("Arial", 14);
             FormTitle.Text = $"{CorrelDist1.Name} vs {CorrelDist2.Name}";
-            FormTitle.Location = new Point(5, 5);
+            FormTitle.Location = new Point(5, 10);
+            this.Controls.Add(FormTitle);
 
             CorrelScatter.Height = 750;
             CorrelScatter.Width = 750;
