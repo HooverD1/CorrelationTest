@@ -139,7 +139,7 @@
             // 
             // btn_LaunchDrawCorrelation
             // 
-            this.btn_LaunchDrawCorrelation.Location = new System.Drawing.Point(968, 636);
+            this.btn_LaunchDrawCorrelation.Location = new System.Drawing.Point(968, 602);
             this.btn_LaunchDrawCorrelation.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_LaunchDrawCorrelation.Name = "btn_LaunchDrawCorrelation";
             this.btn_LaunchDrawCorrelation.Size = new System.Drawing.Size(184, 38);
@@ -150,13 +150,14 @@
             // 
             // comboBox_Zoom
             // 
+            this.comboBox_Zoom.BackColor = System.Drawing.SystemColors.Menu;
             this.comboBox_Zoom.FormattingEnabled = true;
             this.comboBox_Zoom.Items.AddRange(new object[] {
             "View Maximum",
             "View Inner 90%",
             "View Inner 80%",
             "View Inner 70%"});
-            this.comboBox_Zoom.Location = new System.Drawing.Point(968, 182);
+            this.comboBox_Zoom.Location = new System.Drawing.Point(969, 647);
             this.comboBox_Zoom.Name = "comboBox_Zoom";
             this.comboBox_Zoom.Size = new System.Drawing.Size(184, 24);
             this.comboBox_Zoom.TabIndex = 9;

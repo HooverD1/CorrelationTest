@@ -24,6 +24,7 @@ namespace CorrelationTest
         private IUnivariateDistribution Distribution { get; set; }        //Specified distributions will contain an accord object
 
         public string Name { get; set; }
+        public string Type { get; set; }
         public string DistributionString { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
         private double? pdf_maxHeight { get; set; } = null;
@@ -52,7 +53,7 @@ namespace CorrelationTest
             //Pull the name and parameters to move it to the correlation sheet, but do not do any calculation
             IEstimateDistribution returnObject = new SpecifiedDistribution();
 
-            returnObject.Name = "Custom";
+            returnObject.Type = "Custom";
             if (correlType == CorrelationType.Cost || correlType == CorrelationType.Duration)
                 returnObject.DistributionString = xlRow.Cells[1, specs.Distribution_Offset].Value;
             else if (correlType == CorrelationType.Phasing)
@@ -75,7 +76,8 @@ namespace CorrelationTest
             //Need to know the xlSheet and specs off the CorrelationSheet (pass the sheet object)
             SpecifiedDistribution returnObject = new SpecifiedDistribution();
             string distString = xlSelection.EntireRow.Cells[1, cs.Specs.DistributionCoords.Item2].value;
-            returnObject.Name = distString.Split(',')[0];
+            returnObject.Type = distString.Split(',')[0];
+            returnObject.Name = xlSelection.EntireRow.Cells[1, cs.Specs.MatrixCoords.Item2 - 1].value;
             returnObject.DistributionString = distString;
             returnObject.DistributionParameters = ParseStringIntoParameters(returnObject.DistributionString);
             returnObject.Distribution = BuildDistribution(returnObject.DistributionParameters);

@@ -12,6 +12,7 @@ namespace CorrelationTest
         //This class will be its own distribution object
 
         public string Name { get; set; }
+        public string Type { get; set; }
         public string DistributionString { get; set; }
         public Dictionary<string, object> DistributionParameters { get; set; }
 

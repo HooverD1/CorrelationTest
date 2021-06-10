@@ -29,7 +29,7 @@ namespace CorrelationTest
         private bool MouseIsDown { get; set; } = false;
         private bool RefreshBreak { get; set; } = false;
         private Chart yAxisChart { get; set; }
-        private const int base_steps = 75;
+        private const int base_steps = 85;
         const int margin = 0;
         const int scale = 93;
         private ElementPosition scatterPosition { get; set; } = new ElementPosition(margin, margin, scale, scale);
@@ -84,14 +84,18 @@ namespace CorrelationTest
         private void CorrelationForm_Load(object sender, EventArgs e)
         {
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
+
+            Label FormTitle = new Label();
+            FormTitle.Name = "Title";
+            FormTitle.Text = $"{CorrelDist1.Name} vs {CorrelDist2.Name}";
+            FormTitle.Location = new Point(5, 5);
+
             CorrelScatter.Height = 750;
             CorrelScatter.Width = 750;
             CorrelScatter.Top -= 45;
             CorrelScatter.Left -= 45;
             CorrelScatter.ChartAreas[0].Position = scatterPositionCA;
             CorrelScatter.ChartAreas[0].InnerPlotPosition = scatterPosition;
-            //CorrelScatter.ChartAreas[0].AxisX2.Enabled = AxisEnabled.True;
-            //CorrelScatter.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
 
             CorrelSeries.ChartType = SeriesChartType.Point;
             CorrelSeries.Name = "CorrelSeries";
@@ -378,7 +382,13 @@ namespace CorrelationTest
             yAxisChart.Serializer.Load(myStream);
             yAxisChart.Name = "yAxisChart";
 
-            //yAxisChart.BorderlineDashStyle = ChartDashStyle.Solid;
+            yAxisChart.Titles.Clear();
+            Title chartTitle = new Title();
+            chartTitle.Position = new ElementPosition(5, 85, 10, 10);
+            chartTitle.TextOrientation = TextOrientation.Rotated270;
+            chartTitle.Text = $"{CorrelDist2.Name}";
+            chartTitle.Name = "Title";
+            yAxisChart.Titles.Add(chartTitle);
             yAxisChart.Series.Clear();
             Series Series1 = new Series();
             yAxisChart.Series.Add(Series1);
@@ -438,7 +448,7 @@ namespace CorrelationTest
             for (int i = 0; i < 5; i++)
             {
                 //Set the points near the mean to display the mean value
-                lowDistances[i].Item1.ToolTip = $"25th Percentile: {Math.Round(lowPoint.XValue, 2)}";
+                lowDistances[i].Item1.ToolTip = $"25% tile: {Math.Round(lowPoint.XValue, 2)}";
             }
             PercentilePoints.Add("Y_LowPoint", lowPoint);
             lowPoint.Color = Color.FromArgb(50, 50, 50);
@@ -449,7 +459,7 @@ namespace CorrelationTest
             for (int i = 0; i < 5; i++)
             {
                 //Set the points near the mean to display the mean value
-                highDistances[i].Item1.ToolTip = $"75th Percentile: {Math.Round(highPoint.XValue, 2)}";
+                highDistances[i].Item1.ToolTip = $"75% tile: {Math.Round(highPoint.XValue, 2)}";
             }
             PercentilePoints.Add("Y_HighPoint", highPoint);
             highPoint.Color = Color.FromArgb(50, 50, 50);
@@ -481,7 +491,11 @@ namespace CorrelationTest
         private void LoadXAxisDistribution()
         {
             //Build a series off the distribution
-            //this.xAxisChart.BorderlineDashStyle = ChartDashStyle.Solid;
+            Title chartTitle = new Title();
+            chartTitle.Position = new ElementPosition(5, 5, 10, 10);
+            chartTitle.Text = $"{CorrelDist1.Name}";
+            chartTitle.Name = "Title";
+            xAxisChart.Titles.Add(chartTitle);
             this.xAxisChart.Left = CorrelScatter.Left + 45;
             this.xAxisChart.Top = CorrelScatter.Top - 150 + 45;
             this.xAxisChart.Height = 150;
@@ -533,7 +547,7 @@ namespace CorrelationTest
             for (int i = 0; i < 5; i++)
             {
                 //Set the points near the mean to display the mean value
-                lowDistances[i].Item1.ToolTip = $"25th Percentile: {Math.Round(lowPoint.XValue, 2)}";
+                lowDistances[i].Item1.ToolTip = $"25% tile: {Math.Round(lowPoint.XValue, 2)}";
             }
             PercentilePoints.Add("X_LowPoint", lowPoint);
             lowPoint.Color = Color.FromArgb(50, 50, 50);
@@ -544,7 +558,7 @@ namespace CorrelationTest
             for (int i = 0; i < 5; i++)
             {
                 //Set the points near the mean to display the mean value
-                highDistances[i].Item1.ToolTip = $"75th Percentile: {Math.Round(highPoint.XValue, 2)}";
+                highDistances[i].Item1.ToolTip = $"75% tile: {Math.Round(highPoint.XValue, 2)}";
             }
             PercentilePoints.Add("X_HighPoint", highPoint);
             highPoint.Color = Color.FromArgb(50, 50, 50);

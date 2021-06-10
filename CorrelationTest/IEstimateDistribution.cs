@@ -14,6 +14,7 @@ namespace CorrelationTest
         //List all the common interactions in the interface
 
         string Name { get; set; }
+        string Type { get; set; }
         string DistributionString { get; set; }
         Dictionary<string, object> DistributionParameters { get; set; }
 
