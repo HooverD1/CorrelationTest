@@ -119,7 +119,7 @@ namespace CorrelationTest
             try
             {
                 string[] uidValues = uidString.Split('|');
-                if (uidValues.Length != 3)
+                if (uidValues.Length != 4)
                     return false;
                 return true;
             }

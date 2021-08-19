@@ -14,10 +14,15 @@ namespace CorrelationTest
             public PairSpecification Pairs { get; set; }
             public CorrelationString_CP(string correlString)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
-                string[] lines = this.Value.Split('&');
-                string triple = lines[1];
-                this.Pairs = PairSpecification.ConstructFromString(correlString);
+                if (Validate(correlString))
+                {
+                    this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
+                    string[] lines = this.Value.Split('&');
+                    string triple = lines[1];
+                    this.Pairs = PairSpecification.ConstructFromString(correlString);
+                }
+                else
+                    throw new FormatException("Malformed CP string");
             }
 
             //COLLAPSE
@@ -143,6 +148,66 @@ namespace CorrelationTest
 
             public static bool Validate()
             {
+                return true;
+            }
+
+            protected override bool Validate(string correlString)
+            {
+                string[] lines = correlString.Split('&');
+                //Should have at least a header row and a data row
+
+                if (lines.Length != 2)
+                    return false;
+
+                //VALIDATE HEADER
+                string[] header = lines[0].Split(',');
+                //Header should have at least # inputs, type, parent, and two subs (5 items)
+                if (header.Length < 5)      //Minimum length
+                    return false;
+                if (int.TryParse(header[0], out int inputs))        //Check if the lengths are consistent with the "# inputs"
+                {   //Expect at least two sub IDs
+                    if (inputs < 2)
+                        return false;
+                    else if (inputs != lines.Length) // 5 subs = header + 4 lines for sub correlation
+                        return false;
+                    else if (header.Length != inputs + 3)    //Check the header length is consistent
+                        return false;
+                }
+                else
+                {   //Can't parse '# inputs' position as an integer
+                    return false;
+                }
+
+                //VALIDATE THE TYPE
+                if (header[1] != "CP")
+                {
+                    return false;
+                }
+
+                //VALIDATE THE IDs
+                for (int id = 2; id < header.Length; id++)
+                {
+                    if (!UniqueID.Validate(header[id]))
+                        return false;
+                }
+
+                //VALIDATE DATA ROWS AS DOUBLES
+                for (int line = 1; line < lines.Length; line++)
+                {
+                    string[] data_positions = lines[line].Split(',');
+                    if (data_positions.Length != 2)
+                        return false;
+
+                    if (!Double.TryParse(data_positions[0], out double pos0Value))
+                        return false;
+                    if (pos0Value > 1 || pos0Value < -1)
+                        return false;
+
+                    if (!Double.TryParse(data_positions[1], out double pos1Value))
+                        return false;
+                    if (pos1Value > 1 || pos1Value < -1)
+                        return false;
+                }
                 return true;
             }
 

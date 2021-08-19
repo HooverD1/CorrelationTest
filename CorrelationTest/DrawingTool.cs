@@ -121,7 +121,6 @@ namespace CorrelationTest
             //Setup CorrelScatter for drawing
 
             //Set the background to the canvas color
-            DrawOn.BringToFront();
             DrawArea.BackColor = CanvasColor;
             //Hide the markers
             DrawOn.Series["CorrelSeries"].Color = Color.FromArgb(0, DrawOn.Series["CorrelSeries"].Color);

@@ -86,19 +86,25 @@ namespace CorrelationTest
             Sheets.CorrelationSheet CorrelSheet = Sheets.CorrelationSheet.ConstructFromXlCorrelationSheet();
 
             Label FormTitle = new Label();
-            FormTitle.AutoSize = true;
             FormTitle.Name = "Title";
             FormTitle.Font = new Font("Arial", 14);
             FormTitle.Text = $"{CorrelDist1.Name} vs {CorrelDist2.Name}";
-            FormTitle.Location = new Point(5, 10);
+            FormTitle.TextAlign = ContentAlignment.MiddleCenter;
+            FormTitle.BackColor = Color.LightGray;
+            
             this.Controls.Add(FormTitle);
 
             CorrelScatter.Height = 750;
             CorrelScatter.Width = 750;
+            CorrelScatter.Top = 230;
             CorrelScatter.Top -= 45;
             CorrelScatter.Left -= 45;
             CorrelScatter.ChartAreas[0].Position = scatterPositionCA;
             CorrelScatter.ChartAreas[0].InnerPlotPosition = scatterPosition;
+            FormTitle.Left = CorrelScatter.Left - 105;
+            FormTitle.Top = 15;
+            FormTitle.Width = CorrelScatter.Width + 105;
+            FormTitle.Height = 50;
 
             CorrelSeries.ChartType = SeriesChartType.Point;
             CorrelSeries.Name = "CorrelSeries";

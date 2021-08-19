@@ -15,7 +15,11 @@ namespace CorrelationTest
 
             public CorrelationString_CM(string correlString)
             {
-                this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
+                //Need to validate correlString
+                if (Validate(correlString))
+                    this.Value = ExtensionMethods.CleanStringLinebreaks(correlString);
+                else
+                    throw new FormatException("Malformed CM string");
             }
 
             public CorrelationString_CM() { }
@@ -245,6 +249,59 @@ namespace CorrelationTest
                     return true;
                 else
                     return false;
+            }
+
+            protected override bool Validate(string correlString)
+            {
+                string[] lines = correlString.Split('&');
+                //Should have at least a header row and a data row
+
+                if (lines.Length < 2)
+                    return false;
+
+                //VALIDATE HEADER
+                string[] header = lines[0].Split(',');
+                //Header should have at least # inputs, type, parent, and two subs (5 items)
+                if (header.Length < 5)      //Minimum length
+                    return false;
+                if (int.TryParse(header[0], out int inputs))        //Check if the lengths are consistent with the "# inputs"
+                {   //Expect at least two sub IDs
+                    if (inputs < 2)
+                        return false;
+                    else if (inputs != lines.Length) // 5 subs = header + 4 lines for sub correlation
+                        return false;
+                    else if (header.Length != inputs + 3)    //Check the header length is consistent
+                        return false;
+                }
+                else
+                {   //Can't parse '# inputs' position as an integer
+                    return false;
+                }
+
+                //VALIDATE THE TYPE
+                if (header[1] != "CM")
+                {
+                    return false;
+                }
+
+                //VALIDATE THE IDs
+                for(int id = 2; id < header.Length; id++)
+                {
+                    if (!UniqueID.Validate(header[id]))
+                        return false;
+                }
+
+                //VALIDATE DATA ROWS AS INTEGERS
+                for (int line = 1; line < lines.Length; line++)
+                {
+                    string[] data_positions = lines[line].Split(',');
+                    for(int pos = 0; pos < data_positions.Length; pos++)
+                    {
+                        if (!int.TryParse(data_positions[pos], out int posValue))
+                            return false;
+                    }
+                }
+                return true;
             }
 
             public override string[] GetIDs()

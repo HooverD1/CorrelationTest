@@ -383,7 +383,7 @@ namespace CorrelationTest
                 return values;
             }
 
-            public static bool Validate(string correlStringValue)
+            protected virtual bool Validate(string correlStringValue)
             {
                 //act as a switch for sending a string to its proper subclass validation
                 return true;
@@ -414,20 +414,26 @@ namespace CorrelationTest
             {
                 string[] lines = DelimitString(correlStringValue);
                 string[] header = lines[0].Split(',');
-                switch (header[1])
+                if (header.Length < 2)
+                    throw new FormatException("Malformed correlation string");
+                else
                 {
-                    case "CP":
-                        return new CorrelationString_CP(correlStringValue);
-                    case "CM":
-                        return new CorrelationString_CM(correlStringValue);
-                    case "PP":
-                        return new CorrelationString_PP(correlStringValue);
-                    case "DP":
-                        return new CorrelationString_DP(correlStringValue);
-                    case "DM":
-                        return new CorrelationString_DM(correlStringValue);
-                    default:
-                        throw new Exception("Malformed correlation string");
+                    switch (header[1])
+                    {
+                        //Each of these need to do their own integrity testing of the string value before they hand back an object
+                        case "CP":
+                            return new CorrelationString_CP(correlStringValue);
+                        case "CM":
+                            return new CorrelationString_CM(correlStringValue);
+                        case "PP":
+                            return new CorrelationString_PP(correlStringValue);
+                        case "DP":
+                            return new CorrelationString_DP(correlStringValue);
+                        case "DM":
+                            return new CorrelationString_DM(correlStringValue);
+                        default:
+                            throw new FormatException("Malformed correlation string");
+                    }
                 }
             }
 
